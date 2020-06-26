@@ -1,0 +1,3 @@
+useDynLib(LMMsolver)
+exportPattern("^[[:alpha:]]+")
+
