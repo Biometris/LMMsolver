@@ -15,7 +15,7 @@ set.seed(1234)
 # residual error
 sigma2 <- 4.0
 
-# rotate ellipse
+# simulated surface a rotated ellipse
 f <- function(x1,x2, theta) {
   a = 0.2
   b = 0.3
@@ -26,60 +26,49 @@ f <- function(x1,x2, theta) {
   20 - (x1r^2/a^2 + x2r^2/b^2)
 }
 
-# generate simulation grid
-x1 <- x2 <- seq(1:100)-0.5
-x1 <- x1/100
-x2 <- x2/100
-grd <- expand.grid(x1,x2)
-N <- nrow(grd)
-names(grd) <- c("x1","x2")
-head(grd)
-
+# rotation of the simulated ellipse surface:
 degrees_rotation = 30
-grd$ysim <- f(grd$x1, grd$x2, theta=(degrees_rotation/180)*pi)
-e <- rnorm(N, mean = 0, sd = sqrt(sigma2))
-grd$y <- grd$ysim + e
 
-M <- matrix(data = grd$ysim, nrow=100,ncol=100)
-x1_m <- rowMeans(M)
-x2_m <- colMeans(M)
-plot(x=x1,y=x1_m)
-plot(x=x2,y=x2_m)
-
-# select stratified simple random sample without replacement
-#construct strata
-s1bnd <- seq(from=0,to=1,by=0.2)
-x1f <- findInterval(grd$x1,s1bnd)
-x2f <- findInterval(grd$x2,s1bnd)
-grd$stratum <- interaction(x1f,x2f)
-
-# set stratum sample sizes
-nh <- rep(4,times=25)
-
-units <- strata(grd,stratanames="stratum",size=nh,method="srswor")
+x1grid <- (c(1:100)-0.5)/100
+x2grid <- (c(1:100)-0.5)/100
+grid <- expand.grid(x1grid, x2grid)
+names(grid) <- c("x1","x2")
 
 # 12 environments:
 # 25 genotypes:
 nEnv = 12
 nGeno = 25
-env_cov <- runif(nEnv,min=0.02,max=0.98)
-geno_cov <- runif(nGeno,min=0.02,max=0.98)
+
+x1f <- findInterval(x1grid,seq(from=0,to=1,length=nEnv+1))
+ndx1 <- strata(data.frame(x1f),stratanames="x1f",size=rep(1,times=nEnv),method='srswor')$ID_unit
+
+x2f <- findInterval(x1grid,seq(from=0,to=1,length=nGeno+1))
+ndx2 <- strata(data.frame(x2f),stratanames="x2f",size=rep(1,times=nGeno),method='srswor')$ID_unit
+
+grid$ysim <- f(grid$x1, grid$x2, theta=(degrees_rotation/180)*pi)
+
+#env_cov <- runif(nEnv,min=0.02,max=0.98)
+#geno_cov <- runif(nGeno,min=0.02,max=0.98)
+#env_cov <- seq(from=0.05, to=0.95, length=nEnv)
+#geno_cov <- seq(from=0.05, to=0.95, length=nGeno)
+
+env_cov <- x1grid[ndx1]
+geno_cov <- x2grid[ndx2]
+
 env = paste0("env",formatC(1:nEnv,width=2,flag="0"))
 gen = paste0("gen",formatC(1:nGeno,width=2,flag="0"))
 env_df <- data.frame(env,z=env_cov)
 geno_df <- data.frame(gen,x=geno_cov)
-#env_df
-#geno_df
 
 #
-sim.df <- expand.grid(env_cov,geno_cov)
+sim.df <- expand.grid(env_cov, geno_cov)
 names(sim.df) <- c("x1","x2")
 Nobs <- nrow(sim.df)
 sim.df$ysim <- f(sim.df$x1, sim.df$x2, theta=(degrees_rotation/180)*pi)
 e <- rnorm(Nobs, mean = 0, sd = sqrt(sigma2))
 sim.df$y <- sim.df$ysim + e
 
-ggplot(grd)+
+ggplot(grid)+
   geom_raster(mapping=aes(x=x1,y=x2,fill=ysim))+
   scale_fill_gradientn(name="ysim",colours= topo.colors(100)) +
 #  scale_fill_gradient(low = "blue", high = "red",name="z") +
@@ -98,7 +87,6 @@ Rten2 <-
     kronecker(X1,one.2)*kronecker(one.1,X2)
   }
 
-
 degree = 3
 k = degree+1
 x1min = 0
@@ -107,6 +95,8 @@ x2min = 0
 x2max = 1
 nseg1 = 10
 nseg2 = 8
+#nseg1 = 25
+#nseg2 = 30
 
 dx1 = (x1max - x1min) / nseg1
 dx2 = (x2max - x2min) / nseg2
@@ -116,6 +106,9 @@ x2 = sim.df$x2
 
 knots1 = seq(x1min - degree * dx1, x1max + degree * dx1, by = dx1)
 knots2 = seq(x2min - degree * dx2, x2max + degree * dx2, by = dx2)
+
+#knots1 <- c(rep(x1min,3),seq(x1min,x1max,by=dx1),rep(x1max,3))
+#knots2 <- c(rep(x2min,3),seq(x2min,x2max,by=dx2),rep(x2max,3))
 
 B1 = splineDesign(knots1, x1, derivs=rep(0,length(x1)), ord = degree+1)
 q1 = ncol(B1)
@@ -157,8 +150,8 @@ df <- data.frame(gen=rep(gen,each=nEnv),
 df_csv <- data.frame(gen=rep(gen,each=nEnv),
                 env=rep(env,times=nGeno),
                 y=sim.df$y, x=sim.df$x2,z=sim.df$x1)
-#head(df_csv)
-#write.csv(df_csv,"GxE_simulated_surface.csv",quote=FALSE,row.names=FALSE)
+head(df_csv)
+write.csv(df_csv,"GxE_simulated_surface.csv",quote=FALSE,row.names=FALSE)
 
 head(df)
 
@@ -203,11 +196,55 @@ M = matrix(data=theta3,nrow=q1,ncol=q2,byrow=TRUE)
 rowSums(M)
 colSums(M)
 
-x1grid <- seq(0,1,by=0.005)
-x2grid <- seq(0,1,by=0.005)
-
 B1x = splineDesign(knots1, x1grid, derivs=rep(0,length(x1grid)), ord = degree+1)
 B2x = splineDesign(knots2, x2grid, derivs=rep(0,length(x2grid)), ord = degree+1)
+
+nGridext = 500
+x1grid_ext = seq(x1min - degree * dx1, x1max + degree * dx1,length=nGridext)
+x2grid_ext = seq(x2min - degree * dx2, x2max + degree * dx2,length=nGridext)
+#x1grid_ext = seq(x1min, x1max,length=nGridext)
+#x2grid_ext = seq(x2min, x2max,length=nGridext)
+
+B1x_ext = splineDesign(knots1, x1grid_ext, derivs=rep(0,length(x1grid_ext)), ord = degree+1,outer.ok=TRUE)
+B2x_ext = splineDesign(knots2, x2grid_ext, derivs=rep(0,length(x2grid_ext)), ord = degree+1,outer.ok=TRUE)
+
+# marginals
+sum(B1x_ext %*% theta1)
+sum(B2x_ext %*% theta2)
+plot(x=x1grid_ext,y=B1x_ext %*% theta1,type='l')
+abline(h=0,col='red')
+abline(v=x1min,lt=2)
+abline(v=x1max,lt=2)
+
+plot(x=x2grid_ext,y=B2x_ext %*% theta2,type='l')
+abline(h=0,col='red')
+abline(v=x1min,lt=2)
+abline(v=x1max,lt=2)
+
+
+ypred_ext <- kronecker(B1x_ext,B2x_ext) %*% theta3
+M = matrix(ypred_ext,ncol=nGridext,nrow=nGridext)
+range(rowSums(M))
+range(colSums(M))
+
+k1 <- length(x1grid_ext)
+k2 <- length(x2grid_ext)
+x1_ext <- kronecker(x1grid_ext, rep(1,k2))
+x2_ext <- kronecker(rep(1,k1), x2grid_ext)
+
+pred_ext <- data.frame(x1=x1_ext,x2=x2_ext,y=kronecker(B1x_ext,B2x_ext)%*%theta3)
+
+ggplot(pred_ext)+
+  geom_raster(mapping=aes(x=x1,y=x2,fill=y))+
+  scale_fill_gradientn(name="Fitted",colours=topo.colors(100)) +
+  #  scale_fill_gradient(low = "blue", high = "red",name="Fitted") +
+  geom_vline(xintercept=c(x1min,x1max)) +
+  geom_hline(yintercept=c(x2min,x2max)) +
+  geom_point(sim.df,mapping=aes(x=x1,y=x2),size=2)+
+  ggtitle("GxE _extended") + xlab("z") + ylab("x") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  coord_equal()
+
 
 k1 <- length(x1grid)
 k2 <- length(x2grid)
