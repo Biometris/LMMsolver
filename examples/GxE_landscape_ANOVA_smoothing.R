@@ -12,23 +12,21 @@ library(LMMsolver)
 set.seed(1234)
 
 # residual error
-sigma2 <- 4.0
+sigma2 <- 25.0
 
 # simulated surface a rotated ellipse
 simfun <- function(x1,x2, theta) {
-  a = 0.2
-  b = 0.3
+  a = 0.3
+  b = 0.2
   x1c = 0.4
   x2c = 0.6
   x1r <- cos(theta)*(x1-x1c) - sin(theta)*(x2-x2c)
   x2r <- sin(theta)*(x1-x1c) + cos(theta)*(x2-x2c)
-  20 - (x1r^2/a^2 + x2r^2/b^2)
+  25 - (x1r^2/a^2 + x2r^2/b^2)
 }
 
-# rotation of the simulated ellipse surface:
-degrees_rotation = 30
-
-# rotation in radials
+# clockwise rotation of the simulated ellipse surface:
+degrees_rotation = -30
 rotation = (degrees_rotation/180)*pi
 
 x1grid <- (c(1:100)-0.5)/100
@@ -36,9 +34,9 @@ x2grid <- (c(1:100)-0.5)/100
 grid <- expand.grid(x1grid, x2grid)
 names(grid) <- c("x1","x2")
 
-# 12 environments:
+# 20 environments:
 # 25 genotypes:
-nEnv = 12
+nEnv = 20
 nGeno = 25
 
 x1f <- findInterval(x1grid,seq(from=0,to=1,length=nEnv+1))
@@ -65,20 +63,22 @@ sim.df$ysim <- simfun(sim.df$x1, sim.df$x2, theta= rotation)
 e <- rnorm(Nobs, mean = 0, sd = sqrt(sigma2))
 sim.df$y <- sim.df$ysim + e
 
-ggplot(grid)+
-  geom_raster(mapping=aes(x=x1,y=x2,fill=ysim))+
+# add env and genotype number:
+sim.df$geno=rep(1:nGeno,each=nEnv)
+sim.df$env=rep(1:nEnv,times=nGeno)
+
+ggplot(sim.df)+
+  geom_raster(mapping=aes(x=env,y=geno,fill=y))+
   scale_fill_gradientn(name="ysim",colours= topo.colors(100)) +
-#  scale_fill_gradient(low = "blue", high = "red",name="z") +
-  #geom_vline(xintercept=s1bnd) +
-  #geom_hline(yintercept=s1bnd) +
-  geom_point(sim.df,mapping=aes(x=x1,y=x2),size=2)+
-  ggtitle("simulated") + xlab("z") + ylab("x") +
+  #geom_point(sim.df,mapping=aes(x=x1,y=x2),size=2)+
+  ggtitle("simulated") + xlab("env") + ylab("genotype") +
+  #scale_x_continuous(breaks=c(1,6,nEnv)) +
   theme(plot.title = element_text(hjust = 0.5)) +
   coord_equal()
 
 
 degree = 3
-pord <- 1
+pord = 1
 x1min = 0
 x1max = 1
 x2min = 0
@@ -86,14 +86,17 @@ x2max = 1
 nseg1 = 10
 nseg2 = 8
 
-x1 = sim.df$x1
-x2 = sim.df$x2
-
 knots1 = PsplinesKnots(x1min, x1max, degree, nseg1)
 knots2 = PsplinesKnots(x2min, x2max, degree, nseg2)
 
-B1 <- Bsplines(knots1, x1)
-B2 <- Bsplines(knots2, x2)
+
+x1 = sim.df$x1
+x2 = sim.df$x2
+
+B1  <- Bsplines(knots1, x1)
+B2  <- Bsplines(knots2, x2)
+B12 <- RowKronecker(B1,B2)
+
 q1 <- ncol(B1)
 q2 <- ncol(B2)
 
@@ -104,11 +107,12 @@ U12sc = kronecker(U1sc, U2sc)
 df <- data.frame(gen=rep(gen,each=nEnv),
                  env=rep(env,times=nGeno),
                  y=sim.df$y, x1=sim.df$x1,x2=sim.df$x2,InterceptMB=1)
+
 df_csv <- data.frame(gen=rep(gen,each=nEnv),
                 env=rep(env,times=nGeno),
                 y=sim.df$y, x=sim.df$x2,z=sim.df$x1)
 head(df_csv)
-#write.csv(df_csv,"GxE_simulated_surface.csv",quote=FALSE,row.names=FALSE)
+write.csv(df_csv,"GxE_simulated_surface.csv",quote=FALSE,row.names=FALSE)
 
 head(df)
 
@@ -128,9 +132,9 @@ obj0$ED
 
 # model with GxE interaction:
 lZ <- list()
-lZ[[1]] = B1 %*% U1sc
-lZ[[2]] = B2 %*% U2sc
-lZ[[3]] = RowKronecker(B1,B2) %*% U12sc
+lZ[[1]] = B1  %*% U1sc
+lZ[[2]] = B2  %*% U2sc
+lZ[[3]] = B12 %*% U12sc
 Z <- do.call("cbind",lZ)
 df_ext = cbind(df,Z)
 
@@ -204,3 +208,13 @@ ggplot(pred)+
   theme(plot.title = element_text(hjust = 0.5)) +
   coord_equal()
 
+ggplot(grid)+
+  geom_raster(mapping=aes(x=x1,y=x2,fill=ysim))+
+  scale_fill_gradientn(name="ysim",colours= topo.colors(100)) +
+  #  scale_fill_gradient(low = "blue", high = "red",name="z") +
+  #geom_vline(xintercept=s1bnd) +
+  #geom_hline(yintercept=s1bnd) +
+  geom_point(sim.df,mapping=aes(x=x1,y=x2),size=2)+
+  ggtitle("true simulated surface") + xlab("z") + ylab("x") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  coord_equal()
