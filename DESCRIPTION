@@ -1,14 +1,14 @@
 Package: LMMsolver
 Type: Package
 Title: Linear Mixed Model solver
-Version: 0.01
-Date: 2020-06-26
+Version: 0.02
+Date: 2020-07-15
 Author: Martin Boer
 Maintainer: Martin Boer <martin.boer@wur.nl>
 Description: Linear Mixed Model solver
 License: GPL
 Depends:
-    Rcpp (>= 0.10.4), spam
+    Rcpp (>= 0.10.4), spam, splines
 LinkingTo: Rcpp
 RoxygenNote: 6.0.1
 
