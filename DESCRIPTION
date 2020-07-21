@@ -1,8 +1,8 @@
 Package: LMMsolver
 Type: Package
 Title: Linear Mixed Model solver
-Version: 0.02
-Date: 2020-07-15
+Version: 0.03
+Date: 2020-07-21
 Author: Martin Boer
 Maintainer: Martin Boer <martin.boer@wur.nl>
 Description: Linear Mixed Model solver

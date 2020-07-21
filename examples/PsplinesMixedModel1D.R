@@ -49,7 +49,6 @@ lZ[[1]] = B %*% Usc
 Z <- do.call("cbind",lZ)
 
 df_ext = cbind(sim.df,Z)
-df_ext$InterceptMB <- 1.0
 
 dim <- sapply(lZ,ncol)
 e <- cumsum(dim) + ncol(sim.df)
@@ -57,14 +56,14 @@ s <- e - dim + 1
 
 # model without interactions:
 lM <- list(B=c(s[1]:e[1]))
-obj0 = LMMsolve(fixed=y~-1+InterceptMB+x, random=NULL,randomMatrices=lM, data=df_ext)
+obj0 = LMMsolve(fixed=y~x, random=NULL,randomMatrices=lM, data=df_ext)
 obj0$logL
 obj0$ED
 
 xgrid = seq(xmin, xmax, by=0.001)
 Bx = splineDesign(knots, xgrid, derivs=rep(0,length(xgrid)), ord = degree+1,outer.ok=TRUE)
 
-mu <- coef(obj0)$InterceptMB
+mu <- coef(obj0)$'(Intercept)'
 beta  <- coef(obj0)$x
 theta <- Usc %*% coef(obj0)$B
 yfit <- mu + beta * xgrid + Bx %*% theta

@@ -22,11 +22,13 @@ obj1$loglik
 coef(obj1, list=TRUE)
 
 # LMMsolver:
-obj2 <- LMMsolve(y~-1+treatment, random=~block, data=dat)
+obj2 <- LMMsolve(y~treatment, random=~block, data=dat)
 obj2$logL
 
 # effective dimension:
 obj2$ED
 
 coef(obj2)
+
+
 

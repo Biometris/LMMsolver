@@ -125,8 +125,8 @@ Z <- do.call("cbind", lZ)
 
 df_ext = cbind(df, Z)
 
-lM <- ndxMatrix(lZ, c("E","G"))
-obj0 = LMMsolve(fixed=y~-1+InterceptMB, random=NULL,randomMatrices=lM, data=df_ext)
+lM <- ndxMatrix(df, lZ, c("E","G"))
+obj0 = LMMsolve(fixed=y~1, random=NULL,randomMatrices=lM, data=df_ext)
 obj0$logL
 obj0$ED
 
@@ -138,8 +138,8 @@ lZ[[3]] = B12 %*% U12sc
 Z <- do.call("cbind",lZ)
 df_ext = cbind(df,Z)
 
-lM <- ndxMatrix(lZ, c("E","G","GxE"))
-obj1 = LMMsolve(fixed=y~-1+InterceptMB, random=NULL,randomMatrices=lM, data=df_ext)
+lM <- ndxMatrix(df, lZ, c("E","G","GxE"))
+obj1 = LMMsolve(fixed=y~1, random=NULL,randomMatrices=lM, data=df_ext)
 obj1$logL
 obj1$ED
 
