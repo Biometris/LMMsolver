@@ -55,6 +55,9 @@ obj1$ED
 coefficients(obj1.asr,list=TRUE)
 coef(obj1)
 
+coefficients(obj1.asr,list=TRUE)
+coef(obj1)
+
 # sum of effects equal to zero:
 sum(coef(obj1)$QTL)
 
