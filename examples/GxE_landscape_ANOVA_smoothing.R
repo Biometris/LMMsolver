@@ -162,7 +162,7 @@ B2x = Bsplines(knots2, x2grid)
 
 k1 <- length(x1grid)
 k2 <- length(x2grid)
-mu <- coef(obj1)$InterceptMB
+mu <- coef(obj1)$'(Intercept)'
 
 eff1 <- B1x %*% theta1
 eff2 <- B2x %*% theta2
