@@ -7,19 +7,19 @@ linearSum  <- function(theta,matrixList)
   C = Reduce('+', Map(function(x,y) x*y, theta, matrixList))
 }
 
-# calculate log determinant of matrix M, 
+# calculate log determinant of matrix M,
 logDet <- function(cholM) { as.double(determinant(cholM)$modulus) }
 
 # calculate quadratic form xAx (efficient):
 quadForm <- function(x, A, y=x) { sum(x*(A %*% y))}
 
-REMLlogL <- function(ADcholRinv, ADcholGinv, ADcholC,phi,psi,theta, yPy) 
+REMLlogL <- function(ADcholRinv, ADcholGinv, ADcholC,phi,psi,theta, yPy)
 {
   # calculute logLikelihood...
   logdetR = -logdet(ADcholRinv, phi)
   logdetG =  ifelse(!is.null(ADcholGinv), -logdet(ADcholGinv, psi), 0)
   logdetC =  logdet(ADcholC, theta)
-  
+
   # See e.g. Smith 1995..
   logL = -0.5*(logdetR + logdetG + logdetC + yPy)
 }
@@ -36,7 +36,7 @@ calcSumSquares <- function(lRinv,Q, r, a, Nvarcomp)
   }
 }
 
-solveMME <- function(cholC, listC, lWtRinvY, phi, theta)    
+solveMME <- function(cholC, listC, lWtRinvY, phi, theta)
 {
   C = linearSum(theta, listC)
   cholC <-update(cholC, C)
@@ -52,41 +52,41 @@ sparseMixedModels <- function(y, X, Z, lGinv, lRinv, maxiter=100, eps=1.0e-6, di
   q = ncol(Z)
   Nres = length(lRinv)
   Nvarcomp = length(lGinv)
-  NvarcompTot = Nres + Nvarcomp  
+  NvarcompTot = Nres + Nvarcomp
   dimMME = p + q
-  
+
   W = as.spam(cbind(X,Z))
   Wt = t(W)
-  
+
   lWtRinvW = lapply(lRinv, FUN = function(x) { Wt %*% x %*% W})
-  lWtRinvY = lapply(lRinv, FUN = function(x) { Wt %*% (x %*% y)})  
+  lWtRinvY = lapply(lRinv, FUN = function(x) { Wt %*% (x %*% y)})
   # extend lGinv with extra zero's for fixed effect...
-  lQ = lapply(lGinv, FUN = function(x) 
+  lQ = lapply(lGinv, FUN = function(x)
                           { zero = spam(0, ncol=p, nrow=p)
                             bdiag.spam(zero,x)
                           })
   listC = c(lWtRinvW, lQ)
-  
+
   # remove some extra zero's....
   lWtRinvW <- lapply(lWtRinvW, FUN = function(X) {cleanup(X)} )
   lQ       <- lapply(lQ,       FUN = function(X) {cleanup(X)} )
   lGinv    <- lapply(lGinv,  FUN = function(X) {cleanup(X)} )
   listC    <- lapply(listC,  FUN=function(X) {cleanup(X)})
-  
+
   phi = rep(1.0, Nres)
   psi = rep(1.0, Nvarcomp)
   theta = c(psi, phi)
   #cholRinv = chol(Rinv)
   #if (Nvarcomp > 0.0) {cholGinv = chol(linearSum(psi, lGinv))}
   cholC = chol(linearSum(theta, listC))
-  
+
   if (display) {
     C = linearSum(theta, listC)
     display(C)
     L = t(as.spam(cholC))
     display(L)
-  }  
-  
+  }
+
   # make ADchol for Rinv, Ginv and C:
   ADcholRinv = ADchol(lRinv)
   if (Nvarcomp >0) {
@@ -95,10 +95,10 @@ sparseMixedModels <- function(y, X, Z, lGinv, lRinv, maxiter=100, eps=1.0e-6, di
     ADcholGinv = NULL
   }
   ADcholC = ADchol(listC)
-  
+
   logLprev <- 1.0e20
   if (monitor) { cat("iter logLik\n") }
-  
+
   for (it in 1:maxiter)
   {
     if (Nvarcomp > 0)
@@ -120,9 +120,9 @@ sparseMixedModels <- function(y, X, Z, lGinv, lRinv, maxiter=100, eps=1.0e-6, di
     }
     EDmax = c(EDmax_phi, EDmax_psi)
     ED = EDmax - theta*dlogdet(ADcholC, theta)
-    
+
     # solve mixed model equations and calculate residuals...
-    a <- solveMME(cholC, listC, lWtRinvY, phi, theta)    
+    a <- solveMME(cholC, listC, lWtRinvY, phi, theta)
     r = y - W %*% a
 
     SS_all <- calcSumSquares(lRinv, lQ, r, a, Nvarcomp)
@@ -130,15 +130,15 @@ sparseMixedModels <- function(y, X, Z, lGinv, lRinv, maxiter=100, eps=1.0e-6, di
     # here we use Johnson and Thompson 1995:
     yPy = quadForm(y,Rinv,r)
     # yPy2 = sum(theta*SS_all) (should give same results?)
-  
+
     logL = REMLlogL(ADcholRinv, ADcholGinv, ADcholC,phi,psi,theta, yPy)
 
-    if (monitor) { cat(sprintf("%4d %8.4f\n", it, logL)) }  
-    if (abs(logLprev-logL) < eps) { break } 
+    if (monitor) { cat(sprintf("%4d %8.4f\n", it, logL)) }
+    if (abs(logLprev-logL) < eps) { break }
 
     theta = ED / (SS_all + 1.0e-20)
     logLprev = logL
-    
+
   }
   names(phi) = names(lRinv)
   names(psi) = names(lGinv)
@@ -150,7 +150,7 @@ sparseMixedModels <- function(y, X, Z, lGinv, lRinv, maxiter=100, eps=1.0e-6, di
 }
 
 
-# generate list of Ginv matrices, based on dimensions. 
+# generate list of Ginv matrices, based on dimensions.
 generateGinv <- function(dim,namesVarComp)
 {
   N <- length(dim)
@@ -170,9 +170,9 @@ LMMsolve <- function(fixed, random = NULL, randomMatrices = NULL, data, residual
   ## make random part:
   if (!is.null(random)) {
     mf <- model.frame(random, data, drop.unused.levels = TRUE, na.action = NULL)
-    mt <- terms(mf)    
+    mt <- terms(mf)
     f.terms <- all.vars(mt)[attr(mt,"dataClasses") == "factor"]
-    Z1 <- model.matrix(mt, data = mf, 
+    Z1 <- model.matrix(mt, data = mf,
                     contrasts.arg = lapply(mf[,f.terms, drop = FALSE], contrasts, contrasts = FALSE))
     dim1.r <- table(attr(Z1,"assign"))[-1]
     term1.labels.r <- attr(mt,"term.labels")
@@ -182,7 +182,7 @@ LMMsolve <- function(fixed, random = NULL, randomMatrices = NULL, data, residual
     Z1 = NULL
     term1.labels.r = NULL
   }
-  
+
   if (!is.null(randomMatrices))
   {
     ndx <- unlist(randomMatrices)
@@ -194,7 +194,7 @@ LMMsolve <- function(fixed, random = NULL, randomMatrices = NULL, data, residual
     Z2 = NULL
     term2.labels.r = NULL
   }
-  if (!(is.null(random) & is.null(randomMatrices))) 
+  if (!(is.null(random) & is.null(randomMatrices)))
   {
     if (is.null(random)) {
       Z = Z2
@@ -206,10 +206,10 @@ LMMsolve <- function(fixed, random = NULL, randomMatrices = NULL, data, residual
     Z = as.matrix(Z)
     dim.r = c(dim1.r,dim2.r)
     term.labels.r = c(term1.labels.r,term2.labels.r)
-  
+
     e <- cumsum(dim.r)
     s <- e - dim.r + 1
-  
+
     lGinv <- list()
     for(i in 1:length(dim.r)) {
       tmp <- rep(0, sum(dim.r))
@@ -223,16 +223,21 @@ LMMsolve <- function(fixed, random = NULL, randomMatrices = NULL, data, residual
     dim.r=NULL
     term.labels.r=NULL
   }
-  
+
   ## make fixed part:
   mf <- model.frame(fixed, data)
-  mt <- terms(mf)    
+  mt <- terms(mf)
   f.terms <- all.vars(mt)[attr(mt,"dataClasses") == "factor"]
-  X = model.matrix(mt, data=mf, contrasts.arg = lapply(mf[,f.terms, drop = FALSE], 
+  X = model.matrix(mt, data=mf, contrasts.arg = lapply(mf[,f.terms, drop = FALSE],
                                                        contrasts, contrasts = TRUE))
   dim.f <- table(attr(X,"assign"))
   term.labels.f <- attr(mt,"term.labels")
-  
+
+  # add intercept....
+  if (attr(mt,"intercept")==1)
+    term.labels.f <- c("(Intercept)", term.labels.f)
+
+
   if (!is.null(residualterm))
   {
     lRinv <- makeRlist(df=data, column=residualterm)
@@ -241,10 +246,10 @@ LMMsolve <- function(fixed, random = NULL, randomMatrices = NULL, data, residual
     n = nrow(data)
     lRinv[[1]] <- diag.spam(1,n)
     names(lRinv) = "residual"
-  } 
+  }
   y <- mf[,1]
   obj <- sparseMixedModels(y, X, Z, lGinv, lRinv, eps, monitor, display=display,maxiter=maxiter)
-  
+
   dim <- as.numeric(c(dim.f,dim.r))
   dim
   term.labels <- c(term.labels.f,term.labels.r)
@@ -261,12 +266,12 @@ coef.LMMsolve <- function(obj)
   dim <- obj$dim
   e <- cumsum(dim)
   s <- e - dim + 1
-  
+
   for(i in 1:length(dim)) {
     result[[i]] <- obj$a[s[i]:e[i]]
   }
   names(result) <- obj$term.labels
-  result  
+  result
 }
 
 
