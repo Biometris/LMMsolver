@@ -8,7 +8,7 @@ RowKronecker <-
     kronecker(X1,one.2)*kronecker(one.1,X2)
   }
 
-ndxMatrix <- function(lZ, Names)
+ndxMatrix <- function(df, lZ, Names)
 {
   n <- length(lZ)
   dim <- sapply(lZ,ncol)
