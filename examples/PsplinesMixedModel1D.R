@@ -26,50 +26,37 @@ y = fsim(x) +  rnorm(Nobs, sd=sqrt(sigma2) )
 sim.df <- data.frame(x=x, y=y)
 
 degree = 3
-k = degree+1
 nseg = 10
 
-dx = (xmax - xmin) / nseg
-
-x = sim.df$x
-
-knots = seq(xmin - degree * dx, xmax + degree * dx, by = dx)
-B = splineDesign(knots, x, derivs=rep(0,length(x)), ord = degree+1)
+# define the knots and define B-spline basis:
+knots <- PsplinesKnots(xmin, xmax, degree, nseg)
+B <- Bsplines(knots, x)
 q = ncol(B)
 q
 
-D <- diff(diag(q), diff=2)
-DtD <- crossprod(D)
-U <- eigen(DtD)$vectors[,-c(q-1,q)]
-d <- eigen(DtD)$values[-c(q-1,q)]
-Usc <- U %*% diag(1/sqrt(d))
+# spectral decomposition of D'D, with D second order differences:
+Usc <- calcUsc(q, ord=2)
 
 lZ <- list()
-lZ[[1]] = B %*% Usc
+lZ[[1]] <- B %*% Usc
 Z <- do.call("cbind",lZ)
 
-df_ext = cbind(sim.df,Z)
-
-dim <- sapply(lZ,ncol)
-e <- cumsum(dim) + ncol(sim.df)
-s <- e - dim + 1
-
-# model without interactions:
-lM <- list(B=c(s[1]:e[1]))
-obj0 = LMMsolve(fixed=y~x, random=NULL,randomMatrices=lM, data=df_ext)
+df_ext = cbind(sim.df, Z)
+lM <- ndxMatrix(sim.df, lZ, c("B"))
+obj0 = LMMsolve(fixed=y~x, random=NULL, randomMatrices=lM, data=df_ext)
 obj0$logL
 obj0$ED
 
-xgrid = seq(xmin, xmax, by=0.001)
-Bx = splineDesign(knots, xgrid, derivs=rep(0,length(xgrid)), ord = degree+1,outer.ok=TRUE)
+# for making predictions on a grid:
+Bx = Bsplines(knots, x0)
 
 mu <- coef(obj0)$'(Intercept)'
 beta  <- coef(obj0)$x
 theta <- Usc %*% coef(obj0)$B
-yfit <- mu + beta * xgrid + Bx %*% theta
+yfit <- mu + beta * x0 + Bx %*% theta
 plot(x=x, y=y)
-lines(x=xgrid, y=fsim(xgrid), col='blue',lwd=2.5)
-lines(x=xgrid, y=yfit, col='red' ,lwd=2.5)
+lines(x=x0, y=fsim(x0), col='blue',lwd=2.5)
+lines(x=x0, y=yfit, col='red' ,lwd=2.5)
 
 #
 #
@@ -86,6 +73,8 @@ lines(x=xgrid, y=yfit, col='red' ,lwd=2.5)
 # see sparse_mixed_model_splines.pdf:
 # we can construct a sequence t_mn such that B(x) t_mn = x for [xmin,xmax]
 # and therefore we can write X = B %*% A, with A orthogonal to Usc:
+k = degree + 1
+dx = (xmax-xmin)/nseg
 t_mn <- seq(xmin-(k/2)*dx+dx,by=dx,length=q)
 A <- cbind(1, t_mn)
 X <- cbind(1, x)
