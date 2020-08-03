@@ -11,6 +11,7 @@ rm(list=ls())
 library(asreml)
 library(dplyr)
 library(fields)
+library(ggplot2)
 library(LMMsolver)
 
 df = read.csv("Piepho_Williams2010_example2.csv",na.string='.')
@@ -126,28 +127,25 @@ nrep*nrows
 sum(abs(B2 %*% coef(obj5)$ProwxPcol)<1.0e-12)
 nrep*ncols
 
-eff_Prowcol <- coef(obj5)$ProwxPcol
-e <- (nrows-1)*(ncols-1)*c(1:nrep)
-s <- c(1,e[-nrep]+1)
-M <- NULL
-for (r in 1:nrep)
-{
-  cat("rep ", r, ": \n")
-  eff <- U12sc %*% eff_Prowcol[s[r]:e[r]]
-  Mrep <- matrix(data = eff,nrow=nrows,ncol=ncols,byrow=TRUE)
-  print(range(rowSums(Mrep)))
-  print(range(colSums(Mrep)))
-  M <- cbind(M, Mrep)
-}
+df$x1 <- (as.numeric(df$rep)-1)*ncols + df$col
+df$x2 <- df$row
+df$row_eff <- lZ[[1]] %*% coef(obj5)$Prow
+df$col_eff <- lZ[[2]] %*% coef(obj5)$Pcol
+df$int_eff <- lZ[[3]] %*% coef(obj5)$ProwxPcol
 
-#pdf("Smooth_interaction_Gilmour_data.pdf",width=10,height=7)
-# total numer of columns is 3*5 = 15
-col = 1:(nrep*ncols)
-row = 1:nrows
-image.plot(col,row,t(M))
-axis(side=3,at=c(3,8,13),labels=c('rep1','rep2','rep3'))
-abline(v=5.5,lw=2.5)
-abline(v=10.5,lw=2.5)
-#dev.off()
+ggplot(df)+
+  geom_raster(mapping=aes(x=x1,y=x2,fill=int_eff))+
+  scale_fill_gradientn(name="Fitted",colours=topo.colors(100)) +
+  ggtitle("P-spline interaction") + xlab("column") + ylab("row") +
+  geom_vline(xintercept=c(5.5,10.5), size=1.0) +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  coord_equal()
+
+# means for row and columns effects:
+df %>% group_by(rep) %>% summarize(mnCol=mean(col_eff),mnRow=mean(col_eff))
+
+# interaction effects, sum equal to zero for both row and columns:
+df %>% group_by(rep, row) %>% summarize(mn = mean(int_eff))
+df %>% group_by(rep, col) %>% summarize(mn = mean(int_eff))
 
 
