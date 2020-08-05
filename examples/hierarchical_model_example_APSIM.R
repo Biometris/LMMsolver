@@ -4,8 +4,6 @@
 # example of analysis of APSIM data using splines.
 #
 rm(list = ls())
-library(fields)
-library(spam)
 library(LMMsolver)
 library(dplyr)
 library(ggplot2)
@@ -106,7 +104,8 @@ beta <- coef(obj5)$z
 ypredEnv <- mu + beta*z0 + (B1grid %*% U1sc) %*% coef(obj5)$'f(z)'
 ypredE.df <- data.frame(z=z0, y=ypredEnv)
 p <- ggplot(dat, aes(x=z, y=ysim,col=geno)) + geom_point()
-p + geom_line(ypredE.df, mapping=aes(x=z,y=y),col='black',size=1.5)
+p + geom_line(ypredE.df, mapping=aes(x=z,y=y),col='black',size=1.5) +
+  ggtitle("population mean curve and raw data") +  theme(plot.title = element_text(hjust = 0.5))
 
 G_eff <- as.vector(U2sc %*% coef(obj5)$g)
 G_eff
