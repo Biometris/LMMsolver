@@ -19,7 +19,7 @@ dat_traj$biomass <- dat_traj$biomass/1000
 p <- ggplot(dat_traj, aes(x=das, y=biomass,col=geno)) + geom_line() +
     ggtitle("APSIM deterministic simulations") + xlab("days of sowing") + ylab("biomass") +
   theme(plot.title = element_text(hjust = 0.5))
-p
+p + geom_vline(xintercept=57)
 
 # data for the simulations:
 xmin =  20
@@ -28,6 +28,9 @@ step =   5
 #step =   1
 dat <- filter(dat_traj, das %in% seq(xmin, xmax , by=step))
 dim(dat)
+
+#sel_geno <- paste0("g",formatC(c(8, 22),width=3,flag=0))
+#dat <- filter(dat, geno %in% sel_geno)
 
 set.seed(1234)
 dat$z <- dat$das
@@ -80,7 +83,7 @@ B2 <- Bsplines(knots2, dat$g_nr)
 # define matrix orthogonal to constant
 J = matrix(data=1,nrow=Ngeno, ncol=Ngeno)
 K = diag(Ngeno) - (1/Ngeno) * J
-U2sc = eigen(K)$vectors[,-Ngeno]
+U2sc = eigen(K)$vectors[,-Ngeno, drop=FALSE]
 
 # define the mixed model equations and solve:
 
