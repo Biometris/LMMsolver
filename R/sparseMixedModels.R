@@ -165,7 +165,7 @@ generateGinv <- function(dim,namesVarComp)
   K
 }
 
-LMMsolve <- function(fixed, random = NULL, randomMatrices = NULL, data, residualterm=NULL, eps=1.0e-6,monitor=FALSE,display=FALSE,
+LMMsolve <- function(fixed, random = NULL, randomMatrices = NULL, lGinverse=NULL, data, residualterm=NULL, eps=1.0e-6,monitor=FALSE,display=FALSE,
                      maxiter=250) {
   ## make random part:
   if (!is.null(random)) {
@@ -212,9 +212,14 @@ LMMsolve <- function(fixed, random = NULL, randomMatrices = NULL, data, residual
 
     lGinv <- list()
     for(i in 1:length(dim.r)) {
-      tmp <- rep(0, sum(dim.r))
-      tmp[s[i]:e[i]] <- 1
-      lGinv[[i]] <- diag.spam(tmp)
+      if (term.labels.r %in% names(lGinverse))
+      {
+        lGinv[[i]] <- lGinverse[[term.labels.r]]
+      } else {
+        tmp <- rep(0, sum(dim.r))
+        tmp[s[i]:e[i]] <- 1
+        lGinv[[i]] <- diag.spam(tmp)
+      }
     }
     names(lGinv) = term.labels.r
   } else {
