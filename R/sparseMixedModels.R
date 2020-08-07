@@ -212,7 +212,7 @@ LMMsolve <- function(fixed, random = NULL, randomMatrices = NULL, lGinverse=NULL
 
     lGinv <- list()
     for(i in 1:length(dim.r)) {
-      if (term.labels.r %in% names(lGinverse))
+      if (term.labels.r[i] %in% names(lGinverse))
       {
         lGinv[[i]] <- lGinverse[[term.labels.r]]
       } else {
