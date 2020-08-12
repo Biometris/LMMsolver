@@ -42,9 +42,9 @@ PsplinesKnots <- function(xmin, xmax, degree, nseg)
 }
 
 # just to simplify splineDesign
-Bsplines <- function(knots, x)
+Bsplines <- function(knots, x, deriv = 0)
 {
   degree <- attr(knots,"degree")
-  B = splineDesign(knots, x, derivs=rep(0,length(x)), ord = degree+1)
+  B = splineDesign(knots, x, derivs=rep(deriv, length(x)), ord = degree+1)
   B
 }
