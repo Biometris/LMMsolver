@@ -37,7 +37,7 @@ dat$z <- dat$das
 dat$env <- as.factor(dat$das)
 N <- nrow(dat)
 sigma2e = 0.1
-#sigma2e = 0.00001
+#sigma2e = 0.05
 dat$ysim <- dat$biomass + rnorm(N,sd=sqrt(sigma2e))
 
 labels <- unique(dat$geno)
@@ -106,6 +106,7 @@ mu <- coef(obj5)$'(Intercept)'
 beta <- coef(obj5)$z
 ypredEnv <- mu + beta*z0 + (B1grid %*% U1sc) %*% coef(obj5)$'f(z)'
 ypredE.df <- data.frame(z=z0, y=ypredEnv)
+
 p <- ggplot(dat, aes(x=z, y=ysim,col=geno)) + geom_point()
 p + geom_line(ypredE.df, mapping=aes(x=z,y=y),col='black',size=1.5) +
   ggtitle("population mean curve and raw data") +  theme(plot.title = element_text(hjust = 0.5))
@@ -136,22 +137,54 @@ ggplot(pred)+
   ggtitle("Genetic effects, deviations from mean") + xlab("days after sowing") +
   ylab("genotype") + theme(plot.title = element_text(hjust = 0.5))
 
+#
+#
+# first derivatives:
+B1gridDz <- Bsplines(knots1, z0, deriv=1)
+ypredEnvDz <- beta + (B1gridDz %*% U1sc) %*% coef(obj5)$'f(z)'
+ypredEDz.df <- data.frame(z=z0, y=ypredEnvDz)
+
+p <- ggplot(ypredEDz.df, aes(x=z, y=y)) + geom_line() +
+  ggtitle("mean growth rate") +  theme(plot.title = element_text(hjust = 0.5)) +
+   xlab("days after sowing") + ylab("growth rate [ton/ha per day]")
+p
+
+# linear slopes:
+ypredGDz <- as.vector(kronecker(rep(1,length(z0)), G.z))
+ypredGxEDz <- ypredGDz +
+  kronecker(B1gridDz,diag(Ngeno)) %*% kronecker(U1sc,U2sc) %*% coef(obj5)$'f_g(z)'
+
+predDz <- data.frame(geno,x1=x1_ext,x2=x2_ext, ypredGxEDz,
+                     ypredTotDz = rep(ypredEnvDz,each=Ngeno) + ypredGxEDz)
+ggplot(predDz)+
+  geom_raster(mapping=aes(x=x1,y=x2,fill=ypredGxEDz))+
+  scale_fill_gradientn(name="Fitted",colours=topo.colors(100)) +
+  ggtitle("Growth rates") + xlab("days after sowing") +
+  ylab("genotype") + theme(plot.title = element_text(hjust = 0.5))
+
+
 # selection of genotypes:
 # genotype 8 is late mature, still good biomass at the end
 # genotype 22 is the best genotype in this environment
 sel_geno <- paste0("g",formatC(c(8, 22),width=3,flag=0))
 pred_sel <- filter(pred, geno %in% sel_geno)
+predDz_sel <- filter(predDz, geno %in% sel_geno)
+
 dat_sel <- filter(dat, geno %in% sel_geno)
 dat_traj_sel <- filter(dat,geno %in% sel_geno)
 ypredE.df <- data.frame(z=z0, y=ypredEnv)
 p <- ggplot(dat_sel, aes(x=z, y=ysim,col=geno)) + geom_point() +
-    #geom_line(ypredE.df, mapping=aes(x=z,y=y),col='black') +
-    geom_line(pred_sel,mapping=aes(x=x1,y=ypredTot,col=geno)) +
-    geom_line(dat_traj_sel, mapping=aes(x=das,y=biomass,col=geno), linetype='dashed') +
-    ggtitle("Trajectories for selection of genotypes (dashed true curves)") +
-    theme(plot.title = element_text(hjust = 0.5))
+  #geom_line(ypredE.df, mapping=aes(x=z,y=y),col='black') +
+  geom_line(pred_sel,mapping=aes(x=x1,y=ypredTot,col=geno)) +
+  geom_line(dat_traj_sel, mapping=aes(x=das,y=biomass,col=geno), linetype='dashed') +
+  ggtitle("Trajectories for selection of genotypes (dashed true curves)") +
+  theme(plot.title = element_text(hjust = 0.5))
 p
 
+p <-  ggplot(ypredEDz.df, aes(x=z, y=y)) + geom_line() +
+    geom_line(predDz_sel, mapping=aes(x=x1,y=ypredTotDz,col=geno)) +
+    ggtitle("mean growth rate") +  theme(plot.title = element_text(hjust = 0.5)) +
+    xlab("days after sowing") + ylab("growth rate [ton/ha per day]")
 
 
 
