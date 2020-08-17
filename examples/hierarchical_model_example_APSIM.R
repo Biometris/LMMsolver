@@ -6,12 +6,19 @@
 rm(list = ls())
 library(LMMsolver)
 library(dplyr)
+library(zoo)
 library(ggplot2)
 
 # subset of APSIM simulation data set Daniela Bustos-Korts
-dat_traj = read.csv('APSIM_Emerald_1993_25genotypes.csv',header=TRUE, stringsAsFactors = FALSE)
+dat_traj = read.csv('APSIM_Emerald.csv',header=TRUE, stringsAsFactors = FALSE)
 
 head(dat_traj)
+
+Ngeno_sel <- 25
+Year_sel <- 1993
+
+sel_geno <- paste0("g",formatC(c(1:Ngeno_sel),width=3,flag='0'))
+dat_traj <- filter(dat_traj, geno %in% sel_geno & year == Year_sel)
 
 # use ton's/ha
 dat_traj$biomass <- dat_traj$biomass/1000
@@ -66,53 +73,62 @@ knots1 = PsplinesKnots(xmin1, xmax1, degr1, nseg1)
 B1 <- Bsplines(knots1, dat$z)
 q1 <- ncol(B1)
 
-U1sc <- calcUsc(q1, pord1)
-
-## 1) definitions for genotype
-
 # a very simple simple B-spline basis, helps that
 # data can be in any order
 knots2 = PsplinesKnots(1, Ngeno, 1, Ngeno-1)
 B2 <- Bsplines(knots2, dat$g_nr)
 
-# define matrix orthogonal to constant
-J = matrix(data=1, nrow=Ngeno, ncol=Ngeno)
-K = diag(Ngeno) - (1/Ngeno) * J
-U2sc = eigen(K)$vectors[,-Ngeno, drop=FALSE]
+# linear space
+# ~gitprojects/MBnotes/sparse_mixed_model_splines.tex/pdf
+nknots1 <- length(knots1)
+tau <- rollmean(knots1[-c(1,nknots1)], k=degr1)
+# B1(z) %*% tau = z
+all.equal(as.vector(B1 %*% tau), dat$z)
 
-# define the mixed model equations and solve:
+# sparse model:
+D1 <- diff(diag(q1),    diff=pord1)
+D2 <- diff(diag(Ngeno), diff=1)
 
 lZ <- list()
-lZ[[1]] = B1 %*% U1sc  #env
-lZ[[2]] = B2 %*% U2sc  #geno
-lZ[[3]] = dat$z*(B2 %*% U2sc) # x.geno
-lZ[[4]] = RowKronecker(B1,B2) %*% kronecker(U1sc, U2sc)
+lZ[[1]] = B1 %*% t(D1)  #env
+lZ[[2]] = B2 %*% t(D2)  #geno
+lZ[[3]] = RowKronecker(B1,B2) %*% kronecker(tau, t(D2))
+lZ[[4]] = RowKronecker(B1,B2) %*% kronecker(t(D1), t(D2))
 
 Z <- do.call("cbind", lZ)
 dat_ext = cbind(dat, Z)
 
 lM <- ndxMatrix(dat, lZ, c("f(z)","g","g.z","f_g(z)"))
-obj5 <- LMMsolve(ysim~z, randomMatrices=lM, data=dat_ext)
-round(obj5$ED, 2)
+I_g <- diag(1,Ngeno)
+DtD1 <- crossprod(D1)
+lGinv <- list()
+lGinv[['f(z)']] <- as.spam(D1 %*% DtD1 %*% t(D1))
+lGinv[['g']]   <- as.spam(D2 %*% I_g %*% t(D2))
+lGinv[['g.z']] <- as.spam(D2 %*% I_g %*% t(D2))
+lGinv[['f_g(z)']] <- as.spam(kronecker(D1 %*% DtD1 %*% t(D1), D2 %*% I_g %*% t(D2)))
+names(lGinv)
+obj <- LMMsolve(ysim~z, randomMatrices=lM,lGinverse=lGinv, data=dat_ext,
+                       display=TRUE,monitor=TRUE)
+round(obj$ED, 2)
 
 z0 <- seq(xmin1,xmax1,by=1.0)
 B1grid <- Bsplines(knots1, z0)
 B1gridDz <- Bsplines(knots1, z0, deriv=TRUE)
-mu <- coef(obj5)$'(Intercept)'
-beta <- coef(obj5)$z
-theta <- U1sc %*% coef(obj5)$'f(z)'
+mu <- coef(obj)$'(Intercept)'
+beta <- coef(obj)$z
+theta <- t(D1) %*% coef(obj)$'f(z)'
 sum(theta)
 ypredEnv   <- mu + beta*z0 + B1grid   %*% theta
 ypredEnvDz <-      beta    + B1gridDz %*% theta
 ypredE.df <- data.frame(z=z0, y=ypredEnv, dy=ypredEnvDz)
 head(ypredE.df)
 
-G_eff <- as.vector(U2sc %*% coef(obj5)$g)
-G.z <- as.vector(U2sc %*% coef(obj5)$g.z)
+G_eff <- as.vector(t(D2) %*% coef(obj)$g)
+G.z <- as.vector(t(D2) %*% coef(obj)$g.z)
 ypredG <- as.vector(kronecker(rep(1,length(z0)), G_eff))
 ypredGx <- as.vector(kronecker(z0, G.z))
 ypredGxE <- ypredGx +
-  kronecker(B1grid,diag(Ngeno)) %*% kronecker(U1sc,U2sc) %*% coef(obj5)$'f_g(z)'
+  kronecker(B1grid,diag(Ngeno)) %*% kronecker(t(D1), t(D2)) %*% coef(obj)$'f_g(z)'
 ypredGtot <- ypredG + ypredGxE
 
 M <- matrix(data=ypredGxE,nrow=length(z0),ncol=Ngeno,byrow=TRUE)
@@ -121,7 +137,7 @@ range(rowSums(M))
 # calculate derivatives:
 ypredGDz <- as.vector(kronecker(rep(1,length(z0)), G.z))
 ypredGxEDz <- ypredGDz +
-  kronecker(B1gridDz,diag(Ngeno)) %*% kronecker(U1sc,U2sc) %*% coef(obj5)$'f_g(z)'
+  kronecker(B1gridDz,diag(Ngeno)) %*% kronecker(t(D1),t(D2)) %*% coef(obj)$'f_g(z)'
 
 geno <- rep(labels,times=length(z0))
 x1_ext <- kronecker(z0, rep(1,Ngeno))
@@ -137,7 +153,7 @@ head(pred)
 p <- ggplot(dat_traj, aes(x=das, y=biomass,col=geno)) + geom_line() +
   ggtitle("APSIM deterministic simulations") + xlab("days of sowing") + ylab("biomass") +
   theme(plot.title = element_text(hjust = 0.5))
-p + geom_vline(xintercept=57)
+p
 
 p <- ggplot(dat, aes(x=z, y=ysim,col=geno)) + geom_point()
 p + geom_line(ypredE.df, mapping=aes(x=z,y=y),col='black',size=1.5) +
@@ -160,7 +176,6 @@ ggplot(pred)+
   scale_fill_gradientn(name="Fitted",colours=topo.colors(100)) +
   ggtitle("Growth rates") + xlab("days after sowing") +
   ylab("genotype") + theme(plot.title = element_text(hjust = 0.5))
-
 
 # selection of genotypes:
 # genotype 6 has low biomass
