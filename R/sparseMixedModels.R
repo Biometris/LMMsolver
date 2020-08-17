@@ -214,7 +214,11 @@ LMMsolve <- function(fixed, random = NULL, randomMatrices = NULL, lGinverse=NULL
     for(i in 1:length(dim.r)) {
       if (term.labels.r[i] %in% names(lGinverse))
       {
-        lGinv[[i]] <- lGinverse[[term.labels.r]]
+        #print(term.labels.r[i])
+        #lGinv[[i]] <-
+        tmp <- diag.spam(0, sum(dim.r))
+        tmp[s[i]:e[i],s[i]:e[i]] <- lGinverse[[term.labels.r[i]]]
+        lGinv[[i]] <- tmp
       } else {
         tmp <- rep(0, sum(dim.r))
         tmp[s[i]:e[i]] <- 1
