@@ -14,7 +14,7 @@ dat_traj = read.csv('APSIM_Emerald.csv',header=TRUE, stringsAsFactors = FALSE)
 
 head(dat_traj)
 
-Ngeno_sel <- 25
+Ngeno_sel <-  25
 Year_sel <- 1993
 
 sel_geno <- paste0("g",formatC(c(1:Ngeno_sel),width=3,flag='0'))
@@ -78,62 +78,77 @@ D1 <- diff.spam(diag.spam(q1),    diff=pord1)
 D2 <- diff.spam(diag.spam(Ngeno), diff=1)
 
 lZ <- list()
-lZ[[1]] = B1 %*% t(D1)  #env
+lZ[[1]] = B1 %*% t(D1)  #das
 lZ[[2]] = B2 %*% t(D2)  #geno
 lZ[[3]] = RowKronecker(B1,B2) %*% kronecker(tau, t(D2))
 lZ[[4]] = RowKronecker(B1,B2) %*% kronecker(t(D1), t(D2))
 
 Z <- as.matrix(do.call("cbind", lZ))
 dat_ext = cbind(dat, Z)
-
 lM <- ndxMatrix(dat, lZ, c("f(t)","g","g.t","f_g(t)"))
-I_g <- diag.spam(1,Ngeno)
+
+# define precision matrices:
 DtD1 <- crossprod(D1)
+I_g <- diag.spam(1,Ngeno)
+precM1 <- D1 %*% DtD1 %*% t(D1)
+precM2 <- D2 %*% I_g  %*% t(D2)
 lGinv <- list()
-lGinv[['f(t)']] <- D1 %*% DtD1 %*% t(D1)
-lGinv[['g']]   <- D2 %*% I_g %*% t(D2)
-lGinv[['g.t']] <- D2 %*% I_g %*% t(D2)
-lGinv[['f_g(t)']] <- kronecker(D1 %*% DtD1 %*% t(D1), D2 %*% I_g %*% t(D2))
+lGinv[['f(t)']]   <- precM1
+lGinv[['g']]      <- precM2
+lGinv[['g.t']]    <- precM2
+lGinv[['f_g(t)']] <- precM1 %x% precM2 #kronecker product
 names(lGinv)
 obj <- LMMsolve(ysim~das, randomMatrices=lM,lGinverse=lGinv, data=dat_ext,
                        display=TRUE,monitor=TRUE)
 round(obj$ED, 2)
 
-z0 <- seq(xmin1,xmax1,by=1.0)
-B1grid <- as.spam(Bsplines(knots1, z0))
-B1gridDz <- as.spam(Bsplines(knots1, z0, deriv=TRUE))
+# table with parameters:
+par.table <- data.frame(term=c('intercept','slope','f(t)','g','g.t','f_g(t)'),
+                        effect = c('Fixed','Fixed','Random','Random','Random','Random'),
+                        npar = c(1,1,q1-2,Ngeno-1,Ngeno-1,(q1-2)*(Ngeno-1)))
+par.table
+sum(par.table$npar) == q1*Ngeno
+
+obj$EDmax
+
+# make predictions on a dense grid:
+t0 <- seq(xmin1, xmax1, by=1.0)
+B1grid <- as.spam(Bsplines(knots1, t0))
+B1gridDt <- as.spam(Bsplines(knots1, t0, deriv=TRUE))
 mu <- coef(obj)$'(Intercept)'
 beta <- coef(obj)$das
 theta <- t(D1) %*% coef(obj)$'f(t)'
 sum(theta)
-ypredEnv   <- mu + beta*z0 + B1grid   %*% theta
-ypredEnvDz <-      beta    + B1gridDz %*% theta
-ypredE.df <- data.frame(z=z0, y=ypredEnv, dy=ypredEnvDz)
-head(ypredE.df)
+ypredMain   <- mu + beta*t0 + B1grid   %*% theta
+ypredMainDt <-      beta    + B1gridDt %*% theta
+ypredMain.df <- data.frame(z=t0, y=ypredMain, dy=ypredMainDt)
+head(ypredMain.df)
 
 G_eff <- as.vector(t(D2) %*% coef(obj)$g)
 G.t <- as.vector(t(D2) %*% coef(obj)$g.t)
-ypredG <- as.vector(kronecker(rep(1,length(z0)), G_eff))
-ypredGx <- as.vector(kronecker(z0, G.t))
-ypredGxE <- ypredGx +
-  kronecker(B1grid,diag(Ngeno)) %*% kronecker(t(D1), t(D2)) %*% coef(obj)$'f_g(t)'
-ypredGtot <- ypredG + ypredGxE
+ypredG <- as.vector(kronecker(rep(1,length(t0)), G_eff))
+ypredGl<- as.vector(kronecker(t0, G.t))
 
-M <- matrix(data=ypredGxE,nrow=length(z0),ncol=Ngeno,byrow=TRUE)
+# interaction term with sum to zero constraints:
+theta_fgt <- kronecker(t(D1), t(D2)) %*% coef(obj)$'f_g(t)'
+M <- matrix(data=theta_fgt,nrow=q1,ncol=Ngeno,byrow=TRUE)
 range(rowSums(M))
+range(colSums(M))
+
+ypredGnl <- kronecker(B1grid,diag(Ngeno)) %*% theta_fgt
+ypredGtot <- ypredG + ypredGl + ypredGnl
 
 # calculate derivatives:
-ypredGDz <- as.vector(kronecker(rep(1,length(z0)), G.t))
-ypredGxEDz <- ypredGDz +
-  kronecker(B1gridDz,diag(Ngeno)) %*% kronecker(t(D1),t(D2)) %*% coef(obj)$'f_g(t)'
+ypredGlDt <- as.vector(kronecker(rep(1,length(t0)), G.t))
+ypredGDt <- ypredGlDt + kronecker(B1gridDt,diag(Ngeno)) %*% theta_fgt
 
-geno <- rep(labels,times=length(z0))
-x1_ext <- kronecker(z0, rep(1,Ngeno))
-x2_ext <- kronecker(rep(1,length(z0)), c(1:Ngeno))
+geno <- rep(labels,times=length(t0))
+x1_ext <- kronecker(t0, rep(1,Ngeno))
+x2_ext <- kronecker(rep(1,length(t0)), c(1:Ngeno))
 pred <- data.frame(geno,x1=x1_ext,x2=x2_ext, ypredGtot,
-                   ypredTot = rep(ypredEnv,each=Ngeno) + ypredGtot,
-                   ypredGxEDz = ypredGxEDz,
-                   ypredTotDz = rep(ypredEnvDz,each=Ngeno) + ypredGxEDz)
+                   ypredTot = rep(ypredMain,each=Ngeno) + ypredGtot,
+                   ypredGDt = ypredGDt,
+                   ypredTotDt = rep(ypredMainDt,each=Ngeno) + ypredGDt)
 head(pred)
 
 # some plots...
@@ -144,11 +159,11 @@ p <- ggplot(dat_traj, aes(x=das, y=biomass,col=geno)) + geom_line() +
 p
 
 p <- ggplot(dat, aes(x=das, y=ysim,col=geno)) + geom_point()
-p + geom_line(ypredE.df, mapping=aes(x=z,y=y),col='black',size=1.5) +
+p + geom_line(ypredMain.df, mapping=aes(x=z,y=y),col='black',size=1.5) +
   xlab("days after sowing") +
   ggtitle("population mean curve and raw data") +  theme(plot.title = element_text(hjust = 0.5))
 
-p <- ggplot(ypredE.df, aes(x=z, y=dy)) + geom_line() +
+p <- ggplot(ypredMain.df, aes(x=z, y=dy)) + geom_line() +
   ggtitle("mean growth rate") +  theme(plot.title = element_text(hjust = 0.5)) +
   xlab("days after sowing") + ylab("growth rate [ton/ha per day]")
 p
@@ -161,7 +176,7 @@ ggplot(pred)+
 
 
 ggplot(pred)+
-  geom_raster(mapping=aes(x=x1,y=x2,fill=ypredGxEDz))+
+  geom_raster(mapping=aes(x=x1,y=x2,fill=ypredGDt))+
   scale_fill_gradientn(name="Fitted",colours=topo.colors(100)) +
   ggtitle("Growth rates") + xlab("days after sowing") +
   ylab("genotype") + theme(plot.title = element_text(hjust = 0.5))
@@ -183,8 +198,8 @@ p <- ggplot(dat_sel, aes(x=das, y=ysim,col=geno)) + geom_point() +
   theme(plot.title = element_text(hjust = 0.5))
 p
 
-p <-ggplot(ypredE.df, aes(x=z, y=dy)) + geom_line() +
-    geom_line(pred_sel, mapping=aes(x=x1,y=ypredTotDz,col=geno)) +
+p <-ggplot(ypredMain.df, aes(x=z, y=dy)) + geom_line() +
+    geom_line(pred_sel, mapping=aes(x=x1,y=ypredTotDt,col=geno)) +
     ggtitle("growth rate") +  theme(plot.title = element_text(hjust = 0.5)) +
     xlab("days after sowing") + ylab("growth rate [ton/ha per day]")
 p
