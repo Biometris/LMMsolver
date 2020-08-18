@@ -1,0 +1,226 @@
+#
+# Martin Boer, Biometris, Wageningen, the Netherlands.
+#
+# example of analysis of APSIM data using splines.
+#
+rm(list = ls())
+library(LMMsolver)
+library(dplyr)
+library(zoo)
+library(ggplot2)
+
+#dat_all <- read.delim("SimulatedData124Envs_Biomass.txt")
+#save(dat_all, file="SimulatedData124Envs_Biomass.rda")
+load("SimulatedData124Envs_Biomass.rda")
+dim(dat_all)
+
+sel_env <- data.frame(env=c("Emerald_1993", "Emerald_2005",
+                            "Merredin_2002","Merredin_2007",
+                            "Narrabri_1993", "Narrabri_1998",
+                            "Yanco_1993",	 "Yanco_1996",
+                            "Narrabri_2003",	"Narrabri_2008",
+                            "Narrabri_2011",	"Narrabri_2013"),
+                      loc = c("Emerald", "Emerald",
+                              "Merredin","Merredin",
+                              "Narrabri", "Narrabri",
+                              "Yanco",	 "Yanco",
+                              "Narrabri",	"Narrabri",
+                              "Narrabri",	"Narrabri"),
+                      envtype = paste("Envtype",rep(LETTERS[1:3],each=4)))
+sel_env
+
+dat_traj <- filter(dat_all, Env %in% sel_env$env) %>% droplevels()
+
+Ngeno_sel <- 25
+sel_geno <- paste0("g",formatC(c(1:Ngeno_sel),width=3,flag='0'))
+dat_traj <- filter(dat_traj, geno %in% sel_geno) %>% droplevels()
+
+# use ton's/ha
+dat_traj$biomass <- dat_traj$biomass/1000
+
+# data for the simulations:
+xmin =  30
+xmax = 160
+step =   5
+#step =   1
+dat <- filter(dat_traj, das %in% seq(xmin, xmax , by=step))
+dim(dat)
+
+set.seed(1234)
+N <- nrow(dat)
+sigma2e = 0.1
+#sigma2e = 0.05
+dat$ysim <- dat$biomass + rnorm(N,sd=sqrt(sigma2e))
+
+Glabels <- unique(dat$geno)
+Elabels <- unique(dat$Env)
+Glabels
+Elabels
+
+dat$g_nr <- as.numeric(dat$geno)
+dat$e_nr <- as.numeric(dat$Env)
+
+Ngeno <- nlevels(dat$geno)
+Nenv  <- length(unique(dat$e_nr))
+Ngeno
+Nenv
+
+# here we define the splines
+# 1: time (days after sowing) cubical splines, second order differences
+# 2: G first degree splines, ridge penalty
+# 3: ENV (e_nr) first degree splines, ridge penalty
+
+## 1) definitions for time (days after sowing)
+
+degr1 = 3
+pord1 = 2
+xmin1 <- xmin
+xmax1 <- xmax
+nseg1 <- 10
+#nseg1 <- 25
+
+knots1 = PsplinesKnots(xmin1, xmax1, degr1, nseg1)
+B1 <- as.spam(Bsplines(knots1, dat$das))
+q1 <- ncol(B1)
+q1
+
+# a very simple simple B-spline basis, helps that
+# data can be in any order
+knots2 = PsplinesKnots(1, Ngeno, 1, Ngeno-1)
+B2 <- as.spam(Bsplines(knots2, dat$g_nr))
+
+knots3 = PsplinesKnots(1, Nenv, 1, Nenv-1)
+B3 <- as.spam(Bsplines(knots3, dat$e_nr))
+
+# linear space
+# ~gitprojects/MBnotes/sparse_mixed_model_splines.tex/pdf
+nknots1 <- length(knots1)
+tau <- rollmean(knots1[-c(1,nknots1)], k=degr1)
+# B1(z) %*% tau = z
+all.equal(as.vector(B1 %*% tau), dat$das)
+
+# sparse model:
+D1 <- diff.spam(diag.spam(q1),    diff=pord1)
+D2 <- diff.spam(diag.spam(Ngeno), diff=1)
+D3 <- diff.spam(diag.spam(Nenv) , diff=1)
+
+lZ <- list()
+B1B2B3 <- RowKronecker(B1, RowKronecker(B2, B3))
+lZ[[1]] = B1 %*% t(D1)  # das
+lZ[[2]] = B2 %*% t(D2)  # geno
+lZ[[3]] = B3 %*% t(D3)  # env
+lZ[[4]] = RowKronecker(B1,B2) %*% kronecker(tau, t(D2))  # lin geno
+lZ[[5]] = RowKronecker(B1,B3) %*% kronecker(tau, t(D3))  # lin env
+lZ[[6]] = RowKronecker(B2,B3) %*% kronecker(t(D2),t(D3)) # GxE
+lZ[[7]] = B1B2B3 %*% kronecker(tau, t(D2) %x% t(D3) )    # lin GxE
+lZ[[8]] = RowKronecker(B1,B2) %*% kronecker(t(D1), t(D2)) # f_g(t)
+lZ[[9]] = RowKronecker(B1,B3) %*% kronecker(t(D1), t(D3)) # f_g(t)
+lZ[[10]] = B1B2B3 %*% (t(D1) %x% t(D2) %x% t(D3)) # f_g(t)
+
+Z <- as.matrix(do.call("cbind", lZ))
+dat_ext = cbind(dat, Z)
+lM <- ndxMatrix(dat, lZ, c("f(t)","g","e","g.t","e.t","gxe","gxe.t","f_g(t)","f_e(t)",
+                           "f_gxe(t)"))
+
+# define precision matrices:
+DtD1 <- crossprod(D1)
+I_g <- diag.spam(1,Ngeno)
+I_e <- diag.spam(1,Nenv)
+precM1 <- D1 %*% DtD1 %*% t(D1)
+precM2 <- D2 %*% I_g  %*% t(D2)
+precM3 <- D3 %*% I_e  %*% t(D3)
+
+lGinv <- list()
+lGinv[['f(t)']]   <- precM1
+lGinv[['g']]      <- precM2
+lGinv[['e']]      <- precM3
+lGinv[['g.t']]    <- precM2
+lGinv[['e.t']]    <- precM3
+lGinv[['gxe']]  <- kronecker(precM2, precM3)
+lGinv[['gxe.t']]  <- kronecker(precM2, precM3)
+lGinv[['f_g(t)']] <- kronecker(precM1,precM2)
+lGinv[['f_e(t)']] <- kronecker(precM1,precM3)
+lGinv[['f_gxe(t)']] <- precM1 %x% precM2 %x% precM3
+
+
+obj <- LMMsolve(ysim~das, randomMatrices=lM,lGinverse=lGinv, data=dat_ext,eps=1.0e-4,
+                       display=TRUE,monitor=TRUE)
+round(obj$ED, 2)
+
+obj$EDmax
+
+# make predictions on a dense grid:
+t0 <- seq(xmin1, xmax1, by=1.0)
+B1grid <- as.spam(Bsplines(knots1, t0))
+B1gridDt <- as.spam(Bsplines(knots1, t0, deriv=TRUE))
+mu <- coef(obj)$'(Intercept)'
+beta <- coef(obj)$das
+theta <- t(D1) %*% coef(obj)$'f(t)'
+sum(theta)
+ypredMain   <- mu + beta*t0 + B1grid   %*% theta
+ypredMainDt <-      beta    + B1gridDt %*% theta
+ypredMain.df <- data.frame(z=t0, y=ypredMain, dy=ypredMainDt)
+head(ypredMain.df)
+
+#G_eff <- as.vector(t(D2) %*% coef(obj)$g)
+#G.t <- as.vector(t(D2) %*% coef(obj)$g.t)
+#ypredG <- as.vector(kronecker(rep(1,length(t0)), G_eff))
+#ypredGl<- as.vector(kronecker(t0, G.t))
+
+# interaction term with sum to zero constraints:
+#theta_fgt <- kronecker(t(D1), t(D2)) %*% coef(obj)$'f_g(t)'
+#M <- matrix(data=theta_fgt,nrow=q1,ncol=Ngeno,byrow=TRUE)
+#range(rowSums(M))
+#range(colSums(M))
+
+#ypredGnl <- kronecker(B1grid,diag(Ngeno)) %*% theta_fgt
+#ypredGtot <- ypredG + ypredGl + ypredGnl
+
+# calculate derivatives:
+#ypredGlDt <- as.vector(kronecker(rep(1,length(t0)), G.t))
+#ypredGDt <- ypredGlDt + kronecker(B1gridDt,diag(Ngeno)) %*% theta_fgt
+
+#geno <- rep(labels,times=length(t0))
+#x1_ext <- kronecker(t0, rep(1,Ngeno))
+#x2_ext <- kronecker(rep(1,length(t0)), c(1:Ngeno))
+#pred <- data.frame(geno,x1=x1_ext,x2=x2_ext, ypredGtot,
+#                   ypredTot = rep(ypredMain,each=Ngeno) + ypredGtot,
+#                   ypredGDt = ypredGDt,
+#                   ypredTotDt = rep(ypredMainDt,each=Ngeno) + ypredGDt)
+#head(pred)
+
+E_eff <- as.vector(t(D3) %*% coef(obj)$e)
+E.t <- as.vector(t(D3) %*% coef(obj)$e.t)
+ypredE <- as.vector(kronecker(rep(1,length(t0)), E_eff))
+ypredEl<- as.vector(kronecker(t0, E.t))
+
+theta_fEt <- kronecker(t(D1), t(D3)) %*% coef(obj)$'f_e(t)'
+ypredEnl <- kronecker(B1grid,diag(Nenv)) %*% theta_fEt
+ypredEtot <- ypredE + ypredEl + ypredEnl
+
+# calculate derivatives:
+ypredElDt <- as.vector(kronecker(rep(1,length(t0)), E.t))
+ypredEDt <- ypredElDt + kronecker(B1gridDt,diag(Nenv)) %*% theta_fEt
+
+env <- rep(Elabels,times=length(t0))
+x1_ext <- kronecker(t0, rep(1,Nenv))
+x2_ext <- kronecker(rep(1,length(t0)), c(1:Nenv))
+pred <- data.frame(env,x1=x1_ext,x2=x2_ext,
+                   ypredTot = rep(ypredMain,each=Nenv) + ypredEtot,
+                   ypredTotDt = rep(ypredMainDt,each=Nenv) + ypredEDt)
+head(pred)
+
+pred <- left_join(pred,sel_env,by='env')
+
+p <- ggplot(pred, aes(x=x1, y=ypredTot,col=env)) + geom_line() +
+  facet_wrap(~envtype) +
+  ggtitle("Mean Biomass") + xlab("days after sowing") + ylab("biomass") +
+  theme(plot.title = element_text(hjust = 0.5))
+p
+
+p <- ggplot(pred, aes(x=x1, y=ypredTotDt,col=env)) + geom_line() +
+  facet_wrap(~envtype) +
+  ggtitle("Mean growth rates") + xlab("days after sowing") + ylab("growth rate") +
+  theme(plot.title = element_text(hjust = 0.5))
+p
+
