@@ -9,6 +9,9 @@ library(dplyr)
 library(zoo)
 library(ggplot2)
 
+# load obj
+solve_LMM = FALSE
+
 #dat_all <- read.delim("SimulatedData124Envs_Biomass.txt")
 #save(dat_all, file="SimulatedData124Envs_Biomass.rda")
 load("SimulatedData124Envs_Biomass.rda")
@@ -20,13 +23,7 @@ sel_env <- data.frame(env=c("Emerald_1993", "Emerald_2005",
                             "Yanco_1993",	 "Yanco_1996",
                             "Narrabri_2003",	"Narrabri_2008",
                             "Narrabri_2011",	"Narrabri_2013"),
-                      loc = c("Emerald", "Emerald",
-                              "Merredin","Merredin",
-                              "Narrabri", "Narrabri",
-                              "Yanco",	 "Yanco",
-                              "Narrabri",	"Narrabri",
-                              "Narrabri",	"Narrabri"),
-                      envtype = paste("Envtype",rep(LETTERS[1:3],each=4)))
+                      envtype = rep(LETTERS[1:3],each=4))
 sel_env
 
 dat_traj <- filter(dat_all, Env %in% sel_env$env) %>% droplevels()
@@ -76,7 +73,7 @@ degr1 = 3
 pord1 = 2
 xmin1 <- xmin
 xmax1 <- xmax
-nseg1 <- 10
+nseg1 <- 12
 #nseg1 <- 25
 
 knots1 = PsplinesKnots(xmin1, xmax1, degr1, nseg1)
@@ -142,11 +139,16 @@ lGinv[['f_g(t)']] <- kronecker(precM1,precM2)
 lGinv[['f_e(t)']] <- kronecker(precM1,precM3)
 lGinv[['f_gxe(t)']] <- precM1 %x% precM2 %x% precM3
 
-
-obj <- LMMsolve(ysim~das, randomMatrices=lM,lGinverse=lGinv, data=dat_ext,eps=1.0e-4,
+if (solve_LMM)
+{
+  obj <- LMMsolve(ysim~das, randomMatrices=lM,lGinverse=lGinv, data=dat_ext,eps=1.0e-4,
                        display=TRUE,monitor=TRUE)
-round(obj$ED, 2)
+  save(obj, file="LMMsolve_APSIM_multi_env.rda")
 
+} else {
+  load(file="LMMsolve_APSIM_multi_env.rda")
+}
+round(obj$ED, 2)
 obj$EDmax
 
 # make predictions on a dense grid:
@@ -162,32 +164,62 @@ ypredMainDt <-      beta    + B1gridDt %*% theta
 ypredMain.df <- data.frame(z=t0, y=ypredMain, dy=ypredMainDt)
 head(ypredMain.df)
 
-#G_eff <- as.vector(t(D2) %*% coef(obj)$g)
-#G.t <- as.vector(t(D2) %*% coef(obj)$g.t)
-#ypredG <- as.vector(kronecker(rep(1,length(t0)), G_eff))
-#ypredGl<- as.vector(kronecker(t0, G.t))
+G_eff <- as.vector(t(D2) %*% coef(obj)$g)
+G.t <- as.vector(t(D2) %*% coef(obj)$g.t)
+ypredG <- as.vector(kronecker(rep(1,length(t0)), G_eff))
+ypredGl<- as.vector(kronecker(t0, G.t))
 
 # interaction term with sum to zero constraints:
-#theta_fgt <- kronecker(t(D1), t(D2)) %*% coef(obj)$'f_g(t)'
-#M <- matrix(data=theta_fgt,nrow=q1,ncol=Ngeno,byrow=TRUE)
-#range(rowSums(M))
-#range(colSums(M))
+theta_fgt <- kronecker(t(D1), t(D2)) %*% coef(obj)$'f_g(t)'
+M <- matrix(data=theta_fgt,nrow=q1,ncol=Ngeno,byrow=TRUE)
+range(rowSums(M))
+range(colSums(M))
 
-#ypredGnl <- kronecker(B1grid,diag(Ngeno)) %*% theta_fgt
-#ypredGtot <- ypredG + ypredGl + ypredGnl
+ypredGnl <- kronecker(B1grid,diag(Ngeno)) %*% theta_fgt
+ypredGtot <- ypredG + ypredGl + ypredGnl
 
 # calculate derivatives:
-#ypredGlDt <- as.vector(kronecker(rep(1,length(t0)), G.t))
-#ypredGDt <- ypredGlDt + kronecker(B1gridDt,diag(Ngeno)) %*% theta_fgt
+ypredGlDt <- as.vector(kronecker(rep(1,length(t0)), G.t))
+ypredGDt <- ypredGlDt + kronecker(B1gridDt,diag(Ngeno)) %*% theta_fgt
 
-#geno <- rep(labels,times=length(t0))
-#x1_ext <- kronecker(t0, rep(1,Ngeno))
-#x2_ext <- kronecker(rep(1,length(t0)), c(1:Ngeno))
-#pred <- data.frame(geno,x1=x1_ext,x2=x2_ext, ypredGtot,
-#                   ypredTot = rep(ypredMain,each=Ngeno) + ypredGtot,
-#                   ypredGDt = ypredGDt,
-#                   ypredTotDt = rep(ypredMainDt,each=Ngeno) + ypredGDt)
-#head(pred)
+geno <- rep(Glabels,times=length(t0))
+x1_ext <- kronecker(t0, rep(1,Ngeno))
+x2_ext <- kronecker(rep(1,length(t0)), c(1:Ngeno))
+predG <- data.frame(geno,x1=x1_ext,x2=x2_ext, ypredGtot,
+                   ypredTot = rep(ypredMain,each=Ngeno) + ypredGtot,
+                   ypredGDt = ypredGDt,
+                   ypredTotDt = rep(ypredMainDt,each=Ngeno) + ypredGDt)
+head(predG)
+
+mxBiomassAverage <- max(ypredMain.df$y)
+mxBiomass <- predG %>% group_by(geno) %>% summarize(mx=max(ypredTot))
+mxBiomass$type <- as.factor(ifelse(mxBiomass$mx>mxBiomassAverage,"High","Low"))
+predG <- left_join(predG, mxBiomass,by='geno')
+head(predG)
+
+dat <- left_join(dat,sel_env,by=c('Env'='env'))
+
+p <- ggplot(dat, aes(x=das,y=ysim,col=envtype)) +
+  facet_wrap(~geno) + geom_point() +
+  ggtitle("Raw data for 12 environments") +
+  xlab("days after sowing") + ylab("biomass") +
+  theme(plot.title = element_text(hjust = 0.5))
+p
+
+p <- ggplot(predG, aes(x=x1, y=ypredTot,col=type)) +
+  facet_wrap(~geno) + geom_line() +
+  geom_line(ypredMain.df, mapping=aes(x=z,y=y),col='black',linetype='dashed') +
+  ggtitle("Average biomass across 12 environments") + xlab("days after sowing") + ylab("biomass") +
+  theme(plot.title = element_text(hjust = 0.5))
+p
+
+p <- ggplot(predG, aes(x=x1, y=ypredTotDt,col=type)) +
+  facet_wrap(~geno) + geom_line() +
+  ggtitle("Average growth rates across 12 environments") +
+  geom_line(ypredMain.df, mapping=aes(x=z,y=dy),col='black',linetype='dashed') +
+    xlab("days after sowing") + ylab("growth rate") +
+  theme(plot.title = element_text(hjust = 0.5))
+p
 
 E_eff <- as.vector(t(D3) %*% coef(obj)$e)
 E.t <- as.vector(t(D3) %*% coef(obj)$e.t)
@@ -205,22 +237,23 @@ ypredEDt <- ypredElDt + kronecker(B1gridDt,diag(Nenv)) %*% theta_fEt
 env <- rep(Elabels,times=length(t0))
 x1_ext <- kronecker(t0, rep(1,Nenv))
 x2_ext <- kronecker(rep(1,length(t0)), c(1:Nenv))
-pred <- data.frame(env,x1=x1_ext,x2=x2_ext,
+predE <- data.frame(env,x1=x1_ext,x2=x2_ext,
                    ypredTot = rep(ypredMain,each=Nenv) + ypredEtot,
                    ypredTotDt = rep(ypredMainDt,each=Nenv) + ypredEDt)
-head(pred)
+head(predE)
 
-pred <- left_join(pred,sel_env,by='env')
+predE <- left_join(predE,sel_env,by='env')
 
-p <- ggplot(pred, aes(x=x1, y=ypredTot,col=env)) + geom_line() +
-  facet_wrap(~envtype) +
-  ggtitle("Mean Biomass") + xlab("days after sowing") + ylab("biomass") +
+p <- ggplot(predE, aes(x=x1, y=ypredTot,col=envtype)) +
+  facet_wrap(~env) + geom_line() +
+  ggtitle("Average biomass of 25 genotypes") + xlab("days after sowing") + ylab("biomass") +
   theme(plot.title = element_text(hjust = 0.5))
 p
 
-p <- ggplot(pred, aes(x=x1, y=ypredTotDt,col=env)) + geom_line() +
-  facet_wrap(~envtype) +
-  ggtitle("Mean growth rates") + xlab("days after sowing") + ylab("growth rate") +
+p <- ggplot(predE, aes(x=x1, y=ypredTotDt,col=envtype)) +
+  facet_wrap(~env) + geom_line() +
+  ggtitle("Average growth rates of 25 genotypes") + xlab("days after sowing") + ylab("growth rate") +
   theme(plot.title = element_text(hjust = 0.5))
 p
+
 
