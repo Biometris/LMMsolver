@@ -256,4 +256,99 @@ p <- ggplot(predE, aes(x=x1, y=ypredTotDt,col=envtype)) +
   theme(plot.title = element_text(hjust = 0.5))
 p
 
+# make full time x G x E predictions
+
+# vector of ones..
+oneT <- rep(1,q1)
+oneE <- rep(1,Nenv)
+oneG <- rep(1,Ngeno)
+
+Glabels <- as.character(Glabels)
+Elabels <- as.character(Elabels)
+
+x1 = rep(t0, each=Ngeno*Nenv)
+x2 = rep(rep(Glabels,each=Nenv),times=length(t0))
+x3 = rep(Elabels,times=length(t0)*Ngeno)
+
+B1B2B3   <- as.spam(B1grid %x% diag(1,Ngeno) %x% diag(1,Nenv))
+B1B2B3Dt <- as.spam(B1gridDt %x% diag(1,Ngeno) %x% diag(1,Nenv))
+
+
+lM <- ndxMatrix(dat, lZ, c("f(t)","g","e","g.t","e.t","gxe","gxe.t","f_g(t)","f_e(t)",
+                           "f_gxe(t)"))
+
+D3<-as.matrix(D3)
+pred0 <- mu + beta*x1
+pred1 <- B1B2B3 %*% (t(D1) %x% oneG %x% oneE) %*% coef(obj)$'f(t)'
+pred2 <- B1B2B3 %*% (oneT  %x% t(D2) %x% oneE) %*% coef(obj)$g
+pred3 <- B1B2B3 %*% (oneT  %x% oneG %x% t(D3)) %*% coef(obj)$e
+
+pred4 <- B1B2B3 %*% (tau  %x% t(D2) %x% oneE) %*% coef(obj)$'g.t'
+pred5 <- B1B2B3 %*% (tau  %x% oneG %x% t(D3)) %*% coef(obj)$'e.t'
+
+pred6 <- B1B2B3 %*% (oneT  %x% t(D2) %x% t(D3)) %*% coef(obj)$'gxe'
+pred7 <- B1B2B3 %*% (tau  %x% t(D2) %x% t(D3)) %*% coef(obj)$'gxe.t'
+
+pred8 <- B1B2B3 %*% (t(D1)  %x% t(D2) %x% oneE) %*% coef(obj)$'f_g(t)'
+pred9 <- B1B2B3 %*% (t(D1)  %x% oneG %x% t(D3)) %*% coef(obj)$'f_e(t)'
+pred10 <- B1B2B3 %*% (t(D1)  %x% t(D2) %x% t(D3)) %*% coef(obj)$'f_gxe(t)'
+
+ypred <- pred0+pred1+pred2+pred3+pred4+pred5+pred6+pred7+pred8+pred9+pred10
+
+pred0 <- beta
+pred1 <- B1B2B3Dt %*% (t(D1) %x% oneG %x% oneE) %*% coef(obj)$'f(t)'
+pred2 <- B1B2B3Dt %*% (oneT  %x% t(D2) %x% oneE) %*% coef(obj)$g
+pred3 <- B1B2B3Dt %*% (oneT  %x% oneG %x% t(D3)) %*% coef(obj)$e
+
+pred4 <- B1B2B3Dt %*% (tau  %x% t(D2) %x% oneE) %*% coef(obj)$'g.t'
+pred5 <- B1B2B3Dt %*% (tau  %x% oneG %x% t(D3)) %*% coef(obj)$'e.t'
+
+pred6 <- B1B2B3Dt %*% (oneT  %x% t(D2) %x% t(D3)) %*% coef(obj)$'gxe'
+pred7 <- B1B2B3Dt %*% (tau  %x% t(D2) %x% t(D3)) %*% coef(obj)$'gxe.t'
+
+pred8 <- B1B2B3Dt %*% (t(D1)  %x% t(D2) %x% oneE) %*% coef(obj)$'f_g(t)'
+pred9 <- B1B2B3Dt %*% (t(D1)  %x% oneG %x% t(D3)) %*% coef(obj)$'f_e(t)'
+pred10 <- B1B2B3Dt %*% (t(D1)  %x% t(D2) %x% t(D3)) %*% coef(obj)$'f_gxe(t)'
+
+ypredDt <- pred0+pred1+pred2+pred3+pred4+pred5+pred6+pred7+pred8+pred9+pred10
+
+pred <- data.frame(das=x1,geno=x2,env=x3, ypred=ypred,ypredDt=ypredDt)
+
+#sel_geno <- paste0("g",formatC(c(9,12,17),width=3,flag=0))
+sel_geno <- paste0("g",formatC(c(1:25),width=3,flag=0))
+pred_sel <- filter(pred, geno %in% sel_geno)
+
+p <- ggplot(pred_sel, aes(x=das, y=ypredDt,col=geno)) +
+  facet_wrap(~env) + geom_line() +
+  ggtitle("Growth rate") + xlab("days after sowing") + ylab("growth rate") +
+  theme(plot.title = element_text(hjust = 0.5))
+p
+
+#p <- ggplot(pred_sel, aes(x=das, y=ypredDt,col=env)) +
+#  facet_wrap(~geno) + geom_line() +
+#  ggtitle("Average biomass of 25 genotypes") + xlab("days after sowing") + ylab("biomass") +
+#  theme(plot.title = element_text(hjust = 0.5))
+#p
+
+#dat_traj_sel <- filter(dat_traj,geno %in% sel_geno)
+
+#p <- ggplot(dat_traj_sel, aes(x=das, y=biomass,col=geno)) +
+#  facet_wrap(~Env) + geom_line() +
+#  ggtitle("Average biomass of 25 genotypes") + xlab("days after sowing") + ylab("biomass") +
+#  theme(plot.title = element_text(hjust = 0.5))
+#p
+
+
+library(statgenSTA)
+library(statgenGxE)
+
+pred100 <- filter(pred,das==100)
+
+pred100 <- left_join(pred100,sel_env,by='env')
+
+TDobj <- statgenSTA::createTD(data=pred100,genotype='geno', trial='env')
+AMMIobj <- gxeAmmi(TD = TDobj, trait = "ypredDt")
+
+plot(AMMIobj, scale=0.5, plotType="AMMI2", sizeGeno=3, colorEnvBy='envtype',
+  colEnv=c('blue','green','red'))
 
