@@ -318,9 +318,17 @@ pred <- data.frame(das=x1,geno=x2,env=x3, ypred=ypred,ypredDt=ypredDt)
 sel_geno <- paste0("g",formatC(c(1:25),width=3,flag=0))
 pred_sel <- filter(pred, geno %in% sel_geno)
 
+p <- ggplot(pred_sel, aes(x=das, y=ypred,col=geno)) +
+  facet_wrap(~env) + geom_line() +
+  ggtitle("Biomass") + xlab("days after sowing") + ylab("Biomass") +
+  theme(plot.title = element_text(hjust = 0.5))
+p
+
+
 p <- ggplot(pred_sel, aes(x=das, y=ypredDt,col=geno)) +
   facet_wrap(~env) + geom_line() +
   ggtitle("Growth rate") + xlab("days after sowing") + ylab("growth rate") +
+  geom_vline(xintercept=70,linetype='dashed') + geom_vline(xintercept=100,linetype='dashed') +
   theme(plot.title = element_text(hjust = 0.5))
 p
 
