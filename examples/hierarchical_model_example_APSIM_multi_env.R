@@ -8,6 +8,9 @@ library(LMMsolver)
 library(dplyr)
 library(zoo)
 library(ggplot2)
+library(animation)
+library(statgenSTA)
+library(statgenGxE)
 
 # load obj
 solve_LMM = FALSE
@@ -316,7 +319,10 @@ pred <- data.frame(das=x1,geno=x2,env=x3, ypred=ypred,ypredDt=ypredDt)
 
 #sel_geno <- paste0("g",formatC(c(9,12,17),width=3,flag=0))
 sel_geno <- paste0("g",formatC(c(1:25),width=3,flag=0))
+#sel_geno <- paste0("g",formatC(c(7,8),width=3,flag=0))
+
 pred_sel <- filter(pred, geno %in% sel_geno)
+
 
 p <- ggplot(pred_sel, aes(x=das, y=ypred,col=geno)) +
   facet_wrap(~env) + geom_line() +
@@ -328,7 +334,6 @@ p
 p <- ggplot(pred_sel, aes(x=das, y=ypredDt,col=geno)) +
   facet_wrap(~env) + geom_line() +
   ggtitle("Growth rate") + xlab("days after sowing") + ylab("growth rate") +
-  geom_vline(xintercept=70,linetype='dashed') + geom_vline(xintercept=100,linetype='dashed') +
   theme(plot.title = element_text(hjust = 0.5))
 p
 
@@ -347,16 +352,55 @@ p
 #p
 
 
-library(statgenSTA)
-library(statgenGxE)
+sel_day <- 90
+pred_sel_day <- filter(pred,das==sel_day)
 
-pred100 <- filter(pred,das==100)
+pred_sel_day <- left_join(pred_sel_day,sel_env,by='env')
 
-pred100 <- left_join(pred100,sel_env,by='env')
-
-TDobj <- statgenSTA::createTD(data=pred100,genotype='geno', trial='env')
+TDobj <- statgenSTA::createTD(data=pred_sel_day,genotype='geno', trial='env')
 AMMIobj <- gxeAmmi(TD = TDobj, trait = "ypredDt")
 
-plot(AMMIobj, scale=0.5, plotType="AMMI2", sizeGeno=3, colorEnvBy='envtype',
-  colEnv=c('blue','green','red'))
+p <- ggplot(pred_sel, aes(x=das, y=ypredDt,col=geno)) +
+  facet_wrap(~env) + geom_line() +
+  ggtitle("Growth rate") + xlab("days after sowing") + ylab("growth rate") +
+  geom_vline(xintercept=90,linetype='dashed') +
+  theme(plot.title = element_text(hjust = 0.5))
+p
+
+p <- plot(AMMIobj, scale=0.5, plotType="AMMI2", sizeGeno=3, colorEnvBy='envtype',
+  colEnv=c('blue','green','red'), output=FALSE)
+p +  ggtitle(paste0("AMMI 2 Growth rate at day ", sel_day))
+
+
+p <- ggplot(pred_sel, aes(x=das, y=ypredDt,col=geno)) +
+  facet_wrap(~env) + geom_line() +
+  ggtitle("Growth rate") + xlab("days after sowing") + ylab("growth rate") +
+  geom_vline(xintercept=90,linetype='dashed') + geom_vline(xintercept=120,linetype='dashed') +
+  theme(plot.title = element_text(hjust = 0.5))
+p
+
+
+movie.name = paste0("AMMI.gif")
+
+saveGIF(
+  for (i in 90:120)
+  {
+    cat ("analysing day ", i, "\n")
+    predday <- filter(pred, das==i)
+    predday <- left_join(predday,sel_env,by='env')
+
+    TDobj <- statgenSTA::createTD(data=predday,genotype='geno', trial='env')
+    AMMIobj <- gxeAmmi(TD = TDobj, trait = "ypredDt")
+
+    p <- plot(AMMIobj, scale=0.5, plotType="AMMI2", sizeGeno=3, colorEnvBy='envtype',
+         colEnv=c('blue','green','red'),output=FALSE)
+    plot(p + ggtitle(paste("AMMI2 biplot growth rate at day", i)))
+  },
+  movie.name = movie.name)
+
+
+
+
+
+
 
