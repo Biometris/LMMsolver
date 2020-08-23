@@ -99,6 +99,90 @@ tau <- rollmean(knots1[-c(1,nknots1)], k=degr1)
 # B1(z) %*% tau = z
 all.equal(as.vector(B1 %*% tau), dat$das)
 
+# intro example:
+dat2 <- filter(dat, Env=='Narrabri_2003' & geno=='g001') %>%droplevels()
+dat_traj2 <- filter(dat, Env=='Narrabri_2003' & geno=='g001') %>%droplevels()
+D1 <- diff.spam(diag.spam(q1),    diff=pord1)
+
+
+B1_2 <- as.spam(Bsplines(knots1, dat2$das))
+BtB <- crossprod(B1_2)
+DtD <- crossprod(D1)
+BtY <- t(B1_2) %*% dat2$ysim
+grid <- seq(4,-6, by=-0.5)
+t0 <- seq(xmin1, xmax1, by=1.0)
+B1grid <- as.spam(Bsplines(knots1, t0))
+
+movie.name = paste0("Psplines.gif")
+ani.options(loop = 1)
+saveGIF(
+  for (i in 1:length(grid))
+  {
+    cat ("analysing penalty ", i, "\n")
+    tmp <- grid[i]
+    lambda = 10^tmp
+    a <- solve(BtB+lambda*DtD,BtY)
+    ypred <- B1grid %*% a
+    df <- data.frame(das=t0,y=ypred)
+    p <- ggplot(dat2, aes(x=das,y=ysim)) + geom_point(col='blue') +
+      ggtitle(paste0("genotype g001 in environment Narrabri_2003, penalty = 10^",grid[i])) +
+      xlab("days after sowing") + ylab("Biomass (ton/ha)") + ylim(0,15) +
+      geom_line(dat_traj2,mapping=aes(x=das,y=biomass),col='green',size=1.0) +
+      geom_line(df,mapping=aes(x=das,y=ypred),col='red',size=1.0) +
+      theme(plot.title = element_text(hjust = 0.5))
+    plot(p)
+  },
+  movie.name = movie.name)
+
+
+lZ <- list()
+lZ[[1]] = B1_2 %*% t(D1)  # das
+
+Z <- as.matrix(do.call("cbind", lZ))
+dat2_ext = cbind(dat2, Z)
+lM <- ndxMatrix(dat2, lZ, c("f(t)"))
+
+# define precision matrices:
+DtD1 <- crossprod(D1)
+precM1 <- D1 %*% DtD1 %*% t(D1)
+
+lGinv <- list()
+lGinv[['f(t)']]   <- precM1
+
+obj0 <- LMMsolve(ysim~das, randomMatrices=lM,lGinverse=lGinv, data=dat2_ext,eps=1.0e-4,
+    display=TRUE,monitor=TRUE)
+
+t0 <- seq(xmin1, xmax1, by=1.0)
+B1grid <- as.spam(Bsplines(knots1, t0))
+B1gridDt <- as.spam(Bsplines(knots1, t0, deriv=TRUE))
+mu <- coef(obj0)$'(Intercept)'
+beta <- coef(obj0)$das
+theta <- t(D1) %*% coef(obj0)$'f(t)'
+sum(theta)
+ypredMain   <- mu + beta*t0 + B1grid   %*% theta
+ypredMainDt <-      beta    + B1gridDt %*% theta
+ypred.df <- data.frame(das=t0,y=ypredMain)
+
+# parameters for the B-spline basis:
+a <- theta+beta*tau+mu
+dfBbasis <- NULL
+for (i in 1:q1)
+{
+  tmp <- data.frame(BsplineNr=i,t0=t0, B=B1grid[,i],Ba=B1grid[,i] * a[i],
+                    dBdt = B1gridDt[,i], BaDt=B1gridDt[,i] * a[i])
+  dfBbasis <- rbind(dfBbasis,tmp)
+}
+dfBbasis$BsplineNr <- as.factor(dfBbasis$BsplineNr)
+
+p <- ggplot(dat2, aes(x=das,y=ysim)) + geom_point(col='blue') +
+  ggtitle("Example: genotype g001 in environment Narrabri_2003") +
+  xlab("days after sowing") + ylab("y") +
+  geom_line(dfBbasis,mapping=aes(x=t0,y=Ba,col=BsplineNr)) +
+  geom_line(ypred.df,mapping=aes(x=das,y=y)) +
+  theme(plot.title = element_text(hjust = 0.5))
+p
+
+
 # sparse model:
 D1 <- diff.spam(diag.spam(q1),    diff=pord1)
 D2 <- diff.spam(diag.spam(Ngeno), diff=1)
@@ -144,8 +228,11 @@ lGinv[['f_gxe(t)']] <- precM1 %x% precM2 %x% precM3
 
 if (solve_LMM)
 {
+  s <- proc.time()[3]
   obj <- LMMsolve(ysim~das, randomMatrices=lM,lGinverse=lGinv, data=dat_ext,eps=1.0e-4,
                        display=TRUE,monitor=TRUE)
+  e <- proc.time()[3]
+  cat("Computation time ", e-s, "seconds \n")
   save(obj, file="LMMsolve_APSIM_multi_env.rda")
 
 } else {
@@ -153,6 +240,15 @@ if (solve_LMM)
 }
 round(obj$ED, 2)
 obj$EDmax
+
+EDtable0 <- data.frame(term=c('intercept','slope'), ED=c(1,1), EDmax=c(1,1), eff=c('F','F'))
+EDtable <- data.frame(term=names(obj$ED), ED=round(obj$ED,2), EDmax=obj$EDmax, eff=rep('R',11))
+EDtable <- rbind(EDtable0, EDtable)
+EDtable <- EDtable[-3,]
+rownames(EDtable) <- NULL
+EDtableSum <- data.frame(term='TotalSum', ED=sum(EDtable$ED), EDmax=sum(EDtable$EDmax))
+EDtable
+EDtableSum
 
 # make predictions on a dense grid:
 t0 <- seq(xmin1, xmax1, by=1.0)
@@ -166,6 +262,53 @@ ypredMain   <- mu + beta*t0 + B1grid   %*% theta
 ypredMainDt <-      beta    + B1gridDt %*% theta
 ypredMain.df <- data.frame(z=t0, y=ypredMain, dy=ypredMainDt)
 head(ypredMain.df)
+
+p <- ggplot(ypredMain.df, aes(x=z,y=y)) + geom_line(size=1.5,col='blue') +
+  ggtitle("Mean Biomass as function of time") +
+  xlab("days after sowing") + ylab("biomass") +
+  theme(plot.title = element_text(hjust = 0.5))
+p
+
+# parameters for the B-spline basis:
+a <- theta+beta*tau+mu
+dfBbasis <- NULL
+for (i in 1:q1)
+{
+  tmp <- data.frame(BsplineNr=i,t0=t0, B=B1grid[,i],Ba=B1grid[,i] * a[i],
+                    dBdt = B1gridDt[,i], BaDt=B1gridDt[,i] * a[i])
+  dfBbasis <- rbind(dfBbasis,tmp)
+}
+dfBbasis$BsplineNr <- as.factor(dfBbasis$BsplineNr)
+
+dfBbasisSel <- filter(dfBbasis, BsplineNr %in% c(5,10))
+
+p <- ggplot(dfBbasisSel, aes(x=t0,y=B,col=BsplineNr)) + geom_line() +
+  ggtitle("example of two cubical B-splines") +
+  xlab("days after sowing") + ylab("y") + ylim(0,1) +
+  theme(plot.title = element_text(hjust = 0.5))
+p
+
+p <- ggplot(dfBbasis, aes(x=t0,y=B,col=BsplineNr)) + geom_line() +
+  ggtitle("B-splines basis") +
+  xlab("days after sowing") + ylab("y") + ylim(0,1) +
+  theme(plot.title = element_text(hjust = 0.5)) + geom_hline(yintercept=1.0)
+p
+
+
+p <- ggplot(ypredMain.df, aes(x=z,y=y)) + geom_line(size=1.5,col='blue') +
+  geom_line(dfBbasis, mapping=aes(x=t0,y=Ba,col=BsplineNr)) +
+  ggtitle("Mean Biomass as function of time") +
+  xlab("days after sowing") + ylab("biomass") +
+  theme(plot.title = element_text(hjust = 0.5))
+p
+
+
+p <- ggplot(ypredMain.df, aes(x=z,y=dy)) + geom_line(size=1.5, col='blue') +
+  ggtitle("Mean Growth rate") +
+  xlab("days after sowing") + ylab("growth rate (ton/ha per day)") + ylim(0,0.1) +
+  theme(plot.title = element_text(hjust = 0.5))
+p
+
 
 G_eff <- as.vector(t(D2) %*% coef(obj)$g)
 G.t <- as.vector(t(D2) %*% coef(obj)$g.t)
@@ -249,12 +392,14 @@ predE <- left_join(predE,sel_env,by='env')
 
 p <- ggplot(predE, aes(x=x1, y=ypredTot,col=envtype)) +
   facet_wrap(~env) + geom_line() +
+  geom_line(ypredMain.df, mapping=aes(x=z,y=y),col='black',linetype='dashed') +
   ggtitle("Average biomass of 25 genotypes") + xlab("days after sowing") + ylab("biomass") +
   theme(plot.title = element_text(hjust = 0.5))
 p
 
 p <- ggplot(predE, aes(x=x1, y=ypredTotDt,col=envtype)) +
   facet_wrap(~env) + geom_line() +
+  geom_line(ypredMain.df, mapping=aes(x=z,y=dy),col='black',linetype='dashed') +
   ggtitle("Average growth rates of 25 genotypes") + xlab("days after sowing") + ylab("growth rate") +
   theme(plot.title = element_text(hjust = 0.5))
 p
@@ -315,7 +460,8 @@ pred10 <- B1B2B3Dt %*% (t(D1)  %x% t(D2) %x% t(D3)) %*% coef(obj)$'f_gxe(t)'
 
 ypredDt <- pred0+pred1+pred2+pred3+pred4+pred5+pred6+pred7+pred8+pred9+pred10
 
-pred <- data.frame(das=x1,geno=x2,env=x3, ypred=ypred,ypredDt=ypredDt)
+pred <- data.frame(das=x1,geno=x2,env=x3, ypred=ypred,ypredDt=ypredDt,
+                   ypredGxEDt=pred6+pred7+pred10)
 
 #sel_geno <- paste0("g",formatC(c(9,12,17),width=3,flag=0))
 sel_geno <- paste0("g",formatC(c(1:25),width=3,flag=0))
@@ -356,20 +502,30 @@ sel_day <- 90
 pred_sel_day <- filter(pred,das==sel_day)
 
 pred_sel_day <- left_join(pred_sel_day,sel_env,by='env')
+pred_sel_day$genoGrp <- ifelse(pred_sel_day$geno=='g008','no','yes')
 
 TDobj <- statgenSTA::createTD(data=pred_sel_day,genotype='geno', trial='env')
 AMMIobj <- gxeAmmi(TD = TDobj, trait = "ypredDt")
 
-p <- ggplot(pred_sel, aes(x=das, y=ypredDt,col=geno)) +
-  facet_wrap(~env) + geom_line() +
-  ggtitle("Growth rate") + xlab("days after sowing") + ylab("growth rate") +
-  geom_vline(xintercept=90,linetype='dashed') +
+pred_sel <- filter(pred_sel, geno=='g008')
+pred_sel <- left_join(pred_sel,sel_env,by='env')
+
+p <- ggplot(pred_sel, aes(x=das, y=ypredGxEDt,col=envtype)) +
+  facet_wrap(~env) + geom_line(size=1.0) +
+  ggtitle("GxE for Growth rate genotype g008") + xlab("days after sowing") + ylab("growth rate") +
+  geom_vline(xintercept=90,linetype='dashed') + geom_vline(xintercept=120,linetype='dashed') +
   theme(plot.title = element_text(hjust = 0.5))
 p
 
+
 p <- plot(AMMIobj, scale=0.5, plotType="AMMI2", sizeGeno=3, colorEnvBy='envtype',
-  colEnv=c('blue','green','red'), output=FALSE)
-p +  ggtitle(paste0("AMMI 2 Growth rate at day ", sel_day))
+   colorGenoBy='genoGrp', colEnv=c('red','green','blue'), colGeno=c('blue','black'),
+    output=FALSE)
+p +  ggtitle(paste0("AMMI 2 Growth rate at day ", sel_day)) + theme(legend.position = "none")
+
+#colorGenoBy='GenoGrp',colorEnvBy = 'EnvGrp',
+#colEnv = c('blue','green', 'red'),
+#colGeno=c('blue','green','black'))
 
 
 p <- ggplot(pred_sel, aes(x=das, y=ypredDt,col=geno)) +
@@ -381,20 +537,23 @@ p
 
 
 movie.name = paste0("AMMI.gif")
-
+ani.options(loop = 1)
 saveGIF(
   for (i in 90:120)
   {
     cat ("analysing day ", i, "\n")
     predday <- filter(pred, das==i)
     predday <- left_join(predday,sel_env,by='env')
+    predday$genoGrp <- ifelse(predday$geno=='g008','no','yes')
 
     TDobj <- statgenSTA::createTD(data=predday,genotype='geno', trial='env')
     AMMIobj <- gxeAmmi(TD = TDobj, trait = "ypredDt")
 
     p <- plot(AMMIobj, scale=0.5, plotType="AMMI2", sizeGeno=3, colorEnvBy='envtype',
-         colEnv=c('blue','green','red'),output=FALSE)
-    plot(p + ggtitle(paste("AMMI2 biplot growth rate at day", i)))
+              colorGenoBy='genoGrp', colEnv=c('red','green','blue'), colGeno=c('blue','black'),
+              output=FALSE)
+    p <- p +  ggtitle(paste0("AMMI 2 Growth rate at day ", i)) + theme(legend.position = "none")
+    plot(p)
   },
   movie.name = movie.name)
 
