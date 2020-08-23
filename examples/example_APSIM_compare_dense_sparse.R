@@ -11,7 +11,9 @@ library(zoo)
 library(asreml)
 
 # subset of APSIM simulation data set Daniela Bustos-Korts
-dat_traj = read.csv('APSIM_Emerald_1993_25genotypes.csv',header=TRUE, stringsAsFactors = FALSE)
+dat_traj = read.csv('APSIM_Emerald.csv',header=TRUE, stringsAsFactors = FALSE)
+sel_geno <- paste0("g",formatC(1:100, width=3,flag=0))
+dat_traj = filter(dat_traj, year==2013, geno %in% sel_geno)
 
 max_das <- max(dat_traj$das)
 
@@ -56,7 +58,7 @@ degr1 = 3
 pord1 = 2
 xmin1 <- xmin
 xmax1 <- xmax
-nseg1 <- 10
+nseg1 <- 15
 #nseg1 <- 25
 
 #dat$z <- as.numeric(scale(dat$z,scale=FALSE))
@@ -97,13 +99,18 @@ Z <- do.call("cbind", lZ)
 dat_ext = cbind(dat, Z)
 colnames(dat_ext) <- c(colnames(dat_ext)[1:ncol(dat)], paste0("col",1:ncol(Z)))
 
+s <- proc.time()[3]
 lM <- ndxMatrix(dat, lZ, c("f(z)","g","g.z","f_g(z)"))
 obj.dense <- LMMsolve(ysim~z, randomMatrices=lM, data=dat_ext,display=FALSE)
+e <- proc.time()[3]
+dense.time <- e-s
 round(obj.dense$ED, 2)
 
 lM <- ndxMatrix(dat, lZ, c("fz","g","gz","fgz"))
+s <- proc.time()[3]
 obj.asr <- asreml(ysim~z,random=~grp(fz)+grp(g)+grp(gz)+grp(fgz), group=lM[], data=dat_ext)
-
+e <- proc.time()[3]
+asr.time <- e-s
 # sparse model:
 D1 <- diff(diag(q1),    diff=2)
 D2 <- diff(diag(Ngeno), diff=1)
@@ -126,8 +133,11 @@ lGinv[['g']]   <- as.spam(D2 %*% I_g %*% t(D2))
 lGinv[['g.z']] <- as.spam(D2 %*% I_g %*% t(D2))
 lGinv[['f_g(z)']] <- as.spam(kronecker(D1 %*% DtD1 %*% t(D1), D2 %*% I_g %*% t(D2)))
 names(lGinv)
+s <- proc.time()[3]
 obj.sparse <- LMMsolve(ysim~z, randomMatrices=lM,lGinverse=lGinv, data=dat_ext,
                          display=TRUE,monitor=FALSE)
+e <- proc.time()[3]
+sparse.time <- e-s
 round(obj.sparse$ED, 2)
 
 # compare logL:
@@ -147,3 +157,7 @@ all.equal(fz1, fz2)
 fgz1 <- kronecker(U1sc, U2sc) %*% coef(obj.dense)$'f_g(z)'
 fgz2 <- kronecker(t(D1),t(D2)) %*% coef(obj.sparse)$'f_g(z)'
 all.equal(fgz1, fgz2)
+
+dense.time
+sparse.time
+asr.time
