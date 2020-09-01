@@ -7,7 +7,7 @@ library(LMMsolver)
 library(SpATS)
 library(zoo)
 
-scale_fixed_effect = FALSE
+scale_fixed_effect = TRUE
 
 # function to calculate deviance:
 devSAS <- function(obj.asr)
@@ -28,10 +28,10 @@ head(dat)
 Nrows <- max(dat$row)
 Ncols <- max(dat$col)
 
-#nsegR <- Nrows/2
-#nsegC <- Ncols/2
-nsegR <- Nrows-1
-nsegC <- Ncols-1
+nsegR <- Nrows/2
+nsegC <- Ncols/2
+#nsegR <- Nrows-1
+#nsegC <- Ncols-1
 obj0.SpATS <- SpATS(response="yield",spatial=~PSANOVA(col,row, nseg=c(nsegC,nsegR)),
                    genotype="gen",fixed=~rep, data=dat, control=list(monitor=0,tolerance=1.0e-10))
 summary(obj0.SpATS)
@@ -45,6 +45,9 @@ if (scale_fixed_effect) {
   dat$x1 <- X12[,2]
   dat$x2 <- X12[,3]
   dat$x12 <- X12[,4]
+  #dat$x1 <- scale(dat$row)
+  #dat$x2 <- scale(dat$col)
+  #dat$x12 <- dat$x1 * dat$x2
 } else {
 dat$x1 <- dat$row
 dat$x2 <- dat$col
@@ -94,6 +97,16 @@ d2 <- eigen(DtD2)$values[1:(q2-pord)]
 
 # see SpATS paper, used for interaction term:
 d3 <- c(d1 %x% rep(1, q2 - pord) + rep(1, q1 - pord) %x% d2)
+objb.LMM <- LMMsolve(yield~rep+gen+x1+x2+x12,
+                     data=dat,eps=1.0e-10,
+                     display=FALSE,monitor=FALSE)
+
+objb.asr <- asreml(yield~rep+gen+x1+x2+x12, dat=dat)
+
+logL.SpATS <- -0.5*obj0.SpATS$deviance
+
+devSAS(objb.asr)
+
 
 lZ <- list()
 # we have to calculate RowKronecker product only once:
@@ -142,6 +155,8 @@ lZ[[3]] = B12 %*% kronecker(Usc1, tau2)
 lZ[[4]] = B12 %*% kronecker(tau1, Usc2)
 lZ[[5]] = B12 %*% kronecker(Usc1, Usc2)
 
+range(t(kronecker(Usc1, one2)) %*% kronecker(Usc1,tau2))
+
 Z <- as.matrix(do.call("cbind", lZ))
 colnames(Z) <- paste0("Z",1:ncol(Z))
 dat_ext = cbind(dat, Z)
@@ -187,13 +202,15 @@ obj2.asr <- asreml(yield~rep+gen+x1+x2+x12,
 obj2.LMM$logL
 obj2.asr$loglik
 
-devSAS(obj2.asr)  # without G5 or G6 interaction
+
+devSAS(objb.asr) # base model
+devSAS(obj2.asr) # without G5 or G6 interaction
 devSAS(obj0.asr)  # SpATS, G5 model
 devSAS(obj1.asr)  # G6 interaction
-
 
 Constant = log(2*pi)*summary(obj1.asr)$nedf
 dev = -2*obj1.LMM$logL + Constant
 dev
 
-
+devSpATS = obj0.SpATS$deviance + Constant
+devSpATS
