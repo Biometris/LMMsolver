@@ -13,7 +13,7 @@ library(zoo)
 # 2. Gilmour data, with row as fixed effect.
 # 3. Gilmour data, with extra random term:
 
-analysis = 3
+analysis = 1
 
 if (analysis == 1) {
   data(durban.rowcol)
@@ -191,5 +191,66 @@ round(devAR,2)
 round(devLVxLV,2)
 round(devLVxLVcano,2)
 
+###
+# Calculate LV canonical from Delta_plus = -QLQ
+###
 
+q1 <- Nrow
+q2 <- Ncol
+
+L1 <- outer(1:q1,1:q1,function(x,y) { abs(x-y)})
+L2 <- outer(1:q2,1:q2,function(x,y) { abs(x-y)})
+J1 <- matrix(data=1, nrow=q1, ncol=q1)
+J2 <- matrix(data=1, nrow=q2, ncol=q2)
+
+Q1 <- diag(Nrow) - 1/Nrow * J1
+Q2 <- diag(Ncol) - 1/Ncol * J2
+Delta_1_plus <- - Q1 %*% L1 %*% Q1
+Delta_2_plus <- - Q2 %*% L2 %*% Q2
+
+# calculate the scaled positive eigenvectors for rows
+U1 <- eigen(Delta_1_plus)$vectors[,-q1]
+d1 <- eigen(Delta_1_plus)$values[-q1]
+U1 <- U1 %*% diag(sqrt(d1))
+
+# calculate the scaled positive eigenvectors for cols
+U2 <- eigen(Delta_2_plus)$vectors[,-q2]
+d2 <- eigen(Delta_2_plus)$values[-q2]
+U2 <- U2 %*% diag(sqrt(d2))
+
+one1 <- rep(1,Nrow)
+one2 <- rep(1,Ncol)
+
+X1 = kronecker(diag(Nrep), kronecker(U1, one2))
+X2 = kronecker(diag(Nrep), kronecker(one1, U2))
+X3 = kronecker(diag(Nrep), kronecker(U1, U2))
+
+# Below I solve the mixed model equations, in Genstat notation
+# VCOMP [replicate+variety] X1+X2+X3; constraint = positive
+# REML yield
+#
+
+lZ <- list()
+lZ[[1]] = X1
+lZ[[2]] = X2
+lZ[[3]] = X3
+
+# solve the mixed model equations using REML:
+Z <- as.matrix(do.call("cbind", lZ))
+colnames(Z) <- paste0("Z",1:ncol(Z))
+dat_ext = cbind(dat, Z)
+lM <- ndxMatrix(dat, lZ, c("row","col","rowcol"))
+
+if (extra_random_terms == FALSE)
+{
+  obj3.LMM <- LMMsolve(fixed, randomMatrices=lM,data=dat_ext,eps=1.0e-8,
+                       display=FALSE,monitor=FALSE)
+} else {
+  obj3.LMM <- LMMsolve(fixed, random=~rep:C+rep:R, randomMatrices=lM,data=dat_ext,eps=1.0e-8,
+                       display=FALSE,monitor=FALSE)
+}
+
+# should be the same:
+obj1.LMM$logL
+obj3.LMM$logL
 
