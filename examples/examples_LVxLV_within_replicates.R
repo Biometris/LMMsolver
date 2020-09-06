@@ -254,3 +254,49 @@ if (extra_random_terms == FALSE)
 obj1.LMM$logL
 obj3.LMM$logL
 
+# sparse formulation:
+
+q1 <- Nrow
+q2 <- Ncol
+
+D1 <- diff(diag(q1), diff=1)
+D2 <- diff(diag(q2), diff=1)
+
+lZ <- list()
+lZ[[1]] = kronecker(diag(Nrep), kronecker(t(D1),rep(1,Ncol)))
+lZ[[2]] = kronecker(diag(Nrep), kronecker(rep(1,Nrow),t(D2)))
+lZ[[3]] = kronecker(diag(Nrep), kronecker(t(D1), t(D2)))
+
+Z <- as.matrix(do.call("cbind", lZ))
+colnames(Z) <- paste0("Z",1:ncol(Z))
+dat_ext = cbind(dat, Z)
+lM <- ndxMatrix(dat, lZ, c("row","col","rowcol"))
+
+
+# define precision matrices:
+DtD1 <- crossprod(D1)
+DtD2 <- crossprod(D2)
+
+precM1 <- as.spam(D1 %*% DtD1 %*% t(D1))
+precM2 <- as.spam(D2 %*% DtD2 %*% t(D2))
+
+lGinv <- list()
+lGinv[['row']]    <- kronecker(diag(Nrep), precM1)
+lGinv[['col']]    <- kronecker(diag(Nrep), precM2)
+lGinv[['rowcol']] <- kronecker(diag(Nrep), kronecker(precM1, precM2))
+
+if (extra_random_terms == FALSE)
+{
+  obj4.LMM <- LMMsolve(fixed, randomMatrices=lM,lGinverse=lGinv,data=dat_ext,eps=1.0e-8,
+                       display=TRUE, monitor=TRUE)
+} else {
+  obj4.LMM <- LMMsolve(fixed, random=~rep:C+rep:R,lGinverse=lGinv,
+                       randomMatrices=lM,data=dat_ext,eps=1.0e-8,
+                       display=TRUE, monitor=TRUE)
+}
+
+obj3.LMM$logL
+obj4.LMM$logL
+obj3.LMM$logL - obj4.LMM$logL
+
+
