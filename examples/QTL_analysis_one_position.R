@@ -5,7 +5,7 @@ library(LMMsolver)
 library(asreml)
 library(dplyr)
 
-df <- read.csv("multipopQTL.csv")
+df <- read.csv("multipopQTL.csv", stringsAsFactors = TRUE)
 head(df)
 str(df)
 

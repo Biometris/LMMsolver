@@ -2,18 +2,14 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 logdet <- function(arg, lambda) {
-    .Call('_LMMsolver_logdet', PACKAGE = 'LMMsolver', arg, lambda)
+    .Call(`_LMMsolver_logdet`, arg, lambda)
 }
 
 dlogdet <- function(arg, lambda) {
-    .Call('_LMMsolver_dlogdet', PACKAGE = 'LMMsolver', arg, lambda)
+    .Call(`_LMMsolver_dlogdet`, arg, lambda)
 }
 
 construct_ADchol_Rcpp <- function(U, P_list) {
-    .Call('_LMMsolver_construct_ADchol_Rcpp', PACKAGE = 'LMMsolver', U, P_list)
-}
-
-testfun <- function(L) {
-    .Call('_LMMsolver_testfun', PACKAGE = 'LMMsolver', L)
+    .Call(`_LMMsolver_construct_ADchol_Rcpp`, U, P_list)
 }
 

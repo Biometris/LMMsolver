@@ -2,7 +2,6 @@
 #define CALC_DIFFERENTIATION_CHOLESKY_ALGORITHM
 
 #include <Rcpp.h>
-//#include <string>
 
 using namespace Rcpp;
 using namespace std;
@@ -11,9 +10,9 @@ using namespace std;
 class SparseMatrix
 {
 public:
-  SparseMatrix(const IntegerVector& colpointers, 
+  SparseMatrix(const IntegerVector& colpointers,
                const IntegerVector& rowindices,
-               const NumericVector& entries) : _colptr(colpointers), 
+               const NumericVector& entries) : _colptr(colpointers),
                                                _rowndx(rowindices),
                                                _entries(entries)
   { }
@@ -32,20 +31,20 @@ public:
   {
     int p = getpos(r,c);
     if (p==-1) return 0.0;
-    return _entries[p];    
+    return _entries[p];
   }
   double&  operator[](int k) { return _entries[k]; }
   const double& operator[](int k) const { return _entries[k]; }
   int rowndx(int k) const { return _rowndx[k]; }
-  
-  pair<int,int> getcol(int c) 
+
+  pair<int,int> getcol(int c)
   {
     int s = _colptr[c];
     int e = _colptr[c+1];
     return pair<int,int>(s,e);
   }
-private:  
-  const IntegerVector _colptr; 
+private:
+  const IntegerVector _colptr;
   const IntegerVector _rowndx;
   NumericVector _entries;
 };

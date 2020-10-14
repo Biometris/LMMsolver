@@ -22,7 +22,8 @@ geno_name = paste0("g",formatC(1:a,width=2,flag="0"))
 
 dat <- data.frame(geno=rep(geno_name, each=n),
                   rep=rep(paste0("rep",1:n),times=a),
-                  y = rep(geno_eff,each=n) + rnorm(a*n,sd=sigma2e))
+                  y = rep(geno_eff,each=n) + rnorm(a*n,sd=sigma2e),
+                  stringsAsFactors = TRUE)
 
 # LMMsolver:
 obj1 <- LMMsolve(y~rep, random=~geno, data=dat, eps=1.0e-12,display=TRUE)

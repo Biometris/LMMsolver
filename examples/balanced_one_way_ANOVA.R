@@ -21,7 +21,8 @@ geno_name = paste0("g",1:a)
 
 dat <- data.frame(geno=rep(geno_name, each=n),
                   rep=rep(paste0("rep",1:n),times=a),
-                  y = rep(geno_eff,each=n) + rnorm(a*n,sd=sigma2e))
+                  y = rep(geno_eff,each=n) + rnorm(a*n,sd=sigma2e),
+                  stringsAsFactors = TRUE)
 
 # asreml for comparison with LMMsolver
 obj1 <- asreml(y~1, random = ~geno,data=dat, trace = FALSE)

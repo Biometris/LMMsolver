@@ -11,7 +11,7 @@ library(mgcv)
 library(nlme)
 library(dplyr)
 
-dat <- read.csv("cunningham_henderson_ex.csv")
+dat <- read.csv("cunningham_henderson_ex.csv", stringsAsFactors = TRUE)
 head(dat)
 
 # unbalanced data:

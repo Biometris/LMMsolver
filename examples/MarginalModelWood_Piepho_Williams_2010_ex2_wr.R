@@ -14,7 +14,8 @@ library(fields)
 library(ggplot2)
 library(LMMsolver)
 
-df = read.csv("Piepho_Williams2010_example2.csv",na.string='.')
+df = read.csv("Piepho_Williams2010_example2.csv",na.string='.',
+              stringsAsFactors = TRUE)
 
 # 5 columns within replicate
 nrows = 22; ncols=5;

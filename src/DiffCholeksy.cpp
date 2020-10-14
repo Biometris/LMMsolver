@@ -11,14 +11,16 @@ void transf2C(IntegerVector& ndx)
   for (int i=0;i<ndx.size();i++)
   {
     ndx[i] -= 1;
-  }  
+  }
 }
 
 // not very efficient (but not too bad): Make a Class?
 double getvalueC(IntegerVector rowpointers,
                  IntegerVector colindices,
-                 NumericVector entries, int i, int j)
-{  
+                 NumericVector entries,
+                 int i,
+                 int j)
+{
   int s = rowpointers[i];
   int e = rowpointers[i+1];
   for (int k=s;k<e;k++)
@@ -29,26 +31,27 @@ double getvalueC(IntegerVector rowpointers,
 }
 
 // left looking cholesky
-NumericVector cholesky(NumericVector L, const IntegerVector& colpointers, 
-                                    const IntegerVector& rowindices)
+NumericVector cholesky(NumericVector L,
+                       const IntegerVector& colpointers,
+                       const IntegerVector& rowindices)
 {
   const int N = colpointers.size()-1;
 
-  // for details of S_j, see Ng and Peyton, Figure 2.2  
+  // for details of S_j, see Ng and Peyton, Figure 2.2
   vector<set<int> > S(N);
   // current headings of columns:
   IntegerVector colhead = clone(colpointers);
 
-  IntegerVector indmap(N,0);  
-  // dense map t, 
+  IntegerVector indmap(N,0);
+  // dense map t,
   vector<double> t(N,0.0);
-  
+
   for (int j=0;j<N;j++)
   {
     int s = colpointers[j];
-    int e = colpointers[j+1];    
+    int e = colpointers[j+1];
     int sz = e-s;
-     
+
     // make indmap for current column j
     // see Ng and Peyton 1993, p. 1040-1041 for details:
     int l = 0;
@@ -56,38 +59,38 @@ NumericVector cholesky(NumericVector L, const IntegerVector& colpointers,
     {
       indmap[rowindices[i]] = l++;
     }
-    
-    // init dense vector, see Ng and Peyton 1993 for details. 
+
+    // init dense vector, see Ng and Peyton 1993 for details.
     for (int i=0;i<sz;i++)
     {
       t[i] = 0.0;
     }
 
-    // for each k in S_j: 
+    // for each k in S_j:
     for (set<int>::const_iterator it=S[j].begin();it!=S[j].end();it++)
-    {      
+    {
       int k = *it;
       int jk = colhead[k];
       double L_jk = L[jk];
       for (int i = colhead[k]; i < colpointers[k+1];i++)
       {
-         int ndx = indmap[rowindices[i]];
-         t[ndx] += L[i]*L_jk;
-      }        
+        int ndx = indmap[rowindices[i]];
+        t[ndx] += L[i]*L_jk;
+      }
       colhead[k]++;
       if (colhead[k] < colpointers[k+1]) {
         int rNdx = rowindices[colhead[k]];
-        S[rNdx].insert(k); 
-      } 
+        S[rNdx].insert(k);
+      }
     }
-      
+
     // update column j with dense vector t:
     int cnt = 0;
     for (int i = e-1; i>=s ;i--)
     {
       L[i] -= t[cnt++];
     }
-    
+
     // pivot:
     L[s] = sqrt(L[s]);
     // update column j:
@@ -98,26 +101,26 @@ NumericVector cholesky(NumericVector L, const IntegerVector& colpointers,
     colhead[j]++;
     if (colhead[j] < colpointers[j+1]) {
       int rNdx = rowindices[colhead[j]];
-      S[rNdx].insert(j); 
+      S[rNdx].insert(j);
     }
     S[j].clear();
   }
   return L;
 }
 
-NumericVector AD_cholesky(const NumericVector& L, 
-                          const IntegerVector& colpointers, 
+NumericVector AD_cholesky(const NumericVector& L,
+                          const IntegerVector& colpointers,
                           const IntegerVector& rowindices)
 {
   const int N = colpointers.size()-1;
 
   vector<set<int> > S(N);
-  
-  IntegerVector indmap(N,0);  
-  // dense map t, 
+
+  IntegerVector indmap(N,0);
+  // dense map t,
   vector<double> t(N,0.0);
-  
-  // reverse automatic differentiation:  
+
+  // reverse automatic differentiation:
   // set the colheads and sets.
   IntegerVector colhead(N);
   for (int j=0;j<N;j++) {
@@ -135,37 +138,37 @@ NumericVector AD_cholesky(const NumericVector& L,
   for (int k=0;k<N;k++)
   {
     int s = colpointers[k];
-    F[s] = 2.0/L[s];   
+    F[s] = 2.0/L[s];
   }
-    
+
   for (int j=N-1; j>=0; j--)
-  {    
+  {
     int s = colpointers[j];
-    int e = colpointers[j+1];    
+    int e = colpointers[j+1];
 
     int l = 0;
     for (int i=e-1; i>=s;i--)
     {
       indmap[rowindices[i]] = l++;
     }
-    
+
     for (int i = s + 1; i < e; i++)
     {
       //L[i] /= L[s];
       F[i] = F[i]/L[s];
       F[s] = F[s] - L[i]*F[i];
     }
-    F[s] = 0.5*F[s]/L[s]; 
-    
+    F[s] = 0.5*F[s]/L[s];
+
     int cnt=0;
     for (int i = e-1; i>=s;i--)
     {
       t[cnt++] = F[i];
     }
-    
-    // for each k in S_j: 
+
+    // for each k in S_j:
     for (set<int>::const_iterator it=S[j].begin();it!=S[j].end();it++)
-    {      
+    {
       int k = *it;
       int jk = colhead[k];
       for (int ik = colhead[k]; ik < colpointers[k+1];ik++)
@@ -174,8 +177,8 @@ NumericVector AD_cholesky(const NumericVector& L,
         double F_ij = t[ndx];
         F[ik] = F[ik] - F_ij*L[jk];
         F[jk] = F[jk] - F_ij*L[ik];
-      }        
-      colhead[k]--; 
+      }
+      colhead[k]--;
       if (colhead[k] > colpointers[k]) {
         int rNdx = rowindices[colhead[k]];
         S[rNdx].insert(k);
@@ -186,16 +189,17 @@ NumericVector AD_cholesky(const NumericVector& L,
   return F;
 }
 
-// Calculate log determinant using Left-looking Cholesky: 
+// Calculate log determinant using Left-looking Cholesky:
 // [[Rcpp::export]]
-double logdet(SEXP arg, NumericVector lambda)
+double logdet(SEXP arg,
+              NumericVector lambda)
 {
   Rcpp::S4 obj(arg);
 
   IntegerVector colpointers = obj.slot("colpointers");
   IntegerVector rowindices = obj.slot("rowindices");
   NumericMatrix P = Rcpp::clone<Rcpp::NumericMatrix>(obj.slot("P"));
-  
+
   const int sz = rowindices.size();
   const int n_prec_mat = P.ncol();
   NumericVector C(sz,0.0);
@@ -206,32 +210,33 @@ double logdet(SEXP arg, NumericVector lambda)
       C[i] += lambda[k]*P(i,k);
     }
   }
-  
+
   NumericVector L = cholesky(C,colpointers, rowindices);
-  
-  const int N = colpointers.size()-1;  
+
+  const int N = colpointers.size()-1;
   double sum = 0;
   for (int k=0;k<N;k++)
   {
     int s = colpointers[k];
-    sum += 2.0*log(L[s]);   
+    sum += 2.0*log(L[s]);
   }
   return sum;
 }
 
-// backwards Automatic Differentation, using Left-looking Cholesky: 
+// backwards Automatic Differentiation, using Left-looking Cholesky:
 // [[Rcpp::export]]
-NumericVector dlogdet(SEXP arg, NumericVector lambda)
+NumericVector dlogdet(SEXP arg,
+                      NumericVector lambda)
 {
   Rcpp::S4 obj(arg);
 
   IntegerVector colpointers = obj.slot("colpointers");
   IntegerVector rowindices = obj.slot("rowindices");
-    NumericMatrix P = Rcpp::clone<Rcpp::NumericMatrix>(obj.slot("P"));
-  
+  NumericMatrix P = Rcpp::clone<Rcpp::NumericMatrix>(obj.slot("P"));
+
   const int sz = rowindices.size();
   const int n_prec_mat = P.ncol();
-  NumericVector C(sz, 0.0);  
+  NumericVector C(sz, 0.0);
   for (int i=0;i<sz;i++)
   {
     for (int k=0;k<n_prec_mat;k++)
@@ -239,114 +244,115 @@ NumericVector dlogdet(SEXP arg, NumericVector lambda)
       C[i] += lambda[k]*P(i,k);
     }
   }
-  
+
   //Rcout << "start Cholesky" << endl;
   NumericVector L = cholesky(C,colpointers, rowindices);
   //Rcout << "start AD Cholesky" << endl;
-  NumericVector F = AD_cholesky(L,colpointers, rowindices);    
+  NumericVector F = AD_cholesky(L,colpointers, rowindices);
   //Rcout << "end AD Cholesky" << endl;
-  
+
   // evaluate dL/dlambda:
   NumericVector gradient(n_prec_mat);
   for (int i=0;i<F.size();i++)
   {
     for (int k=0;k<n_prec_mat;k++)
-      gradient[k] += F[i]*P(i,k); 
+      gradient[k] += F[i]*P(i,k);
   }
-  
+
   return gradient;
 }
 
-/* 
-// forward Automatic Differentation, using Left-looking Cholesky: 
-// [[Rcpp::export]]
-double dlogdet_AD_forward(double lambda , SEXP arg)
-{
-  Rcpp::S4 obj(arg);
+/*
+ // forward Automatic Differentation, using Left-looking Cholesky:
+ // [[Rcpp::export]]
+ double dlogdet_AD_forward(double lambda , SEXP arg)
+ {
+ Rcpp::S4 obj(arg);
 
-  IntegerVector colpointers = obj.slot("colpointers");
-  IntegerVector rowindices = obj.slot("rowindices");
-  NumericVector entriesA = Rcpp::clone<Rcpp::NumericVector>(obj.slot("ZtZ"));
-  NumericVector entriesB = Rcpp::clone<Rcpp::NumericVector>(obj.slot("P"));
-  
-  NumericVector L = entriesA + lambda * entriesB;
-  NumericVector F = entriesB;
+ IntegerVector colpointers = obj.slot("colpointers");
+ IntegerVector rowindices = obj.slot("rowindices");
+ NumericVector entriesA = Rcpp::clone<Rcpp::NumericVector>(obj.slot("ZtZ"));
+ NumericVector entriesB = Rcpp::clone<Rcpp::NumericVector>(obj.slot("P"));
 
-  const int N = colpointers.size()-1;
-  
-  // current headings of columns:
-  IntegerVector colhead = clone(colpointers);
-  for (int j=0;j<N;j++)
-  {
-    // see Ng and Peyton 1993, p. 1040-1041 for details:
-    map<int,int> indmap = make_indmap(colpointers,rowindices,j);
-    
-    int s = colpointers[j];
-    int e = colpointers[j+1];    
-    int sz = e-s;
-        
-    vector<double> t0(sz,0.0), t1(sz,0.0);
+ NumericVector L = entriesA + lambda * entriesB;
+ NumericVector F = entriesB;
 
-    for (int k=0;k<j;k++)
-    {      
-      if (rowindices[colhead[k]] == j)
-      {
-        int jk = colhead[k];
-        for (int i = colhead[k]; i < colpointers[k+1];i++)
-        {
-           int ndx = indmap[rowindices[i]];
-           t0[ndx] += L[i]*L[jk];
-           t1[ndx] += L[i]*F[jk] + F[i]*L[jk]; // deriv
-        }        
-        colhead[k]++;
-      }
-    }
-      
-    // update column j with dense vector t:
-    int cnt = 0;
-    for (int i = e-1; i>=s ;i--)
-    {
-      L[i] -= t0[cnt];
-      F[i] -= t1[cnt];
-      cnt++;
-    }
-  
-    // pivot:
-    L[s] = sqrt(L[s]);
-    F[s] = 0.5*F[s]/L[s];
-    
-    // update column j:
-    for (int i = s + 1; i < e; i++)
-    {
-      L[i] /= L[s];
-      F[i] = (F[i] - L[i]*F[s])/L[s];
-    }    
-    colhead[j]++;
-  }
-  
-  double sum = 0;
-  for (int k=0;k<N;k++)
-  {
-    int s = colpointers[k];
-    sum += 2.0*F[s]/L[s];   
-  }
-  return sum;  
-}
+ const int N = colpointers.size()-1;
+
+ // current headings of columns:
+ IntegerVector colhead = clone(colpointers);
+ for (int j=0;j<N;j++)
+ {
+ // see Ng and Peyton 1993, p. 1040-1041 for details:
+ map<int,int> indmap = make_indmap(colpointers,rowindices,j);
+
+ int s = colpointers[j];
+ int e = colpointers[j+1];
+ int sz = e-s;
+
+ vector<double> t0(sz,0.0), t1(sz,0.0);
+
+ for (int k=0;k<j;k++)
+ {
+ if (rowindices[colhead[k]] == j)
+ {
+ int jk = colhead[k];
+ for (int i = colhead[k]; i < colpointers[k+1];i++)
+ {
+ int ndx = indmap[rowindices[i]];
+ t0[ndx] += L[i]*L[jk];
+ t1[ndx] += L[i]*F[jk] + F[i]*L[jk]; // deriv
+ }
+ colhead[k]++;
+ }
+ }
+
+ // update column j with dense vector t:
+ int cnt = 0;
+ for (int i = e-1; i>=s ;i--)
+ {
+ L[i] -= t0[cnt];
+ F[i] -= t1[cnt];
+ cnt++;
+ }
+
+ // pivot:
+ L[s] = sqrt(L[s]);
+ F[s] = 0.5*F[s]/L[s];
+
+ // update column j:
+ for (int i = s + 1; i < e; i++)
+ {
+ L[i] /= L[s];
+ F[i] = (F[i] - L[i]*F[s])/L[s];
+ }
+ colhead[j]++;
+ }
+
+ double sum = 0;
+ for (int k=0;k<N;k++)
+ {
+ int s = colpointers[k];
+ sum += 2.0*F[s]/L[s];
+ }
+ return sum;
+ }
 
  */
 
 vector<double> convert_matrix(const vector<int>& rowindices_ext,
                               const vector<int>& colindices_ext,
-                              const IntegerVector& pivot, SEXP A)
+                              const IntegerVector& pivot,
+                              SEXP A)
 {
-  Rcpp::S4 obj(A);  
+  Rcpp::S4 obj(A);
   IntegerVector rowpointers = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("rowpointers"));
   IntegerVector colindices  = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("colindices"));
   NumericVector entries     = obj.slot("entries") ;
-  
+
   transf2C(rowpointers);
   transf2C(colindices);
-  
+
   const int Nrow = rowindices_ext.size();
   std::vector<double> z(Nrow);
   for (int i=0;i<Nrow;i++)
@@ -363,20 +369,21 @@ vector<double> convert_matrix(const vector<int>& rowindices_ext,
 // ZtZ is crossproduct design matrix Z
 // P is a precision matrix.
 // [[Rcpp::export]]
-List construct_ADchol_Rcpp(SEXP U, const List& P_list) {
+List construct_ADchol_Rcpp(SEXP U,
+                           const List& P_list) {
   Rcpp::S4 obj_spam(U);
-  IntegerVector supernodes  = Rcpp::clone<Rcpp::IntegerVector>(obj_spam.slot("supernodes"));
+  IntegerVector supernodes = Rcpp::clone<Rcpp::IntegerVector>(obj_spam.slot("supernodes"));
   IntegerVector rowpointers = Rcpp::clone<Rcpp::IntegerVector>(obj_spam.slot("rowpointers"));
   IntegerVector colpointers = Rcpp::clone<Rcpp::IntegerVector>(obj_spam.slot("colpointers"));
-  IntegerVector colindices  = Rcpp::clone<Rcpp::IntegerVector>(obj_spam.slot("colindices"));
-  IntegerVector pivot       = Rcpp::clone<Rcpp::IntegerVector>(obj_spam.slot("pivot"));
+  IntegerVector colindices = Rcpp::clone<Rcpp::IntegerVector>(obj_spam.slot("colindices"));
+  IntegerVector pivot = Rcpp::clone<Rcpp::IntegerVector>(obj_spam.slot("pivot"));
   transf2C(supernodes);
   transf2C(rowpointers);
   transf2C(colpointers);
   transf2C(colindices);
-  transf2C(pivot);  
-  
-  //const int dim = 
+  transf2C(pivot);
+
+  //const int dim =
   const int size = rowpointers[rowpointers.size()-1];
   //cout << "Nelem: " << size  << endl;
 
@@ -405,11 +412,11 @@ List construct_ADchol_Rcpp(SEXP U, const List& P_list) {
   {
     int n_elem_cur = rowpointers[i+1] - rowpointers[i];
     for (int k=0;k<n_elem_cur;k++)
-    {  
+    {
       rowindices_ext[cnt++] = i;
     }
   }
-  
+
   const int n_prec_matrices = P_list.size();
   int nelem = rowindices_ext.size();
   //Rcout << "Number of precision matrices: " << n_prec_matrices << endl;
@@ -423,32 +430,10 @@ List construct_ADchol_Rcpp(SEXP U, const List& P_list) {
       P_matrix(j,i) = entries_P[j];
     }
   }
-  
+
   List L;
   L["colpointers"] = rowpointers;
-  L["rowindices"]  = Rcpp::wrap(colindices_ext);
-  L["P"]           = P_matrix;                                                
+  L["rowindices"] = Rcpp::wrap(colindices_ext);
+  L["P"] = P_matrix;
   return L;
-}
-
-IntegerVector just_a_test(SEXP A)
-{
-  Rcpp::S4 obj(A);
-  IntegerVector dim = IntegerVector(obj.slot("dimension"));
-  return dim;
-}
-
-// [[Rcpp::export]]
-int testfun(const List& L) 
-{
-  const int n = L.size();
-  Rcout << "Total number of elements: " << n << endl;
-  for (int i=0;i<n;i++)
-  {
-    Rcpp::S4 obj(L[i]);
-    CharacterVector snames = Rcpp::Function("slotNames")(obj);
-    IntegerVector dim = just_a_test(obj);
-    Rcout << setw(3) << i << " " << snames << setw(5) << dim[0] << setw(5) << dim[1] << endl;
-  }
-  return n;
 }
