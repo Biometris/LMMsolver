@@ -190,6 +190,7 @@ NumericVector AD_cholesky(const NumericVector& L,
 }
 
 // Calculate log determinant using Left-looking Cholesky:
+//
 // [[Rcpp::export]]
 double logdet(SEXP arg,
               NumericVector lambda)
@@ -224,6 +225,7 @@ double logdet(SEXP arg,
 }
 
 // backwards Automatic Differentiation, using Left-looking Cholesky:
+//
 // [[Rcpp::export]]
 NumericVector dlogdet(SEXP arg,
                       NumericVector lambda)
