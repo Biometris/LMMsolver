@@ -19,15 +19,16 @@ data(ethanol)
 #' SAP model using SpATS.nogeno
 #' ==================
 
-nseg <- c(25, 25)
+nseg <- c(30, 25)
 degr <- 3
 pord <- 1
+tolerance <- 1.0e-6
 
 # Fit the PS-ANOVA model
 obj1 <- SpATS.nogeno(response = "NOx",
                      spatial = ~SAP(E, C, nseg = nseg, degree=degr, pord=pord),
                      data = ethanol,
-                     control = list(maxit = 100, tolerance = 1.0e-10,
+                     control = list(maxit = 100, tolerance = tolerance,
                                     monitoring = 2, update.psi = FALSE))
 
 summary(obj1)
@@ -52,39 +53,43 @@ s <- proc.time()[3]
 knots1 <- PsplinesKnots(min(x1), max(x1), degree=degr, nseg=nseg[1])
 knots2 <- PsplinesKnots(min(x2), max(x2), degree=degr, nseg=nseg[2])
 
-B1 <- Bsplines(knots1, x1)
-B2 <- Bsplines(knots2, x2)
+B1 <- as.spam(Bsplines(knots1, x1))
+B2 <- as.spam(Bsplines(knots2, x2))
 q1 <- ncol(B1)
 q2 <- ncol(B2)
 
-D1 <- diff(diag(q1), diff=pord)
+D1 <- diff.spam(diag(q1), diff=pord)
 DtD1 <- crossprod(D1)
 
-D2 <- diff(diag(q2), diff=pord)
+D2 <- diff.spam(diag(q2), diff=pord)
 DtD2 <- crossprod(D2)
 
 # we have to calculate RowKronecker product only once:
-B21 <- RowKronecker(B2, B1)
+B21 <- as.spam(RowKronecker(B2, B1))
 
-Nobs <- length(y)
-X<-matrix(data=1, ncol=1, nrow=Nobs)
+# null spaces of DtD1 and DtD2 (not normalized!)
+U1_null <- matrix(data=1, ncol=pord, nrow=q1)
+U2_null <- matrix(data=1, ncol=pord, nrow=q2)
+
+# fixed part of SAP model, equal to vector of ones for pord=1
+X <- B21 %*% (U2_null %x% U1_null)
 
 # make Rinv
 lRinv = list()
+Nobs <- length(y)
 lRinv[[1]] = diag.spam(1, Nobs)
 names(lRinv) = "residual"
 
-Z <- B21
-
 # boundary constraint
-C <- c(1, rep(0,q1*q2-2), 1)
-CCt <- tcrossprod(C)
+C <- spam(x=c(1, rep(0,q1*q2-2), 1), nrow=q1*q2, ncol=1)
+CCt <- C %*% t(C)
 lGinv <- list()
-lGinv[[1]] <- bdiag.spam(as.spam(kronecker.spam(diag(q2), DtD1) + CCt))
-lGinv[[2]] <- bdiag.spam(as.spam(kronecker.spam(DtD2, diag(q1)) + CCt))
+lGinv[[1]] <- kronecker(diag.spam(q2), DtD1) + CCt
+lGinv[[2]] <- kronecker(DtD2, diag.spam(q1)) + CCt
 names(lGinv) <- c('f(E,C)|E', 'f(E,C)|C')
-obj2 = sparseMixedModels(y,X,Z,lGinv,lRinv,maxiter=300,
-                          eps=1.0e-10,display=TRUE,monitor=TRUE)
+
+obj2 = sparseMixedModels(y, X, B21, lGinv, lRinv,
+              maxiter=100, eps=tolerance, display=TRUE, monitor=TRUE)
 e <- proc.time()[3]
 cat("Computation time:", e-s, "seconds")
 obj2$ED
