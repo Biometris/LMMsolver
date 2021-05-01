@@ -19,9 +19,9 @@ data(ethanol)
 #' SAP model using SpATS.nogeno
 #' ==================
 
-nseg <- c(30, 25)
+nseg <- c(20, 20)
 degr <- 3
-pord <- 1
+pord <- 2
 tolerance <- 1.0e-6
 
 # Fit the PS-ANOVA model
@@ -68,11 +68,33 @@ DtD2 <- crossprod(D2)
 B21 <- as.spam(RowKronecker(B2, B1))
 
 # null spaces of DtD1 and DtD2 (not normalized!)
-U1_null <- matrix(data=1, ncol=pord, nrow=q1)
-U2_null <- matrix(data=1, ncol=pord, nrow=q2)
+if (pord == 1)
+{
+  U1_null <- matrix(data=1, ncol=pord, nrow=q1)
+  U2_null <- matrix(data=1, ncol=pord, nrow=q2)
 
-# fixed part of SAP model, equal to vector of ones for pord=1
-X <- B21 %*% (U2_null %x% U1_null)
+  # fixed part of SAP model, equal to vector of ones for pord=1
+  X <- B21 %*% (U2_null %x% U1_null)
+} else {
+  # L2 norm of a vector:
+  norm_vec <- function(x) { return(sqrt(sum(x^2)))}
+
+  # calculate the linear/fixed parts:
+  U1_null <- cbind(1, scale(1:q1))
+  U2_null <- cbind(1, scale(1:q2))
+
+  U1_null[,1] <- U1_null[,1]/norm_vec(U1_null[,1])
+  U2_null[,1] <- U2_null[,1]/norm_vec(U2_null[,1])
+
+  U1_null[,2] <- U1_null[,2]/norm_vec(U1_null[,2])
+  U1_null[,2] <- U1_null[,2]/norm_vec(U2_null[,2])
+
+  # fixed part of SAP model, equal to vector of ones for pord=1
+  X <- B21 %*% (U2_null %x% U1_null)
+  X[,1] <- 1
+}
+
+head(X)
 
 # make Rinv
 lRinv = list()
@@ -81,8 +103,14 @@ lRinv[[1]] = diag.spam(1, Nobs)
 names(lRinv) = "residual"
 
 # boundary constraint
-C <- spam(x=c(1, rep(0,q1*q2-2), 1), nrow=q1*q2, ncol=1)
-CCt <- C %*% t(C)
+if (pord == 1)
+{
+  C <- spam(x=c(1, rep(0,q1*q2-2), 1), nrow=q1*q2, ncol=1)
+} else {
+  # use dense constraint as test...
+  C <- kronecker(U2_null, U1_null)
+}
+CCt <- as.spam(C %*% t(C))
 lGinv <- list()
 lGinv[[1]] <- kronecker(diag.spam(q2), DtD1) + CCt
 lGinv[[2]] <- kronecker(DtD2, diag.spam(q1)) + CCt
