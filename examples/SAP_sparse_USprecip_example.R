@@ -11,47 +11,79 @@ library(SpATS)
 library(LMMsolver)
 library(ggplot2)
 library(JOPS)
+library(maps)
+library(sp)
+library(reshape2)
 
-# Get the data
-library(SemiPar)
-data(ethanol)
+# Get USA outline
+usa = map("usa", region = "main", plot = F)
+
+# Get precipitation data from spam
+data(USprecip)
+dat = data.frame(USprecip)
+dat = subset(dat, infill==1)
 
 #' SAP model using SpATS.nogeno
 #' ==================
 
-nseg <- c(25, 20)
+nseg <- c(41, 41)
 degr <- 3
 pord <- 2
 tolerance <- 1.0e-6
 
-# Fit the PS-ANOVA model
-obj1 <- SpATS.nogeno(response = "NOx",
-                     spatial = ~SAP(E, C, nseg = nseg, degree=degr, pord=pord),
-                     data = ethanol,
-                     control = list(maxit = 100, tolerance = tolerance,
-                                    monitoring = 2, update.psi = FALSE))
-
+# Fit PS-ANOVA model
+obj1 = SpATS.nogeno(response = "anomaly",
+                   spatial = ~SAP(lat, lon,  nseg = nseg, pord=pord, degree=degr),
+                   data = dat,
+                   control = list(maxit = 100, tolerance = tolerance,
+                                  monitoring = 2, update.psi = FALSE))
 summary(obj1)
 
-# Compute component surface and their sum on a fine grid
-Tr = obtain.spatialtrend(obj1, grid = c(100, 100))
+# Extract the surfaces
+Tr = obtain.spatialtrend(obj1, grid = c(200, 200))
 
-# Plot surface and contours
-image(Tr$row.p, Tr$col.p, Tr$fit, col = terrain.colors(100), xlab = 'C', ylab = 'E')
-contour(Tr$row.p, Tr$col.p, Tr$fit, add = TRUE, col = 'blue')
-points(ethanol$C, ethanol$E, pch = '+')
+# Turn matrix into a "long" data frame
+Mu = Tr$fit
+rownames(Mu) = Tr$row.p
+colnames(Mu) = Tr$col.p
+dens = reshape2::melt(Mu)
+names(dens) = c('x', 'y', 'z')
+
+# Plot fit with contours
+sl = T
+ccol = 'blue'
+capsize = 15
+
+# Find points within US boundary for clipping
+v = point.in.polygon(dens$x, dens$y, usa$x, usa$y)
+dens = subset(dens, v == 1)
+
+plt1 = ggplot(dens,  aes(x, y, fill = z)) +
+  geom_raster(show.legend = sl) +
+  scale_fill_gradientn(colours = terrain.colors(100))+
+  xlab('Longitude') + ylab('Latitude') +
+  ggtitle('Precipitation anomaly, smoothed and clipped') +
+  geom_contour(aes(z = z), color = ccol, show.legend = T) +
+  JOPS_theme() +
+  coord_fixed() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        plot.title = element_text(size = capsize),
+        axis.title.x = element_text(size = capsize),
+        axis.title.y = element_text(size = capsize))
+print(plt1)
 
 #' solve using sparse formulation SAP
 #' ==================
 
-x1 <- ethanol$E
-x2 <- ethanol$C
-y <- ethanol$NOx
+x1 <- dat$lat
+x2 <- dat$lon
+y  <- dat$anomaly
 
 s <- proc.time()[3]
 
-knots1 <- PsplinesKnots(min(x1), max(x1), degree=degr, nseg=nseg[1])
-knots2 <- PsplinesKnots(min(x2), max(x2), degree=degr, nseg=nseg[2])
+knots1 <- PsplinesKnots(min(x1)-1.0e-10, max(x1)+1.0e-10, degree=degr, nseg=nseg[1])
+knots2 <- PsplinesKnots(min(x2)-1.0e-10, max(x2)+1.0e-10, degree=degr, nseg=nseg[2])
 
 B1 <- as.spam(Bsplines(knots1, x1))
 B2 <- as.spam(Bsplines(knots2, x2))
