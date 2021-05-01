@@ -19,7 +19,7 @@ data(ethanol)
 #' SAP model using SpATS.nogeno
 #' ==================
 
-nseg <- c(20, 20)
+nseg <- c(25, 20)
 degr <- 3
 pord <- 2
 tolerance <- 1.0e-6
@@ -72,9 +72,6 @@ if (pord == 1)
 {
   U1_null <- matrix(data=1, ncol=pord, nrow=q1)
   U2_null <- matrix(data=1, ncol=pord, nrow=q2)
-
-  # fixed part of SAP model, equal to vector of ones for pord=1
-  X <- B21 %*% (U2_null %x% U1_null)
 } else {
   # L2 norm of a vector:
   norm_vec <- function(x) { return(sqrt(sum(x^2)))}
@@ -83,18 +80,13 @@ if (pord == 1)
   U1_null <- cbind(1, scale(1:q1))
   U2_null <- cbind(1, scale(1:q2))
 
-  U1_null[,1] <- U1_null[,1]/norm_vec(U1_null[,1])
-  U2_null[,1] <- U2_null[,1]/norm_vec(U2_null[,1])
-
-  U1_null[,2] <- U1_null[,2]/norm_vec(U1_null[,2])
-  U1_null[,2] <- U1_null[,2]/norm_vec(U2_null[,2])
-
-  # fixed part of SAP model, equal to vector of ones for pord=1
-  X <- B21 %*% (U2_null %x% U1_null)
-  X[,1] <- 1
+  U1_null <- apply(U1_null, MARGIN=2, function(x) (x/norm_vec(x)))
+  U2_null <- apply(U2_null, MARGIN=2, function(x) (x/norm_vec(x)))
 }
 
-head(X)
+X <- B21 %*% (U2_null %x% U1_null)
+# take first column as intercept...
+X[,1] <- 1
 
 # make Rinv
 lRinv = list()
@@ -102,14 +94,19 @@ Nobs <- length(y)
 lRinv[[1]] = diag.spam(1, Nobs)
 names(lRinv) = "residual"
 
-# boundary constraint
+# boundary constraints
 if (pord == 1)
 {
+  # other constraints also possible....
   C <- spam(x=c(1, rep(0,q1*q2-2), 1), nrow=q1*q2, ncol=1)
 } else {
-  # use dense constraint as test...
-  C <- kronecker(U2_null, U1_null)
+  C1 <- spam(x=0, nrow=q1, ncol=pord)
+  C1[1,1] = C1[q1,2] = 1
+  C2 <- spam(x=0, nrow=q2, ncol=pord)
+  C2[1,1] = C2[q2,2] = 1
+  C <- kronecker(C2, C1)
 }
+
 CCt <- as.spam(C %*% t(C))
 lGinv <- list()
 lGinv[[1]] <- kronecker(diag.spam(q2), DtD1) + CCt
@@ -122,10 +119,7 @@ e <- proc.time()[3]
 cat("Computation time:", e-s, "seconds")
 obj2$ED
 
-p = ncol(X)
-# sum of first and last element equal to zero, as for 1D LV model:
-obj2$a[p+1]
-obj2$a[p+ncol(B21)]
+t(C) %*% obj2$a[-c(1:pord^2)]
 
 #' compare results
 #' ==================
