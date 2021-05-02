@@ -1,5 +1,5 @@
 #' ---
-#' title: SAP example sparse
+#' title: SAP example sparse using USprecip example
 #' author: Martin Boer, Biometris, WUR, Wageningen, the Netherlands
 #' ---
 
@@ -21,7 +21,9 @@ usa = map("usa", region = "main", plot = F)
 # Get precipitation data from spam
 data(USprecip)
 dat = data.frame(USprecip)
+# take a subset
 dat = subset(dat, infill==1)
+nrow(dat) # 5906 true records, as in SAP2014 paper.
 
 #' SAP model using SpATS.nogeno
 #' ==================
@@ -116,6 +118,8 @@ if (pord == 1)
   U2_null <- apply(U2_null, MARGIN=2, function(x) (x/norm_vec(x)))
 }
 
+U_null <- kronecker(U2_null, U1_null)
+
 X <- B21 %*% (U2_null %x% U1_null)
 # take first column as intercept...
 X[,1] <- 1
@@ -136,6 +140,10 @@ if (pord == 1)
   C1[1,1] = C1[q1,2] = 1
   C2 <- spam(x=0, nrow=q2, ncol=pord)
   C2[1,1] = C2[q2,2] = 1
+
+  #dense model
+  #C1 <- U1_null
+  #C2 <- U2_null
   C <- kronecker(C2, C1)
 }
 
@@ -153,7 +161,46 @@ obj2$ED
 
 t(C) %*% obj2$a[-c(1:pord^2)]
 
-#' compare results
+#' make predictions on a grid and compare
+#' ==================
+
+x1grid <- seq(min(x1), max(x1), length=200)
+x2grid <- seq(min(x2), max(x2), length=200)
+Bx1 <- Bsplines(knots1, x1grid)
+Bx2 <- Bsplines(knots2, x2grid)
+
+Xpred <- (Bx2 %x% Bx1) %*% (U2_null %x% U1_null)
+
+# don't use intercept for predictions, as in SpATS/SAP:
+Xpred[,1] <- 0.0
+
+# for predictions we use following transformation, see notes..
+#
+#  [ a ] = [I2   -H    ] [b]
+#  [ u ] = [0   Im + GH] [v]  , H = (C'G)^{-1} (G' - C')
+#
+G = U_null
+H = solve(t(C) %*% U_null) %*% (t(G) - t(C))
+GH = G %*% H
+tmp1 <- rbind(-H,diag(1,q1*q2) + GH)
+Id <- diag(1, pord^2)
+Zero <- matrix(data=0,nrow=q1*q2,ncol=pord^2)
+tmp2 <- rbind(Id,Zero)
+A <- cbind(tmp2, tmp1)
+# conversion....
+a <- solve(A, obj2$a)
+bc <- as.vector(Xpred %*% a[1:pord^2])
+sc <- as.vector((Bx2 %x% Bx1) %*% a[-c(1:pord^2)])
+
+# trick to reorder.....
+fit <- bc + sc
+A = matrix(data=fit,ncol=200,nrow=200, byrow=TRUE)
+fit <- as.vector(A)
+range(fit - Tr$fit)
+plot(x=fit,y=Tr$fit,xlab='fit using sparse model', ylab='fit SpATS.nogeno')
+abline(a=0, b=1, col='red')
+
+#' compare deviances
 #' ==================
 
 # compare SAP SpATS with LMMsolver..
