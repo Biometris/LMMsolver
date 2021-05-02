@@ -21,7 +21,7 @@ usa = map("usa", region = "main", plot = F)
 # Get precipitation data from spam
 data(USprecip)
 dat = data.frame(USprecip)
-# take a subset
+# only use observed data
 dat = subset(dat, infill==1)
 nrow(dat) # 5906 true records, as in SAP2014 paper.
 
@@ -29,7 +29,6 @@ nrow(dat) # 5906 true records, as in SAP2014 paper.
 #' ==================
 
 nseg <- c(41, 41)
-#nseg <- c(21, 21)
 degr <- 3
 pord <- 2
 tolerance <- 1.0e-6
@@ -40,15 +39,17 @@ obj1 = SpATS.nogeno(response = "anomaly",
                    data = dat,
                    control = list(maxit = 100, tolerance = tolerance,
                                   monitoring = 2, update.psi = FALSE))
+
+# effective dimensions close to SAP2014 paper:
 summary(obj1)
 
 # Extract the surfaces
-Tr = obtain.spatialtrend(obj1, grid = c(200, 200))
+Trend = obtain.spatialtrend(obj1, grid = c(200, 200))
 
 # Turn matrix into a "long" data frame
-Mu = Tr$fit
-rownames(Mu) = Tr$row.p
-colnames(Mu) = Tr$col.p
+Mu = Trend$fit
+rownames(Mu) = Trend$row.p
+colnames(Mu) = Trend$col.p
 dens = reshape2::melt(Mu)
 names(dens) = c('x', 'y', 'z')
 
@@ -121,7 +122,7 @@ if (pord == 1)
 
 U_null <- kronecker(U1_null, U2_null)
 
-X <- B12 %*% (U1_null %x% U2_null)
+X <- B12 %*% U_null
 # take first column as intercept...
 X[,1] <- 1
 
@@ -131,7 +132,7 @@ Nobs <- length(y)
 lRinv[[1]] = diag.spam(1, Nobs)
 names(lRinv) = "residual"
 
-# boundary constraints
+# sparse boundary constraints
 if (pord == 1)
 {
   # other constraints also possible....
@@ -141,24 +142,23 @@ if (pord == 1)
   C1[1,1] = C1[q1,2] = 1
   C2 <- spam(x=0, nrow=q2, ncol=pord)
   C2[1,1] = C2[q2,2] = 1
-
-  #dense model
-  #C1 <- U1_null
-  #C2 <- U2_null
   C <- kronecker(C1, C2)
 }
 
 CCt <- as.spam(C %*% t(C))
 lGinv <- list()
-lGinv[[1]] <- kronecker(diag.spam(q1), DtD2) + CCt
-lGinv[[2]] <- kronecker(DtD1, diag.spam(q2)) + CCt
-names(lGinv) <- c('f(E,C)|E', 'f(E,C)|C')
+lGinv[[1]] <- kronecker(DtD1, diag.spam(q2)) + CCt
+lGinv[[2]] <- kronecker(diag.spam(q1), DtD2) + CCt
+names(lGinv) <- c('f(lat,lon)|lat', 'f(lat,lon)|lon')
 
 obj2 = sparseMixedModels(y, X, B12, lGinv, lRinv,
               maxiter=100, eps=tolerance, display=TRUE, monitor=TRUE)
 e <- proc.time()[3]
 cat("Computation time:", e-s, "seconds")
 obj2$ED
+
+# compare efffective dimensions...
+obj1$eff.dim[c(5,6)] - obj2$ED[c(2,3)]
 
 t(C) %*% obj2$a[-c(1:pord^2)]
 
@@ -167,36 +167,22 @@ t(C) %*% obj2$a[-c(1:pord^2)]
 
 x1grid <- seq(min(x1), max(x1), length=200)
 x2grid <- seq(min(x2), max(x2), length=200)
-Bx1 <- Bsplines(knots1, x1grid)
-Bx2 <- Bsplines(knots2, x2grid)
+Bx1 <- as.spam(Bsplines(knots1, x1grid))
+Bx2 <- as.spam(Bsplines(knots2, x2grid))
+B12x <- Bx1 %x% Bx2
+Xpred <- B12x %*% U_null
+Xpred[,1] <- 1.0
 
-Xpred <- (Bx1 %x% Bx2) %*% (U1_null %x% U2_null)
+# fit obtained from SpATS.nogeno,
+# for comparison include intercept:
+mu <- obj1$coeff[1]
+fit1 = Trend$fit + mu
 
-# don't use intercept for predictions, as in SpATS/SAP:
-Xpred[,1] <- 0.0
-
-# for predictions we use following transformation, see notes..
-#
-#  [ a ] = [I2   -H    ] [b]
-#  [ u ] = [0   Im + GH] [v]  , H = (C'G)^{-1} (G' - C')
-#
-G = U_null
-CtG <- as.matrix(t(C)%*%G)
-H = solve(t(C) %*% G) %*% (t(G) - t(C))
-GH = G %*% H
-tmp1 <- rbind(-H,diag(1,q1*q2) + GH)
-Id <- diag(1, pord^2)
-Zero <- matrix(data=0,nrow=q1*q2,ncol=pord^2)
-tmp2 <- rbind(Id,Zero)
-A <- cbind(tmp2, tmp1)
-a <- solve(A, obj2$a)
-
+a <- obj2$a
 bc <- as.vector(Xpred %*% a[1:pord^2])
-sc <- as.vector((Bx2 %x% Bx1) %*% a[-c(1:pord^2)])
-fit <- bc + sc
-range(fit - Tr$fit)
-plot(x=fit,y=Tr$fit,xlab='fit using sparse model', ylab='fit SpATS.nogeno')
-abline(a=0, b=1, col='red')
+sc <- as.vector(B12x %*% a[-c(1:pord^2)])
+fit2 <- bc + sc
+range(fit1 - fit2)
 
 #' compare deviances
 #' ==================
