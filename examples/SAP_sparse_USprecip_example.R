@@ -29,6 +29,7 @@ nrow(dat) # 5906 true records, as in SAP2014 paper.
 #' ==================
 
 nseg <- c(41, 41)
+#nseg <- c(21, 21)
 degr <- 3
 pord <- 2
 tolerance <- 1.0e-6
@@ -99,7 +100,7 @@ D2 <- diff.spam(diag(q2), diff=pord)
 DtD2 <- crossprod(D2)
 
 # we have to calculate RowKronecker product only once:
-B21 <- as.spam(RowKronecker(B2, B1))
+B12 <- as.spam(RowKronecker(B1, B2))
 
 # null spaces of DtD1 and DtD2 (not normalized!)
 if (pord == 1)
@@ -118,9 +119,9 @@ if (pord == 1)
   U2_null <- apply(U2_null, MARGIN=2, function(x) (x/norm_vec(x)))
 }
 
-U_null <- kronecker(U2_null, U1_null)
+U_null <- kronecker(U1_null, U2_null)
 
-X <- B21 %*% (U2_null %x% U1_null)
+X <- B12 %*% (U1_null %x% U2_null)
 # take first column as intercept...
 X[,1] <- 1
 
@@ -144,16 +145,16 @@ if (pord == 1)
   #dense model
   #C1 <- U1_null
   #C2 <- U2_null
-  C <- kronecker(C2, C1)
+  C <- kronecker(C1, C2)
 }
 
 CCt <- as.spam(C %*% t(C))
 lGinv <- list()
-lGinv[[1]] <- kronecker(diag.spam(q2), DtD1) + CCt
-lGinv[[2]] <- kronecker(DtD2, diag.spam(q1)) + CCt
+lGinv[[1]] <- kronecker(diag.spam(q1), DtD2) + CCt
+lGinv[[2]] <- kronecker(DtD1, diag.spam(q2)) + CCt
 names(lGinv) <- c('f(E,C)|E', 'f(E,C)|C')
 
-obj2 = sparseMixedModels(y, X, B21, lGinv, lRinv,
+obj2 = sparseMixedModels(y, X, B12, lGinv, lRinv,
               maxiter=100, eps=tolerance, display=TRUE, monitor=TRUE)
 e <- proc.time()[3]
 cat("Computation time:", e-s, "seconds")
@@ -169,7 +170,7 @@ x2grid <- seq(min(x2), max(x2), length=200)
 Bx1 <- Bsplines(knots1, x1grid)
 Bx2 <- Bsplines(knots2, x2grid)
 
-Xpred <- (Bx2 %x% Bx1) %*% (U2_null %x% U1_null)
+Xpred <- (Bx1 %x% Bx2) %*% (U1_null %x% U2_null)
 
 # don't use intercept for predictions, as in SpATS/SAP:
 Xpred[,1] <- 0.0
@@ -180,22 +181,19 @@ Xpred[,1] <- 0.0
 #  [ u ] = [0   Im + GH] [v]  , H = (C'G)^{-1} (G' - C')
 #
 G = U_null
-H = solve(t(C) %*% U_null) %*% (t(G) - t(C))
+CtG <- as.matrix(t(C)%*%G)
+H = solve(t(C) %*% G) %*% (t(G) - t(C))
 GH = G %*% H
 tmp1 <- rbind(-H,diag(1,q1*q2) + GH)
 Id <- diag(1, pord^2)
 Zero <- matrix(data=0,nrow=q1*q2,ncol=pord^2)
 tmp2 <- rbind(Id,Zero)
 A <- cbind(tmp2, tmp1)
-# conversion....
 a <- solve(A, obj2$a)
+
 bc <- as.vector(Xpred %*% a[1:pord^2])
 sc <- as.vector((Bx2 %x% Bx1) %*% a[-c(1:pord^2)])
-
-# trick to reorder.....
 fit <- bc + sc
-A = matrix(data=fit,ncol=200,nrow=200, byrow=TRUE)
-fit <- as.vector(A)
 range(fit - Tr$fit)
 plot(x=fit,y=Tr$fit,xlab='fit using sparse model', ylab='fit SpATS.nogeno')
 abline(a=0, b=1, col='red')
