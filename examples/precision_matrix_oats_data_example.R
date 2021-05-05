@@ -81,12 +81,52 @@ oats.df_ext = cbind(oats.df,Z)
 lM <- ndxMatrix(oats.df, lZ, c("P-splines"))
 obj2 <- LMMsolve(y~Trt+Rep, randomMatrices=lM, data=oats.df_ext,monitor=FALSE,eps=1.0e-10)
 
+# automatic selection of constraint C based on null space:
+D = diff(diag(v), diff=1)
+DtD = crossprod(D)
+P = kronecker.spam(diag(r), DtD)
+d <- eigen(P)$values
+U0 <- eigen(P)$vectors[,which(abs(d)<1.0e-10)]
+dim(U0)
+
+# ndx for sparse constraint, it doesn't matter
+# which one we choose...
+set.seed(1234)
+ndxCon <- rep(NA, r)
+C <- matrix(data=0,nrow=N,ncol=3)
+for (i in 1:r)
+{
+  ndx_non_zero <- which(U0[,i]!=0)
+  # choose the next element, not overlapping with previous indices:
+  k <- sample(setdiff(ndx_non_zero, ndxCon), 1)
+  C[k,i] = 1/U0[k,i]
+  ndxCon[i] = k
+}
+ndxCon
+
+# CtG is identity matrix
+CtG <- t(C) %*% U0
+CtG
+lGinv <- list()
+lGinv[["rRow:Rep"]] = as.spam(P + tcrossprod(C))
+obj3 <- LMMsolve(y~Trt+Rep, random=~rRow:Rep, lGinverse=lGinv,
+                 data=oats.df, eps=1.0e-10, display=TRUE)
+p <- v + r -1
+random_eff <- obj3$a[-c(1:p)]
+random_eff[ndxCon]
+
 # compare the results, should be identical:
 
-asr$loglik
-obj1$logL
-obj2$logL
+logL <- rep(NA,4)
+logL[1] = asr$loglik
+logL[2] = obj1$logL
+logL[3] = obj2$logL
+logL[4] = obj3$logL
+
+# compare all deviances:
+abs(apply(combn(logL,2), 2, diff))
 
 obj1$ED
 obj2$ED
+obj3$ED
 
