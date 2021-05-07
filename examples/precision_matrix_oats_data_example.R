@@ -81,13 +81,28 @@ oats.df_ext = cbind(oats.df,Z)
 lM <- ndxMatrix(oats.df, lZ, c("P-splines"))
 obj2 <- LMMsolve(y~Trt+Rep, randomMatrices=lM, data=oats.df_ext,monitor=FALSE,eps=1.0e-10)
 
-# automatic selection of constraint C based on null space:
 D = diff(diag(v), diff=1)
 DtD = crossprod(D)
 P = kronecker.spam(diag(r), DtD)
 d <- eigen(P)$values
 U0 <- eigen(P)$vectors[,which(abs(d)<1.0e-10)]
 dim(U0)
+
+# Use as constraint U0
+C <- U0
+CtG <- t(C) %*% U0
+CtG
+lGinv <- list()
+lGinv[["rRow:Rep"]] = as.spam(P + tcrossprod(C))
+obj3 <- LMMsolve(y~Trt+Rep, random=~rRow:Rep, lGinverse=lGinv,
+                 data=oats.df, eps=1.0e-10, display=TRUE)
+p <- v + r -1
+random_eff <- obj3$a[-c(1:p)]
+
+# built-in constraints:
+t(U0) %*% random_eff
+
+# automatic selection of constraint C based on null space:
 
 # ndx for sparse constraint, it doesn't matter
 # which one we choose...
@@ -109,19 +124,20 @@ CtG <- t(C) %*% U0
 CtG
 lGinv <- list()
 lGinv[["rRow:Rep"]] = as.spam(P + tcrossprod(C))
-obj3 <- LMMsolve(y~Trt+Rep, random=~rRow:Rep, lGinverse=lGinv,
+obj4 <- LMMsolve(y~Trt+Rep, random=~rRow:Rep, lGinverse=lGinv,
                  data=oats.df, eps=1.0e-10, display=TRUE)
 p <- v + r -1
-random_eff <- obj3$a[-c(1:p)]
+random_eff <- obj4$a[-c(1:p)]
 random_eff[ndxCon]
 
 # compare the results, should be identical:
 
-logL <- rep(NA,4)
+logL <- rep(NA,5)
 logL[1] = asr$loglik
 logL[2] = obj1$logL
 logL[3] = obj2$logL
 logL[4] = obj3$logL
+logL[5] = obj4$logL
 
 # compare all deviances:
 abs(apply(combn(logL,2), 2, diff))
@@ -129,4 +145,25 @@ abs(apply(combn(logL,2), 2, diff))
 obj1$ED
 obj2$ED
 obj3$ED
+obj4$ED
+
+cf1 <- coef(obj1)
+cf2 <- coef(obj2)
+cf3 <- coef(obj3)
+cf4 <- coef(obj4)
+
+cf1$'(Intercept)'
+cf2$'(Intercept)'
+cf3$'(Intercept)'
+cf4$'(Intercept)'
+
+cf1$Rep
+cf2$Rep
+cf3$Rep
+cf4$Rep
+
+range(cf1$Trt - cf2$Trt)
+range(cf1$Trt - cf3$Trt)
+range(cf1$Trt - cf4$Trt)
+
 
