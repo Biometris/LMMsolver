@@ -97,30 +97,48 @@ sap3Dfast <- function(y, x1, x2, x3, knots, trace=TRUE, thr=1.0e-8, scaleX=FALSE
 #' predict for sap3D, without spectral decomposition
 #'
 #' @export
-predict.sap3Dfast <- function(object, grid)
-{
-  # make predictions on a grid, use min(x1) and max(x1) as in original SAP:
-  x1 <- object$x1
-  x2 <- object$x2
-  x3 <- object$x3
-  x1grid <- seq(min(x1), max(x1), length=grid[1])
-  x2grid <- seq(min(x2), max(x2), length=grid[2])
-  x3grid <- seq(min(x3), max(x3), length=grid[3])
+predict.sap3Dfast <- function(object, newdata, grid = c(30,30,30)) {
+  if (!missing(newdata)) {
+    if (!is.data.frame(newdata)) {
+      stop("newdata should be a dataframe")
+    }
+    if (!all(c("x1", "x2", "x3") %in% names(newdata))) {
+      stop("Not all needed variables (x1,x2,x3) are supplied in newdata")
+    }
 
-  Bx1 <- as.spam(Bsplines(object$knots1, x1grid))
-  Bx2 <- as.spam(Bsplines(object$knots2, x2grid))
-  Bx3 <- as.spam(Bsplines(object$knots3, x3grid))
+    x1p <- newdata$x1
+    x2p <- newdata$x2
+    x3p <- newdata$x3
 
-  B123x <- Bx1 %x% Bx2 %x% Bx3
+    Bx1 <- as.spam(Bsplines(object$knots1, x1p))
+    Bx2 <- as.spam(Bsplines(object$knots2, x2p))
+    Bx3 <- as.spam(Bsplines(object$knots3, x3p))
+    B123x = RowKronecker(RowKronecker(Bx1, Bx2), Bx3)
+
+  } else { # grid....
+    # make predictions on a grid, use min(x1) and max(x1) as in original SAP:
+    x1p <- seq(min(object$x1), max(object$x1), length=grid[1])
+    x2p <- seq(min(object$x2), max(object$x2), length=grid[2])
+    x3p <- seq(min(object$x3), max(object$x3), length=grid[3])
+    Bx1 <- as.spam(Bsplines(object$knots1, x1p))
+    Bx2 <- as.spam(Bsplines(object$knots2, x2p))
+    Bx3 <- as.spam(Bsplines(object$knots3, x3p))
+    B123x <- Bx1 %x% Bx2 %x% Bx3
+  }
+
 
   if (object$scaleX) {
     Xpred <- B123x %*% object$U0
     Xpred[,1] <- 1.0
   } else {
-    X1 <- cbind(1, x1grid)
-    X2 <- cbind(1, x2grid)
-    X3 <- cbind(1, x3grid)
-    Xpred <- X1 %x% X2 %x% X3
+    X1 <- cbind(1, x1p)
+    X2 <- cbind(1, x2p)
+    X3 <- cbind(1, x3p)
+    if (!missing(newdata)) {
+      Xpred = RowKronecker(RowKronecker(X1,X2), X3)
+    } else {
+      Xpred = X1 %x% X2 %x% X3
+    }
   }
 
   a <- object$a
@@ -128,9 +146,13 @@ predict.sap3Dfast <- function(object, grid)
   bc <- as.vector(Xpred %*% a[1:p])
   sc <- as.vector(B123x %*% a[-c(1:p)])
   fit <- bc + sc
-  fit
-  p.data <- list(x1=x1grid,x2=x2grid,x3=x3grid)
-  L = list(p.data, eta=fit, mu=fit)
+
+  if (missing(newdata)) {
+      p.data <- list(x1=x1p,x2=x2p,x3=x3p)
+  } else {
+      p.data <- newdata
+  }
+  L = list(p.data=p.data, eta=fit, mu=fit)
   class(L) = "predict.sap3Dfast"
   L
 }
