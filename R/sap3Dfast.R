@@ -1,7 +1,7 @@
 #' sap3D, without spectral decomposition
 #'
 #' @export
-sap3Dfast <- function(y, x1, x2, x3, knots, trace=TRUE, thr=1.0e-8, scaleX=FALSE)
+sap3Dfast <- function(y, x1, x2, x3, knots, trace=TRUE, thr=1.0e-8, scaleX=TRUE)
 {
   nseg <- knots
   n <- length(y)
