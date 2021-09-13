@@ -15,7 +15,7 @@ library(asreml)
 # oats data
 n <- 4  # number of units per block
 b <- 6  # number of blocks per Rep
-r <- 3  # number of Reps
+r <- 3  # number of Rtolerance
 v <- 24 # number of genotypes/Rep:
 N <- n*b*r # total number of observations.
 
@@ -66,7 +66,7 @@ asr = asreml(y ~ Trt + Rep, random = ~idv(Rep):vm(rRow, Ginv_LV2),
 Ginv <- as.spam(Ginv_LV2)
 lGinv <- list()
 lGinv[["rRow:Rep"]] = kronecker.spam(diag(r), Ginv)
-obj1 <- LMMsolve(y~Trt+Rep, random=~rRow:Rep, lGinverse=lGinv,data=oats.df, eps=1.0e-10)
+obj1 <- LMMsolve(y~Trt+Rep, random=~rRow:Rep, lGinverse=lGinv,data=oats.df, tolerance=1.0e-10)
 
 # check the buildin-constraints:
 LV_eff <- coef(obj1)$'rRow:Rep'
@@ -79,7 +79,7 @@ lZ[[1]] = kronecker(diag(1,r), Usc)
 Z <- do.call("cbind",lZ)
 oats.df_ext = cbind(oats.df,Z)
 lM <- ndxMatrix(oats.df, lZ, c("P-splines"))
-obj2 <- LMMsolve(y~Trt+Rep, group=lM, data=oats.df_ext,trace=FALSE,eps=1.0e-10)
+obj2 <- LMMsolve(y~Trt+Rep, group=lM, data=oats.df_ext,trace=FALSE,tolerance=1.0e-10)
 
 D = diff(diag(v), diff=1)
 DtD = crossprod(D)
@@ -95,7 +95,7 @@ CtG
 lGinv <- list()
 lGinv[["rRow:Rep"]] = as.spam(P + tcrossprod(C))
 obj3 <- LMMsolve(y~Trt+Rep, random=~rRow:Rep, lGinverse=lGinv,
-                 data=oats.df, eps=1.0e-10, display=TRUE)
+                 data=oats.df, tolerance=1.0e-10, display=TRUE)
 p <- v + r -1
 random_eff <- obj3$a[-c(1:p)]
 
@@ -125,7 +125,7 @@ CtG
 lGinv <- list()
 lGinv[["rRow:Rep"]] = as.spam(P + tcrossprod(C))
 obj4 <- LMMsolve(y~Trt+Rep, random=~rRow:Rep, lGinverse=lGinv,
-                 data=oats.df, eps=1.0e-10, display=TRUE)
+                 data=oats.df, tolerance=1.0e-10, display=TRUE)
 p <- v + r -1
 random_eff <- obj4$a[-c(1:p)]
 random_eff[ndxCon]

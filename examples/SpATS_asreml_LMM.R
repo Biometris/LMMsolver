@@ -54,11 +54,11 @@ dat$x2 <- dat$col
 dat$x12 <- dat$x1 * dat$x2
 }
 
-eps = 1.0e-14
-xmin1 = min(dat$x1) - eps
-xmax1 = max(dat$x1) + eps
-xmin2 = min(dat$x2) - eps
-xmax2 = max(dat$x2) + eps
+tolerance = 1.0e-14
+xmin1 = min(dat$x1) - tolerance
+xmax1 = max(dat$x1) + tolerance
+xmin2 = min(dat$x2) - tolerance
+xmax2 = max(dat$x2) + tolerance
 
 # definition of splines...
 knots1 <- PsplinesKnots(xmin1,xmax1, degree=3, nseg=nsegR)
@@ -98,7 +98,7 @@ d2 <- eigen(DtD2)$values[1:(q2-pord)]
 # see SpATS paper, used for interaction term:
 d3 <- c(d1 %x% rep(1, q2 - pord) + rep(1, q1 - pord) %x% d2)
 objb.LMM <- LMMsolve(yield~rep+gen+x1+x2+x12,
-                     data=dat,eps=1.0e-10,
+                     data=dat,tolerance=1.0e-10,
                      display=FALSE,trace=FALSE)
 
 objb.asr <- asreml(yield~rep+gen+x1+x2+x12, dat=dat)
@@ -123,7 +123,7 @@ dat_ext = cbind(dat, Z)
 lM <- ndxMatrix(dat, lZ, c("fr","fc","fr.c","r.fc","fr.fc"))
 
 obj0.LMM <- LMMsolve(yield~rep+gen+x1+x2+x12, group=lM,
-                     data=dat_ext,eps=1.0e-10,
+                     data=dat_ext,tolerance=1.0e-10,
                      display=FALSE,trace=FALSE)
 
 obj0.asr <- asreml(yield~rep+gen+x1+x2+x12,
@@ -163,7 +163,7 @@ dat_ext = cbind(dat, Z)
 lM <- ndxMatrix(dat, lZ, c("fr","fc","fr.c","r.fc","fr.fc"))
 
 obj1.LMM <- LMMsolve(yield~rep+gen+x1+x2+x12, group=lM,
-                     data=dat_ext,eps=1.0e-10,
+                     data=dat_ext,tolerance=1.0e-10,
                      display=FALSE,trace=FALSE)
 
 obj1.asr <- asreml(yield~rep+gen+x1+x2+x12,
@@ -192,7 +192,7 @@ dat_ext = cbind(dat, Z)
 lM <- ndxMatrix(dat, lZ, c("fr","fc","fr.c","r.fc"))
 
 obj2.LMM <- LMMsolve(yield~rep+gen+x1+x2+x12, group=lM,
-                     data=dat_ext,eps=1.0e-10,
+                     data=dat_ext,tolerance=1.0e-10,
                      display=FALSE,trace=FALSE)
 
 obj2.asr <- asreml(yield~rep+gen+x1+x2+x12,

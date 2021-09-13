@@ -29,7 +29,7 @@ obj1 <- asreml(y~1, random = ~geno,data=dat, trace = FALSE)
 obj1$loglik
 
 # LMMsolver:
-obj2 <- LMMsolve(y~1, random=~geno, data=dat, eps=1.0e-12)
+obj2 <- LMMsolve(y~1, random=~geno, data=dat, tolerance=1.0e-12)
 obj2$logL
 
 # effective dimension:

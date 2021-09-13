@@ -28,7 +28,7 @@ minlog10p = -log10(0.5*pchisq(dev,1,lower.tail=FALSE))
 minlog10p
 
 # NULL mode, using LMMsolver:
-obj0 <- LMMsolve(fixed=pheno~cross, residual='cross', data=df, eps=1.0e-8,
+obj0 <- LMMsolve(fixed=pheno~cross, residual='cross', data=df, tolerance=1.0e-8,
                           trace=TRUE, display= FALSE)
 # check with asreml:
 obj0$logL
@@ -40,7 +40,7 @@ obj0$ED
 
 # include QTL, using LMMsolve
 lM <- list(QTL=c(3:5))
-obj1 <- LMMsolve(fixed=pheno~cross, group=lM,residual='cross', data=df, eps=1.0e-8,
+obj1 <- LMMsolve(fixed=pheno~cross, group=lM,residual='cross', data=df, tolerance=1.0e-8,
                  trace=TRUE, display= FALSE)
 
 # check with asreml:

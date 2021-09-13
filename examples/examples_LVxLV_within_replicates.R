@@ -97,10 +97,10 @@ lM <- ndxMatrix(dat, lZ, c("row","col","rowcol"))
 
 if (extra_random_terms == FALSE)
 {
-  obj1.LMM <- LMMsolve(fixed, group=lM,data=dat_ext,eps=1.0e-8,
+  obj1.LMM <- LMMsolve(fixed, group=lM,data=dat_ext,tolerance=1.0e-8,
                      display=FALSE,trace=FALSE)
 } else {
-  obj1.LMM <- LMMsolve(fixed, random=~rep:C+rep:R, group=lM,data=dat_ext,eps=1.0e-8,
+  obj1.LMM <- LMMsolve(fixed, random=~rep:C+rep:R, group=lM,data=dat_ext,tolerance=1.0e-8,
                        display=FALSE,trace=FALSE)
 }
 obj1.LMM$ED
@@ -176,7 +176,7 @@ lGinv <- list()
 lGinv[["C:rep"]] = as.spam(Mc_inv_ext)
 lGinv[["R:rep"]] = as.spam(Mr_inv_ext)
 lGinv[["C:R:rep"]] = as.spam(Mrc_inv_ext)
-obj2.LMM <- LMMsolve(fixed, random=random, lGinverse=lGinv,data=dat, eps=1.0e-10,
+obj2.LMM <- LMMsolve(fixed, random=random, lGinverse=lGinv,data=dat, tolerance=1.0e-10,
                      display=TRUE)
 obj2.LMM$logL
 obj2.LMM$ED
@@ -243,10 +243,10 @@ lM <- ndxMatrix(dat, lZ, c("row","col","rowcol"))
 
 if (extra_random_terms == FALSE)
 {
-  obj3.LMM <- LMMsolve(fixed, group=lM,data=dat_ext,eps=1.0e-8,
+  obj3.LMM <- LMMsolve(fixed, group=lM,data=dat_ext,tolerance=1.0e-8,
                        display=FALSE,trace=FALSE)
 } else {
-  obj3.LMM <- LMMsolve(fixed, random=~rep:C+rep:R, group=lM,data=dat_ext,eps=1.0e-8,
+  obj3.LMM <- LMMsolve(fixed, random=~rep:C+rep:R, group=lM,data=dat_ext,tolerance=1.0e-8,
                        display=FALSE,trace=FALSE)
 }
 
@@ -287,11 +287,11 @@ lGinv[['rowcol']] <- kronecker(diag(Nrep), kronecker(precM1, precM2))
 
 if (extra_random_terms == FALSE)
 {
-  obj4.LMM <- LMMsolve(fixed, group=lM,lGinverse=lGinv,data=dat_ext,eps=1.0e-8,
+  obj4.LMM <- LMMsolve(fixed, group=lM,lGinverse=lGinv,data=dat_ext,tolerance=1.0e-8,
                        display=TRUE, trace=TRUE)
 } else {
   obj4.LMM <- LMMsolve(fixed, random=~rep:C+rep:R,lGinverse=lGinv,
-                       group=lM,data=dat_ext,eps=1.0e-8,
+                       group=lM,data=dat_ext,tolerance=1.0e-8,
                        display=TRUE, trace=TRUE)
 }
 

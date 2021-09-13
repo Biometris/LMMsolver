@@ -77,7 +77,7 @@ sparseMixedModels <- function(y,
                               lGinv,
                               lRinv,
                               maxit = 100,
-                              eps = 1.0e-6,
+                              tolerance = 1.0e-6,
                               display = FALSE,
                               trace = FALSE) {
   Ntot <- length(y)
@@ -172,7 +172,7 @@ sparseMixedModels <- function(y,
     if (trace) {
       cat(sprintf("%4d %8.4f\n", it, logL))
     }
-    if (abs(logLprev - logL) < eps) {
+    if (abs(logLprev - logL) < tolerance) {
       break
     }
 

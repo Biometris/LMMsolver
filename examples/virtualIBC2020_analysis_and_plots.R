@@ -153,7 +153,7 @@ precM1 <- D1 %*% DtD1 %*% t(D1)
 lGinv <- list()
 lGinv[['f(t)']]   <- precM1
 
-obj0 <- LMMsolve(ysim~das, group=lM,lGinverse=lGinv, data=dat2_ext,eps=1.0e-4,
+obj0 <- LMMsolve(ysim~das, group=lM,lGinverse=lGinv, data=dat2_ext,tolerance=1.0e-4,
     display=TRUE,trace=TRUE)
 
 t0 <- seq(xmin1, xmax1, by=1.0)
@@ -233,7 +233,7 @@ lGinv[['f_gxe(t)']] <- precM1 %x% precM2 %x% precM3
 if (solve_LMM)
 {
   s <- proc.time()[3]
-  obj <- LMMsolve(ysim~das, group=lM,lGinverse=lGinv, data=dat_ext,eps=1.0e-4,
+  obj <- LMMsolve(ysim~das, group=lM,lGinverse=lGinv, data=dat_ext,tolerance=1.0e-4,
                        display=TRUE,trace=TRUE)
   e <- proc.time()[3]
   cat("Computation time ", e-s, "seconds \n")

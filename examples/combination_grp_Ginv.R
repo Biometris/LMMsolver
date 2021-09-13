@@ -26,7 +26,7 @@ dat <- data.frame(geno=rep(geno_name, each=n),
                   stringsAsFactors = TRUE)
 
 # LMMsolver:
-obj1 <- LMMsolve(y~rep, random=~geno, data=dat, eps=1.0e-12,display=TRUE)
+obj1 <- LMMsolve(y~rep, random=~geno, data=dat, tolerance=1.0e-12,display=TRUE)
 obj1$logL
 
 # effective dimension:
@@ -49,7 +49,7 @@ lM <- ndxMatrix(dat, lZ, c("diff_geno"))
 lGinv <- list()
 lGinv[['diff_geno']] <- as.spam(UtU)
 
-obj2 <- LMMsolve(y~rep, group=lM,lGinverse=lGinv, data=dat_ext, eps=1.0e-12,display=TRUE)
+obj2 <- LMMsolve(y~rep, group=lM,lGinverse=lGinv, data=dat_ext, tolerance=1.0e-12,display=TRUE)
 obj1$logL
 obj2$logL
 

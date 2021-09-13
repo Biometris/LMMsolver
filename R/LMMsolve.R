@@ -7,7 +7,7 @@ LMMsolve <- function(fixed,
                      lGinverse = NULL,
                      data,
                      residual = NULL,
-                     eps = 1.0e-6,
+                     tolerance = 1.0e-6,
                      trace = FALSE,
                      display = FALSE,
                      maxit = 250) {
@@ -101,7 +101,7 @@ LMMsolve <- function(fixed,
     names(lRinv) = "residual"
   }
   y <- mf[, 1]
-  obj <- sparseMixedModels(y, X, Z, lGinv, lRinv, eps, trace,
+  obj <- sparseMixedModels(y, X, Z, lGinv, lRinv, tolerance, trace,
                            display = display, maxit = maxit)
   dim <- as.numeric(c(dim.f, dim.r))
   term.labels <- c(term.labels.f, term.labels.r)
