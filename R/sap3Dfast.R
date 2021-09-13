@@ -82,7 +82,7 @@ sap3Dfast <- function(y, x1, x2, x3, knots, trace=TRUE, thr=1.0e-8, scaleX=TRUE)
   names(lGinv) <- c('x1','x2','x3')
 
   obj = sparseMixedModels(y, X, B123, lGinv, lRinv,
-                          maxiter=200, eps=thr, display=FALSE, trace=trace)
+                          maxit=200, eps=thr, display=FALSE, trace=trace)
 
   e <- proc.time()[3]
   cat("Computation time sparse SAP fast:", e-s, "seconds\n")

@@ -60,7 +60,7 @@ invM_matrix <- function(n, type) {
 # test with asreml using linear variance model:
 Ginv_LV2 <- invM_matrix(v, "LV")
 asr = asreml(y ~ Trt + Rep, random = ~idv(Rep):vm(rRow, Ginv_LV2),
-              data = oats.df,trace=FALSE, maxiter=25)
+              data = oats.df,trace=FALSE, maxit=25)
 
 # compare with LMMsolve using inverse matrix:
 Ginv <- as.spam(Ginv_LV2)

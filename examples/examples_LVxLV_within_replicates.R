@@ -67,10 +67,10 @@ devBaseline <- devSAS(obj0.asr)
 if (extra_random_terms == FALSE)
 {
   obj0.asr <- asreml(fixed, dat=dat, random=~units,
-                   residual=~idv(rep):ar1(R):ar1(C),maxiter=100)
+                   residual=~idv(rep):ar1(R):ar1(C),maxit=100)
 } else {
   obj0.asr <- asreml(fixed, dat=dat, random=~rep:C+rep:R+units,
-                     residual=~idv(rep):ar1(R):ar1(C),maxiter=100)
+                     residual=~idv(rep):ar1(R):ar1(C),maxit=100)
 }
 
 summary(obj0.asr)$varcomp

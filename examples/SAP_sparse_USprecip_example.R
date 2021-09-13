@@ -152,7 +152,7 @@ lGinv[[2]] <- kronecker(diag.spam(q1), DtD2) + CCt
 names(lGinv) <- c('f(lat,lon)|lat', 'f(lat,lon)|lon')
 
 obj2 = sparseMixedModels(y, X, B12, lGinv, lRinv,
-              maxiter=100, eps=tolerance, display=TRUE, trace=TRUE)
+              maxit=100, eps=tolerance, display=TRUE, trace=TRUE)
 e <- proc.time()[3]
 cat("Computation time:", e-s, "seconds")
 obj2$ED

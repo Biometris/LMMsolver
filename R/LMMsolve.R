@@ -10,7 +10,7 @@ LMMsolve <- function(fixed,
                      eps = 1.0e-6,
                      trace = FALSE,
                      display = FALSE,
-                     maxiter = 250) {
+                     maxit = 250) {
   ## make random part:
   if (!is.null(random)) {
     mf <- model.frame(random, data, drop.unused.levels = TRUE, na.action = NULL)
@@ -102,7 +102,7 @@ LMMsolve <- function(fixed,
   }
   y <- mf[, 1]
   obj <- sparseMixedModels(y, X, Z, lGinv, lRinv, eps, trace,
-                           display = display, maxiter = maxiter)
+                           display = display, maxit = maxit)
   dim <- as.numeric(c(dim.f, dim.r))
   term.labels <- c(term.labels.f, term.labels.r)
   obj$dim <- dim

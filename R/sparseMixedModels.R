@@ -76,7 +76,7 @@ sparseMixedModels <- function(y,
                               Z,
                               lGinv,
                               lRinv,
-                              maxiter = 100,
+                              maxit = 100,
                               eps = 1.0e-6,
                               display = FALSE,
                               trace = FALSE) {
@@ -134,7 +134,7 @@ sparseMixedModels <- function(y,
     cat("iter logLik\n")
   }
 
-  for (it in 1:maxiter) {
+  for (it in 1:maxit) {
     if (Nvarcomp > 0) {
       phi <- theta[c(1:length(phi))]
       psi <- theta[-c(1:length(phi))]
