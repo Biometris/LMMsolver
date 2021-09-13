@@ -4,7 +4,7 @@
 \alias{predict.sap3Dfast}
 \title{predict for sap3D, without spectral decomposition}
 \usage{
-\method{predict}{sap3Dfast}(object, newdata, grid = c(30, 30, 30))
+\method{predict}{sap3Dfast}(object, ..., newdata, grid = c(30, 30, 30))
 }
 \description{
 predict for sap3D, without spectral decomposition

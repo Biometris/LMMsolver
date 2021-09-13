@@ -9,7 +9,7 @@ setClass("ADchol",
 #' with C = lambda[1]*P1 + lambda[2]*P2 + .....
 #'
 #' @importFrom methods new
-#' @export
+#' @keywords internal
 ADchol <- function(P_list) {
   nelem <- length(P_list)
   nCol <- ncol(P_list[[1]])

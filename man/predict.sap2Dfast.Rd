@@ -4,7 +4,7 @@
 \alias{predict.sap2Dfast}
 \title{predict for sap2D, without spectral decomposition}
 \usage{
-\method{predict}{sap2Dfast}(object, grid)
+\method{predict}{sap2Dfast}(object, ..., grid)
 }
 \description{
 predict for sap2D, without spectral decomposition

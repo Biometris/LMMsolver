@@ -1,11 +1,3 @@
-
-# mixed model coefficient matrix...
-
-# Added to expert help functions from Rcpp:
-
-#' @export dlogdet
-#' @export logdet
-
 # calcalate the weighted sum of list of matrices.
 linearSum  <- function(theta,
                        matrixList) {
