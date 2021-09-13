@@ -6,7 +6,7 @@ LMMsolve <- function(fixed,
                      group = NULL,
                      lGinverse = NULL,
                      data,
-                     residualterm = NULL,
+                     residual = NULL,
                      eps = 1.0e-6,
                      monitor = FALSE,
                      display = FALSE,
@@ -92,8 +92,8 @@ LMMsolve <- function(fixed,
     term.labels.f <- c("(Intercept)", term.labels.f)
   }
 
-  if (!is.null(residualterm)) {
-    lRinv <- makeRlist(df = data, column = residualterm)
+  if (!is.null(residual)) {
+    lRinv <- makeRlist(df = data, column = residual)
   } else {
     lRinv <- list()
     n <- nrow(data)
