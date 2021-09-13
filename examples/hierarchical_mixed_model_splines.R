@@ -108,7 +108,7 @@ df_ext = cbind(df, Z)
 
 lM <- ndxMatrix(df, lZ, c("genotypes","plants"))
 
-obj1 <- LMMsolve(fixed=y~1, randomMatrices=lM,data=df_ext, display=TRUE)
+obj1 <- LMMsolve(fixed=y~1, group=lM,data=df_ext, display=TRUE)
 obj1$logL
 obj1$ED
 
@@ -134,7 +134,7 @@ df_ext = cbind(df, Z)
 
 lM <- ndxMatrix(df, lZ, c("plants"))
 
-obj2 <- LMMsolve(fixed=y~1, random=~geno, randomMatrices=lM,data=df_ext, display=TRUE)
+obj2 <- LMMsolve(fixed=y~1, random=~geno, group=lM,data=df_ext, display=TRUE)
 obj1$logL
 obj2$logL
 

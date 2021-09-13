@@ -43,7 +43,7 @@ Z <- do.call("cbind",lZ)
 
 df_ext = cbind(sim.df, Z)
 lM <- ndxMatrix(sim.df, lZ, c("B"))
-obj0 = LMMsolve(fixed=y~x, random=NULL, randomMatrices=lM, data=df_ext)
+obj0 = LMMsolve(fixed=y~x, random=NULL, group=lM, data=df_ext)
 obj0$logL
 obj0$ED
 

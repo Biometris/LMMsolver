@@ -148,7 +148,7 @@ lGinv[['f_gxe(t)']] <- precM1 %x% precM2 %x% precM3
 if (solve_LMM)
 {
   s <- proc.time()[3]
-  obj <- LMMsolve(ysim~das, randomMatrices=lM,lGinverse=lGinv, data=dat_ext,eps=1.0e-4,
+  obj <- LMMsolve(ysim~das, group=lM,lGinverse=lGinv, data=dat_ext,eps=1.0e-4,
                        display=TRUE,monitor=TRUE)
   e <- proc.time()[3]
   cat("Computation time ", e-s, "seconds \n")

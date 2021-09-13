@@ -1,16 +1,5 @@
 ## some help functions, make part of LMM solve library:
 
-#' row-wise kronecker product
-#'
-#' @export
-RowKronecker <- function(X1,
-                         X2) {
-    one.1 <- matrix(1, 1, ncol(X1))
-    one.2 <- matrix(1, 1, ncol(X2))
-    rowKron <- kronecker(X1, one.2) * kronecker(one.1, X2)
-    return(rowKron)
-}
-
 #' @export
 ndxMatrix <- function(df,
                       lZ,
@@ -25,18 +14,6 @@ ndxMatrix <- function(df,
   }
   names(lM) <- Names
   return(lM)
-}
-
-#' spectral decomposition of D'D, returns a q x (q-ord) matrix
-#'
-#' @export
-calcUsc <- function(q,
-                    ord) {
-  D <- diff(diag(q), diff = ord)
-  DtD <- crossprod(D)
-  U <- eigen(DtD)$vectors[, 1:(q - ord)]
-  d <- eigen(DtD)$values[1:(q - ord)]
-  return(U %*% diag(1 / sqrt(d)))
 }
 
 #' equally placed knots:

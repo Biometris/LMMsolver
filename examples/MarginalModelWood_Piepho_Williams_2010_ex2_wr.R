@@ -51,7 +51,7 @@ lZ[[1]] <- kronecker(diag(nrep),tmp1)
 Z <- do.call("cbind",lZ)
 df_ext = cbind(df, lZ)
 lM <- ndxMatrix(df, lZ, "Prow")
-obj3 = LMMsolve(fixed=yield~-1+gen+rep, random=~rep:Row+rep:Col,randomMatrices=lM, data=df_ext)
+obj3 = LMMsolve(fixed=yield~-1+gen+rep, random=~rep:Row+rep:Col,group=lM, data=df_ext)
 obj3$logL
 obj3$ED
 
@@ -73,7 +73,7 @@ lZ[[2]] = kronecker(diag(nrep),tmp2)
 Z <- do.call("cbind",lZ)
 df_ext = cbind(df, lZ)
 lM <- ndxMatrix(df, lZ, c("Prow","Pcol"))
-obj4 = LMMsolve(fixed=yield~-1+gen+rep, random=~rep:Row+rep:Col,randomMatrices=lM, data=df_ext)
+obj4 = LMMsolve(fixed=yield~-1+gen+rep, random=~rep:Row+rep:Col,group=lM, data=df_ext)
 obj4$logL
 obj4$ED
 
@@ -99,7 +99,7 @@ lZ[[3]] = kronecker(diag(nrep), U12sc)
 Z <- do.call("cbind",lZ)
 df_ext = cbind(df, lZ)
 lM <- ndxMatrix(df, lZ, c("Prow","Pcol","ProwxPcol"))
-obj5 = LMMsolve(fixed=yield~-1+rep+gen, random=~rep:Row+rep:Col,randomMatrices=lM, data=df_ext)
+obj5 = LMMsolve(fixed=yield~-1+rep+gen, random=~rep:Row+rep:Col,group=lM, data=df_ext)
 obj5$logL
 obj5$ED
 

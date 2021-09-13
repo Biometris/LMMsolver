@@ -97,10 +97,10 @@ lM <- ndxMatrix(dat, lZ, c("row","col","rowcol"))
 
 if (extra_random_terms == FALSE)
 {
-  obj1.LMM <- LMMsolve(fixed, randomMatrices=lM,data=dat_ext,eps=1.0e-8,
+  obj1.LMM <- LMMsolve(fixed, group=lM,data=dat_ext,eps=1.0e-8,
                      display=FALSE,monitor=FALSE)
 } else {
-  obj1.LMM <- LMMsolve(fixed, random=~rep:C+rep:R, randomMatrices=lM,data=dat_ext,eps=1.0e-8,
+  obj1.LMM <- LMMsolve(fixed, random=~rep:C+rep:R, group=lM,data=dat_ext,eps=1.0e-8,
                        display=FALSE,monitor=FALSE)
 }
 obj1.LMM$ED
@@ -243,10 +243,10 @@ lM <- ndxMatrix(dat, lZ, c("row","col","rowcol"))
 
 if (extra_random_terms == FALSE)
 {
-  obj3.LMM <- LMMsolve(fixed, randomMatrices=lM,data=dat_ext,eps=1.0e-8,
+  obj3.LMM <- LMMsolve(fixed, group=lM,data=dat_ext,eps=1.0e-8,
                        display=FALSE,monitor=FALSE)
 } else {
-  obj3.LMM <- LMMsolve(fixed, random=~rep:C+rep:R, randomMatrices=lM,data=dat_ext,eps=1.0e-8,
+  obj3.LMM <- LMMsolve(fixed, random=~rep:C+rep:R, group=lM,data=dat_ext,eps=1.0e-8,
                        display=FALSE,monitor=FALSE)
 }
 
@@ -287,11 +287,11 @@ lGinv[['rowcol']] <- kronecker(diag(Nrep), kronecker(precM1, precM2))
 
 if (extra_random_terms == FALSE)
 {
-  obj4.LMM <- LMMsolve(fixed, randomMatrices=lM,lGinverse=lGinv,data=dat_ext,eps=1.0e-8,
+  obj4.LMM <- LMMsolve(fixed, group=lM,lGinverse=lGinv,data=dat_ext,eps=1.0e-8,
                        display=TRUE, monitor=TRUE)
 } else {
   obj4.LMM <- LMMsolve(fixed, random=~rep:C+rep:R,lGinverse=lGinv,
-                       randomMatrices=lM,data=dat_ext,eps=1.0e-8,
+                       group=lM,data=dat_ext,eps=1.0e-8,
                        display=TRUE, monitor=TRUE)
 }
 

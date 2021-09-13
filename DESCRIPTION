@@ -8,11 +8,11 @@ Maintainer: Martin Boer <martin.boer@wur.nl>
 Description: Linear Mixed Model solver.
 License: GPL
 Depends: R (>= 3.6)
-Imports:    
+Imports: 
     methods,
     Rcpp (>= 0.10.4), 
     spam, 
     splines
-LinkingTo: Rcpp
-RoxygenNote: 7.1.1
+LinkingTo: Rcpp, RcppArmadillo
+RoxygenNote: 7.1.2
 Encoding: UTF-8

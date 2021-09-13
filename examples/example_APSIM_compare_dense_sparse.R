@@ -11,7 +11,7 @@ library(zoo)
 library(asreml)
 
 # subset of APSIM simulation data set Daniela Bustos-Korts
-dat_traj = read.csv('APSIM_Emerald.csv',header=TRUE, stringsAsFactors = FALSE)
+dat_traj = read.csv('./examples/APSIM_Emerald.csv',header=TRUE, stringsAsFactors = FALSE)
 sel_geno <- paste0("g",formatC(1:100, width=3,flag=0))
 dat_traj = filter(dat_traj, year==2013, geno %in% sel_geno)
 
@@ -101,7 +101,7 @@ colnames(dat_ext) <- c(colnames(dat_ext)[1:ncol(dat)], paste0("col",1:ncol(Z)))
 
 s <- proc.time()[3]
 lM <- ndxMatrix(dat, lZ, c("f(z)","g","g.z","f_g(z)"))
-obj.dense <- LMMsolve(ysim~z, randomMatrices=lM, data=dat_ext,display=FALSE)
+obj.dense <- LMMsolve(ysim~z, group=lM, data=dat_ext,display=FALSE)
 e <- proc.time()[3]
 dense.time <- e-s
 round(obj.dense$ED, 2)
@@ -134,7 +134,7 @@ lGinv[['g.z']] <- as.spam(D2 %*% I_g %*% t(D2))
 lGinv[['f_g(z)']] <- as.spam(kronecker(D1 %*% DtD1 %*% t(D1), D2 %*% I_g %*% t(D2)))
 names(lGinv)
 s <- proc.time()[3]
-obj.sparse <- LMMsolve(ysim~z, randomMatrices=lM,lGinverse=lGinv, data=dat_ext,
+obj.sparse <- LMMsolve(ysim~z, group=lM,lGinverse=lGinv, data=dat_ext,
                          display=TRUE,monitor=FALSE)
 e <- proc.time()[3]
 sparse.time <- e-s

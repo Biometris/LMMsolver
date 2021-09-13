@@ -8,8 +8,8 @@ library(LMMsolver)
 library(dplyr)
 
 # a genotypes, n times replicated
-a <- 10
-n <- 3
+a <- 4
+n <- 2
 
 set.seed(1234)
 

@@ -39,7 +39,7 @@ D <- diff(diag(a), diff=1)
 U <- cbind(1, t(D))
 UtU <- crossprod(U)
 
-# here we use combination of argument randomMatrices with
+# here we use combination of argument group with
 # lGinverse:
 lZ <- list()
 lZ[[1]] <- kronecker(U, rep(1,n))
@@ -49,7 +49,7 @@ lM <- ndxMatrix(dat, lZ, c("diff_geno"))
 lGinv <- list()
 lGinv[['diff_geno']] <- as.spam(UtU)
 
-obj2 <- LMMsolve(y~rep, randomMatrices=lM,lGinverse=lGinv, data=dat_ext, eps=1.0e-12,display=TRUE)
+obj2 <- LMMsolve(y~rep, group=lM,lGinverse=lGinv, data=dat_ext, eps=1.0e-12,display=TRUE)
 obj1$logL
 obj2$logL
 

@@ -31,6 +31,8 @@ double getvalueC(IntegerVector rowpointers,
 }
 
 // left looking cholesky
+//
+// [[Rcpp::export]]
 NumericVector cholesky(NumericVector L,
                        const IntegerVector& colpointers,
                        const IntegerVector& rowindices)

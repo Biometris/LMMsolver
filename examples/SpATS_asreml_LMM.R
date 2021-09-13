@@ -122,7 +122,7 @@ colnames(Z) <- paste0("Z",1:ncol(Z))
 dat_ext = cbind(dat, Z)
 lM <- ndxMatrix(dat, lZ, c("fr","fc","fr.c","r.fc","fr.fc"))
 
-obj0.LMM <- LMMsolve(yield~rep+gen+x1+x2+x12, randomMatrices=lM,
+obj0.LMM <- LMMsolve(yield~rep+gen+x1+x2+x12, group=lM,
                      data=dat_ext,eps=1.0e-10,
                      display=FALSE,monitor=FALSE)
 
@@ -162,7 +162,7 @@ colnames(Z) <- paste0("Z",1:ncol(Z))
 dat_ext = cbind(dat, Z)
 lM <- ndxMatrix(dat, lZ, c("fr","fc","fr.c","r.fc","fr.fc"))
 
-obj1.LMM <- LMMsolve(yield~rep+gen+x1+x2+x12, randomMatrices=lM,
+obj1.LMM <- LMMsolve(yield~rep+gen+x1+x2+x12, group=lM,
                      data=dat_ext,eps=1.0e-10,
                      display=FALSE,monitor=FALSE)
 
@@ -191,7 +191,7 @@ colnames(Z) <- paste0("Z",1:ncol(Z))
 dat_ext = cbind(dat, Z)
 lM <- ndxMatrix(dat, lZ, c("fr","fc","fr.c","r.fc"))
 
-obj2.LMM <- LMMsolve(yield~rep+gen+x1+x2+x12, randomMatrices=lM,
+obj2.LMM <- LMMsolve(yield~rep+gen+x1+x2+x12, group=lM,
                      data=dat_ext,eps=1.0e-10,
                      display=FALSE,monitor=FALSE)
 

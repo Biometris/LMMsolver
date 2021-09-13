@@ -40,7 +40,7 @@ obj0$ED
 
 # include QTL, using LMMsolve
 lM <- list(QTL=c(3:5))
-obj1 <- LMMsolve(fixed=pheno~cross, randomMatrices=lM,residualterm='cross', data=df, eps=1.0e-8,
+obj1 <- LMMsolve(fixed=pheno~cross, group=lM,residualterm='cross', data=df, eps=1.0e-8,
                  monitor=TRUE, display= FALSE)
 
 # check with asreml:

@@ -39,7 +39,7 @@ dim(Z)
 dat_ext = cbind(dat, Z)
 lM <- ndxMatrix(dat, lZ, c("B0","B1","B2","B3"))
 
-obj1 <- LMMsolve(y~x0+x1+x2+x3, randomMatrices=lM, data=dat_ext, display=FALSE,monitor=TRUE)
+obj1 <- LMMsolve(y~x0+x1+x2+x3, group=lM, data=dat_ext, display=FALSE,monitor=TRUE)
 round(obj1$ED,2)
 obj1$logL
 
@@ -66,7 +66,7 @@ lGinv <- lapply(q, makeP)
 sapply(lGinv, dim)
 names(lGinv) <- paste0("B",0:3)
 names(lGinv)
-obj2 <- LMMsolve(y~x0+x1+x2+x3, randomMatrices=lM,lGinverse=lGinv, data=dat_ext,
+obj2 <- LMMsolve(y~x0+x1+x2+x3, group=lM,lGinverse=lGinv, data=dat_ext,
                 display=TRUE,monitor=TRUE)
 round(obj1$ED,2)
 round(obj2$ED,2)
