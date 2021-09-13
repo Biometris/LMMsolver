@@ -38,7 +38,7 @@ obj1 = SpATS.nogeno(response = "anomaly",
                    spatial = ~SAP(lat, lon,  nseg = nseg, pord=pord, degree=degr),
                    data = dat,
                    control = list(maxit = 100, tolerance = tolerance,
-                                  monitoring = 2, update.psi = FALSE))
+                                  traceing = 2, update.psi = FALSE))
 
 # effective dimensions close to SAP2014 paper:
 summary(obj1)
@@ -152,7 +152,7 @@ lGinv[[2]] <- kronecker(diag.spam(q1), DtD2) + CCt
 names(lGinv) <- c('f(lat,lon)|lat', 'f(lat,lon)|lon')
 
 obj2 = sparseMixedModels(y, X, B12, lGinv, lRinv,
-              maxiter=100, eps=tolerance, display=TRUE, monitor=TRUE)
+              maxiter=100, eps=tolerance, display=TRUE, trace=TRUE)
 e <- proc.time()[3]
 cat("Computation time:", e-s, "seconds")
 obj2$ED

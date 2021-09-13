@@ -8,7 +8,7 @@ LMMsolve <- function(fixed,
                      data,
                      residual = NULL,
                      eps = 1.0e-6,
-                     monitor = FALSE,
+                     trace = FALSE,
                      display = FALSE,
                      maxiter = 250) {
   ## make random part:
@@ -101,7 +101,7 @@ LMMsolve <- function(fixed,
     names(lRinv) = "residual"
   }
   y <- mf[, 1]
-  obj <- sparseMixedModels(y, X, Z, lGinv, lRinv, eps, monitor,
+  obj <- sparseMixedModels(y, X, Z, lGinv, lRinv, eps, trace,
                            display = display, maxiter = maxiter)
   dim <- as.numeric(c(dim.f, dim.r))
   term.labels <- c(term.labels.f, term.labels.r)

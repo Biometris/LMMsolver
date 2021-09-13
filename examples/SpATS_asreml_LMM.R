@@ -33,7 +33,7 @@ nsegC <- Ncols/2
 #nsegR <- Nrows-1
 #nsegC <- Ncols-1
 obj0.SpATS <- SpATS(response="yield",spatial=~PSANOVA(col,row, nseg=c(nsegC,nsegR)),
-                   genotype="gen",fixed=~rep, data=dat, control=list(monitor=0,tolerance=1.0e-10))
+                   genotype="gen",fixed=~rep, data=dat, control=list(trace=0,tolerance=1.0e-10))
 summary(obj0.SpATS)
 plot(obj0.SpATS)
 
@@ -99,7 +99,7 @@ d2 <- eigen(DtD2)$values[1:(q2-pord)]
 d3 <- c(d1 %x% rep(1, q2 - pord) + rep(1, q1 - pord) %x% d2)
 objb.LMM <- LMMsolve(yield~rep+gen+x1+x2+x12,
                      data=dat,eps=1.0e-10,
-                     display=FALSE,monitor=FALSE)
+                     display=FALSE,trace=FALSE)
 
 objb.asr <- asreml(yield~rep+gen+x1+x2+x12, dat=dat)
 
@@ -124,7 +124,7 @@ lM <- ndxMatrix(dat, lZ, c("fr","fc","fr.c","r.fc","fr.fc"))
 
 obj0.LMM <- LMMsolve(yield~rep+gen+x1+x2+x12, group=lM,
                      data=dat_ext,eps=1.0e-10,
-                     display=FALSE,monitor=FALSE)
+                     display=FALSE,trace=FALSE)
 
 obj0.asr <- asreml(yield~rep+gen+x1+x2+x12,
                    random=~grp(fr)+grp(fc)+grp(fr.c)+grp(r.fc)+grp(fr.fc),
@@ -164,7 +164,7 @@ lM <- ndxMatrix(dat, lZ, c("fr","fc","fr.c","r.fc","fr.fc"))
 
 obj1.LMM <- LMMsolve(yield~rep+gen+x1+x2+x12, group=lM,
                      data=dat_ext,eps=1.0e-10,
-                     display=FALSE,monitor=FALSE)
+                     display=FALSE,trace=FALSE)
 
 obj1.asr <- asreml(yield~rep+gen+x1+x2+x12,
                    random=~grp(fr)+grp(fc)+grp(fr.c)+grp(r.fc)+grp(fr.fc),
@@ -193,7 +193,7 @@ lM <- ndxMatrix(dat, lZ, c("fr","fc","fr.c","r.fc"))
 
 obj2.LMM <- LMMsolve(yield~rep+gen+x1+x2+x12, group=lM,
                      data=dat_ext,eps=1.0e-10,
-                     display=FALSE,monitor=FALSE)
+                     display=FALSE,trace=FALSE)
 
 obj2.asr <- asreml(yield~rep+gen+x1+x2+x12,
                    random=~grp(fr)+grp(fc)+grp(fr.c)+grp(r.fc),

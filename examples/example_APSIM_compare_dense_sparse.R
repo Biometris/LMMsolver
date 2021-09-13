@@ -135,7 +135,7 @@ lGinv[['f_g(z)']] <- as.spam(kronecker(D1 %*% DtD1 %*% t(D1), D2 %*% I_g %*% t(D
 names(lGinv)
 s <- proc.time()[3]
 obj.sparse <- LMMsolve(ysim~z, group=lM,lGinverse=lGinv, data=dat_ext,
-                         display=TRUE,monitor=FALSE)
+                         display=TRUE,trace=FALSE)
 e <- proc.time()[3]
 sparse.time <- e-s
 round(obj.sparse$ED, 2)

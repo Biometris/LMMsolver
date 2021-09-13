@@ -79,7 +79,7 @@ lZ[[1]] = kronecker(diag(1,r), Usc)
 Z <- do.call("cbind",lZ)
 oats.df_ext = cbind(oats.df,Z)
 lM <- ndxMatrix(oats.df, lZ, c("P-splines"))
-obj2 <- LMMsolve(y~Trt+Rep, group=lM, data=oats.df_ext,monitor=FALSE,eps=1.0e-10)
+obj2 <- LMMsolve(y~Trt+Rep, group=lM, data=oats.df_ext,trace=FALSE,eps=1.0e-10)
 
 D = diff(diag(v), diff=1)
 DtD = crossprod(D)

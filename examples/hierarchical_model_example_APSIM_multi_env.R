@@ -149,7 +149,7 @@ if (solve_LMM)
 {
   s <- proc.time()[3]
   obj <- LMMsolve(ysim~das, group=lM,lGinverse=lGinv, data=dat_ext,eps=1.0e-4,
-                       display=TRUE,monitor=TRUE)
+                       display=TRUE,trace=TRUE)
   e <- proc.time()[3]
   cat("Computation time ", e-s, "seconds \n")
   save(obj, file="LMMsolve_APSIM_multi_env.rda")

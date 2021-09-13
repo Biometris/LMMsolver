@@ -79,7 +79,7 @@ sparseMixedModels <- function(y,
                               maxiter = 100,
                               eps = 1.0e-6,
                               display = FALSE,
-                              monitor = FALSE) {
+                              trace = FALSE) {
   Ntot <- length(y)
   p <- ncol(X)
   q <- ncol(Z)
@@ -130,7 +130,7 @@ sparseMixedModels <- function(y,
   ADcholC <- ADchol(listC)
 
   logLprev <- Inf
-  if (monitor) {
+  if (trace) {
     cat("iter logLik\n")
   }
 
@@ -169,7 +169,7 @@ sparseMixedModels <- function(y,
                      ADcholC = ADcholC, phi = phi, psi = psi, theta = theta,
                      yPy = yPy)
 
-    if (monitor) {
+    if (trace) {
       cat(sprintf("%4d %8.4f\n", it, logL))
     }
     if (abs(logLprev - logL) < eps) {

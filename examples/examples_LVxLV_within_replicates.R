@@ -98,10 +98,10 @@ lM <- ndxMatrix(dat, lZ, c("row","col","rowcol"))
 if (extra_random_terms == FALSE)
 {
   obj1.LMM <- LMMsolve(fixed, group=lM,data=dat_ext,eps=1.0e-8,
-                     display=FALSE,monitor=FALSE)
+                     display=FALSE,trace=FALSE)
 } else {
   obj1.LMM <- LMMsolve(fixed, random=~rep:C+rep:R, group=lM,data=dat_ext,eps=1.0e-8,
-                       display=FALSE,monitor=FALSE)
+                       display=FALSE,trace=FALSE)
 }
 obj1.LMM$ED
 obj1.LMM$EDmax
@@ -244,10 +244,10 @@ lM <- ndxMatrix(dat, lZ, c("row","col","rowcol"))
 if (extra_random_terms == FALSE)
 {
   obj3.LMM <- LMMsolve(fixed, group=lM,data=dat_ext,eps=1.0e-8,
-                       display=FALSE,monitor=FALSE)
+                       display=FALSE,trace=FALSE)
 } else {
   obj3.LMM <- LMMsolve(fixed, random=~rep:C+rep:R, group=lM,data=dat_ext,eps=1.0e-8,
-                       display=FALSE,monitor=FALSE)
+                       display=FALSE,trace=FALSE)
 }
 
 # should be the same:
@@ -288,11 +288,11 @@ lGinv[['rowcol']] <- kronecker(diag(Nrep), kronecker(precM1, precM2))
 if (extra_random_terms == FALSE)
 {
   obj4.LMM <- LMMsolve(fixed, group=lM,lGinverse=lGinv,data=dat_ext,eps=1.0e-8,
-                       display=TRUE, monitor=TRUE)
+                       display=TRUE, trace=TRUE)
 } else {
   obj4.LMM <- LMMsolve(fixed, random=~rep:C+rep:R,lGinverse=lGinv,
                        group=lM,data=dat_ext,eps=1.0e-8,
-                       display=TRUE, monitor=TRUE)
+                       display=TRUE, trace=TRUE)
 }
 
 obj3.LMM$logL

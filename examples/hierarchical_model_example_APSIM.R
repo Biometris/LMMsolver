@@ -99,7 +99,7 @@ lGinv[['g.t']]    <- precM2
 lGinv[['f_g(t)']] <- precM1 %x% precM2 #kronecker product
 names(lGinv)
 obj <- LMMsolve(ysim~das, group=lM,lGinverse=lGinv, data=dat_ext,
-                       display=TRUE,monitor=TRUE)
+                       display=TRUE,trace=TRUE)
 round(obj$ED, 2)
 
 # table with parameters:
