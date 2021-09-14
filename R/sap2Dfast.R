@@ -40,9 +40,8 @@ sap2Dfast <- function(y,
   U1_null <- cbind(1, scale(1:q1))
   U2_null <- cbind(1, scale(1:q2))
 
-  norm_vec <- function(x) { return(sqrt(sum(x^2)))}
-  U1_null <- apply(U1_null, MARGIN = 2, function(x) (x / norm_vec(x)))
-  U2_null <- apply(U2_null, MARGIN = 2, function(x) (x / norm_vec(x)))
+  U1_null <- apply(U1_null, MARGIN = 2, function(x) (x / normVec(x)))
+  U2_null <- apply(U2_null, MARGIN = 2, function(x) (x / normVec(x)))
 
   U_null <- U1_null %x% U2_null
   if (scaleX) {
@@ -122,9 +121,8 @@ sap2D <- function(x1,
   U1_null <- cbind(1, scale(1:q1))
   U2_null <- cbind(1, scale(1:q2))
 
-  norm_vec <- function(x) { return(sqrt(sum(x^2)))}
-  U1_null <- apply(U1_null, MARGIN = 2, function(x) (x / norm_vec(x)))
-  U2_null <- apply(U2_null, MARGIN = 2, function(x) (x / norm_vec(x)))
+  U1_null <- apply(U1_null, MARGIN = 2, function(x) (x / normVec(x)))
+  U2_null <- apply(U2_null, MARGIN = 2, function(x) (x / normVec(x)))
 
   U_null <- U1_null %x% U2_null
   if (scaleX) {
@@ -145,7 +143,8 @@ sap2D <- function(x1,
   C2[1, 1] = C2[q2,2] = 1
   C <- C1 %x% C2
 
-  CCt <- spam::as.spam(C %*% t(C))
+  CCt <- spam::tcrossprod(C)
+
   lGinv <- list()
   lGinv[[1]] <- DtD1 %x% spam::diag.spam(q2) + CCt
   lGinv[[2]] <- spam::diag.spam(q1) %x% DtD2 + CCt

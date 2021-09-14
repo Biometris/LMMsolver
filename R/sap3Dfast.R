@@ -53,10 +53,9 @@ sap3Dfast <- function(y,
   U2_null <- cbind(1, scale(1:q2))
   U3_null <- cbind(1, scale(1:q3))
 
-  norm_vec <- function(x) { return(sqrt(sum(x^2)))}
-  U1_null <- apply(U1_null, MARGIN = 2, function(x) (x / norm_vec(x)))
-  U2_null <- apply(U2_null, MARGIN = 2, function(x) (x / norm_vec(x)))
-  U3_null <- apply(U3_null, MARGIN = 2, function(x) (x / norm_vec(x)))
+  U1_null <- apply(U1_null, MARGIN = 2, function(x) (x / normVec(x)))
+  U2_null <- apply(U2_null, MARGIN = 2, function(x) (x / normVec(x)))
+  U3_null <- apply(U3_null, MARGIN = 2, function(x) (x / normVec(x)))
 
   U_null <- U1_null %x% U2_null %x% U3_null
   if (scaleX) {
@@ -153,10 +152,9 @@ sap3D <- function(x1,
   U2_null <- cbind(1, scale(1:q2))
   U3_null <- cbind(1, scale(1:q3))
 
-  norm_vec <- function(x) { return(sqrt(sum(x^2)))}
-  U1_null <- apply(U1_null, MARGIN = 2, function(x) (x / norm_vec(x)))
-  U2_null <- apply(U2_null, MARGIN = 2, function(x) (x / norm_vec(x)))
-  U3_null <- apply(U3_null, MARGIN = 2, function(x) (x / norm_vec(x)))
+  U1_null <- apply(U1_null, MARGIN = 2, function(x) (x / normVec(x)))
+  U2_null <- apply(U2_null, MARGIN = 2, function(x) (x / normVec(x)))
+  U3_null <- apply(U3_null, MARGIN = 2, function(x) (x / normVec(x)))
 
   U_null <- U1_null %x% U2_null %x% U3_null
 
@@ -182,7 +180,8 @@ sap3D <- function(x1,
   C3[1, 1] <- C3[q3, 2] <- 1
   C <- C1 %x% C2 %x% C3
 
-  CCt <- spam::as.spam(C %*% t(C))
+  CCt <- spam::tcrossprod(C)
+
   lGinv <- list()
   lGinv[[1]] <- DtD1 %x% spam::diag.spam(q2) %x% spam::diag.spam(q3) + CCt
   lGinv[[2]] <- spam::diag.spam(q1) %x% DtD2 %x% spam::diag.spam(q3) + CCt
@@ -192,9 +191,6 @@ sap3D <- function(x1,
 
   return(list(X = X, Z = B123, lGinv = lGinv))
 }
-
-
-
 
 #' predict for sap3D, without spectral decomposition
 #'
@@ -240,7 +236,7 @@ predict.sap3Dfast <- function(object,
     X2 <- cbind(1, x2p)
     X3 <- cbind(1, x3p)
     if (!missing(newdata)) {
-      Xpred <- RowKronecker(RowKronecker(X1,X2), X3)
+      Xpred <- RowKronecker(RowKronecker(X1, X2), X3)
     } else {
       Xpred <- X1 %x% X2 %x% X3
     }

@@ -9,7 +9,7 @@ linearSum  <- function(theta,
 quadForm <- function(x,
                      A,
                      y = x) {
-  sum(x*(A %*% y))
+  sum(x * (A %*% y))
 }
 
 REMLlogL <- function(ADcholRinv,

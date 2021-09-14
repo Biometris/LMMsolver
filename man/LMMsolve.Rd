@@ -21,7 +21,9 @@ LMMsolve(
 \arguments{
 \item{fixed}{...}
 
-\item{random}{...}
+\item{random}{..}
+
+\item{spatial}{...}
 
 \item{group}{...}
 
