@@ -6,7 +6,7 @@ sap2Dfast <- function(y,
                       x2,
                       knots,
                       trace = TRUE,
-                      thr = 1.0e-8,
+                      tolerance = 1.0e-8,
                       scaleX = FALSE) {
   nseg <- knots
   n <- length(y)
@@ -41,8 +41,8 @@ sap2Dfast <- function(y,
   U2_null <- cbind(1, scale(1:q2))
 
   norm_vec <- function(x) { return(sqrt(sum(x^2)))}
-  U1_null <- apply(U1_null, MARGIN=2, function(x) (x/norm_vec(x)))
-  U2_null <- apply(U2_null, MARGIN=2, function(x) (x/norm_vec(x)))
+  U1_null <- apply(U1_null, MARGIN = 2, function(x) (x / norm_vec(x)))
+  U2_null <- apply(U2_null, MARGIN = 2, function(x) (x / norm_vec(x)))
 
   U_null <- U1_null %x% U2_null
   if (scaleX) {
@@ -69,20 +69,90 @@ sap2Dfast <- function(y,
   lGinv[[1]] <- DtD1 %x% spam::diag.spam(q2) + CCt
   lGinv[[2]] <- spam::diag.spam(q1) %x% DtD2 + CCt
 
-  names(lGinv) <- c('x1','x2')
+  names(lGinv) <- c("x1", "x2")
 
   obj <- sparseMixedModels(y = y, X = X, Z = B12, lGinv = lGinv, lRinv = lRinv,
-                           maxit = 200, tolerance = thr,
+                           maxit = 200, tolerance = tolerance,
                            display = FALSE, trace = trace)
 
   e <- proc.time()[3]
-  cat("Computation time sparse SAP fast:", e-s, "seconds\n")
+  cat("Computation time sparse SAP fast:", e - s, "seconds\n")
 
   L <- list(a = obj$a, edf = obj$ED[-1], knots1 = knots1, knots2 = knots2,
             U0 = U_null, x1 = x1, x2 = x2, scaleX = scaleX)
 
   class(L) <- "sap2Dfast"
   return(L)
+}
+
+#' sap2D, without spectral decomposition
+#'
+#' @export
+sap2D <- function(x1,
+                  x2,
+                  knots,
+                  scaleX = FALSE) {
+  nseg <- knots
+
+  pord <- 2
+  degr <- 3
+  x1lim <- c(min(x1) - 0.01, max(x1) + 0.01)
+  x2lim <- c(min(x2) - 0.01, max(x2) + 0.01)
+
+  knots1 <- PsplinesKnots(x1lim[1], x1lim[2], degree = degr, nseg = nseg[1])
+  knots2 <- PsplinesKnots(x2lim[1], x2lim[2], degree = degr, nseg = nseg[2])
+
+  B1 <- spam::as.spam(Bsplines(knots1, x1))
+  B2 <- spam::as.spam(Bsplines(knots2, x2))
+  q1 <- ncol(B1)
+  q2 <- ncol(B2)
+
+  D1 <- spam::diff.spam(diag(q1), diff = pord)
+  DtD1 <- crossprod(D1)
+
+  D2 <- spam::diff.spam(diag(q2), diff = pord)
+  DtD2 <- crossprod(D2)
+
+  # we have to calculate RowKronecker product only once:
+  one.1 <- matrix(1, 1, ncol(B1))
+  one.2 <- matrix(1, 1, ncol(B2))
+  B12 <- (B1 %x% one.2) * (one.1 %x% B2)
+
+  # calculate the linear/fixed parts:
+  U1_null <- cbind(1, scale(1:q1))
+  U2_null <- cbind(1, scale(1:q2))
+
+  norm_vec <- function(x) { return(sqrt(sum(x^2)))}
+  U1_null <- apply(U1_null, MARGIN = 2, function(x) (x / norm_vec(x)))
+  U2_null <- apply(U2_null, MARGIN = 2, function(x) (x / norm_vec(x)))
+
+  U_null <- U1_null %x% U2_null
+  if (scaleX) {
+    X <- B12 %*% U_null
+    # take first column as intercept...
+    # X[,1] <- 1
+    X <- X[, -1]
+  } else {
+    # X1 <- cbind(1, x1)
+    # X2 <- cbind(1, x2)
+    X1 <- as.matrix(x1)
+    X2 <- as.matrix(x2)
+    X <- RowKronecker(X1, X2)
+  }
+  C1 <- spam::spam(x = 0, nrow = q1, ncol = pord)
+  C1[1, 1] = C1[q1,2] = 1
+  C2 <- spam::spam(x = 0, nrow = q2, ncol = pord)
+  C2[1, 1] = C2[q2,2] = 1
+  C <- C1 %x% C2
+
+  CCt <- spam::as.spam(C %*% t(C))
+  lGinv <- list()
+  lGinv[[1]] <- DtD1 %x% spam::diag.spam(q2) + CCt
+  lGinv[[2]] <- spam::diag.spam(q1) %x% DtD2 + CCt
+
+  names(lGinv) <- c("x1", "x2")
+
+  return(list(X = X, Z = B12, lGinv = lGinv))
 }
 
 #' predict for sap2D, without spectral decomposition

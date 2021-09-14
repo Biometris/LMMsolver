@@ -17,10 +17,20 @@ construct_ADchol_Rcpp <- function(U, P_list) {
     .Call(`_LMMsolver_construct_ADchol_Rcpp`, U, P_list)
 }
 
+#' Row-wise kronecker product
+#'
+#' Row-wise kronecker product
+#'
+#' @export
 RowKronecker <- function(X1, X2) {
     .Call(`_LMMsolver_RowKronecker`, X1, X2)
 }
 
+#' Spectral decomposition of D'D, returns a q x (q-ord) matrix
+#'
+#' Spectral decomposition of D'D, returns a q x (q-ord) matrix
+#'
+#' @export
 calcUsc <- function(q, ord) {
     .Call(`_LMMsolver_calcUsc`, q, ord)
 }

@@ -7,6 +7,7 @@
 LMMsolve(
   fixed,
   random = NULL,
+  spatial = NULL,
   group = NULL,
   lGinverse = NULL,
   data,

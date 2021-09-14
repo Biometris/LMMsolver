@@ -18,6 +18,7 @@
 #' @export
 LMMsolve <- function(fixed,
                      random = NULL,
+                     spatial = NULL,
                      group = NULL,
                      lGinverse = NULL,
                      data,
@@ -101,6 +102,22 @@ LMMsolve <- function(fixed,
                                           FUN = contrasts, contrasts = TRUE))
   dim.f <- table(attr(X, "assign"))
   term.labels.f <- attr(mt, "term.labels")
+
+  ## Make spatial part.
+  env <- environment(spatial)
+  if(inherits(spatial, "character"))
+    spatial <- as.formula(spatial)
+  tf <- terms.formula(spatial, specials = c("sap2D", "sap3D"))
+  terms <- attr(tf, "term.labels")
+  nt <- length(terms)
+  if(nt != 1)
+    stop("Error in the specification of the spatial effect: only a sigle bidimensional function is allowed")
+
+  spatRes <- eval(parse(text = terms), envir = env)
+
+  X <- cbind(X, spatRes$X)
+  Z <- cbind(Z, spatRes$Z)
+  lGinv <- c(lGinv, spatRes$lGinv)
 
   # add intercept....
   if (attr(mt, "intercept") == 1) {

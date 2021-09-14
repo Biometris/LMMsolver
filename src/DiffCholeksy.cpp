@@ -206,6 +206,7 @@ double logdet(SEXP arg,
   const int sz = rowindices.size();
   const int n_prec_mat = P.ncol();
   NumericVector C(sz,0.0);
+
   for (int i=0;i<sz;i++)
   {
     for (int k=0;k<n_prec_mat;k++)

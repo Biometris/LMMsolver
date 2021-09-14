@@ -7,6 +7,7 @@ library(dplyr)
 library(LMMsolver)
 library(SpATS)
 library(zoo)
+library(spam)
 
 # analysis of three models, within replicates:
 # 1. Durban2003 data

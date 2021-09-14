@@ -11,3 +11,4 @@ ADchol(P_list)
 Automatic differentiation Cholesky, ZtZ and P spam matrices,
 with C = lambda[1]*P1 + lambda[2]*P2 + .....
 }
+\keyword{internal}

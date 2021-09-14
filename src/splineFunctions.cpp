@@ -5,22 +5,28 @@
 using namespace Rcpp;
 using namespace arma;
 
-// Row-wise kronecker product
-//
+//' Row-wise kronecker product
+//'
+//' Row-wise kronecker product
+//'
+//' @export
 // [[Rcpp::export]]
 arma::mat RowKronecker(const arma::mat& X1,
-                        const arma::mat& X2) {
+                       const arma::mat& X2) {
   arma::mat one1 = arma::ones(1, X1.n_cols);
   arma::mat one2 = arma::ones(1, X2.n_cols);
   arma::mat rowKron = arma::kron(X1, one2) % arma::kron(one1, X2);
   return rowKron;
 }
 
-// spectral decomposition of D'D, returns a q x (q-ord) matrix
-//
+//' Spectral decomposition of D'D, returns a q x (q-ord) matrix
+//'
+//' Spectral decomposition of D'D, returns a q x (q-ord) matrix
+//'
+//' @export
 // [[Rcpp::export]]
 arma::mat calcUsc(const double& q,
-                   const double& ord) {
+                  const double& ord) {
   arma::mat D = arma::diff(arma::eye(q, q), ord);
   arma::mat DtD = D.t() * D;
 

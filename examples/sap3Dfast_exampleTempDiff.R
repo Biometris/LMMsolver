@@ -4,7 +4,7 @@ library(SAP)
 library(LMMsolver)
 
 
-df <- read.csv("exampleTempDiff.csv")
+df <- read.csv("examples/exampleTempDiff.csv")
 head(df)
 
 y <- df$par
@@ -33,10 +33,18 @@ fit0 <- predict(obj0, grid=grid)$eta
 #fit0n <- predict(obj0, newdata=newData)$eta
 
 # fast sap, using LMMsolver:
-obj1 <- sap3Dfast(y, x1, x2, x3, knots=knots, trace=trace, thr=thr)
+obj1 <- sap3Dfast(y, x1, x2, x3, knots=knots, trace=trace, tolerance=thr)
 obj1$edf
-
 fit1 <- predict(obj1, grid=grid)$eta
+
+obj2 <- LMMsolve(fixed = formula(y~1),
+                 spatial = ~sap3D(x1, x2, x3, knots),
+                 data = df,
+                 trace = trace,
+                 tolerance = thr)
+obj2$ED
+
+
 #fit1n <- predict(obj1, newdata=newData)$eta
 
 # fast sap, using LMMsolver:
