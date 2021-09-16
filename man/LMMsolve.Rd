@@ -19,27 +19,49 @@ LMMsolve(
 )
 }
 \arguments{
-\item{fixed}{...}
+\item{fixed}{A formula for the fixed part of the model. Should be of the
+form "response ~ pred"}
 
-\item{random}{..}
+\item{random}{A formula for the random part of the model. Should be of the
+form "~ pred".}
 
-\item{spatial}{...}
+\item{group}{A named list where each component is a numeric vector
+specifying contiguous fields in data that are to be considered as a
+single term.}
 
-\item{group}{...}
+\item{lGinverse}{A named list where each component is a matrix corresponding
+to the group of the same name.}
 
-\item{lGinverse}{...}
+\item{data}{A data.frame containing the modeling data.}
 
-\item{data}{...}
+\item{residual}{A formula for the residual part of the model. Should be of
+the form "~ pred".}
 
-\item{residual}{...}
+\item{tolerance}{A numerical value. The convergence tolerance for the
+algorithm.}
 
-\item{tolerance}{...}
+\item{trace}{Should the progress of the algorithm be printed?}
 
-\item{trace}{...}
+\item{display}{Should the ... matrix created in the algorithm be plotted?}
 
-\item{display}{...}
+\item{maxit}{A numerical value. The maximum number of iterations for the
+algorithm.}
 
-\item{maxit}{...}
+\item{spatialA}{formula for the random part of the model. Should be of the
+form "~ sap2D()" or "~sap3d()".}
+}
+\value{
+An object of class LMMsolve, a list with the following items:
+\item{logL}{The loglikelihood}
+\item{sigma2e}{The residual error}
+\item{tau2e}{}
+\item{ED}{The effective dimensions}
+\item{EDmax}{The maximal effective dimensions}
+\item{EDnames}{The names of the effective dimensions}
+\item{a}{}
+\item{yhat}{The fitted values}
+\item{dim}{}
+\item{term.labels}{}
 }
 \description{
 Solve Linear Mixed Models

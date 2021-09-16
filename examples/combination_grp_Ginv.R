@@ -7,6 +7,7 @@ rm(list=ls())
 library(asreml)
 library(LMMsolver)
 library(dplyr)
+library(spam)
 
 # a genotypes, n times replicated
 a <- 10
@@ -49,7 +50,8 @@ lM <- ndxMatrix(dat, lZ, c("diff_geno"))
 lGinv <- list()
 lGinv[['diff_geno']] <- as.spam(UtU)
 
-obj2 <- LMMsolve(y~rep, group=lM,lGinverse=lGinv, data=dat_ext, tolerance=1.0e-12,display=TRUE)
+obj2 <- LMMsolve(y~rep, group=lM, lGinverse=lGinv,
+                 data=dat_ext, tolerance=1.0e-12,display=TRUE)
 obj1$logL
 obj2$logL
 

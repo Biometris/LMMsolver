@@ -17,9 +17,10 @@ sap3Dfast(y, x1, x2, x3, knots, trace = TRUE, tolerance = 1e-08, scaleX = TRUE)
 
 \item{knots}{...}
 
-\item{trace}{...}
+\item{trace}{Should the progress of the algorithm be printed?}
 
-\item{tolerance}{...}
+\item{tolerance}{A numerical value. The convergence tolerance for the
+algorithm.}
 
 \item{scaleX}{...}
 }
