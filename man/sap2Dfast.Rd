@@ -6,6 +6,21 @@
 \usage{
 sap2Dfast(y, x1, x2, knots, trace = TRUE, tolerance = 1e-08, scaleX = FALSE)
 }
+\arguments{
+\item{y}{...}
+
+\item{x1}{...}
+
+\item{x2}{...}
+
+\item{knots}{...}
+
+\item{trace}{...}
+
+\item{tolerance}{...}
+
+\item{scaleX}{...}
+}
 \description{
 sap2D, without spectral decomposition
 }

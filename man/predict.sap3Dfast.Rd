@@ -6,6 +6,15 @@
 \usage{
 \method{predict}{sap3Dfast}(object, ..., newdata, grid = c(30, 30, 30))
 }
+\arguments{
+\item{object}{...}
+
+\item{...}{...}
+
+\item{newdata}{...}
+
+\item{grid}{...}
+}
 \description{
 predict for sap3D, without spectral decomposition
 }

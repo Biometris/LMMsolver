@@ -6,6 +6,13 @@
 \usage{
 \method{predict}{sap2Dfast}(object, ..., grid)
 }
+\arguments{
+\item{object}{...}
+
+\item{...}{...}
+
+\item{grid}{...}
+}
 \description{
 predict for sap2D, without spectral decomposition
 }

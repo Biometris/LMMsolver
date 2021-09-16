@@ -2,3 +2,4 @@
 ^\.Rproj\.user$
 examples
 unused functions
+.gitlab-ci.yml

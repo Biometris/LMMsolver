@@ -1,5 +1,10 @@
 #' sap3D, without spectral decomposition
 #'
+#' @inheritParams sap3D
+#' @inheritParams LMMsolve
+#'
+#' @param y ...
+#'
 #' @export
 sap3Dfast <- function(y,
                       x1,
@@ -201,6 +206,11 @@ sap3D <- function(x1,
 }
 
 #' predict for sap3D, without spectral decomposition
+#'
+#' @param object ...
+#' @param ... ...
+#' @param newdata ...
+#' @param grid ...
 #'
 #' @export
 predict.sap3Dfast <- function(object,

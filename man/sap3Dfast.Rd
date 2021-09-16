@@ -6,6 +6,23 @@
 \usage{
 sap3Dfast(y, x1, x2, x3, knots, trace = TRUE, tolerance = 1e-08, scaleX = TRUE)
 }
+\arguments{
+\item{y}{...}
+
+\item{x1}{...}
+
+\item{x2}{...}
+
+\item{x3}{...}
+
+\item{knots}{...}
+
+\item{trace}{...}
+
+\item{tolerance}{...}
+
+\item{scaleX}{...}
+}
 \description{
 sap3D, without spectral decomposition
 }
