@@ -26,7 +26,7 @@ thr <- 1.0e-8  # convergence tolerance
 ######################
 
 # original sap package:
-obj0 <- sap3D(y, x1, x2, x3, knots=knots, trace=trace, thr=thr)
+obj0 <- SAP::sap3D(y, x1, x2, x3, knots=knots, trace=trace, thr=thr)
 obj0$edf
 
 fit0 <- predict(obj0, grid=grid)$eta
@@ -38,12 +38,11 @@ obj1$edf
 fit1 <- predict(obj1, grid=grid)$eta
 
 obj2 <- LMMsolve(fixed = formula(y~1),
-                 spatial = ~sap3D(x1, x2, x3, knots),
+                 spatial = ~LMMsolver::sap3D(x1, x2, x3, knots),
                  data = df,
                  trace = trace,
                  tolerance = thr)
 obj2$ED
-
 
 #fit1n <- predict(obj1, newdata=newData)$eta
 
