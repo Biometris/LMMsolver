@@ -6,6 +6,15 @@
 \usage{
 sap2D(x1, x2, knots, scaleX = FALSE)
 }
+\arguments{
+\item{x1}{...}
+
+\item{x2}{...}
+
+\item{knots}{...}
+
+\item{scaleX}{...}
+}
 \description{
 sap2D, without spectral decomposition
 }

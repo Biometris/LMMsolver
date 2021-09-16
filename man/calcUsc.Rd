@@ -2,10 +2,18 @@
 % Please edit documentation in R/RcppExports.R
 \name{calcUsc}
 \alias{calcUsc}
-\title{Spectral decomposition of D'D, returns a q x (q-ord) matrix}
+\title{Spectral decomposition of D'D}
 \usage{
 calcUsc(q, ord)
 }
+\arguments{
+\item{q}{A numeric value.}
+
+\item{ord}{A numeric value.}
+}
+\value{
+A q x (q-ord) matrix, the spectral decomposition D'D.
+}
 \description{
-Spectral decomposition of D'D, returns a q x (q-ord) matrix
+Spectral decomposition of D'D
 }

@@ -86,6 +86,13 @@ sap2Dfast <- function(y,
 
 #' sap2D, without spectral decomposition
 #'
+#' sap2D, without spectral decomposition
+#'
+#' @param x1 ...
+#' @param x2 ...
+#' @param knots ...
+#' @param scaleX ...
+#'
 #' @export
 sap2D <- function(x1,
                   x2,

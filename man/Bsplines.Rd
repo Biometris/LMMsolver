@@ -2,10 +2,19 @@
 % Please edit documentation in R/splinesFunctions.R
 \name{Bsplines}
 \alias{Bsplines}
-\title{just to simplify splineDesign}
+\title{Construct design matrix for B-Splines}
 \usage{
 Bsplines(knots, x, deriv = 0)
 }
+\arguments{
+\item{knots}{A numerical vector of knot positions.}
+
+\item{x}{a numeric vector of values at which to evaluate the B-spline
+functions or derivatives.}
+
+\item{deriv}{A numerical value. The derivative of the given order is
+evaluated at the x positions.}
+}
 \description{
-just to simplify splineDesign
+Construct design matrix for B-Splines.
 }

@@ -1,9 +1,19 @@
 ## some help functions, make part of LMM solve library:
 
+#' Construct index matrix
+#'
+#' Construct index matrix.
+#'
+#' @param df A data.frame.
+#' @param lZ A list of matrices.
+#' @param names A character vector of names.
+#'
+#' @return The index matrix.
+#'
 #' @export
 ndxMatrix <- function(df,
                       lZ,
-                      Names) {
+                      names) {
   n <- length(lZ)
   dim <- sapply(X = lZ, FUN = ncol)
   e <- cumsum(dim) + ncol(df)
@@ -12,11 +22,20 @@ ndxMatrix <- function(df,
   for (i in 1:n) {
     lM[[i]] <- c(s[i]:e[i])
   }
-  names(lM) <- Names
+  names(lM) <- names
   return(lM)
 }
 
-#' equally placed knots:
+#' Construct equally placed knots
+#'
+#' Construct equally placed knots.
+#'
+#' @param xmin A numerical value.
+#' @param xmax A numerical value.
+#' @param degree A numerical value.
+#' @param nseg A numerical value.
+#'
+#' @return A numerical vector of knot positions.
 #'
 #' @export
 PsplinesKnots <- function(xmin,
@@ -29,7 +48,15 @@ PsplinesKnots <- function(xmin,
   return(knots)
 }
 
-#' just to simplify splineDesign
+#' Construct design matrix for B-Splines
+#'
+#' Construct design matrix for B-Splines.
+#'
+#' @param knots A numerical vector of knot positions.
+#' @param x a numeric vector of values at which to evaluate the B-spline
+#' functions or derivatives.
+#' @param deriv A numerical value. The derivative of the given order is
+#' evaluated at the x positions.
 #'
 #' @export
 Bsplines <- function(knots,

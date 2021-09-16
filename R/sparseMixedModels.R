@@ -62,7 +62,7 @@ solveMME <- function(cholC,
 }
 
 
-#' @export
+#' @keywords internal
 sparseMixedModels <- function(y,
                               X,
                               Z,

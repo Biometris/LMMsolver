@@ -6,6 +6,17 @@
 \usage{
 sap3D(x1, x2, x3, knots, scaleX = TRUE)
 }
+\arguments{
+\item{x1}{...}
+
+\item{x2}{...}
+
+\item{x3}{...}
+
+\item{knots}{...}
+
+\item{scaleX}{...}
+}
 \description{
 sap3D, without spectral decomposition
 }

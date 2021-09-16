@@ -6,6 +6,14 @@
 \usage{
 RowKronecker(X1, X2)
 }
+\arguments{
+\item{X1}{A matrix.}
+
+\item{X2}{A matrix.}
+}
+\value{
+The row-wise kronecker product of X1 and X2.
+}
 \description{
 Row-wise kronecker product
 }

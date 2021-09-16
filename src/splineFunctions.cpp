@@ -9,6 +9,11 @@ using namespace arma;
 //'
 //' Row-wise kronecker product
 //'
+//' @param X1 A matrix.
+//' @param X2 A matrix.
+//'
+//' @return The row-wise kronecker product of X1 and X2.
+//'
 //' @export
 // [[Rcpp::export]]
 arma::mat RowKronecker(const arma::mat& X1,
@@ -19,9 +24,14 @@ arma::mat RowKronecker(const arma::mat& X1,
   return rowKron;
 }
 
-//' Spectral decomposition of D'D, returns a q x (q-ord) matrix
+//' Spectral decomposition of D'D
 //'
-//' Spectral decomposition of D'D, returns a q x (q-ord) matrix
+//' Spectral decomposition of D'D
+//'
+//' @param q A numeric value.
+//' @param ord A numeric value.
+//'
+//' @return A q x (q-ord) matrix, the spectral decomposition D'D.
 //'
 //' @export
 // [[Rcpp::export]]

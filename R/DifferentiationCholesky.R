@@ -1,4 +1,4 @@
-#' @export
+#' @keywords internal
 setClass("ADchol",
          slots = c(colpointers = "numeric",
                    rowindices = "numeric",

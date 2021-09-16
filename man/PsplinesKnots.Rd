@@ -2,10 +2,22 @@
 % Please edit documentation in R/splinesFunctions.R
 \name{PsplinesKnots}
 \alias{PsplinesKnots}
-\title{equally placed knots:}
+\title{Construct equally placed knots}
 \usage{
 PsplinesKnots(xmin, xmax, degree, nseg)
 }
+\arguments{
+\item{xmin}{A numerical value.}
+
+\item{xmax}{A numerical value.}
+
+\item{degree}{A numerical value.}
+
+\item{nseg}{A numerical value.}
+}
+\value{
+A numerical vector of knot positions.
+}
 \description{
-equally placed knots:
+Construct equally placed knots.
 }

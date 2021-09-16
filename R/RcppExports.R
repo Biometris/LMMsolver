@@ -21,14 +21,24 @@ construct_ADchol_Rcpp <- function(U, P_list) {
 #'
 #' Row-wise kronecker product
 #'
+#' @param X1 A matrix.
+#' @param X2 A matrix.
+#'
+#' @return The row-wise kronecker product of X1 and X2.
+#'
 #' @export
 RowKronecker <- function(X1, X2) {
     .Call(`_LMMsolver_RowKronecker`, X1, X2)
 }
 
-#' Spectral decomposition of D'D, returns a q x (q-ord) matrix
+#' Spectral decomposition of D'D
 #'
-#' Spectral decomposition of D'D, returns a q x (q-ord) matrix
+#' Spectral decomposition of D'D
+#'
+#' @param q A numeric value.
+#' @param ord A numeric value.
+#'
+#' @return A q x (q-ord) matrix, the spectral decomposition D'D.
 #'
 #' @export
 calcUsc <- function(q, ord) {
