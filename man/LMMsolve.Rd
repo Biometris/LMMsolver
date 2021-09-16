@@ -25,6 +25,9 @@ form "response ~ pred"}
 \item{random}{A formula for the random part of the model. Should be of the
 form "~ pred".}
 
+\item{spatial}{A formula for the spatial part of the model. Should be of the
+form "~ sap2D()" or "~sap3d()".}
+
 \item{group}{A named list where each component is a numeric vector
 specifying contiguous fields in data that are to be considered as a
 single term.}
@@ -46,9 +49,6 @@ algorithm.}
 
 \item{maxit}{A numerical value. The maximum number of iterations for the
 algorithm.}
-
-\item{spatialA}{formula for the random part of the model. Should be of the
-form "~ sap2D()" or "~sap3d()".}
 }
 \value{
 An object of class LMMsolve, a list with the following items:

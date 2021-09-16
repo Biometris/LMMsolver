@@ -37,8 +37,8 @@ obj1 <- sap3Dfast(y, x1, x2, x3, knots=knots, trace=trace, tolerance=thr)
 obj1$edf
 fit1 <- predict(obj1, grid=grid)$eta
 
-obj2 <- LMMsolve(fixed = formula(y~1),
-                 spatial = ~LMMsolver::sap3D(x1, x2, x3, knots),
+obj2 <- LMMsolve(fixed = par~1,
+                 spatial = ~sap3D(row, col, time, knots),
                  data = df,
                  trace = trace,
                  tolerance = thr)

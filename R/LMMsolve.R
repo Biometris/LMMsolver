@@ -6,7 +6,7 @@
 #' form "response ~ pred"
 #' @param random A formula for the random part of the model. Should be of the
 #' form "~ pred".
-#' @param spatialA formula for the random part of the model. Should be of the
+#' @param spatial A formula for the spatial part of the model. Should be of the
 #' form "~ sap2D()" or "~sap3d()".
 #' @param group A named list where each component is a numeric vector
 #' specifying contiguous fields in data that are to be considered as a
@@ -141,17 +141,15 @@ LMMsolve <- function(fixed,
 
   ## Make spatial part.
   if (!is.null(spatial)) {
-    env <- environment(spatial)
-    if(inherits(spatial, "character"))
+
+    if (inherits(spatial, "character")) {
       spatial <- as.formula(spatial)
-    tf <- terms.formula(spatial, specials = c("sap2D", "sap3D"))
+    }
+    tf <- terms(spatial, specials = c("sap2D", "sap3D"))
     terms <- attr(tf, "term.labels")
     nt <- length(terms)
-    if(nt != 1)
-      stop("Error in the specification of the spatial effect:",
-           "only a single function is allowed")
 
-    spatRes <- eval(parse(text = terms), envir = env)
+    spatRes <- eval(parse(text = terms), envir = data, enclos = parent.frame())
 
     X <- cbind(X, spatRes$X)
     Z <- cbind(Z, spatRes$Z)
