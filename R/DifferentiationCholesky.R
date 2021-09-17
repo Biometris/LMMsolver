@@ -20,7 +20,9 @@ ADchol <- function(P_list) {
   for (i in 1:nelem) {
     C <- C + lambda[i] * P_list[[i]]
   }
-  cholC <- chol(C)
+  opt <- summary(C)
+  cholC <- chol(C, memory = list(nnzR = 8 * opt$nnz,
+                                 nnzcolindices = 4 * opt$nnz))
   L <- construct_ADchol_Rcpp(cholC, P_list)
   new("ADchol", colpointers = L$colpointers, rowindices = L$rowindices,
       P = L$P)
