@@ -1,6 +1,7 @@
 rm(list=ls())
 library(SAP)
 library(LMMsolver)
+library(spam)
 
 # Get precipitation data from spam
 data(USprecip)
@@ -52,11 +53,17 @@ obj1$edf - obj2$edf
 #
 # use new spatial option in LMMsolve:
 #
-df = data.frame(y=y, x1=x1, x2=x2)
+obj3 <- LMMsolve(fixed = anomaly~1,
+                 spatial = ~LMMsolver::sap2D(x1 = lon, x2 = lat, knots = knots,
+                                             scaleX = FALSE),
+                 data = dat,
+                 trace = trace,
+                 tolerance = thr)
 
-obj3 <- LMMsolve(fixed = formula(y~1),
-                 spatial = ~LMMsolver::sap2D(x1, x2, knots),
-                 data = df,
+obj4 <- LMMsolve(fixed = anomaly~1,
+                 spatial = ~LMMsolver::sap2D(x1 = lon, x2 = lat, knots = knots,
+                                             scaleX = TRUE),
+                 data = dat,
                  trace = trace,
                  tolerance = thr)
 
@@ -65,4 +72,4 @@ obj0$edf
 obj1$edf
 obj2$edf
 obj3$ED
-
+obj4$ED

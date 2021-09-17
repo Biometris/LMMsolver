@@ -48,15 +48,14 @@ sap2D <- function(x1,
   U_null <- U1_null %x% U2_null
   if (scaleX) {
     X <- B12 %*% U_null
-    # take first column as intercept...
-    # X[,1] <- 1
+    # Remove intercept column to avoid singularity problems.
     X <- X[, -1]
   } else {
-    # X1 <- cbind(1, x1)
-    # X2 <- cbind(1, x2)
-    X1 <- as.matrix(x1)
-    X2 <- as.matrix(x2)
+    X1 <- cbind(1, x1)
+    X2 <- cbind(1, x2)
     X <- RowKronecker(X1, X2)
+    # Remove intercept column to avoid singularity problems.
+    X <- X[, -1]
   }
   C1 <- spam::spam(x = 0, nrow = q1, ncol = pord)
   C1[1, 1] = C1[q1,2] = 1
