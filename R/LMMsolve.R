@@ -72,6 +72,15 @@ LMMsolve <- function(fixed,
     stop("maxit should be a positive numerical value.")
   }
 
+  ## Remove NA for response variable from data.
+  respVar <- all.vars(fixed)[attr(terms(fixed), "response")]
+  respVarNA <- is.na(data[[respVar]])
+  if (sum(respVarNA) > 0) {
+    warning(sum(respVarNA), " observations removed with missing value for ",
+            respVar, ".\n", call. = FALSE)
+    data <- data[!respVarNA, ]
+  }
+
   ## Make random part.
   if (!is.null(random)) {
     mf <- model.frame(random, data, drop.unused.levels = TRUE, na.action = NULL)
@@ -130,7 +139,7 @@ LMMsolve <- function(fixed,
   }
 
   ## Make fixed part.
-  mf <- model.frame(fixed, data)
+  mf <- model.frame(fixed, data, drop.unused.levels = TRUE)
   mt <- terms(mf)
   f.terms <- all.vars(mt)[attr(mt, "dataClasses") == "factor"]
   X = model.matrix(mt, data = mf,
