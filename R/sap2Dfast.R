@@ -38,23 +38,24 @@ sap2D <- function(x1,
   one.2 <- matrix(1, 1, ncol(B2))
   B12 <- (B1 %x% one.2) * (one.1 %x% B2)
 
-  # calculate the linear/fixed parts:
-  U1_null <- cbind(1, scale(1:q1))
-  U2_null <- cbind(1, scale(1:q2))
-
-  U1_null <- apply(U1_null, MARGIN = 2, function(x) (x / normVec(x)))
-  U2_null <- apply(U2_null, MARGIN = 2, function(x) (x / normVec(x)))
-
-  U_null <- U1_null %x% U2_null
   if (scaleX) {
+    ## calculate the linear/fixed parts.
+    U1_null <- cbind(1, scale(1:q1))
+    U2_null <- cbind(1, scale(1:q2))
+
+    U1_null <- apply(U1_null, MARGIN = 2, function(x) (x / normVec(x)))
+    U2_null <- apply(U2_null, MARGIN = 2, function(x) (x / normVec(x)))
+
+    U_null <- U1_null %x% U2_null
+
     X <- B12 %*% U_null
-    # Remove intercept column to avoid singularity problems.
+    ## Remove intercept column to avoid singularity problems.
     X <- X[, -1]
   } else {
     X1 <- cbind(1, x1)
     X2 <- cbind(1, x2)
     X <- RowKronecker(X1, X2)
-    # Remove intercept column to avoid singularity problems.
+    ## Remove intercept column to avoid singularity problems.
     X <- X[, -1]
   }
   C1 <- spam::spam(x = 0, nrow = q1, ncol = pord)
