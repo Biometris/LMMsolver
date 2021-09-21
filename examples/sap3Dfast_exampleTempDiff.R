@@ -39,7 +39,7 @@ obj1$edf
 fit1 <- predict(obj1, grid=grid)$eta
 
 obj2 <- LMMsolve(fixed = par~1,
-                 spatial = ~sap3D(row, col, time, knots),
+                 spatial = ~LMMsolver::sap3D(row, col, time, knots),
                  data = df,
                  trace = trace,
                  tolerance = thr)
