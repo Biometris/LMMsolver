@@ -3,7 +3,8 @@ library(mvtnorm)
 library(SAP)
 library(LMMsolver)
 
-
+# testdata Daniela NPEC, see list of closed issues LMMsolver:
+# "error after a number of iterations with sap3Dfast"
 df <- read.csv("examples/exampleTempDiff.csv")
 head(df)
 
@@ -60,4 +61,7 @@ range(fit1-fit0)
 #range(fit1n-fit0n)
 
 # compare effective dimensions:
-obj0$edf - obj1$edf
+obj0$edf  # SAP package
+obj1$edf  # sap3D fast function
+obj2$ED   # LMMsolve with spatial argument
+

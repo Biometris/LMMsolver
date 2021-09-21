@@ -24,7 +24,7 @@ thr <- 1.0e-7  # convergence tolerance
 ######################
 
 # original sap package:
-obj0 <- sap2D(y, x1, x2 , knots=knots, trace=trace, thr=thr)
+obj0 <- SAP::sap2D(y, x1, x2 , knots=knots, trace=trace, thr=thr)
 obj0$edf
 fit0 <- predict(obj0, grid=grid)$eta
 # reorder fit....
