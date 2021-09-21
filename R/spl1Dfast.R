@@ -14,7 +14,8 @@ spl1D <- function(x,
                   pord = 2,
                   degr = 3,
                   scaleX = FALSE) {
-  xlim <- c(min(x) - 0.01, max(x) + 0.01)
+  #xlim <- c(min(x) - 0.01, max(x) + 0.01)
+  xlim <- c(min(x), max(x))
 
   knots <- PsplinesKnots(xlim[1], xlim[2], degree = degr, nseg = nseg)
 
@@ -24,25 +25,31 @@ spl1D <- function(x,
   D <- spam::diff.spam(diag(q), diff = pord)
   DtD <- crossprod(D)
 
-  if (scaleX) {
-    ## calculate the linear/fixed parts.
-    U_null <- cbind(1, scale(1:q))
+  if (pord == 2) {
+    if (scaleX) {
+      ## calculate the linear/fixed parts.
+      U_null <- cbind(1, scale(1:q))
 
-    U_null <- apply(U_null, MARGIN = 2, function(x) (x / normVec(x)))
+      U_null <- apply(U_null, MARGIN = 2, function(x) (x / normVec(x)))
 
-    X <- B %*% U_null
-    ## Remove intercept column to avoid singularity problems.
-    X <- X[, -1, drop=FALSE]
-  } else {
-    X <- cbind(1, x)
-    ## Remove intercept column to avoid singularity problems.
-    X <- X[, -1, drop=FALSE]
+      X <- B %*% U_null
+      ## Remove intercept column to avoid singularity problems.
+      X <- X[, -1, drop=FALSE]
+    } else {
+      X <- cbind(1, x)
+      ## Remove intercept column to avoid singularity problems.
+      X <- X[, -1, drop=FALSE]
+    }
+    C <- spam::spam(x = 0, nrow = q, ncol = pord)
+    C[1, 1] = C[q,2] = 1
+    CCt <- spam::tcrossprod(C)
+  } else {  # pord = 1
+    X = NULL
+    C <- spam::spam(x = 0, nrow = q, ncol = pord)
+    C[1,1] = C[q,1] = 1
+    # spam::tcrossprod doesn't work....
+    CCt <- C %*% t(C)
   }
-  # assuming pord=2
-  C <- spam::spam(x = 0, nrow = q, ncol = pord)
-  C[1, 1] = C[q,2] = 1
-
-  CCt <- spam::tcrossprod(C)
 
   lGinv <- list()
   lGinv[[1]] <- spam::as.spam(DtD + CCt)

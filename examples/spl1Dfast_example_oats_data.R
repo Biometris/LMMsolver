@@ -1,5 +1,4 @@
 # Martin Boer, Biometris, Wageningen
-
 # example sparse 1D, see Boer et al 2020, JABES for details.
 rm(list=ls())
 
@@ -8,13 +7,24 @@ library(LMMsolver)
 
 data(john.alpha)
 dat <- john.alpha
-str(dat)
+
+n <- 4     # number of units per block
+b <- 6     # number of blocks per replicate
+r <- 3     # number of replicates
+v <- 24    # number of genotypes/replicate:
+N <- n*b*r # total number of observations.
 
 obj <- LMMsolve(fixed = yield~rep+gen,
-                spatial = ~spl1D(x = plot, nseg = 20),
+                spatial = ~spl1D(x = plot, nseg = N-1, degr = 1, pord= 1),
                 data = dat,
                 trace = TRUE,
-                tolerance = 1.0e-8)
-obj$logL
-obj$ED
+                tolerance = 1.0e-10)
 
+# calculate deviance, as in JABES 2020 paper, table 1:
+p <- 1 + (v-1) + (r-1)
+Constant = log(2*pi)*(N-p)
+dev = -2*obj$logL + Constant
+round(dev,2)
+
+# residual variance, see JABES 2020 paper, table 1:
+round(obj$sigma2e, 5)
