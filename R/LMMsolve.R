@@ -154,7 +154,7 @@ LMMsolve <- function(fixed,
     if (inherits(spatial, "character")) {
       spatial <- as.formula(spatial)
     }
-    tf <- terms(spatial, specials = c("sap2D", "sap3D"))
+    tf <- terms(spatial, specials = c("spl1D", "sap2D", "sap3D"))
     terms <- attr(tf, "term.labels")
     nt <- length(terms)
 
