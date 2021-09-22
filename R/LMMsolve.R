@@ -162,7 +162,7 @@ LMMsolve <- function(fixed,
 
     X <- cbind(X, spatRes$X)
     Z <- cbind(Z, spatRes$Z)
-    lGinv <- c(lGinv, spatRes$lGinv)
+    lGinv <- ExpandGinv(lGinv, spatRes$lGinv)
   }
 
   ## Add intercept.

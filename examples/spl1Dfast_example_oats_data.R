@@ -19,6 +19,7 @@ obj <- LMMsolve(fixed = yield~rep+gen,
                 data = dat,
                 trace = TRUE,
                 tolerance = 1.0e-10)
+obj$ED
 
 # calculate deviance, as in JABES 2020 paper, table 1:
 p <- 1 + (v-1) + (r-1)
@@ -28,3 +29,13 @@ round(dev,2)
 
 # residual variance, see JABES 2020 paper, table 1:
 round(obj$sigma2e, 5)
+
+# genotype random, not in JABES paper
+obj2 <- LMMsolve(fixed = yield~rep,
+                 random = ~gen,
+                spatial = ~spl1D(x = plot, nseg = N-1, degr = 1, pord= 1),
+                data = dat,
+                trace = FALSE,
+                tolerance = 1.0e-10)
+obj2$ED
+
