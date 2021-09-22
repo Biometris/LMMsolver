@@ -19,6 +19,9 @@ head(dat)
 dat$R <- as.factor(dat$row)
 dat$C <- as.factor(dat$col)
 
+# tolerance
+tol = 1.0e-8
+
 m0 <- SpATS(response = "yield",
             spatial = ~ SAP(col, row, nseg = c(10,20), degree = 3, pord = 2),
             genotype = "gen",
@@ -26,7 +29,7 @@ m0 <- SpATS(response = "yield",
             random = ~ R + C,
             genotype.as.random = TRUE,
             data = dat,
-            control =  list(tolerance = 1.0e-6))
+            control = list(tolerance = tol))
 # Brief summary
 summary(m0)
 plot(m0)
@@ -38,11 +41,10 @@ m1 <- LMMsolve(yield~rep,
                spatial=~sap2D(col, row, knots = c(10,20), scaleX=TRUE),
                data = dat,
                trace=TRUE,
-               tolerance = 1.0e-6,display=TRUE)
+               tolerance = tol)
 dev1 <- -2.0*m1$logL
 
-m0$eff.dim
-m1$ED
 dev0
 dev1
+dev0-dev1
 

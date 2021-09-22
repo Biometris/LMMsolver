@@ -16,8 +16,10 @@ sap2D <- function(x1,
 
   pord <- 2
   degr <- 3
-  x1lim <- c(min(x1) - 0.01, max(x1) + 0.01)
-  x2lim <- c(min(x2) - 0.01, max(x2) + 0.01)
+  #x1lim <- c(min(x1) - 0.01, max(x1) + 0.01)
+  #x2lim <- c(min(x2) - 0.01, max(x2) + 0.01)
+  x1lim <- c(min(x1), max(x1))
+  x2lim <- c(min(x2), max(x2))
 
   knots1 <- PsplinesKnots(x1lim[1], x1lim[2], degree = degr, nseg = nseg[1])
   knots2 <- PsplinesKnots(x2lim[1], x2lim[2], degree = degr, nseg = nseg[2])
