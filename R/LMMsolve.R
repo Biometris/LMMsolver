@@ -6,8 +6,8 @@
 #' form "response ~ pred"
 #' @param random A formula for the random part of the model. Should be of the
 #' form "~ pred".
-#' @param spatial A formula for the spatial part of the model. Should be of the
-#' form "~ sap2D()" or "~sap3d()".
+#' @param spline A formula for the spline part of the model. Should be of the
+#' form "~ spl1D()", ~ sap2D()" or "~sap3d()".
 #' @param group A named list where each component is a numeric vector
 #' specifying contiguous fields in data that are to be considered as a
 #' single term.
