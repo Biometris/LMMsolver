@@ -37,3 +37,52 @@ ExpandGinv <- function(lGinv1, lGinv2)
   names(lGinv) <- c(names(lGinv1), names(lGinv2))
   lGinv
 }
+
+# some help functions for spl1D, spl2D and spl3D functions:
+
+constructPenalty <-function(q, pord)
+{
+  D <- spam::diff.spam(diag(q), diff = pord)
+  DtD <- crossprod(D)
+}
+
+constructX <- function(B, x, scaleX, pord)
+{
+  if (pord == 2) {
+    if (scaleX) {
+      ## calculate the linear/fixed parts.
+      U_null <- cbind(1, scale(1:q))
+      U_null <- apply(U_null, MARGIN = 2, function(x) (x / normVec(x)))
+      X <- B %*% U_null
+    } else {
+      X <- cbind(1, x)
+    }
+  } else {  # pord = 1
+    X = matrix(data=1, nrow=length(x), ncol=1)
+  }
+  X
+}
+
+constructConstraint <- function(q, pord)
+{
+  if (pord == 2) {
+    C <- spam::spam(x = 0, nrow = q, ncol = pord)
+    C[1, 1] = C[q,2] = 1
+  } else {  # pord = 1
+    C <- spam::spam(x = 0, nrow = q, ncol = pord)
+    C[1,1] = C[q,1] = 1
+    # spam::tcrossprod doesn't work....
+  }
+  C
+}
+
+removeIntercept <- function(X) {
+  if (ncol(X)==1) {
+    X = NULL
+  } else {
+    X <- X[, -1,  drop=FALSE]
+  }
+  X
+}
+
+

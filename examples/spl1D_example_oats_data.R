@@ -25,11 +25,11 @@ obj1$ED
 # calculate deviance, as in JABES 2020 paper, table 1:
 p <- 1 + (v-1) + (r-1)
 Constant = log(2*pi)*(N-p)
-dev = -2*obj$logL + Constant
+dev = -2*obj1$logL + Constant
 round(dev,2)
 
 # residual variance, see JABES 2020 paper, table 1:
-round(obj$sigma2e, 5)
+round(obj1$sigma2e, 5)
 
 # genotype random, not in JABES paper
 obj2 <- LMMsolve(fixed = yield~rep,

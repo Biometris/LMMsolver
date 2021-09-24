@@ -13,9 +13,9 @@
 #'
 #' @usage spl1D(x, nseg, pord=2, degree=3, scaleX=FALSE, xlim=NULL)
 #'
-#' @return A list with three matrices: fixed effect \code{X} (not including the
-#' intercept), the random effect $Z$, and the precision matrix \code(Ginv}$ for
-#' the random effect \code{Z}
+#' @return A list with three matrices: design matrix for fixed effect \code{X} (not including the
+#' intercept), the design matrix for random effect \code{Z}, and a list of precision matrices \code{Ginv}$ for
+#' the random effect \code{Z}.
 #'
 #' @export
 spl1D <- function(x,
@@ -32,34 +32,15 @@ spl1D <- function(x,
   B <- spam::as.spam(Bsplines(knots, x))
   q <- ncol(B)
 
-  D <- spam::diff.spam(diag(q), diff = pord)
-  DtD <- crossprod(D)
+  DtD <- constructPenalty(q, pord)
 
-  if (pord == 2) {
-    if (scaleX) {
-      ## calculate the linear/fixed parts.
-      U_null <- cbind(1, scale(1:q))
+  X <- constructX(B, x, scaleX, pord)
+  C <- constructConstraint(q, pord)
 
-      U_null <- apply(U_null, MARGIN = 2, function(x) (x / normVec(x)))
+  ## Remove intercept column to avoid singularity problems.
+  X  <- removeIntercept(X)
 
-      X <- B %*% U_null
-      ## Remove intercept column to avoid singularity problems.
-      X <- X[, -1, drop=FALSE]
-    } else {
-      X <- cbind(1, x)
-      ## Remove intercept column to avoid singularity problems.
-      X <- X[, -1, drop=FALSE]
-    }
-    C <- spam::spam(x = 0, nrow = q, ncol = pord)
-    C[1, 1] = C[q,2] = 1
-    CCt <- spam::tcrossprod(C)
-  } else {  # pord = 1
-    X = NULL
-    C <- spam::spam(x = 0, nrow = q, ncol = pord)
-    C[1,1] = C[q,1] = 1
-    # spam::tcrossprod doesn't work....
-    CCt <- C %*% t(C)
-  }
+  CCt <- C %*% t(C)
 
   lGinv <- list()
   lGinv[[1]] <- spam::as.spam(DtD + CCt)
