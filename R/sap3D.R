@@ -18,7 +18,7 @@
 #' @param x3lim numerical vector of length 2 containing the domain of covariate
 #' \code{x3} where the knots should be placed. Default set to \code{NULL} (covariate range).
 #'
-#' @usage sap3D(x, nseg, pord=2, degree=3, scaleX=FALSE, x1lim=NULL,x2lim=NULL,x3lim=NULL)
+#' @usage sap3D(x1, x2, x3, nseg, pord=2, degree=3, scaleX=FALSE, x1lim=NULL,x2lim=NULL, x3lim=NULL)
 #'
 #' @return A list with three matrices: design matrix for fixed effect \code{X} (not including the
 #' intercept), the design matrix for random effect \code{Z}, and a list of precision matrices \code{Ginv}$ for

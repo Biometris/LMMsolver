@@ -15,7 +15,7 @@
 #' @param x2lim numerical vector of length 2 containing the domain of covariate
 #' \code{x2} where the knots should be placed. Default set to \code{NULL} (covariate range).
 
-#' @usage spl2D(x, nseg, pord=2, degree=3, scaleX=FALSE, x1lim=NULL,x2lim=NULL)
+#' @usage sap2D(x1, x2, nseg, pord=2, degree=3, scaleX=FALSE, x1lim=NULL,x2lim=NULL)
 #'
 #' @return A list with three matrices: design matrix for fixed effect \code{X} (not including the
 #' intercept), the design matrix for random effect \code{Z}, and a list of precision matrices \code{Ginv}$ for
