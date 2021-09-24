@@ -44,10 +44,12 @@ constructPenalty <-function(q, pord)
 {
   D <- spam::diff.spam(diag(q), diff = pord)
   DtD <- crossprod(D)
+  DtD
 }
 
 constructX <- function(B, x, scaleX, pord)
 {
+  q <- ncol(B)
   if (pord == 2) {
     if (scaleX) {
       ## calculate the linear/fixed parts.
@@ -63,7 +65,8 @@ constructX <- function(B, x, scaleX, pord)
   X
 }
 
-constructConstraint <- function(q, pord)
+# constraint matrix:
+constructCCt <- function(q, pord)
 {
   if (pord == 2) {
     C <- spam::spam(x = 0, nrow = q, ncol = pord)
@@ -71,9 +74,9 @@ constructConstraint <- function(q, pord)
   } else {  # pord = 1
     C <- spam::spam(x = 0, nrow = q, ncol = pord)
     C[1,1] = C[q,1] = 1
-    # spam::tcrossprod doesn't work....
   }
-  C
+  CCt <- C %*% t(C)
+  CCt
 }
 
 removeIntercept <- function(X) {

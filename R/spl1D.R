@@ -35,12 +35,10 @@ spl1D <- function(x,
   DtD <- constructPenalty(q, pord)
 
   X <- constructX(B, x, scaleX, pord)
-  C <- constructConstraint(q, pord)
+  CCt <- constructCCt(q, pord)
 
   ## Remove intercept column to avoid singularity problems.
   X  <- removeIntercept(X)
-
-  CCt <- C %*% t(C)
 
   lGinv <- list()
   lGinv[[1]] <- spam::as.spam(DtD + CCt)
