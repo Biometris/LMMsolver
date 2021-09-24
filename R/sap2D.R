@@ -1,81 +1,80 @@
-#' sap2D, without spectral decomposition
+#' fit 1D P-splines
 #'
-#' sap2D, without spectral decomposition
+#' fit 1D P-splines using sparse implementation.
 #'
-#' @param x1 ...
-#' @param x2 ...
-#' @param knots ...
-#' @param scaleX ...
+#' @param x1 numerical vector containing the values of \code{x1} covariate.
+#' @param x2 numerical vector containing the values of \code{x2} covariate.
+
+#' @param nseg number of segments
+#' @param scaleX logical, scale fixed effect or not. Default is FALSE,
+#' no scaling.
+#' @param pord order of penalty, default \code{pord=2}
+#' @param degree degree of B-spline basis, default \code{degree=3}
+#' @param x1lim numerical vector of length 2 containing the domain of covariate
+#' \code{x1} where the knots should be placed. Default set to \code{NULL} (covariate range).
+#' @param x2lim numerical vector of length 2 containing the domain of covariate
+#' \code{x2} where the knots should be placed. Default set to \code{NULL} (covariate range).
+
+#' @usage spl2D(x, nseg, pord=2, degree=3, scaleX=FALSE, x1lim=NULL,x2lim=NULL)
+#'
+#' @return A list with three matrices: design matrix for fixed effect \code{X} (not including the
+#' intercept), the design matrix for random effect \code{Z}, and a list of precision matrices \code{Ginv}$ for
+#' the random effect \code{Z}.
 #'
 #' @export
 sap2D <- function(x1,
                   x2,
-                  knots,
-                  scaleX = FALSE) {
-  nseg <- knots
+                  nseg,
+                  pord = 2,
+                  degree = 3,
+                  scaleX = FALSE,
+                  x1lim = NULL,
+                  x2lim = NULL) {
+  if (is.null(x1lim))
+    x1lim <- c(min(x1), max(x1))
+  if (is.null(x2lim))
+    x2lim <- c(min(x2), max(x2))
 
-  pord <- 2
-  degr <- 3
-  #x1lim <- c(min(x1) - 0.01, max(x1) + 0.01)
-  #x2lim <- c(min(x2) - 0.01, max(x2) + 0.01)
-  x1lim <- c(min(x1), max(x1))
-  x2lim <- c(min(x2), max(x2))
-
-  knots1 <- PsplinesKnots(x1lim[1], x1lim[2], degree = degr, nseg = nseg[1])
-  knots2 <- PsplinesKnots(x2lim[1], x2lim[2], degree = degr, nseg = nseg[2])
+  knots1 <- PsplinesKnots(x1lim[1], x1lim[2], degree = degree, nseg = nseg[1])
+  knots2 <- PsplinesKnots(x2lim[1], x2lim[2], degree = degree, nseg = nseg[2])
 
   B1 <- spam::as.spam(Bsplines(knots1, x1))
   B2 <- spam::as.spam(Bsplines(knots2, x2))
   q1 <- ncol(B1)
   q2 <- ncol(B2)
 
-  D1 <- spam::diff.spam(diag(q1), diff = pord)
-  DtD1 <- crossprod(D1)
-
-  D2 <- spam::diff.spam(diag(q2), diff = pord)
-  DtD2 <- crossprod(D2)
-
-  # we have to calculate RowKronecker product only once:
   one.1 <- matrix(1, 1, ncol(B1))
   one.2 <- matrix(1, 1, ncol(B2))
   B12 <- (B1 %x% one.2) * (one.1 %x% B2)
 
-  if (scaleX) {
-    ## calculate the linear/fixed parts.
-    U1_null <- cbind(1, scale(1:q1))
-    U2_null <- cbind(1, scale(1:q2))
+  DtD1 <- constructPenalty(q1, pord)
+  DtD2 <- constructPenalty(q2, pord)
 
-    U1_null <- apply(U1_null, MARGIN = 2, function(x) (x / normVec(x)))
-    U2_null <- apply(U2_null, MARGIN = 2, function(x) (x / normVec(x)))
+  X1 <- constructX(B1, x1, scaleX, pord)
+  X2 <- constructX(B2, x2, scaleX, pord)
+  X <- RowKronecker(X1, X2)
 
-    U_null <- U1_null %x% U2_null
+  ## Remove intercept column to avoid singularity problems.
+  X  <- removeIntercept(X)
 
-    X <- B12 %*% U_null
-    ## Remove intercept column to avoid singularity problems.
-    X <- X[, -1]
-  } else {
-    X1 <- cbind(1, x1)
-    X2 <- cbind(1, x2)
-    X <- RowKronecker(X1, X2)
-    ## Remove intercept column to avoid singularity problems.
-    X <- X[, -1]
-  }
-  C1 <- spam::spam(x = 0, nrow = q1, ncol = pord)
-  C1[1, 1] = C1[q1,2] = 1
-  C2 <- spam::spam(x = 0, nrow = q2, ncol = pord)
-  C2[1, 1] = C2[q2,2] = 1
-  C <- C1 %x% C2
+  CCt1 <- constructCCt(q1, pord)
+  CCt2 <- constructCCt(q2, pord)
+  CCt <- CCt1 %x% CCt2
 
-  CCt <- spam::tcrossprod(C)
 
   lGinv <- list()
   lGinv[[1]] <- DtD1 %x% spam::diag.spam(q2) + CCt
   lGinv[[2]] <- spam::diag.spam(q1) %x% DtD2 + CCt
 
-  names(lGinv) <- c("x1", "x2")
+  names(lGinv) <- c("s(x1)", "s(x2)")
 
   return(list(X = X, Z = B12, lGinv = lGinv))
 }
+
+
+####
+####  below, old code.....
+####
 
 #' predict for sap2D, without spectral decomposition
 #'
@@ -208,3 +207,12 @@ sap2Dfast <- function(y,
   class(L) <- "sap2Dfast"
   return(L)
 }
+
+
+
+
+
+
+
+
+

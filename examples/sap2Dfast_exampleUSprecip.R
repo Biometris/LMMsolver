@@ -17,7 +17,7 @@ x2 <- dat$lat
 #
 # set parameters:
 #
-knots <- c(41,41)
+knots <- nseg <- c(41,41)
 grid <- c(40,40)
 trace <- TRUE
 thr <- 1.0e-7  # convergence tolerance
@@ -50,19 +50,24 @@ obj0$edf - obj1$edf
 obj0$edf - obj2$edf
 obj1$edf - obj2$edf
 
+# extra space, to be consitent with knot positions in SAP package:
+x1lim <- c(min(x1)-0.01, max(x1)+0.01)
+x2lim <- c(min(x2)-0.01, max(x2)+0.01)
+
 #
 # use new spatial option in LMMsolve:
 #
 obj3 <- LMMsolve(fixed = anomaly~1,
-                 spatial = ~LMMsolver::sap2D(x1 = lon, x2 = lat, knots = knots,
-                                             scaleX = FALSE),
+                 spline = ~LMMsolver::sap2D(x1 = lon, x2 = lat, nseg = nseg,
+                              scaleX = FALSE, x1lim=x1lim, x2lim=x2lim),
                  data = dat,
                  trace = trace,
                  tolerance = thr)
 
 obj4 <- LMMsolve(fixed = anomaly~1,
-                 spatial = ~LMMsolver::sap2D(x1 = lon, x2 = lat, knots = knots,
-                                             scaleX = TRUE),
+                 spline = ~LMMsolver::sap2D(x1 = lon, x2 = lat, nseg = nseg,
+                                             scaleX = TRUE,
+                                            x1lim=x1lim, x2lim=x2lim),
                  data = dat,
                  trace = trace,
                  tolerance = thr)
