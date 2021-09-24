@@ -40,7 +40,7 @@
 #' @export
 LMMsolve <- function(fixed,
                      random = NULL,
-                     spatial = NULL,
+                     spline = NULL,
                      group = NULL,
                      lGinverse = NULL,
                      data,
@@ -59,8 +59,8 @@ LMMsolve <- function(fixed,
   if (!is.null(random) && length(terms(random)) != 2) {
     stop("random model formula must be of form \" ~ pred\".\n")
   }
-  if (!is.null(spatial) && length(terms(spatial)) != 2) {
-    stop("spatial model formula must be of form \"~ sap2D()\" or \"~sap3d()\".\n")
+  if (!is.null(spline) && length(terms(spline)) != 2) {
+    stop("spline model formula must be of form \"~ sap2D()\" or \"~sap3d()\".\n")
   }
   if (!is.null(residual) && length(terms(residual)) != 2) {
     stop("residual model formula must be of the form \" ~ pred\".\n")
@@ -149,12 +149,12 @@ LMMsolve <- function(fixed,
   term.labels.f <- attr(mt, "term.labels")
 
   ## Make spatial part.
-  if (!is.null(spatial)) {
+  if (!is.null(spline)) {
 
-    if (inherits(spatial, "character")) {
-      spatial <- as.formula(spatial)
+    if (inherits(spline, "character")) {
+      spline <- as.formula(spline)
     }
-    tf <- terms(spatial, specials = c("spl1D", "sap2D", "sap3D"))
+    tf <- terms(spline, specials = c("spl1D", "sap2D", "sap3D"))
     terms <- attr(tf, "term.labels")
     nt <- length(terms)
 
