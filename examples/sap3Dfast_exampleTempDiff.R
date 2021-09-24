@@ -38,8 +38,15 @@ obj1 <- sap3Dfast(y, x1, x2, x3, knots=knots, trace=trace, tolerance=thr)
 obj1$edf
 fit1 <- predict(obj1, grid=grid)$eta
 
+# extra space, to be consitent with knot positions in SAP package:
+x1lim <- c(min(x1)-0.01, max(x1)+0.01)
+x2lim <- c(min(x2)-0.01, max(x2)+0.01)
+x3lim <- c(min(x3)-0.01, max(x3)+0.01)
+
 obj2 <- LMMsolve(fixed = par~1,
-                 spatial = ~LMMsolver::sap3D(row, col, time, knots),
+                 spline = ~LMMsolver::sap3D(row, col, time, nseg=knots,
+                              x1lim = x1lim, x2lim = x2lim, x3lim = x3lim,
+                              scaleX = TRUE),
                  data = df,
                  trace = trace,
                  tolerance = thr)

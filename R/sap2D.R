@@ -1,6 +1,6 @@
-#' fit 1D P-splines
+#' fit 2D P-splines
 #'
-#' fit 1D P-splines using sparse implementation.
+#' fit 2D P-splines using sparse implementation.
 #'
 #' @param x1 numerical vector containing the values of \code{x1} covariate.
 #' @param x2 numerical vector containing the values of \code{x2} covariate.

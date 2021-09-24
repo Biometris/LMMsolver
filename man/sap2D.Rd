@@ -2,7 +2,7 @@
 % Please edit documentation in R/sap2D.R
 \name{sap2D}
 \alias{sap2D}
-\title{fit 1D P-splines}
+\title{fit 2D P-splines}
 \usage{
 spl2D(x, nseg, pord=2, degree=3, scaleX=FALSE, x1lim=NULL,x2lim=NULL)
 }
@@ -32,5 +32,5 @@ intercept), the design matrix for random effect \code{Z}, and a list of precisio
 the random effect \code{Z}.
 }
 \description{
-fit 1D P-splines using sparse implementation.
+fit 2D P-splines using sparse implementation.
 }
