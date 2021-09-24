@@ -128,11 +128,11 @@ predict.sap2Dfast <- function(object,
 sap2Dfast <- function(y,
                       x1,
                       x2,
-                      knots,
+                      nseg,
                       trace = TRUE,
                       tolerance = 1.0e-8,
                       scaleX = FALSE) {
-  nseg <- knots
+  #nseg <- knots
   n <- length(y)
   s <- proc.time()[3]
 

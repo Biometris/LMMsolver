@@ -107,11 +107,11 @@ sap3Dfast <- function(y,
                       x1,
                       x2,
                       x3,
-                      knots,
+                      nseg,
                       trace = TRUE,
                       tolerance = 1.0e-8,
                       scaleX = TRUE) {
-  nseg <- knots
+  #nseg <- knots
   n <- length(y)
   s <- proc.time()[3]
 
