@@ -31,7 +31,7 @@ fit0 <- predict(obj0, grid=grid)$eta
 fit0 <- matrix(data=fit0, nrow=grid[1], ncol=grid[2], byrow=TRUE)
 
 # fast sap, using LMMsolver:
-obj1 <- sap2Dfast(y, x1, x2, nseg=knots, trace=trace, tolerance=thr)
+obj1 <- sap2Dfast(y, x1, x2, nseg=knots, trace=trace, tolerance=thr,scaleX=FALSE)
 obj1$edf
 fit1 <- predict(obj1, grid=grid)$eta
 

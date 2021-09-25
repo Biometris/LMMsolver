@@ -4,25 +4,28 @@
 #'
 #' @param x numerical vector containing the values of x covariate.
 #' @param nseg number of segments
-#' @param scaleX logical, scale fixed effect or not. Default is FALSE,
+#' @param scaleX logical, scale fixed effect or not. Default is TRUE,
 #' no scaling.
 #' @param pord order of penalty, default \code{pord=2}
 #' @param degree degree of B-spline basis, default \code{degree=3}
 #' @param xlim numerical vector of length 2 containing the domain of covariate
 #' x where the knots should be placed. Default set to \code{NULL} (covariate range).
 #'
-#' @usage spl1D(x, nseg, pord=2, degree=3, scaleX=FALSE, xlim=NULL)
+#' @usage spl1D(x, nseg, pord=2, degree=3, scaleX=TRUE, xlim=NULL)
 #'
-#' @return A list with three matrices: design matrix for fixed effect \code{X} (not including the
-#' intercept), the design matrix for random effect \code{Z}, and a list of precision matrices \code{Ginv}$ for
-#' the random effect \code{Z}.
+#' @return A list with the following elements:
+#' \itemize{
+#'   \item \code{X} - design matrix for fixed effect. The intercept is not included.
+#'   \item \code{Z} - design matrix for random effect.
+#'   \item \code{lGinv} - a list of precision matrices
+#' }
 #'
 #' @export
 spl1D <- function(x,
                   nseg,
                   pord = 2,
                   degree = 3,
-                  scaleX = FALSE,
+                  scaleX = TRUE,
                   xlim = NULL) {
   if (is.null(xlim))
     xlim <- c(min(x), max(x))

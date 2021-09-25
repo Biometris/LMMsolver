@@ -6,7 +6,7 @@
 #' @param x2 numerical vector containing the values of \code{x2} covariate.
 
 #' @param nseg number of segments
-#' @param scaleX logical, scale fixed effect or not. Default is FALSE,
+#' @param scaleX logical, scale fixed effect or not. Default is TRUE,
 #' no scaling.
 #' @param pord order of penalty, default \code{pord=2}
 #' @param degree degree of B-spline basis, default \code{degree=3}
@@ -15,11 +15,14 @@
 #' @param x2lim numerical vector of length 2 containing the domain of covariate
 #' \code{x2} where the knots should be placed. Default set to \code{NULL} (covariate range).
 
-#' @usage sap2D(x1, x2, nseg, pord=2, degree=3, scaleX=FALSE, x1lim=NULL,x2lim=NULL)
+#' @usage sap2D(x1, x2, nseg, pord=2, degree=3, scaleX=TRUE, x1lim=NULL,x2lim=NULL)
 #'
-#' @return A list with three matrices: design matrix for fixed effect \code{X} (not including the
-#' intercept), the design matrix for random effect \code{Z}, and a list of precision matrices \code{Ginv}$ for
-#' the random effect \code{Z}.
+#' @return A list with the following elements:
+#' \itemize{
+#'   \item \code{X} - design matrix for fixed effect. The intercept is not included.
+#'   \item \code{Z} - design matrix for random effect.
+#'   \item \code{lGinv} - a list of precision matrices
+#' }
 #'
 #' @export
 sap2D <- function(x1,
@@ -27,7 +30,7 @@ sap2D <- function(x1,
                   nseg,
                   pord = 2,
                   degree = 3,
-                  scaleX = FALSE,
+                  scaleX = TRUE,
                   x1lim = NULL,
                   x2lim = NULL) {
   if (is.null(x1lim))

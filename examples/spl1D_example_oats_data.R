@@ -15,8 +15,9 @@ r <- 3     # number of replicates
 v <- 24    # number of genotypes/replicate:
 N <- n*b*r # total number of observations.
 
+# Here scaleX is FALSE in spl1D, to be consistent with model in JABES2020 paper.
 obj1 <- LMMsolve(fixed = yield~rep+gen,
-                spline = ~spl1D(x = plot, nseg = N-1, degree = 1, pord= 1),
+                spline = ~spl1D(x = plot, nseg = N-1, degree = 1, pord= 1, scaleX=FALSE),
                 data = dat,
                 trace = FALSE,
                 tolerance = 1.0e-10)
@@ -34,7 +35,7 @@ round(obj1$sigma2e, 5)
 # genotype random, not in JABES paper
 obj2 <- LMMsolve(fixed = yield~rep,
                  random = ~gen,
-                spline = ~spl1D(x = plot, nseg = N-1, degree = 1, pord= 1),
+                spline = ~spl1D(x = plot, nseg = N-1, degree = 1, pord= 1, scaleX=FALSE),
                 data = dat,
                 trace = FALSE,
                 tolerance = 1.0e-10)

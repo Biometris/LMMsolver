@@ -45,8 +45,7 @@ x3lim <- c(min(x3)-0.01, max(x3)+0.01)
 
 obj2 <- LMMsolve(fixed = par~1,
                  spline = ~LMMsolver::sap3D(row, col, time, nseg=knots,
-                              x1lim = x1lim, x2lim = x2lim, x3lim = x3lim,
-                              scaleX = TRUE),
+                              x1lim = x1lim, x2lim = x2lim, x3lim = x3lim),
                  data = df,
                  trace = trace,
                  tolerance = thr)

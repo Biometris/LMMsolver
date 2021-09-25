@@ -4,7 +4,7 @@
 \alias{sap2D}
 \title{fit 2D P-splines}
 \usage{
-sap2D(x1, x2, nseg, pord=2, degree=3, scaleX=FALSE, x1lim=NULL,x2lim=NULL)
+sap2D(x1, x2, nseg, pord=2, degree=3, scaleX=TRUE, x1lim=NULL,x2lim=NULL)
 }
 \arguments{
 \item{x1}{numerical vector containing the values of \code{x1} covariate.}
@@ -17,7 +17,7 @@ sap2D(x1, x2, nseg, pord=2, degree=3, scaleX=FALSE, x1lim=NULL,x2lim=NULL)
 
 \item{degree}{degree of B-spline basis, default \code{degree=3}}
 
-\item{scaleX}{logical, scale fixed effect or not. Default is FALSE,
+\item{scaleX}{logical, scale fixed effect or not. Default is TRUE,
 no scaling.}
 
 \item{x1lim}{numerical vector of length 2 containing the domain of covariate
@@ -27,9 +27,12 @@ no scaling.}
 \code{x2} where the knots should be placed. Default set to \code{NULL} (covariate range).}
 }
 \value{
-A list with three matrices: design matrix for fixed effect \code{X} (not including the
-intercept), the design matrix for random effect \code{Z}, and a list of precision matrices \code{Ginv}$ for
-the random effect \code{Z}.
+A list with the following elements:
+\itemize{
+  \item \code{X} - design matrix for fixed effect. The intercept is not included.
+  \item \code{Z} - design matrix for random effect.
+  \item \code{lGinv} - a list of precision matrices
+}
 }
 \description{
 fit 2D P-splines using sparse implementation.

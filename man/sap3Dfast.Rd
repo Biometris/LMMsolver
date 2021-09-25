@@ -22,7 +22,7 @@ sap3Dfast(y, x1, x2, x3, nseg, trace = TRUE, tolerance = 1e-08, scaleX = TRUE)
 \item{tolerance}{A numerical value. The convergence tolerance for the
 algorithm.}
 
-\item{scaleX}{logical, scale fixed effect or not. Default is FALSE,
+\item{scaleX}{logical, scale fixed effect or not. Default is TRUE,
 no scaling.}
 }
 \description{

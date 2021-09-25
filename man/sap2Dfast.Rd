@@ -20,7 +20,7 @@ sap2Dfast(y, x1, x2, nseg, trace = TRUE, tolerance = 1e-08, scaleX = FALSE)
 \item{tolerance}{A numerical value. The convergence tolerance for the
 algorithm.}
 
-\item{scaleX}{logical, scale fixed effect or not. Default is FALSE,
+\item{scaleX}{logical, scale fixed effect or not. Default is TRUE,
 no scaling.}
 }
 \description{
