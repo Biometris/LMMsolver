@@ -148,7 +148,7 @@ LMMsolve <- function(fixed,
   dim.f <- table(attr(X, "assign"))
   term.labels.f <- attr(mt, "term.labels")
 
-  ## Make spatial part.
+  ## Add spline part.
   if (!is.null(spline)) {
 
     if (inherits(spline, "character")) {
@@ -158,11 +158,22 @@ LMMsolve <- function(fixed,
     terms <- attr(tf, "term.labels")
     nt <- length(terms)
 
-    spatRes <- eval(parse(text = terms), envir = data, enclos = parent.frame())
+    splRes <- eval(parse(text = terms), envir = data, enclos = parent.frame())
 
-    X <- cbind(X, spatRes$X)
-    Z <- cbind(Z, spatRes$Z)
-    lGinv <- ExpandGinv(lGinv, spatRes$lGinv)
+    ## Add to design matrix fixed effect X
+    X <- cbind(X, splRes$X)
+    ## Add to design matrix random effect Z
+    Z <- cbind(Z, splRes$Z)
+    ## Expand matrices Ginv to the updated Z
+    lGinv <- ExpandGinv(lGinv, splRes$lGinv)
+
+    ## Add dims
+    dim.f <- c(dim.f, splRes$dim.f)
+    dim.r <- c(dim.r, splRes$dim.r)
+    ## Add labels
+    term.labels.f <- c(term.labels.f, splRes$term.labels.f)
+    term.labels.r <- c(term.labels.r, splRes$term.labels.r)
+
   }
 
   ## Add intercept.

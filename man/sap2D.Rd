@@ -32,6 +32,7 @@ A list with the following elements:
   \item \code{X} - design matrix for fixed effect. The intercept is not included.
   \item \code{Z} - design matrix for random effect.
   \item \code{lGinv} - a list of precision matrices
+  \item \code{knots} - a list of vectors with knot positions
 }
 }
 \description{

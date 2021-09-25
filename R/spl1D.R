@@ -18,6 +18,7 @@
 #'   \item \code{X} - design matrix for fixed effect. The intercept is not included.
 #'   \item \code{Z} - design matrix for random effect.
 #'   \item \code{lGinv} - a list of precision matrices
+#'   \item \code{knots} - a list of vectors with knot positions
 #' }
 #'
 #' @export
@@ -30,9 +31,10 @@ spl1D <- function(x,
   if (is.null(xlim))
     xlim <- c(min(x), max(x))
 
-  knots <- PsplinesKnots(xlim[1], xlim[2], degree = degree, nseg = nseg)
+  knots <- list()
+  knots[[1]] <- PsplinesKnots(xlim[1], xlim[2], degree = degree, nseg = nseg)
 
-  B <- spam::as.spam(Bsplines(knots, x))
+  B <- spam::as.spam(Bsplines(knots[[1]], x))
   q <- ncol(B)
 
   DtD <- constructPenalty(q, pord)
@@ -47,6 +49,18 @@ spl1D <- function(x,
   lGinv[[1]] <- spam::as.spam(DtD + CCt)
   names(lGinv) <- "s(x)"
 
-  return(list(X = X, Z = B, lGinv = lGinv))
+  if (is.null(X))
+  {
+    dim.f = NULL
+    term.labels.f = NULL
+  } else {
+    dim.f = c(ncol(X))
+    term.labels.f = c('splF')
+  }
+  dim.r = c(ncol(B))
+  term.labels.r = c('splR')
+  return(list(X = X, Z = B, lGinv = lGinv, knots = knots,
+              dim.f=dim.f, dim.r=dim.r, term.labels.f=term.labels.f,
+              term.labels.r=term.labels.r))
 }
 

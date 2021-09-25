@@ -41,3 +41,4 @@ obj2 <- LMMsolve(fixed = yield~rep,
                 tolerance = 1.0e-10)
 obj2$ED
 
+str(obj2)

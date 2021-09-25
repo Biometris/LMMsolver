@@ -21,6 +21,15 @@ no scaling.}
 \item{xlim}{numerical vector of length 2 containing the domain of covariate
 x where the knots should be placed. Default set to \code{NULL} (covariate range).}
 }
+\value{
+A list with the following elements:
+\itemize{
+  \item \code{X} - design matrix for fixed effect. The intercept is not included.
+  \item \code{Z} - design matrix for random effect.
+  \item \code{lGinv} - a list of precision matrices
+  \item \code{knots} - a list of vectors with knot positions
+}
+}
 \description{
 fit 1D P-splines using sparse implementation.
 }

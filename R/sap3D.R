@@ -25,6 +25,7 @@
 #'   \item \code{X} - design matrix for fixed effect. The intercept is not included.
 #'   \item \code{Z} - design matrix for random effect.
 #'   \item \code{lGinv} - a list of precision matrices
+#'   \item \code{knots} - a list of vectors with knot positions
 #' }
 #'
 #' @export
@@ -45,13 +46,14 @@ sap3D <- function(x1,
   if (is.null(x3lim))
     x3lim <- c(min(x3), max(x3))
 
-  knots1 <- PsplinesKnots(x1lim[1], x1lim[2], degree = degree, nseg = nseg[1])
-  knots2 <- PsplinesKnots(x2lim[1], x2lim[2], degree = degree, nseg = nseg[2])
-  knots3 <- PsplinesKnots(x3lim[1], x3lim[2], degree = degree, nseg = nseg[3])
+  knots <- list(1)
+  knots[[1]] <- PsplinesKnots(x1lim[1], x1lim[2], degree = degree, nseg = nseg[1])
+  knots[[2]] <- PsplinesKnots(x2lim[1], x2lim[2], degree = degree, nseg = nseg[2])
+  knots[[3]] <- PsplinesKnots(x3lim[1], x3lim[2], degree = degree, nseg = nseg[3])
 
-  B1 <- spam::as.spam(Bsplines(knots1, x1))
-  B2 <- spam::as.spam(Bsplines(knots2, x2))
-  B3 <- spam::as.spam(Bsplines(knots3, x3))
+  B1 <- spam::as.spam(Bsplines(knots[[1]], x1))
+  B2 <- spam::as.spam(Bsplines(knots[[2]], x2))
+  B3 <- spam::as.spam(Bsplines(knots[[3]], x3))
 
   q1 <- ncol(B1)
   q2 <- ncol(B2)
@@ -91,7 +93,19 @@ sap3D <- function(x1,
 
   names(lGinv) <- c("s(x1)", "s(x2)", "s(x3)")
 
-  return(list(X = X, Z = B123, lGinv = lGinv))
+  if (is.null(X))
+  {
+    dim.f = NULL
+    term.labels.f = NULL
+  } else {
+    dim.f = c(ncol(X))
+    term.labels.f = c('splF')
+  }
+  dim.r = c(ncol(B123))
+  term.labels.r = c('splR')
+  return(list(X = X, Z = B123, lGinv = lGinv, knots = knots,
+              dim.f=dim.f, dim.r=dim.r, term.labels.f=term.labels.f,
+              term.labels.r=term.labels.r))
 }
 
 ##
