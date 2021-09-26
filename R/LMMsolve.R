@@ -149,6 +149,7 @@ LMMsolve <- function(fixed,
   term.labels.f <- attr(mt, "term.labels")
 
   ## Add spline part.
+  spRes <- NULL
   if (!is.null(spline)) {
 
     if (inherits(spline, "character")) {
@@ -195,6 +196,7 @@ LMMsolve <- function(fixed,
   term.labels <- c(term.labels.f, term.labels.r)
   obj$dim <- dim
   obj$term.labels <- term.labels
+  obj$splRes <- splRes
   class(obj) <- c("LMMsolve", "list")
   return(obj)
 }
