@@ -59,6 +59,39 @@ spl1D <- function(x,
   term.labels.r = c('splR')
   return(list(X = X, Z = B, lGinv = lGinv, knots = knots,
               dim.f=dim.f, dim.r=dim.r, term.labels.f=term.labels.f,
-              term.labels.r=term.labels.r))
+              term.labels.r=term.labels.r, x=x, pord=pord, degree=degree,
+              scaleX=scaleX))
 }
+
+#' obtain Smooth Trend for 1D P-splines
+#'
+#' @param obj an object of class LMMsolve
+#' @param grid number of grid points.
+#' @export
+obtainSmoothTrend1D <- function(object, grid) {
+  x <- object$splRes$x
+  knots <- object$splRes$knots[[1]]
+
+  xgrid <- seq(min(x), max(x), length = grid)
+
+  Bx <- spam::as.spam(Bsplines(knots, xgrid))
+
+  X <- constructX(Bx, xgrid, object$splRes$scaleX,object$splRes$pord)
+  X <- removeIntercept(X)
+
+  mu <- coef(object)$'(Intercept)'
+  if (is.null(X))
+  {
+    bc <- 0.0
+  } else
+  {
+    bc <- as.vector(X %*% coef(object)$splF)
+  }
+  sc <- as.vector(Bx %*% coef(object)$splR)
+  fit <- mu + bc + sc
+  p.data <- list(x=xgrid)
+  L <- list(p.data = p.data, eta=fit, mu=fit)
+  return(L)
+}
+
 

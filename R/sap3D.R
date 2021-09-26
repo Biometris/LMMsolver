@@ -103,7 +103,57 @@ sap3D <- function(x1,
   term.labels.r = c('splR')
   return(list(X = X, Z = B123, lGinv = lGinv, knots = knots,
               dim.f=dim.f, dim.r=dim.r, term.labels.f=term.labels.f,
-              term.labels.r=term.labels.r))
+              term.labels.r=term.labels.r,x1=x1,x2=x2,x3=x3,
+              pord=pord, degree=degree, scaleX=scaleX))
+}
+
+#' obtain Smooth Trend for 3D P-splines
+#'
+#' @param obj an object of class LMMsolve
+#' @param grid a numeric vector of length 3, with the number of grid points at which a
+#' three-dimensional surface will be computed.
+#' @export
+obtainSmoothTrend3D <- function(object, grid) {
+  x1 <- object$splRes$x1
+  x2 <- object$splRes$x2
+  x3 <- object$splRes$x3
+
+  knots1 <- object$splRes$knots[[1]]
+  knots2 <- object$splRes$knots[[2]]
+  knots3 <- object$splRes$knots[[3]]
+
+  x1grid <- seq(min(x1), max(x1), length = grid[1])
+  x2grid <- seq(min(x2), max(x2), length = grid[2])
+  x3grid <- seq(min(x3), max(x3), length = grid[3])
+
+  Bx1 <- spam::as.spam(Bsplines(knots1, x1grid))
+  Bx2 <- spam::as.spam(Bsplines(knots2, x2grid))
+  Bx3 <- spam::as.spam(Bsplines(knots3, x3grid))
+
+  B123x <- Bx1 %x% Bx2 %x% Bx3
+
+  X1 <- constructX(Bx1, x1grid, object$splRes$scaleX, object$splRes$pord)
+  X2 <- constructX(Bx2, x2grid, object$splRes$scaleX, object$splRes$pord)
+  X3 <- constructX(Bx3, x3grid, object$splRes$scaleX, object$splRes$pord)
+
+  X <- X1 %x% X2 %x% X3
+  X <- removeIntercept(X)
+
+  mu <- coef(object)$'(Intercept)'
+  if (is.null(X))
+  {
+    bc <- 0.0
+  } else
+  {
+    bc <- as.vector(X %*% coef(object)$splF)
+  }
+  sc <- as.vector(B123x %*% coef(object)$splR)
+  fit <- mu + bc + sc
+  fit
+  p.data <- list(x1=x1grid, x2=x2grid, x3=x3grid)
+  L <- list(p.data = p.data, eta=fit, mu=fit)
+
+  return(L)
 }
 
 ##
