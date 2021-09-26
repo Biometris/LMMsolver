@@ -14,8 +14,6 @@
 #' \code{x1} where the knots should be placed. Default set to \code{NULL} (covariate range).
 #' @param x2lim numerical vector of length 2 containing the domain of covariate
 #' \code{x2} where the knots should be placed. Default set to \code{NULL} (covariate range).
-
-#' @usage sap2D(x1, x2, nseg, pord=2, degree=3, scaleX=TRUE, x1lim=NULL,x2lim=NULL)
 #'
 #' @return A list with the following elements:
 #' \itemize{

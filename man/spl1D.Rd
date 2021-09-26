@@ -4,7 +4,7 @@
 \alias{spl1D}
 \title{fit 1D P-splines}
 \usage{
-spl1D(x, nseg, pord=2, degree=3, scaleX=TRUE, xlim=NULL)
+spl1D(x, nseg, pord = 2, degree = 3, scaleX = TRUE, xlim = NULL)
 }
 \arguments{
 \item{x}{numerical vector containing the values of x covariate.}

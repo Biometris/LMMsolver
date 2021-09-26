@@ -4,7 +4,18 @@
 \alias{sap3D}
 \title{fit 3D P-splines}
 \usage{
-sap3D(x1, x2, x3, nseg, pord=2, degree=3, scaleX=TRUE, x1lim=NULL,x2lim=NULL, x3lim=NULL)
+sap3D(
+  x1,
+  x2,
+  x3,
+  nseg,
+  pord = 2,
+  degree = 3,
+  scaleX = TRUE,
+  x1lim = NULL,
+  x2lim = NULL,
+  x3lim = NULL
+)
 }
 \arguments{
 \item{x1}{numerical vector containing the values of \code{x1} covariate.}

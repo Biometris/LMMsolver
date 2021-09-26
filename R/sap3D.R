@@ -18,8 +18,6 @@
 #' @param x3lim numerical vector of length 2 containing the domain of covariate
 #' \code{x3} where the knots should be placed. Default set to \code{NULL} (covariate range).
 #'
-#' @usage sap3D(x1, x2, x3, nseg, pord=2, degree=3, scaleX=TRUE, x1lim=NULL,x2lim=NULL, x3lim=NULL)
-#'
 #' @return A list with the following elements:
 #' \itemize{
 #'   \item \code{X} - design matrix for fixed effect. The intercept is not included.

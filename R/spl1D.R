@@ -11,8 +11,6 @@
 #' @param xlim numerical vector of length 2 containing the domain of covariate
 #' x where the knots should be placed. Default set to \code{NULL} (covariate range).
 #'
-#' @usage spl1D(x, nseg, pord=2, degree=3, scaleX=TRUE, xlim=NULL)
-#'
 #' @return A list with the following elements:
 #' \itemize{
 #'   \item \code{X} - design matrix for fixed effect. The intercept is not included.
