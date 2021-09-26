@@ -65,7 +65,7 @@ spl1D <- function(x,
 
 #' obtain Smooth Trend for 1D P-splines
 #'
-#' @param obj an object of class LMMsolve
+#' @param object an object of class LMMsolve
 #' @param grid number of grid points.
 #' @export
 obtainSmoothTrend1D <- function(object, grid) {

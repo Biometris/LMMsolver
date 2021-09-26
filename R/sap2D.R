@@ -91,7 +91,7 @@ sap2D <- function(x1,
 
 #' obtain Smooth Trend for 2D P-splines
 #'
-#' @param obj an object of class LMMsolve
+#' @param object an object of class LMMsolve
 #' @param grid a numeric vector of length 2, with the number of grid points at which a
 #' two-dimensional surface will be computed.
 #' @export

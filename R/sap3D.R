@@ -109,7 +109,7 @@ sap3D <- function(x1,
 
 #' obtain Smooth Trend for 3D P-splines
 #'
-#' @param obj an object of class LMMsolve
+#' @param object an object of class LMMsolve
 #' @param grid a numeric vector of length 3, with the number of grid points at which a
 #' three-dimensional surface will be computed.
 #' @export
