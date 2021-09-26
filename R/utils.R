@@ -1,19 +1,24 @@
-#' @keywords internal
+#' Norm of a vector
+#'
+#' @param x a numerical vector
+#' @return norm of vector x
+#'
 normVec <- function(x) {
   return(sqrt(sum(x ^ 2)))
 }
 
-#
-# combine two lists of lGinv matrices
-# lGinv1 are sparse matrices with dimension d1 x d1
-# lGinv2 are sparse matrices with dimension d2 x d2
-#
-# output is a combined list, of dimension (d1+d2) x (d1+d2),
-# with matrices in lGinv1 extended to [A1 0]
-#                                     [0  0]
-#
-# and              lGinv2 extended to [0  0]
-#                                     [0 A2]
+#' combine two lists of Ginv matrices
+#'
+#' @param lGinv1 a list of sparse matrices
+#' @param lGinv2 a list of sparse matrices
+#' @description
+#'
+#' output is a combined list, of dimension (d1+d2) x (d1+d2),
+#' with matrices in lGinv1 extended to [A1 0]
+#'                                     [0  0]
+#' and              lGinv2 extended to [0  0]
+#'                                     [0 A2]
+#' @return a list of sparse matrices of dimension (d1+d2) x (d1+d2)
 ExpandGinv <- function(lGinv1, lGinv2)
 {
   if (is.null(lGinv1)) return(lGinv2)
@@ -38,8 +43,12 @@ ExpandGinv <- function(lGinv1, lGinv2)
   lGinv
 }
 
-# some help functions for spl1D, spl2D and spl3D functions:
-
+#' construct P-splines penalty matrix D'D
+#'
+#' @param q integer with dimensions
+#' @param pord order of the penalty
+#'
+#' @return qxq matrix D'D of class spam
 constructPenalty <-function(q, pord)
 {
   D <- spam::diff.spam(diag(q), diff = pord)
@@ -47,6 +56,15 @@ constructPenalty <-function(q, pord)
   DtD
 }
 
+#' construct fixed part of the spline model
+#'
+#' @param B matrix with B-spline basis.
+#' @param x vector with values for x
+#' @param scaleX logical. If scaleX is FALSE, the original x is used. If scaleX is TRUE,
+#' scaling is used, based on the B-splines basis. For details see the code
+#' @param pord order of the penalty, values 1 or 2.
+#'
+#' @return a matrix X
 constructX <- function(B, x, scaleX, pord)
 {
   q <- ncol(B)
@@ -65,7 +83,12 @@ constructX <- function(B, x, scaleX, pord)
   X
 }
 
-# constraint matrix:
+#' construct constraint matrix
+#'
+#' @param q dimension of the B-spline basis used
+#' @param pord order of the penalty matrix (pord=1 or 2).
+#'
+#' @return a q x q matrix of type spam
 constructCCt <- function(q, pord)
 {
   if (pord == 2) {
@@ -79,6 +102,10 @@ constructCCt <- function(q, pord)
   CCt
 }
 
+#' remove the intercept from a design matrix
+#'
+#' @param X design matrix
+#' @return a matrix if \code{X} has more than one column, otherwise return NULL
 removeIntercept <- function(X) {
   if (ncol(X)==1) {
     X = NULL
