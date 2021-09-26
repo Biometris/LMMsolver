@@ -139,15 +139,15 @@ obtainSmoothTrend3D <- function(object, grid) {
   X <- X1 %x% X2 %x% X3
   X <- removeIntercept(X)
 
-  mu <- coef(object)$'(Intercept)'
+  mu <- coef.LMMsolve(object)$'(Intercept)'
   if (is.null(X))
   {
     bc <- 0.0
   } else
   {
-    bc <- as.vector(X %*% coef(object)$splF)
+    bc <- as.vector(X %*% coef.LMMsolve(object)$splF)
   }
-  sc <- as.vector(B123x %*% coef(object)$splR)
+  sc <- as.vector(B123x %*% coef.LMMsolve(object)$splR)
   fit <- mu + bc + sc
   fit
   p.data <- list(x1=x1grid, x2=x2grid, x3=x3grid)

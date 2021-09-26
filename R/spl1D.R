@@ -79,15 +79,15 @@ obtainSmoothTrend1D <- function(object, grid) {
   X <- constructX(Bx, xgrid, object$splRes$scaleX,object$splRes$pord)
   X <- removeIntercept(X)
 
-  mu <- coef(object)$'(Intercept)'
+  mu <- coef.LMMsolve(object)$'(Intercept)'
   if (is.null(X))
   {
     bc <- 0.0
   } else
   {
-    bc <- as.vector(X %*% coef(object)$splF)
+    bc <- as.vector(X %*% coef.LMMsolve(object)$splF)
   }
-  sc <- as.vector(Bx %*% coef(object)$splR)
+  sc <- as.vector(Bx %*% coef.LMMsolve(object)$splR)
   fit <- mu + bc + sc
   p.data <- list(x=xgrid)
   L <- list(p.data = p.data, eta=fit, mu=fit)
