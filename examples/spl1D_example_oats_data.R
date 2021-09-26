@@ -41,4 +41,8 @@ obj2 <- LMMsolve(fixed = yield~rep,
                 tolerance = 1.0e-10)
 obj2$ED
 
-str(obj2)
+tr <- obtainSmoothTrend1D(obj2,grid=100)
+str(tr)
+plot(x=tr[[1]]$x, y=tr$eta,type='l')
+
+

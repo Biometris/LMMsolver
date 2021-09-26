@@ -2,6 +2,7 @@ rm(list=ls())
 library(SAP)
 library(LMMsolver)
 library(spam)
+library(fields)
 
 # Get precipitation data from spam
 data(USprecip)
@@ -17,8 +18,8 @@ x2 <- dat$lat
 #
 # set parameters:
 #
-knots <- nseg <- c(41,41)
-grid <- c(40,40)
+knots <- nseg <- c(40, 40)
+grid <- c(40,50)
 trace <- TRUE
 thr <- 1.0e-7  # convergence tolerance
 ######################
@@ -28,34 +29,26 @@ obj0 <- SAP::sap2D(y, x1, x2 , knots=knots, trace=trace, thr=thr)
 obj0$edf
 fit0 <- predict(obj0, grid=grid)$eta
 # reorder fit....
-fit0 <- matrix(data=fit0, nrow=grid[1], ncol=grid[2], byrow=TRUE)
+fit0 <- matrix(data=fit0, nrow=grid[1], ncol=grid[2], byrow=FALSE)
 
 # fast sap, using LMMsolver:
 obj1 <- sap2Dfast(y, x1, x2, nseg=knots, trace=trace, tolerance=thr,scaleX=FALSE)
 obj1$edf
 fit1 <- predict(obj1, grid=grid)$eta
+fit1 <- matrix(data=fit1, nrow=grid[1], ncol=grid[2], byrow=TRUE)
 
 # fast sap, using LMMsolver:
 obj2 <- sap2Dfast(y, x1, x2, nseg=knots, trace=trace, tolerance=thr,scaleX=TRUE)
 obj2$edf
 fit2 <- predict(obj2, grid=grid)$eta
+fit2 <- matrix(data=fit2, nrow=grid[1], ncol=grid[2], byrow=TRUE)
 
-# compare fit on grid:
-range(fit1-fit0)
-range(fit2-fit0)
-range(fit1-fit2)
-
-# compare effective dimensions:
-obj0$edf - obj1$edf
-obj0$edf - obj2$edf
-obj1$edf - obj2$edf
-
-# extra space, to be consitent with knot positions in SAP package:
+# extra space, to be consistent with knot positions in SAP package:
 x1lim <- c(min(x1)-0.01, max(x1)+0.01)
 x2lim <- c(min(x2)-0.01, max(x2)+0.01)
 
 #
-# use new spatial option in LMMsolve:
+# use spatial option in LMMsolve:
 #
 obj3 <- LMMsolve(fixed = anomaly~1,
                  spline = ~LMMsolver::sap2D(x1 = lon, x2 = lat, nseg = nseg,
@@ -72,9 +65,22 @@ obj4 <- LMMsolve(fixed = anomaly~1,
                  trace = trace,
                  tolerance = thr)
 
-# effective dimensions for model 3 slightly different:
+# compare effective dimensions
 obj0$edf
 obj1$edf
 obj2$edf
 obj3$ED
 obj4$ED
+
+fit3 <- obtainSmoothTrend2D(obj3, grid)$eta
+fit3 <- matrix(data=fit3, nrow=grid[1], ncol=grid[2], byrow=TRUE)
+
+fit4 <- obtainSmoothTrend2D(obj4, grid)$eta
+fit4 <- matrix(data=fit4, nrow=grid[1], ncol=grid[2], byrow=TRUE)
+
+# compare fit on grid:
+range(fit0 - fit1)
+range(fit0 - fit2)
+range(fit0 - fit3)
+range(fit0 - fit4)
+

@@ -60,9 +60,6 @@ obj2$ED
 #fit2 <- predict(obj2, grid=grid)$eta
 #fit2n <- predict(obj2, newdata=newData)$eta
 
-# compare fit on grid:
-range(fit1-fit0)
-
 # compare fit newdata:
 #range(fit1n-fit0n)
 
@@ -71,3 +68,9 @@ obj0$edf  # SAP package
 obj1$edf  # sap3D fast function
 obj2$ED   # LMMsolve with spatial argument
 
+fit2 <- obtainSmoothTrend3D(obj2, grid=grid)$eta
+
+# compare fit on grid:
+range(fit1-fit0)
+range(fit2-fit0)
+range(fit1-fit2)

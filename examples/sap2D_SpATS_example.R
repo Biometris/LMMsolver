@@ -48,3 +48,14 @@ dev0
 dev1
 dev0-dev1
 
+grid = c(80, 100)
+M0 <- SpATS::obtain.spatialtrend(m0, grid=grid)$fit
+tmp <- LMMsolver::obtainSmoothTrend2D(m1, grid=grid)$eta
+M1 <- matrix(data = tmp, nrow=grid[1], ncol= grid[2],byrow=TRUE)
+
+# obtainSmoothTrend includes intercept, SpATS::obtain.spatialtrend doesn't
+mu <- coef(m1)$'(Intercept)'
+M1 <- M1 - mu
+
+# only a constant difference...
+range(M0 - t(M1))
