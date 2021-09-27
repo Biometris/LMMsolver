@@ -1,3 +1,4 @@
+install.packages("agridat")
 library(agridat)
 
 data(john.alpha)
