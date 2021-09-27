@@ -103,7 +103,8 @@ sparseMixedModels <- function(y,
   theta <- c(psi, phi)
   #cholRinv = chol(Rinv)
   #if (Nvarcomp > 0.0) {cholGinv = chol(linearSum(psi, lGinv))}
-  cholC <- chol(linearSum(theta = theta, matrixList = listC))
+  cholC <- chol(linearSum(theta = theta, matrixList = listC),
+                memory=list(nnzcolindices=50000))
 
   if (display) {
     C <- linearSum(theta, listC)

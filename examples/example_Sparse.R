@@ -19,17 +19,17 @@ head(df)
 str(df)
 
 # This model doesn't work for K > 1000, problem with intercept:
-# obj0 <- LMMsolve(y~1,random=~block, data=df, trace=TRUE)
+#obj0 <- LMMsolve(y~1,random=~block, data=df, trace=TRUE)
 
 # This model is ok, with replicate fixed:
-obj1 <- LMMsolve(y~rep,random=~block, data=df, trace=TRUE)
+obj1 <- LMMsolve(y~1,random=~block, data=df, trace=TRUE)
 obj1$ED
 # nlme4:
-obj2 <- lme(y~rep,data=df,~1|block)
+obj2 <- lme(y~1,data=df,~1|block)
 
 obj1$logL
 
-p <- r
+p <- 1
 N <- nrow(df)
 
 Constant_logL <- -0.5*log(2*pi)*(N-p)
