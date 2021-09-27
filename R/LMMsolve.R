@@ -204,11 +204,13 @@ LMMsolve <- function(fixed,
 #' Obtain the coefficients from the mixed model equations
 #'
 #' @param object an object of class LMMsolve
-#' @result a list of vectors, containing the estimated effects for each fixed effect
+#' @param \dots some methods for this generic require additional arguments.
+#' None are used in this method.
+#' @return a list of vectors, containing the estimated effects for each fixed effect
 #' and the predictions for each random effect in the defined linear mixed model.
 #'
 #' @export
-coef.LMMsolve <- function(object) {
+coef.LMMsolve <- function(object, ...) {
   result <- list()
   dim <- object$dim
   e <- cumsum(dim)

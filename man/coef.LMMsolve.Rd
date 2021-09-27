@@ -4,10 +4,17 @@
 \alias{coef.LMMsolve}
 \title{Obtain the coefficients from the mixed model equations}
 \usage{
-\method{coef}{LMMsolve}(object)
+\method{coef}{LMMsolve}(object, ...)
 }
 \arguments{
 \item{object}{an object of class LMMsolve}
+
+\item{\dots}{some methods for this generic require additional arguments.
+None are used in this method.}
+}
+\value{
+a list of vectors, containing the estimated effects for each fixed effect
+and the predictions for each random effect in the defined linear mixed model.
 }
 \description{
 Obtain the coefficients from the mixed model equations
