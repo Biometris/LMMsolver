@@ -41,27 +41,28 @@ to the group of the same name.}
 the form "~ pred".}
 
 \item{tolerance}{A numerical value. The convergence tolerance for the
-algorithm.}
+modified Henderson algorithm to estimate the variance components.}
 
-\item{trace}{Should the progress of the algorithm be printed?}
+\item{trace}{Should the progress of the algorithm be printed? Default \code{trace=FALSE}.}
 
-\item{display}{Should the ... matrix created in the algorithm be plotted?}
+\item{display}{Should the sparse matrix created in the algorithm be plotted?}
 
 \item{maxit}{A numerical value. The maximum number of iterations for the
-algorithm.}
+algorithm. Default \code{maxit=250}.}
 }
 \value{
 An object of class LMMsolve, a list with the following items:
 \item{logL}{The loglikelihood}
 \item{sigma2e}{The residual error}
-\item{tau2e}{}
+\item{tau2e}{estimated variance components}
 \item{ED}{The effective dimensions}
 \item{EDmax}{The maximal effective dimensions}
 \item{EDnames}{The names of the effective dimensions}
-\item{a}{}
+\item{a}{the estimated effects from the mixed model equations}
 \item{yhat}{The fitted values}
-\item{dim}{}
-\item{term.labels}{}
+\item{dim}{dimensions for each fixed or random term in the mixed model}
+\item{term.labels}{names of the fixed and random terms in the mixed model}
+\item{splRes}{An object with definition of spline argument}
 }
 \description{
 Solve Linear Mixed Models

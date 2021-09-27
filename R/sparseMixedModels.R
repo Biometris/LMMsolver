@@ -19,7 +19,8 @@ REMLlogL <- function(ADcholRinv,
                      psi,
                      theta,
                      yPy) {
-  # calculute logLikelihood...
+
+  # calculate logLikelihood...
   logdetR <- -logdet(ADcholRinv, phi)
   logdetG <- ifelse(!is.null(ADcholGinv), -logdet(ADcholGinv, psi), 0)
   logdetC <- logdet(ADcholC, theta)

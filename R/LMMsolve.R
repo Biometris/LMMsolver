@@ -17,24 +17,24 @@
 #' @param residual A formula for the residual part of the model. Should be of
 #' the form "~ pred".
 #' @param tolerance A numerical value. The convergence tolerance for the
-#' algorithm.
-#' @param trace Should the progress of the algorithm be printed?
-#' @param display Should the ... matrix created in the algorithm be plotted?
+#' modified Henderson algorithm to estimate the variance components.
+#' @param trace Should the progress of the algorithm be printed? Default \code{trace=FALSE}.
+#' @param display Should the sparse matrix created in the algorithm be plotted?
 #' @param maxit A numerical value. The maximum number of iterations for the
-#' algorithm.
+#' algorithm. Default \code{maxit=250}.
 #'
 #' @return An object of class LMMsolve, a list with the following items:
 #' \item{logL}{The loglikelihood}
 #' \item{sigma2e}{The residual error}
-#' \item{tau2e}{}
+#' \item{tau2e}{estimated variance components}
 #' \item{ED}{The effective dimensions}
 #' \item{EDmax}{The maximal effective dimensions}
 #' \item{EDnames}{The names of the effective dimensions}
-#' \item{a}{}
+#' \item{a}{the estimated effects from the mixed model equations}
 #' \item{yhat}{The fitted values}
-#' \item{dim}{}
-#' \item{term.labels}{}
-#'
+#' \item{dim}{dimensions for each fixed or random term in the mixed model}
+#' \item{term.labels}{names of the fixed and random terms in the mixed model}
+#' \item{splRes}{An object with definition of spline argument}
 #' @importFrom stats model.frame terms model.matrix contrasts as.formula terms.formula
 #'
 #' @export
@@ -201,9 +201,14 @@ LMMsolve <- function(fixed,
   return(obj)
 }
 
+#' Obtain the coefficients from the mixed model equations
+#'
+#' @param object an object of class LMMsolve
+#' @result a list of vectors, containing the estimated effects for each fixed effect
+#' and the predictions for each random effect in the defined linear mixed model.
+#'
 #' @export
-coef.LMMsolve <- function(object,
-                          ...) {
+coef.LMMsolve <- function(object) {
   result <- list()
   dim <- object$dim
   e <- cumsum(dim)
