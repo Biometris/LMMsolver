@@ -7,9 +7,9 @@
 obtainSmoothTrend1D(object, grid)
 }
 \arguments{
-\item{grid}{number of grid points.}
+\item{object}{an object of class LMMsolve}
 
-\item{obj}{an object of class LMMsolve}
+\item{grid}{number of grid points.}
 }
 \description{
 obtain Smooth Trend for 1D P-splines

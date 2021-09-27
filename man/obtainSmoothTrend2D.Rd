@@ -7,10 +7,10 @@
 obtainSmoothTrend2D(object, grid)
 }
 \arguments{
+\item{object}{an object of class LMMsolve}
+
 \item{grid}{a numeric vector of length 2, with the number of grid points at which a
 two-dimensional surface will be computed.}
-
-\item{obj}{an object of class LMMsolve}
 }
 \description{
 obtain Smooth Trend for 2D P-splines
