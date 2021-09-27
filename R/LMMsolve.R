@@ -24,16 +24,16 @@
 #' algorithm. Default \code{maxit=250}.
 #'
 #' @return An object of class LMMsolve, a list with the following items:
-#' \item{logL}{The loglikelihood}
+#' \item{logL}{The restricted log-likelihood at convergence}
 #' \item{sigma2e}{The residual error}
-#' \item{tau2e}{estimated variance components}
+#' \item{tau2e}{Estimated variance components}
 #' \item{ED}{The effective dimensions}
 #' \item{EDmax}{The maximal effective dimensions}
 #' \item{EDnames}{The names of the effective dimensions}
-#' \item{a}{the estimated effects from the mixed model equations}
+#' \item{a}{The estimated effects from the mixed model equations}
 #' \item{yhat}{The fitted values}
-#' \item{dim}{dimensions for each fixed or random term in the mixed model}
-#' \item{term.labels}{names of the fixed and random terms in the mixed model}
+#' \item{dim}{Dimensions for each fixed or random term in the mixed model}
+#' \item{term.labels}{Names of the fixed and random terms in the mixed model}
 #' \item{splRes}{An object with definition of spline argument}
 #' @importFrom stats model.frame terms model.matrix contrasts as.formula terms.formula
 #'
