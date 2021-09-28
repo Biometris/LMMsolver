@@ -184,7 +184,8 @@ LMMsolve <- function(fixed,
 
   ## Make residual part.
   if (!is.null(residual)) {
-    lRinv <- makeRlist(df = data, column = residual)
+    residVar <- all.vars(residual)
+    lRinv <- makeRlist(df = data, column = residVar)
   } else {
     lRinv <- list(residual = spam::diag.spam(1, nrow(data)))
   }
