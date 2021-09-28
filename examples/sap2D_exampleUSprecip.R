@@ -25,20 +25,20 @@ thr <- 1.0e-7  # convergence tolerance
 ######################
 
 # original sap package:
-obj0 <- SAP::sap2D(y, x1, x2 , knots=knots, trace=trace, thr=thr)
+obj0 <- SAP::spl2D(y, x1, x2 , knots=knots, trace=trace, thr=thr)
 obj0$edf
 fit0 <- predict(obj0, grid=grid)$eta
 # reorder fit....
 fit0 <- matrix(data=fit0, nrow=grid[1], ncol=grid[2], byrow=FALSE)
 
 # fast sap, using LMMsolver:
-obj1 <- sap2Dfast(y, x1, x2, nseg=knots, trace=trace, tolerance=thr,scaleX=FALSE)
+obj1 <- spl2Dfast(y, x1, x2, nseg=knots, trace=trace, tolerance=thr,scaleX=FALSE)
 obj1$edf
 fit1 <- predict(obj1, grid=grid)$eta
 fit1 <- matrix(data=fit1, nrow=grid[1], ncol=grid[2], byrow=TRUE)
 
 # fast sap, using LMMsolver:
-obj2 <- sap2Dfast(y, x1, x2, nseg=knots, trace=trace, tolerance=thr,scaleX=TRUE)
+obj2 <- spl2Dfast(y, x1, x2, nseg=knots, trace=trace, tolerance=thr,scaleX=TRUE)
 obj2$edf
 fit2 <- predict(obj2, grid=grid)$eta
 fit2 <- matrix(data=fit2, nrow=grid[1], ncol=grid[2], byrow=TRUE)
@@ -51,14 +51,14 @@ x2lim <- c(min(x2)-0.01, max(x2)+0.01)
 # use spatial option in LMMsolve:
 #
 obj3 <- LMMsolve(fixed = anomaly~1,
-                 spline = ~LMMsolver::sap2D(x1 = lon, x2 = lat, nseg = nseg,
+                 spline = ~LMMsolver::spl2D(x1 = lon, x2 = lat, nseg = nseg,
                               scaleX = FALSE, x1lim=x1lim, x2lim=x2lim),
                  data = dat,
                  trace = trace,
                  tolerance = thr)
 
 obj4 <- LMMsolve(fixed = anomaly~1,
-                 spline = ~LMMsolver::sap2D(x1 = lon, x2 = lat, nseg = nseg,
+                 spline = ~LMMsolver::spl2D(x1 = lon, x2 = lat, nseg = nseg,
                                              scaleX = TRUE,
                                             x1lim=x1lim, x2lim=x2lim),
                  data = dat,

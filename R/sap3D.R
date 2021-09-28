@@ -27,7 +27,7 @@
 #' }
 #'
 #' @export
-sap3D <- function(x1,
+spl3D <- function(x1,
                   x2,
                   x3,
                   nseg,
@@ -160,15 +160,15 @@ obtainSmoothTrend3D <- function(object, grid) {
 ## old code below (check for making predictions)
 ##
 
-#' sap3D, without spectral decomposition
+#' spl3D, without spectral decomposition
 #'
-#' @inheritParams sap3D
+#' @inheritParams spl3D
 #' @inheritParams LMMsolve
 #'
 #' @param y ...
 #'
 #' @export
-sap3Dfast <- function(y,
+spl3Dfast <- function(y,
                       x1,
                       x2,
                       x3,
@@ -266,11 +266,11 @@ sap3Dfast <- function(y,
             knots3 = knots3, U0 = U_null, x1 = x1, x2 = x2, x3 = x3,
             scaleX = scaleX)
 
-  class(L) <- "sap3Dfast"
+  class(L) <- "spl3Dfast"
   return(L)
 }
 
-#' predict for sap3D, without spectral decomposition
+#' predict for spl3D, without spectral decomposition
 #'
 #' @param object ...
 #' @param ... ...
@@ -278,7 +278,7 @@ sap3Dfast <- function(y,
 #' @param grid ...
 #'
 #' @export
-predict.sap3Dfast <- function(object,
+predict.spl3Dfast <- function(object,
                               ...,
                               newdata,
                               grid = c(30, 30, 30)) {
@@ -337,6 +337,6 @@ predict.sap3Dfast <- function(object,
     p.data <- newdata
   }
   L <- list(p.data = p.data, eta = fit, mu = fit)
-  class(L) <- "predict.sap3Dfast"
+  class(L) <- "predict.spl3Dfast"
   return(L)
 }

@@ -24,7 +24,7 @@
 #' }
 #'
 #' @export
-sap2D <- function(x1,
+spl2D <- function(x1,
                   x2,
                   nseg,
                   pord = 2,
@@ -136,12 +136,12 @@ obtainSmoothTrend2D <- function(object, grid) {
 ####  below, old code, for comparison
 ####
 
-#' predict for sap2D, without spectral decomposition
+#' predict for spl2D, without spectral decomposition
 #'
-#' @inheritParams predict.sap3Dfast
+#' @inheritParams predict.spl3Dfast
 #'
 #' @export
-predict.sap2Dfast <- function(object,
+predict.spl2Dfast <- function(object,
                               ...,
                               grid) {
   # make predictions on a grid, use min(x1) and max(x1) as in original SAP:
@@ -172,20 +172,20 @@ predict.sap2Dfast <- function(object,
   fit
   p.data <- list(x1=x1grid,x2=x2grid)
   L <- list(p.data, eta=fit, mu=fit)
-  class(L) <- "predict.sap2Dfast"
+  class(L) <- "predict.spl2Dfast"
   return(L)
 }
 
 
-#' sap2D, without spectral decomposition
+#' spl2D, without spectral decomposition
 #'
-#' @inheritParams sap2D
+#' @inheritParams spl2D
 #' @inheritParams LMMsolve
 #'
 #' @param y ...
 #'
 #' @export
-sap2Dfast <- function(y,
+spl2Dfast <- function(y,
                       x1,
                       x2,
                       nseg,
@@ -264,7 +264,7 @@ sap2Dfast <- function(y,
   L <- list(a = obj$a, edf = obj$ED[-1], knots1 = knots1, knots2 = knots2,
             U0 = U_null, x1 = x1, x2 = x2, scaleX = scaleX)
 
-  class(L) <- "sap2Dfast"
+  class(L) <- "spl2Dfast"
   return(L)
 }
 

@@ -7,7 +7,7 @@
 #' @param random A formula for the random part of the model. Should be of the
 #' form "~ pred".
 #' @param spline A formula for the spline part of the model. Should be of the
-#' form "~ spl1D()", ~ sap2D()" or "~sap3d()".
+#' form "~ spl1D()", ~ spl2D()" or "~spl3D()".
 #' @param group A named list where each component is a numeric vector
 #' specifying contiguous fields in data that are to be considered as a
 #' single term.
@@ -60,7 +60,7 @@ LMMsolve <- function(fixed,
     stop("random model formula must be of form \" ~ pred\".\n")
   }
   if (!is.null(spline) && length(terms(spline)) != 2) {
-    stop("spline model formula must be of form \"~ sap2D()\" or \"~sap3d()\".\n")
+    stop("spline model formula must be of form \"~ spl2D()\" or \"~spl3D()\".\n")
   }
   if (!is.null(residual) && length(terms(residual)) != 2) {
     stop("residual model formula must be of the form \" ~ pred\".\n")
@@ -155,7 +155,7 @@ LMMsolve <- function(fixed,
     if (inherits(spline, "character")) {
       spline <- as.formula(spline)
     }
-    tf <- terms(spline, specials = c("spl1D", "sap2D", "sap3D"))
+    tf <- terms(spline, specials = c("spl1D", "spl2D", "spl3D"))
     terms <- attr(tf, "term.labels")
     nt <- length(terms)
 

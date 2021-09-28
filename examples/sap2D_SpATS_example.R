@@ -38,7 +38,7 @@ dev0 <- m0$deviance
 # degree and pord not defined yet
 m1 <- LMMsolve(yield~rep,
                random=~R+C+gen,
-               spline=~sap2D(col, row, nseg = c(10,20)),
+               spline=~spl2D(col, row, nseg = c(10,20)),
                data = dat,
                trace=TRUE,
                tolerance = tol)
