@@ -1,0 +1,26 @@
+---
+title: "Solving Linear Mixed Models using LMMsolver"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_vignette:
+    toc: false
+    number_sections: true
+bibliography: bibliography.bib
+link-citations: yes
+vignette: >
+  %\VignetteIndexEntry{Solving Linear Mixed Models using LMMsolver}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.dim = c(7, 4)
+)
+```
+
+```{r setup}
+library(LMMsolver)
+```

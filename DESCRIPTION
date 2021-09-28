@@ -16,4 +16,8 @@ Imports:
 LinkingTo: Rcpp, RcppArmadillo
 RoxygenNote: 7.1.2
 Encoding: UTF-8
-Suggests: tinytest
+Suggests: 
+    rmarkdown,
+    knitr,
+    tinytest
+VignetteBuilder: knitr
