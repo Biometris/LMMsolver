@@ -13,8 +13,9 @@
 None are used in this method.}
 }
 \value{
-a list of vectors, containing the estimated effects for each fixed effect
-and the predictions for each random effect in the defined linear mixed model.
+A list of vectors, containing the estimated effects for each fixed
+effect and the predictions for each random effect in the defined linear
+mixed model.
 }
 \description{
 Obtain the coefficients from the mixed model equations

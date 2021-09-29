@@ -1,6 +1,6 @@
 #' Solve Linear Mixed Models
 #'
-#' Solve Linear Mixed Models
+#' Solve Linear Mixed Models.
 #'
 #' @param fixed A formula for the fixed part of the model. Should be of the
 #' form "response ~ pred"
@@ -18,24 +18,18 @@
 #' the form "~ pred".
 #' @param tolerance A numerical value. The convergence tolerance for the
 #' modified Henderson algorithm to estimate the variance components.
-#' @param trace Should the progress of the algorithm be printed? Default \code{trace=FALSE}.
+#' @param trace Should the progress of the algorithm be printed? Default
+#' \code{trace = FALSE}.
 #' @param display Should the sparse matrix created in the algorithm be plotted?
 #' @param maxit A numerical value. The maximum number of iterations for the
-#' algorithm. Default \code{maxit=250}.
+#' algorithm. Default \code{maxit = 250}.
 #'
-#' @return An object of class LMMsolve, a list with the following items:
-#' \item{logL}{The restricted log-likelihood at convergence}
-#' \item{sigma2e}{The residual error}
-#' \item{tau2e}{Estimated variance components}
-#' \item{ED}{The effective dimensions}
-#' \item{EDmax}{The maximal effective dimensions}
-#' \item{EDnames}{The names of the effective dimensions}
-#' \item{a}{The estimated effects from the mixed model equations}
-#' \item{yhat}{The fitted values}
-#' \item{dim}{Dimensions for each fixed or random term in the mixed model}
-#' \item{term.labels}{Names of the fixed and random terms in the mixed model}
-#' \item{splRes}{An object with definition of spline argument}
-#' @importFrom stats model.frame terms model.matrix contrasts as.formula terms.formula
+#' @return An object of class \code{LMMsolve} representing the fitted model.
+#'
+#' @seealso \code{\link{new_LMMsolve}}, \code{\link{coef.LMMsolve}}
+#'
+#' @importFrom stats model.frame terms model.matrix contrasts as.formula
+#' terms.formula
 #'
 #' @export
 LMMsolve <- function(fixed,
@@ -198,8 +192,7 @@ LMMsolve <- function(fixed,
   obj$dim <- dim
   obj$term.labels <- term.labels
   obj$splRes <- splRes
-  class(obj) <- c("LMMsolve", "list")
-  return(obj)
+  return(new_LMMsolve(obj))
 }
 
 #' Obtain the coefficients from the mixed model equations
@@ -207,11 +200,14 @@ LMMsolve <- function(fixed,
 #' @param object an object of class LMMsolve
 #' @param \dots some methods for this generic require additional arguments.
 #' None are used in this method.
-#' @return a list of vectors, containing the estimated effects for each fixed effect
-#' and the predictions for each random effect in the defined linear mixed model.
+#'
+#' @return A list of vectors, containing the estimated effects for each fixed
+#' effect and the predictions for each random effect in the defined linear
+#' mixed model.
 #'
 #' @export
-coef.LMMsolve <- function(object, ...) {
+coef.LMMsolve <- function(object,
+                          ...) {
   result <- list()
   dim <- object$dim
   e <- cumsum(dim)

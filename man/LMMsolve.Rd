@@ -43,27 +43,20 @@ the form "~ pred".}
 \item{tolerance}{A numerical value. The convergence tolerance for the
 modified Henderson algorithm to estimate the variance components.}
 
-\item{trace}{Should the progress of the algorithm be printed? Default \code{trace=FALSE}.}
+\item{trace}{Should the progress of the algorithm be printed? Default
+\code{trace = FALSE}.}
 
 \item{display}{Should the sparse matrix created in the algorithm be plotted?}
 
 \item{maxit}{A numerical value. The maximum number of iterations for the
-algorithm. Default \code{maxit=250}.}
+algorithm. Default \code{maxit = 250}.}
 }
 \value{
-An object of class LMMsolve, a list with the following items:
-\item{logL}{The restricted log-likelihood at convergence}
-\item{sigma2e}{The residual error}
-\item{tau2e}{Estimated variance components}
-\item{ED}{The effective dimensions}
-\item{EDmax}{The maximal effective dimensions}
-\item{EDnames}{The names of the effective dimensions}
-\item{a}{The estimated effects from the mixed model equations}
-\item{yhat}{The fitted values}
-\item{dim}{Dimensions for each fixed or random term in the mixed model}
-\item{term.labels}{Names of the fixed and random terms in the mixed model}
-\item{splRes}{An object with definition of spline argument}
+An object of class \code{LMMsolve} representing the fitted model.
 }
 \description{
-Solve Linear Mixed Models
+Solve Linear Mixed Models.
+}
+\seealso{
+\code{\link{new_LMMsolve}}, \code{\link{coef.LMMsolve}}
 }

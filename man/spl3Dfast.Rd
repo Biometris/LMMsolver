@@ -17,7 +17,8 @@ spl3Dfast(y, x1, x2, x3, nseg, trace = TRUE, tolerance = 1e-08, scaleX = TRUE)
 
 \item{nseg}{number of segments}
 
-\item{trace}{Should the progress of the algorithm be printed? Default \code{trace=FALSE}.}
+\item{trace}{Should the progress of the algorithm be printed? Default
+\code{trace = FALSE}.}
 
 \item{tolerance}{A numerical value. The convergence tolerance for the
 modified Henderson algorithm to estimate the variance components.}
