@@ -12,7 +12,8 @@ Imports:
     methods,
     Rcpp (>= 0.10.4), 
     spam, 
-    splines
+    splines,
+    agridat
 LinkingTo: Rcpp, RcppArmadillo
 RoxygenNote: 7.1.2
 Encoding: UTF-8
