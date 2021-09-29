@@ -25,8 +25,10 @@
 #' algorithm. Default \code{maxit = 250}.
 #'
 #' @return An object of class \code{LMMsolve} representing the fitted model.
+#' See \code{\link{LMMsolveObject}} for a full description of the components in
+#' this object.
 #'
-#' @seealso \code{\link{new_LMMsolve}}, \code{\link{coef.LMMsolve}}
+#' @seealso \code{\link{LMMsolveObject}}
 #'
 #' @importFrom stats model.frame terms model.matrix contrasts as.formula
 #' terms.formula
@@ -192,7 +194,7 @@ LMMsolve <- function(fixed,
   obj$dim <- dim
   obj$term.labels <- term.labels
   obj$splRes <- splRes
-  return(new_LMMsolve(obj))
+  return(LMMsolveObject(obj))
 }
 
 #' Obtain the coefficients from the mixed model equations

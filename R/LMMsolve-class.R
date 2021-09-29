@@ -1,9 +1,11 @@
-#' Class LMMsolve
+#' Fitted LMMsolve Object
 #'
-#' Class LMMsolve of fitted mixed models.
+#' An object of class \code{LMMsolve} returned by the LMMsolve function,
+#' representing a fitted linear mixed model. Objects of this class have
+#' methods for the generic functions coef, .....
 #'
-#' @section Slots:
-#' An object of class LMMsolve contains the following slots.
+#' @return
+#' An object of class \code{LMMsolve} contains the following components.
 #' \describe{
 #' \item{logL}{The restricted log-likelihood at convergence}
 #' \item{sigma2e}{The residual error}
@@ -22,9 +24,9 @@
 #'
 #' @usage NULL
 #'
-#' @rdname LMMsolve-class
+#' @rdname LMMsolveObject
 #' @export
-new_LMMsolve <- function(object) {
+LMMsolveObject <- function(object) {
   structure(object,
             class = c("LMMsolve", "list"))
 }

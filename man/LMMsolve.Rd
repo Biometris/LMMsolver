@@ -53,10 +53,12 @@ algorithm. Default \code{maxit = 250}.}
 }
 \value{
 An object of class \code{LMMsolve} representing the fitted model.
+See \code{\link{LMMsolveObject}} for a full description of the components in
+this object.
 }
 \description{
 Solve Linear Mixed Models.
 }
 \seealso{
-\code{\link{new_LMMsolve}}, \code{\link{coef.LMMsolve}}
+\code{\link{LMMsolveObject}}
 }
