@@ -49,7 +49,6 @@ ExpandGinv <- function(lGinv1, lGinv2)
 #' @param pord order of the penalty
 #'
 #' @return qxq matrix D'D of class spam
-#' @export
 constructPenalty <-function(q, pord)
 {
   D <- spam::diff.spam(diag(q), diff = pord)
@@ -66,7 +65,6 @@ constructPenalty <-function(q, pord)
 #' @param pord order of the penalty, values 1 or 2.
 #'
 #' @return a matrix X
-#' @export
 constructX <- function(B, x, scaleX, pord)
 {
   q <- ncol(B)
@@ -91,7 +89,6 @@ constructX <- function(B, x, scaleX, pord)
 #' @param pord order of the penalty matrix (pord=1 or 2).
 #'
 #' @return a q x q matrix of type spam
-#' @export
 constructCCt <- function(q, pord)
 {
   if (pord == 2) {
@@ -109,7 +106,6 @@ constructCCt <- function(q, pord)
 #'
 #' @param X design matrix
 #' @return a matrix if \code{X} has more than one column, otherwise return NULL
-#' @export
 removeIntercept <- function(X) {
   if (ncol(X)==1) {
     X = NULL
