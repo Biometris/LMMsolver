@@ -4,8 +4,10 @@
 \alias{LMMsolveObject}
 \title{Fitted LMMsolve Object}
 \value{
-An object of class \code{LMMsolve} contains the following components.
+An object of class \code{LMMsolve} contains the following components:
 \item{logL}{The restricted log-likelihood at convergence}
+\item{dev}{The REML deviance at convergence (i.e., - 2 times the
+restricted log-likelihood \code{logL})}
 \item{sigma2e}{The residual error}
 \item{tau2e}{The estimated variance components}
 \item{ED}{The effective dimensions}

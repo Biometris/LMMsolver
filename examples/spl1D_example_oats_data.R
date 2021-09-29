@@ -20,14 +20,11 @@ obj1 <- LMMsolve(fixed = yield~rep+gen,
                 spline = ~spl1D(x = plot, nseg = N-1, degree = 1, pord= 1, scaleX=FALSE),
                 data = dat,
                 trace = FALSE,
-                tolerance = 1.0e-10)
+                tolerance = 1.0e-10,
+                omitConstant = FALSE)
 obj1$ED
 
-# calculate deviance, as in JABES 2020 paper, table 1:
-p <- 1 + (v-1) + (r-1)
-Constant = log(2*pi)*(N-p)
-dev = -2*obj1$logL + Constant
-round(dev,2)
+round(obj1$dev, 2)
 
 # residual variance, see JABES 2020 paper, table 1:
 round(obj1$sigma2e, 5)

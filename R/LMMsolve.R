@@ -23,6 +23,9 @@
 #' @param display Should the sparse matrix created in the algorithm be plotted?
 #' @param maxit A numerical value. The maximum number of iterations for the
 #' algorithm. Default \code{maxit = 250}.
+#' @param omitConstant Omit the constant in the restricted log-likelihood. Default is
+#' \code{TRUE}, as for example in \code{asreml}. In \code{nlme} and SAS the constant
+#' is included.
 #'
 #' @return An object of class \code{LMMsolve} representing the fitted model.
 #' See \code{\link{LMMsolveObject}} for a full description of the components in
@@ -44,7 +47,8 @@ LMMsolve <- function(fixed,
                      tolerance = 1.0e-6,
                      trace = FALSE,
                      display = FALSE,
-                     maxit = 250) {
+                     maxit = 250,
+                     omitConstant = TRUE) {
   ## Input checks.
   if (!inherits(data, "data.frame")) {
     stop("data should be a data.frame.\n")
@@ -189,11 +193,19 @@ LMMsolve <- function(fixed,
   obj <- sparseMixedModels(y = y, X = X, Z = Z, lGinv = lGinv, lRinv = lRinv,
                            tolerance = tolerance, trace = trace,
                            display = display, maxit = maxit)
+  if (!omitConstant)
+  {
+    N <- length(y)
+    p <- sum(dim.f)
+    Constant = -0.5*log(2*pi)*(N-p)
+    obj$logL <- obj$logL + Constant
+  }
   dim <- as.numeric(c(dim.f, dim.r))
   term.labels <- c(term.labels.f, term.labels.r)
   obj$dim <- dim
   obj$term.labels <- term.labels
   obj$splRes <- splRes
+  obj$dev <- -2.0*obj$logL
   return(LMMsolveObject(obj))
 }
 
