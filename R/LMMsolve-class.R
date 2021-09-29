@@ -5,8 +5,7 @@
 #' methods for the generic functions coef, .....
 #'
 #' @return
-#' An object of class \code{LMMsolve} contains the following components.
-#' \describe{
+#' An object of class \code{LMMsolve} contains the following components:
 #' \item{logL}{The restricted log-likelihood at convergence}
 #' \item{sigma2e}{The residual error}
 #' \item{tau2e}{The estimated variance components}
@@ -20,7 +19,6 @@
 #' \item{term.labels}{The Names of the fixed and random terms in the mixed
 #' model}
 #' \item{splRes}{An object with definition of spline argument}
-#' }
 #'
 #' @usage NULL
 #'

@@ -5,7 +5,6 @@
 \title{Fitted LMMsolve Object}
 \value{
 An object of class \code{LMMsolve} contains the following components.
-\describe{
 \item{logL}{The restricted log-likelihood at convergence}
 \item{sigma2e}{The residual error}
 \item{tau2e}{The estimated variance components}
@@ -19,7 +18,6 @@ mixed model}
 \item{term.labels}{The Names of the fixed and random terms in the mixed
 model}
 \item{splRes}{An object with definition of spline argument}
-}
 }
 \description{
 An object of class \code{LMMsolve} returned by the LMMsolve function,
