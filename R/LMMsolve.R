@@ -195,9 +195,9 @@ LMMsolve <- function(fixed,
                            display = display, maxit = maxit)
   if (!omitConstant)
   {
-    N <- length(y)
+    Nobs <- length(y)
     p <- sum(dim.f)
-    Constant = -0.5*log(2*pi)*(N-p)
+    Constant = -0.5*log(2*pi)*(Nobs-p)
     obj$logL <- obj$logL + Constant
   }
   dim <- as.numeric(c(dim.f, dim.r))
