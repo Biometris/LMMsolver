@@ -13,6 +13,9 @@ obj0 <- LMMsolve(fixed = yield ~ rep + gen,
 devJABES2020paper_baseline <- 69.91
 expect_equal(round(obj0$dev, 2), devJABES2020paper_baseline)
 
+# number of plots
+N <- nrow(john.alpha)
+
 # Here scaleX is FALSE in spl1D, to be consistent with model in JABES2020 paper.
 obj1 <- LMMsolve(fixed = yield ~ rep + gen,
                  spline = ~spl1D(x = plot, nseg = N - 1, degree = 1, pord = 1,
