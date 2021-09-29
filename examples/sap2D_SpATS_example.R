@@ -59,3 +59,6 @@ M1 <- M1 - mu
 
 # only a constant difference...
 range(M0 - t(M1))
+
+# give summary
+summary(m1)

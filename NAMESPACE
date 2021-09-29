@@ -3,6 +3,7 @@
 S3method(coef,LMMsolve)
 S3method(predict,spl2Dfast)
 S3method(predict,spl3Dfast)
+S3method(summary,LMMsolve)
 export(Bsplines)
 export(LMMsolve)
 export(LMMsolveObject)

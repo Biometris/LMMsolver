@@ -25,7 +25,7 @@ thr <- 1.0e-7  # convergence tolerance
 ######################
 
 # original sap package:
-obj0 <- SAP::spl2D(y, x1, x2 , knots=knots, trace=trace, thr=thr)
+obj0 <- SAP::sap2D(y, x1, x2 , knots=knots, trace=trace, thr=thr)
 obj0$edf
 fit0 <- predict(obj0, grid=grid)$eta
 # reorder fit....
@@ -64,6 +64,7 @@ obj4 <- LMMsolve(fixed = anomaly~1,
                  data = dat,
                  trace = trace,
                  tolerance = thr)
+summary(obj4)
 
 # compare effective dimensions
 obj0$edf

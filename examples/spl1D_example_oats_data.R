@@ -22,7 +22,7 @@ obj1 <- LMMsolve(fixed = yield~rep+gen,
                 trace = FALSE,
                 tolerance = 1.0e-10,
                 omitConstant = FALSE)
-obj1$ED
+summary(obj1)
 
 round(obj1$dev, 2)
 
@@ -36,7 +36,8 @@ obj2 <- LMMsolve(fixed = yield~rep,
                 data = dat,
                 trace = FALSE,
                 tolerance = 1.0e-10)
-obj2$ED
+summary(obj2)
+
 
 tr <- obtainSmoothTrend1D(obj2,grid=100)
 str(tr)
