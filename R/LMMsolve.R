@@ -92,29 +92,34 @@ LMMsolve <- function(fixed,
                                               contrasts = FALSE))
     dim1.r <- table(attr(Z1, "assign"))[-1]
     term1.labels.r <- attr(mt, "term.labels")
+    # number of variance parameters (see Gilmour 1995) for each variance component
+    varPar1 <- rep(1, length(dim1.r))
     Z1 <- Z1[, -1]
   } else {
     dim1.r <- NULL
     term1.labels.r <- NULL
     Z1 <- NULL
+    varPar1 <- NULL
   }
 
   if (!is.null(group)) {
     ndx <- unlist(group)
     dim2.r <- sapply(X = group, FUN = length)
     term2.labels.r <- names(group)
+    varPar2 <- rep(1, length(dim2.r))
     Z2 <- as.matrix(data[, ndx])
   } else {
     dim2.r <- NULL
     term2.labels.r <- NULL
     Z2 <- NULL
+    varPar2 <- NULL
   }
 
   if (!(is.null(random) & is.null(group))) {
     Z <- cbind(Z1, Z2)
     dim.r <- c(dim1.r, dim2.r)
     term.labels.r <- c(term1.labels.r, term2.labels.r)
-
+    varPar <- c(varPar1, varPar2)
     e <- cumsum(dim.r)
     s <- e - dim.r + 1
 
@@ -136,6 +141,7 @@ LMMsolve <- function(fixed,
     lGinv <- NULL
     dim.r <- NULL
     term.labels.r <- NULL
+    varPar <- NULL
   }
 
   ## Make fixed part.
@@ -167,6 +173,9 @@ LMMsolve <- function(fixed,
     Z <- cbind(Z, splRes$Z)
     ## Expand matrices Ginv to the updated Z
     lGinv <- ExpandGinv(lGinv, splRes$lGinv)
+
+    # a splxD model has x parameters....
+    varPar <- c(varPar, length(splRes$lGinv))
 
     ## Add dims
     dim.f <- c(dim.f, splRes$dim.f)
@@ -202,7 +211,12 @@ LMMsolve <- function(fixed,
   }
   dim <- as.numeric(c(dim.f, dim.r))
   term.labels <- c(term.labels.f, term.labels.r)
+  obj$varPar <- varPar
   obj$dim <- dim
+
+  obj$Nres <- length(lRinv)
+  obj$term.labels.f <- term.labels.f
+  obj$term.labels.r <- term.labels.r
   obj$term.labels <- term.labels
   obj$splRes <- splRes
   obj$dev <- -2.0*obj$logL
