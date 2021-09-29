@@ -23,4 +23,34 @@ knitr::opts_chunk$set(
 
 ```{r setup}
 library(LMMsolver)
+library(agridat)
 ```
+
+# The LMMsolver package {.unnumbered}
+
+The `LMMsolver` package is developed as....
+
+# Baseline model
+
+# A simple example using 1-dimensional P-splines
+
+```{r LV_model}
+data(john.alpha)
+dat <- john.alpha
+
+n <- 4     # number of units per block
+b <- 6     # number of blocks per replicate
+r <- 3     # number of replicates
+v <- 24    # number of genotypes/replicate:
+N <- n*b*r # total number of observations.
+
+# Here scaleX is FALSE in spl1D, to be consistent with model in JABES2020 paper.
+obj <- LMMsolve(fixed = yield~rep+gen,
+                spline = ~spl1D(x = plot, nseg = N-1, degree = 1, pord = 1, scaleX=FALSE),
+                data = dat,
+                trace = FALSE,
+                tolerance = 1.0e-10)
+obj$ED
+
+```
+
