@@ -30,3 +30,47 @@ LMMsolveObject <- function(object) {
   structure(object,
             class = c("LMMsolve", "list"))
 }
+
+
+#' Summarize Linear Mixed Model fits
+#'
+#' Summary method for class "LMMsolve". Prints the effective dimensions of the
+#' model.
+#'
+#' @param object an object of class LMMsolve
+#' @param which default dimensions (only option so far).
+#' @param \dots some methods for this generic require additional arguments.
+#' None are used in this method.
+#'
+#' @export
+summary.LMMsolve <- function(object,
+                             which = "dimensions",
+                             ...) {
+  ## Checks.
+  which <- match.arg(which)
+  ## start and end of each variance component.
+  Nres <- object$Nres
+  e <- cumsum(object$varPar)
+  s <- e - object$varPar + 1
+  e <- e + Nres
+  s <- s + Nres
+  ## Get number of variance components.
+  nVarComp <- length(object$term.labels.r)
+  ## Get names of effective dimensions.
+  namesED <- names(object$ED)
+  ## Print total effective dimensions per variance component.
+  for (i in 1:nVarComp) {
+    ndx <- s[i]:e[i]
+    cat(object$term.labels.r[i], "with total effective dimension ",
+        round(sum(object$ED[ndx]), 2), "\n")
+    if (length(ndx) > 1) {
+      for (k in ndx) {
+        cat("   ", namesED[k], "\t", round(object$ED[k], 2), "\n")
+      }
+    }
+  }
+}
+
+
+
+
