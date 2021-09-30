@@ -61,3 +61,9 @@ coef(obj1)
 # sum of effects equal to zero:
 sum(coef(obj1)$QTL)
 
+obj0$ED
+
+obj1$ED
+obj1$EDmax
+obj1$EDnominal
+

@@ -125,6 +125,7 @@ removeIntercept <- function(X) {
 #' @keywords internal
 calcNomEffDim <- function(X, Z, dim.r)
 {
+  if (is.null(Z)) return(NULL)
   p <- ncol(X)
 
   EDnom <- vector(length=length(dim.r))
