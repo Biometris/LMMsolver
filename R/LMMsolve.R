@@ -197,12 +197,22 @@ LMMsolve <- function(fixed,
     lRinv <- makeRlist(df = data, column = residVar)
   } else {
     lRinv <- list(residual = spam::diag.spam(1, nrow(data)))
+    attr(lRinv, "cnt") <- nrow(data)
   }
   y <- mf[, 1]
   obj <- sparseMixedModels(y = y, X = X, Z = Z, lGinv = lGinv, lRinv = lRinv,
                            tolerance = tolerance, trace = trace,
                            display = display, maxit = maxit)
-  obj$EDnominal <- calcNomEffDim(X, Z, dim.r)
+  NomEffDimRes <- attr(lRinv,"cnt") - 1
+  cat("1", NomEffDimRes, "\n")
+  NomEffDimRan <- calcNomEffDim(X, Z, dim.r)
+  cat("2", NomEffDimRan, "\n")
+
+  NomEffDim <- c(NomEffDimRes, NomEffDimRan)
+  cat("3", NomEffDim, "\n")
+
+  names(NomEffDim) <- names(obj$ED)
+  obj$EDnominal <- NomEffDim
 
   if (!omitConstant)
   {
