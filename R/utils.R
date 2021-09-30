@@ -100,7 +100,7 @@ constructCCt <- function(q,
                          pord) {
   C <- spam::spam(x = 0, nrow = q, ncol = pord)
   C[1, 1] <- C[q, pord] <- 1
-  CCt <- tcrossprod(C)
+  CCt <- C %*% t(C)
   return(CCt)
 }
 
