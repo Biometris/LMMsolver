@@ -46,4 +46,7 @@ identical(tr, tra)
 str(tr)
 plot(x=tr[[1]]$x, y=tr$eta,type='l')
 
+obj2$EDmax
+obj2$EDnominal
+
 
