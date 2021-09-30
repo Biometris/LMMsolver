@@ -68,7 +68,8 @@ obj0$edf  # SAP package
 obj1$edf  # spl3D fast function
 obj2$ED   # LMMsolve with spatial argument
 
-fit2 <- obtainSmoothTrend3D(obj2, grid=grid)$eta
+fit2 <- LMMsolver:::obtainSmoothTrend3D(obj2, grid=grid)$eta
+fit2a <- obtainSmoothTrend(obj2, grid=grid)$eta
 
 # compare fit on grid:
 range(fit1-fit0)

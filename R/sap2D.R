@@ -89,47 +89,7 @@ spl2D <- function(x1,
 
 }
 
-#' obtain Smooth Trend for 2D P-splines
-#'
-#' @param object an object of class LMMsolve
-#' @param grid a numeric vector of length 2, with the number of grid points at which a
-#' two-dimensional surface will be computed.
-#' @export
-obtainSmoothTrend2D <- function(object, grid) {
-  x1 <- object$splRes$x1
-  x2 <- object$splRes$x2
-  knots1 <- object$splRes$knots[[1]]
-  knots2 <- object$splRes$knots[[2]]
 
-  x1grid <- seq(min(x1), max(x1), length = grid[1])
-  x2grid <- seq(min(x2), max(x2), length = grid[2])
-
-  Bx1 <- spam::as.spam(Bsplines(knots1, x1grid))
-  Bx2 <- spam::as.spam(Bsplines(knots2, x2grid))
-
-  B12x <- Bx1 %x% Bx2
-
-  X1 <- constructX(Bx1, x1grid, object$splRes$scaleX,object$splRes$pord)
-  X2 <- constructX(Bx2, x2grid, object$splRes$scaleX,object$splRes$pord)
-  X <- X1 %x% X2
-  X <- removeIntercept(X)
-
-  mu <- coef.LMMsolve(object)$'(Intercept)'
-  if (is.null(X))
-  {
-    bc <- 0.0
-  } else
-  {
-    bc <- as.vector(X %*% coef.LMMsolve(object)$splF)
-  }
-  sc <- as.vector(B12x %*% coef.LMMsolve(object)$splR)
-  fit <- mu + bc + sc
-  fit
-  p.data <- list(x1=x1grid, x2=x2grid)
-  L <- list(p.data=p.data, eta=fit, mu=fit)
-
-  return(L)
-}
 
 
 ####

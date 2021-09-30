@@ -39,7 +39,10 @@ obj2 <- LMMsolve(fixed = yield~rep,
 summary(obj2)
 
 
-tr <- obtainSmoothTrend1D(obj2,grid=100)
+tr <- LMMsolver:::obtainSmoothTrend1D(obj2,grid=100)
+tra <- obtainSmoothTrend(obj2,grid=100)
+identical(tr, tra)
+
 str(tr)
 plot(x=tr[[1]]$x, y=tr$eta,type='l')
 

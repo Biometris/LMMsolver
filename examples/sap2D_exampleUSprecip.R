@@ -73,10 +73,12 @@ obj2$edf
 obj3$ED
 obj4$ED
 
-fit3 <- obtainSmoothTrend2D(obj3, grid)$eta
+fit3 <- LMMsolver:::obtainSmoothTrend2D(obj3, grid)$eta
+fit3a <- obtainSmoothTrend(obj3, grid)$eta
+
 fit3 <- matrix(data=fit3, nrow=grid[1], ncol=grid[2], byrow=TRUE)
 
-fit4 <- obtainSmoothTrend2D(obj4, grid)$eta
+fit4 <- obtainSmoothTrend(obj4, grid)$eta
 fit4 <- matrix(data=fit4, nrow=grid[1], ncol=grid[2], byrow=TRUE)
 
 # compare fit on grid:
