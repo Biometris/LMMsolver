@@ -41,26 +41,25 @@ spl1D <- function(x,
   CCt <- constructCCt(q, pord)
 
   ## Remove intercept column to avoid singularity problems.
-  X  <- removeIntercept(X)
+  X <- removeIntercept(X)
 
   lGinv <- list()
   lGinv[[1]] <- spam::as.spam(DtD + CCt)
   names(lGinv) <- "s(x)"
 
-  if (is.null(X))
-  {
-    dim.f = NULL
-    term.labels.f = NULL
+  if (is.null(X)) {
+    dim.f <- NULL
+    term.labels.f <- NULL
   } else {
-    dim.f = c(ncol(X))
-    term.labels.f = c('splF')
+    dim.f <- c(ncol(X))
+    term.labels.f <- "splF"
   }
-  dim.r = c(ncol(B))
-  term.labels.r = c('splR')
+  dim.r <- ncol(B)
+  term.labels.r <- "splR"
   return(list(X = X, Z = B, lGinv = lGinv, knots = knots,
-              dim.f=dim.f, dim.r=dim.r, term.labels.f=term.labels.f,
-              term.labels.r=term.labels.r, x=x, pord=pord, degree=degree,
-              scaleX=scaleX))
+              dim.f = dim.f, dim.r = dim.r, term.labels.f = term.labels.f,
+              term.labels.r = term.labels.r, x = list(x), pord = pord,
+              degree = degree, scaleX = scaleX))
 }
 
 

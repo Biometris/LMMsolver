@@ -25,10 +25,54 @@ obtainSmoothTrend <- function(object,
     stop("grid should be a numeric vector with length equal to the dimension ",
          "of the fitted spline: ", splDim,".\n")
   }
-  L <- do.call(what = paste0("obtainSmoothTrend", splDim, "D"),
-               args = list(object = object, grid = grid))
-  return(L)
+  ## Get content from splRes.
+  x <- object$splRes$x
+  knots <- object$splRes$knots
+  scaleX <- object$splRes$scaleX
+  pord <- object$splRes$pord
+  ## Construct grid for each dimension.
+  xGrid <- lapply(X = seq_along(x), FUN = function(i) {
+    seq(min(x[[i]]), max(x[[i]]), length = grid[i])
+  })
+  ## Compute Bx per dimension.
+  Bx <- mapply(FUN = function(x, y) {
+    spam::as.spam(Bsplines(x, y))
+  }, knots, xGrid)
+  ## Compute Bx over all dimensions.
+  BxTot <- Reduce(`%x%`, Bx)
+  ## Compute X per dimension.
+  X <- mapply(FUN = function(x, y) {
+    constructX(B = x, x = y, scaleX = scaleX, pord = pord)
+  }, Bx, xGrid, SIMPLIFY = FALSE)
+  ## Compute X over all dimensions.
+  XTot <- Reduce(`%x%`, X)
+  ## Remove intercept (needed when fitting model to avoid singularities).
+  XTot <- removeIntercept(XTot)
+  ## Get intercept and compute contribution of fixed and random terms.
+  mu <- coef.LMMsolve(object)$'(Intercept)'
+  if (is.null(XTot)) {
+    bc <- 0
+  } else {
+    bc <- as.vector(XTot %*% coef.LMMsolve(object)$splF)
+  }
+  sc <- as.vector(BxTot %*% coef.LMMsolve(object)$splR)
+  ## Compute fitted values.
+  fit <- mu + bc + sc
+  return(list(p.data = xGrid, eta = fit, mu = mu))
 }
+
+
+
+
+
+
+
+
+
+
+#### Original functions below for comparison
+
+
 
 #' Obtain Smooth Trend for 1D P-splines
 #'
@@ -38,7 +82,7 @@ obtainSmoothTrend <- function(object,
 #' @keywords internal
 obtainSmoothTrend1D <- function(object,
                                 grid) {
-  x <- object$splRes$x
+  x <- object$splRes$x[[1]]
   knots <- object$splRes$knots[[1]]
 
   xgrid <- seq(min(x), max(x), length = grid)
@@ -70,8 +114,8 @@ obtainSmoothTrend1D <- function(object,
 #' @keywords internal
 obtainSmoothTrend2D <- function(object,
                                 grid) {
-  x1 <- object$splRes$x1
-  x2 <- object$splRes$x2
+  x1 <- object$splRes$x[[1]]
+  x2 <- object$splRes$x[[2]]
   knots1 <- object$splRes$knots[[1]]
   knots2 <- object$splRes$knots[[2]]
 
@@ -112,9 +156,9 @@ obtainSmoothTrend2D <- function(object,
 #' @keywords internal
 obtainSmoothTrend3D <- function(object,
                                 grid) {
-  x1 <- object$splRes$x1
-  x2 <- object$splRes$x2
-  x3 <- object$splRes$x3
+  x1 <- object$splRes$x[[1]]
+  x2 <- object$splRes$x[[2]]
+  x3 <- object$splRes$x[[3]]
 
   knots1 <- object$splRes$knots[[1]]
   knots2 <- object$splRes$knots[[2]]
@@ -138,11 +182,9 @@ obtainSmoothTrend3D <- function(object,
   X <- removeIntercept(X)
 
   mu <- coef.LMMsolve(object)$'(Intercept)'
-  if (is.null(X))
-  {
-    bc <- 0.0
-  } else
-  {
+  if (is.null(X)) {
+    bc <- 0
+  } else {
     bc <- as.vector(X %*% coef.LMMsolve(object)$splF)
   }
   sc <- as.vector(B123x %*% coef.LMMsolve(object)$splR)

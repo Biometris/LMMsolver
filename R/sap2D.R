@@ -64,28 +64,26 @@ spl2D <- function(x1,
   CCt2 <- constructCCt(q2, pord)
   CCt <- CCt1 %x% CCt2
 
-
   lGinv <- list()
   lGinv[[1]] <- DtD1 %x% spam::diag.spam(q2) + CCt
   lGinv[[2]] <- spam::diag.spam(q1) %x% DtD2 + CCt
 
   names(lGinv) <- c("s(x1)", "s(x2)")
 
-  if (is.null(X))
-  {
-    dim.f = NULL
-    term.labels.f = NULL
+  if (is.null(X)) {
+    dim.f <- NULL
+    term.labels.f <- NULL
   } else {
-    dim.f = c(ncol(X))
-    term.labels.f = c('splF')
+    dim.f <- ncol(X)
+    term.labels.f <- "splF"
   }
-  dim.r = c(ncol(B12))
-  term.labels.r = c('splR')
+  dim.r <- ncol(B12)
+  term.labels.r <- "splR"
 
   return(list(X = X, Z = B12, lGinv = lGinv, knots = knots,
-              dim.f=dim.f, dim.r=dim.r, term.labels.f=term.labels.f,
-              term.labels.r=term.labels.r, x1=x1, x2=x2, pord=pord, degree=degree,
-              scaleX=scaleX))
+              dim.f = dim.f, dim.r = dim.r, term.labels.f = term.labels.f,
+              term.labels.r = term.labels.r, x = list(x1, x2), pord = pord,
+              degree = degree, scaleX = scaleX))
 
 }
 

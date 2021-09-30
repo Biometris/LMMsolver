@@ -91,20 +91,19 @@ spl3D <- function(x1,
 
   names(lGinv) <- c("s(x1)", "s(x2)", "s(x3)")
 
-  if (is.null(X))
-  {
-    dim.f = NULL
-    term.labels.f = NULL
+  if (is.null(X)) {
+    dim.f <- NULL
+    term.labels.f <- NULL
   } else {
-    dim.f = c(ncol(X))
-    term.labels.f = c('splF')
+    dim.f <- ncol(X)
+    term.labels.f <- "splF"
   }
-  dim.r = c(ncol(B123))
-  term.labels.r = c('splR')
+  dim.r <- ncol(B123)
+  term.labels.r <- "splR"
   return(list(X = X, Z = B123, lGinv = lGinv, knots = knots,
-              dim.f=dim.f, dim.r=dim.r, term.labels.f=term.labels.f,
-              term.labels.r=term.labels.r,x1=x1,x2=x2,x3=x3,
-              pord=pord, degree=degree, scaleX=scaleX))
+              dim.f = dim.f, dim.r = dim.r, term.labels.f = term.labels.f,
+              term.labels.r = term.labels.r, x = list(x1, x2, x3),
+              pord = pord, degree = degree, scaleX = scaleX))
 }
 
 
