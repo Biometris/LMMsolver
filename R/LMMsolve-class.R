@@ -50,10 +50,8 @@ summary.LMMsolve <- function(object,
   which <- match.arg(which)
   ## start and end of each variance component.
   Nres <- object$Nres
-  e <- cumsum(object$varPar)
+  e <- cumsum(object$varPar) + Nres
   s <- e - object$varPar + 1
-  e <- e + Nres
-  s <- s + Nres
   ## Get number of variance components.
   nVarComp <- length(object$term.labels.r)
   ## Get names of effective dimensions.
