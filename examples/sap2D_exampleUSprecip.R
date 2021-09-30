@@ -18,8 +18,9 @@ x2 <- dat$lat
 #
 # set parameters:
 #
-knots <- nseg <- c(40, 40)
-grid <- c(40,50)
+innerKnots <- 40 # See SAP 2014 paper
+knots <- nseg <- c(innerKnots+1, innerKnots+1)
+grid <- c(300,200)
 trace <- TRUE
 thr <- 1.0e-7  # convergence tolerance
 ######################
@@ -66,7 +67,9 @@ obj4 <- LMMsolve(fixed = anomaly~1,
                  tolerance = thr)
 summary(obj4)
 
-# compare effective dimensions
+# compare effective dimensions, in SAP2014 paper
+# ED(lon) = 302.656
+# ED(lat) = 408.757
 obj0$edf
 obj1$edf
 obj2$edf
