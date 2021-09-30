@@ -20,16 +20,16 @@ obtainSmoothTrend <- function(object,
   }
   ## Get dimension of fitted spline component.
   splRes <- object$splRes
-  splDim <- length(splRes$lGinv)
+  splDim <- length(splRes$x)
   if (!is.numeric(grid) || length(grid) != splDim) {
     stop("grid should be a numeric vector with length equal to the dimension ",
          "of the fitted spline: ", splDim,".\n")
   }
   ## Get content from splRes.
-  x <- object$splRes$x
-  knots <- object$splRes$knots
-  scaleX <- object$splRes$scaleX
-  pord <- object$splRes$pord
+  x <- splRes$x
+  knots <- splRes$knots
+  scaleX <- splRes$scaleX
+  pord <- splRes$pord
   ## Construct grid for each dimension.
   xGrid <- lapply(X = seq_along(x), FUN = function(i) {
     seq(min(x[[i]]), max(x[[i]]), length = grid[i])
