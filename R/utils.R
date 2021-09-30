@@ -119,3 +119,24 @@ removeIntercept <- function(X) {
   }
   return(X)
 }
+
+#' Calculate the Nominal Effective dimension
+#'
+#' @keywords internal
+calcNomEffDim <- function(X, Z, dim.r)
+{
+  p <- ncol(X)
+
+  EDnom <- vector(length=length(dim.r))
+  e <- cumsum(dim.r)
+  s <- e - dim.r + 1
+  # for each variance component in Z:
+  for (i in 1:length(dim.r)) {
+    ndx <- c(s[i]:e[i])
+    XZ <- cbind(X, Z[, ndx])
+    r <- qr(XZ)$rank
+    EDnom[i] <- r - p
+  }
+  EDnom
+}
+

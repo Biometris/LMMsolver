@@ -202,6 +202,8 @@ LMMsolve <- function(fixed,
   obj <- sparseMixedModels(y = y, X = X, Z = Z, lGinv = lGinv, lRinv = lRinv,
                            tolerance = tolerance, trace = trace,
                            display = display, maxit = maxit)
+  obj$EDnominal <- calcNomEffDim(X, Z, dim.r)
+
   if (!omitConstant)
   {
     Nobs <- length(y)
