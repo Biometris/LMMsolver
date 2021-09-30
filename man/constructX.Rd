@@ -2,17 +2,18 @@
 % Please edit documentation in R/utils.R
 \name{constructX}
 \alias{constructX}
-\title{construct fixed part of the spline model}
+\title{Construct fixed part of the spline model}
 \usage{
 constructX(B, x, scaleX, pord)
 }
 \arguments{
 \item{B}{matrix with B-spline basis.}
 
-\item{x}{vector with values for x}
+\item{x}{vector with values for x.}
 
-\item{scaleX}{logical. If scaleX is FALSE, the original x is used. If scaleX is TRUE,
-scaling is used, based on the B-splines basis. For details see the code}
+\item{scaleX}{logical. If scaleX is FALSE, the original x is used. If scaleX
+is TRUE, scaling is used, based on the B-splines basis. For details see
+the code.}
 
 \item{pord}{order of the penalty, values 1 or 2.}
 }
@@ -20,5 +21,6 @@ scaling is used, based on the B-splines basis. For details see the code}
 a matrix X
 }
 \description{
-construct fixed part of the spline model
+Construct fixed part of the spline model
 }
+\keyword{internal}

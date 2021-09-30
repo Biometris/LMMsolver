@@ -2,16 +2,17 @@
 % Please edit documentation in R/utils.R
 \name{removeIntercept}
 \alias{removeIntercept}
-\title{remove the intercept from a design matrix}
+\title{Remove the intercept from a design matrix}
 \usage{
 removeIntercept(X)
 }
 \arguments{
-\item{X}{design matrix}
+\item{X}{design matrix.}
 }
 \value{
 a matrix if \code{X} has more than one column, otherwise return NULL
 }
 \description{
-remove the intercept from a design matrix
+Remove the intercept from a design matrix
 }
+\keyword{internal}

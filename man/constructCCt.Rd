@@ -2,12 +2,12 @@
 % Please edit documentation in R/utils.R
 \name{constructCCt}
 \alias{constructCCt}
-\title{construct constraint matrix}
+\title{Construct constraint matrix}
 \usage{
 constructCCt(q, pord)
 }
 \arguments{
-\item{q}{dimension of the B-spline basis used}
+\item{q}{dimension of the B-spline basis used.}
 
 \item{pord}{order of the penalty matrix (pord=1 or 2).}
 }
@@ -15,5 +15,6 @@ constructCCt(q, pord)
 a q x q matrix of type spam
 }
 \description{
-construct constraint matrix
+Construct constraint matrix
 }
+\keyword{internal}

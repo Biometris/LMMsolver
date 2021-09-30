@@ -172,7 +172,7 @@ LMMsolve <- function(fixed,
     ## Add to design matrix random effect Z
     Z <- cbind(Z, splRes$Z)
     ## Expand matrices Ginv to the updated Z
-    lGinv <- ExpandGinv(lGinv, splRes$lGinv)
+    lGinv <- expandGinv(lGinv, splRes$lGinv)
 
     # a splxD model has x parameters....
     varPar <- c(varPar, length(splRes$lGinv))

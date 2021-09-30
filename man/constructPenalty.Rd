@@ -2,18 +2,19 @@
 % Please edit documentation in R/utils.R
 \name{constructPenalty}
 \alias{constructPenalty}
-\title{construct P-splines penalty matrix D'D}
+\title{Construct P-splines penalty matrix D'D}
 \usage{
 constructPenalty(q, pord)
 }
 \arguments{
-\item{q}{integer with dimensions}
+\item{q}{integer with dimensions.}
 
-\item{pord}{order of the penalty}
+\item{pord}{order of the penalty.}
 }
 \value{
 qxq matrix D'D of class spam
 }
 \description{
-construct P-splines penalty matrix D'D
+Construct P-splines penalty matrix D'D
 }
+\keyword{internal}

@@ -7,7 +7,7 @@
 normVec(x)
 }
 \arguments{
-\item{x}{a numerical vector}
+\item{x}{a numerical vector.}
 }
 \value{
 norm of vector x
@@ -15,3 +15,4 @@ norm of vector x
 \description{
 Norm of a vector
 }
+\keyword{internal}
