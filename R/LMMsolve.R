@@ -204,14 +204,11 @@ LMMsolve <- function(fixed,
                            tolerance = tolerance, trace = trace,
                            display = display, maxit = maxit)
   NomEffDimRes <- attr(lRinv,"cnt") - 1
-  cat("1", NomEffDimRes, "\n")
   NomEffDimRan <- calcNomEffDim(X, Z, dim.r)
-  cat("2", NomEffDimRan, "\n")
-
   NomEffDim <- c(NomEffDimRes, NomEffDimRan)
-  cat("3", NomEffDim, "\n")
 
-  names(NomEffDim) <- names(obj$ED)
+  # not working: names(NomEffDim) <- names(obj$ED),
+  # as NomEffDim is per variance component:
   obj$EDnominal <- NomEffDim
 
   if (!omitConstant)
