@@ -3,6 +3,7 @@ library(SAP)
 library(LMMsolver)
 library(spam)
 library(fields)
+library(ggplot2)
 
 # Get precipitation data from spam
 data(USprecip)
@@ -76,12 +77,12 @@ obj2$edf
 obj3$ED
 obj4$ED
 
-fit3 <- LMMsolver:::obtainSmoothTrend2D(obj3, grid)$eta
-fit3a <- obtainSmoothTrend(obj3, grid)$eta
+fit3 <- LMMsolver:::obtainSmoothTrend2D(obj3, grid)
+fit3a <- obtainSmoothTrend(obj3, grid)
 
 fit3 <- matrix(data=fit3, nrow=grid[1], ncol=grid[2], byrow=TRUE)
 
-fit4 <- obtainSmoothTrend(obj4, grid)$eta
+fit4 <- obtainSmoothTrend(obj4, grid, includeIntercept = TRUE)
 fit4 <- matrix(data=fit4, nrow=grid[1], ncol=grid[2], byrow=TRUE)
 
 # compare fit on grid:
@@ -89,4 +90,24 @@ range(fit0 - fit1)
 range(fit0 - fit2)
 range(fit0 - fit3)
 range(fit0 - fit4)
+
+
+plotDat <- fit4
+
+usa = maps::map("usa", regions = "main", plot = FALSE)
+
+v <- sp::point.in.polygon(plotDat$lon, plotDat$lat, usa$x, usa$y)
+
+plotDat <- plotDat[v == 1, ]
+
+ggplot(plotDat, aes(x = lon, y = lat, fill = ypred)) +
+  geom_tile(show.legend = TRUE) +
+  scale_fill_gradientn(colours = topo.colors(100))+
+  labs(title = "Precipitation anomaly", x = "Longitude", y = "Latitude") +
+  coord_fixed() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
+
+
+
 
