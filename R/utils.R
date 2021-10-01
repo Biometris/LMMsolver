@@ -133,10 +133,14 @@ calcNomEffDim <- function(X, Z, dim.r)
   s <- e - dim.r + 1
   # for each variance component in Z:
   for (i in 1:length(dim.r)) {
-    ndx <- c(s[i]:e[i])
-    XZ <- cbind(X, Z[, ndx])
-    r <- qr(XZ)$rank
-    EDnom[i] <- r - p
+    if (dim.r[i] > 100) {
+      EDnom[i] <- dim.r[i]
+    } else {
+      ndx <- c(s[i]:e[i])
+      XZ <- cbind(X, Z[, ndx])
+      r <- qr(XZ)$rank
+      EDnom[i] <- r - p
+    }
   }
   EDnom
 }
