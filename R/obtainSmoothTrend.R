@@ -6,12 +6,15 @@
 #' @param grid A numeric vector having the length of the dimension of the fitted
 #' spline component. This represents the number of grid points at which a
 #' surface will be computed.
+#' @param includeIntercept Should the value of the intercept be included in
+#' the computed smooth trend?
 #'
 #' @return A list with three components, p.data, eta and mu.
 #'
 #' @export
 obtainSmoothTrend <- function(object,
-                              grid) {
+                              grid,
+                              includeIntercept = FALSE) {
   if (!inherits(object, "LMMsolve")) {
     stop("object should be an object of class LMMsolve.\n")
   }
@@ -49,7 +52,11 @@ obtainSmoothTrend <- function(object,
   ## Remove intercept (needed when fitting model to avoid singularities).
   XTot <- removeIntercept(XTot)
   ## Get intercept and compute contribution of fixed and random terms.
-  mu <- coef.LMMsolve(object)$'(Intercept)'
+  if (includeIntercept) {
+    mu <- coef.LMMsolve(object)$'(Intercept)'
+  } else {
+    mu <- 0
+  }
   if (is.null(XTot)) {
     bc <- 0
   } else {
