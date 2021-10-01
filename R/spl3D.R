@@ -37,6 +37,10 @@ spl3D <- function(x1,
                   x1lim = NULL,
                   x2lim = NULL,
                   x3lim = NULL) {
+  x1Name <- deparse(substitute(x1))
+  x2Name <- deparse(substitute(x2))
+  x3Name <- deparse(substitute(x3))
+
   if (is.null(x1lim))
     x1lim <- c(min(x1), max(x1))
   if (is.null(x2lim))
@@ -100,9 +104,11 @@ spl3D <- function(x1,
   }
   dim.r <- ncol(B123)
   term.labels.r <- "splR"
+
+  xList <- setNames(list(x1, x2, x3), c(x1Name, x2Name, x3Name))
   return(list(X = X, Z = B123, lGinv = lGinv, knots = knots,
               dim.f = dim.f, dim.r = dim.r, term.labels.f = term.labels.f,
-              term.labels.r = term.labels.r, x = list(x1, x2, x3),
+              term.labels.r = term.labels.r, x = xList,
               pord = pord, degree = degree, scaleX = scaleX))
 }
 

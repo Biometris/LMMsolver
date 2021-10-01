@@ -32,6 +32,9 @@ spl2D <- function(x1,
                   scaleX = TRUE,
                   x1lim = NULL,
                   x2lim = NULL) {
+  x1Name <- deparse(substitute(x1))
+  x2Name <- deparse(substitute(x2))
+
   if (is.null(x1lim))
     x1lim <- c(min(x1), max(x1))
   if (is.null(x2lim))
@@ -80,9 +83,10 @@ spl2D <- function(x1,
   dim.r <- ncol(B12)
   term.labels.r <- "splR"
 
+  xList <- setNames(list(x1, x2), c(x1Name, x2Name))
   return(list(X = X, Z = B12, lGinv = lGinv, knots = knots,
               dim.f = dim.f, dim.r = dim.r, term.labels.f = term.labels.f,
-              term.labels.r = term.labels.r, x = list(x1, x2), pord = pord,
+              term.labels.r = term.labels.r, x = xList, pord = pord,
               degree = degree, scaleX = scaleX))
 
 }

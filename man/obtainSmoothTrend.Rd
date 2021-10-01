@@ -17,7 +17,8 @@ surface will be computed.}
 the computed smooth trend?}
 }
 \value{
-A list with three components, p.data, eta and mu.
+A data.frame with predictions for the smooth trend on the specified
+grid.
 }
 \description{
 Obtain the smooth trend for models fitted with a spline component.

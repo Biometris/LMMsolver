@@ -26,6 +26,8 @@ spl1D <- function(x,
                   degree = 3,
                   scaleX = TRUE,
                   xlim = NULL) {
+  xName <- deparse(substitute(x))
+
   if (is.null(xlim))
     xlim <- c(min(x), max(x))
 
@@ -56,9 +58,11 @@ spl1D <- function(x,
   }
   dim.r <- ncol(B)
   term.labels.r <- "splR"
+
+  xList <- setNames(list(x), xName)
   return(list(X = X, Z = B, lGinv = lGinv, knots = knots,
               dim.f = dim.f, dim.r = dim.r, term.labels.f = term.labels.f,
-              term.labels.r = term.labels.r, x = list(x), pord = pord,
+              term.labels.r = term.labels.r, x = xList, pord = pord,
               degree = degree, scaleX = scaleX))
 }
 

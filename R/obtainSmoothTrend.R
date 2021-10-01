@@ -9,7 +9,8 @@
 #' @param includeIntercept Should the value of the intercept be included in
 #' the computed smooth trend?
 #'
-#' @return A list with three components, p.data, eta and mu.
+#' @return A data.frame with predictions for the smooth trend on the specified
+#' grid.
 #'
 #' @export
 obtainSmoothTrend <- function(object,
@@ -65,7 +66,11 @@ obtainSmoothTrend <- function(object,
   sc <- as.vector(BxTot %*% coef.LMMsolve(object)$splR)
   ## Compute fitted values.
   fit <- mu + bc + sc
-  return(list(p.data = xGrid, eta = fit, mu = mu))
+  ## Construct output data.frame.
+  outDat <- data.frame(expand.grid(rev(xGrid)), ypred = fit)
+  colnames(outDat)[-ncol(outDat)] <- rev(names(x))
+  outDat <- outDat[c(names(x), "ypred")]
+  return(outDat)
 }
 
 
