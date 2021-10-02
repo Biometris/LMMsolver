@@ -52,8 +52,8 @@ expandGinv <- function(lGinv1, lGinv2) {
 #' @keywords internal
 constructPenalty <-function(q,
                             pord) {
-  D <- spam::diff.spam(diag(q), diff = pord)
-  DtD <- crossprod(D)
+  D <- spam::diff.spam(spam::diag.spam(q), diff = pord)
+  DtD <- spam::crossprod.spam(D)
   return(DtD)
 }
 
