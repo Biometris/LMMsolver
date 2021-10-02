@@ -3,18 +3,25 @@ library(mvtnorm)
 library(SAP)
 library(LMMsolver)
 
-# testdata Daniela NPEC, see list of closed issues LMMsolver:
-# "error after a number of iterations with spl3Dfast"
-df <- read.csv("exampleTempDiff.csv")
-head(df)
+set.seed(1234)
 
-y <- df$par
-x1 <- df$row
-x2 <- df$col
-x3 <- df$time
+Wood3D <- function(x1, x2, x3) { # Wood 2006
+  y = 1.5*exp(-(x1-0.2)^2/5 -(x2-0.5)^2/3 -(x3-0.9)^2/4)
+    + 0.5*exp(-(x1-0.3)^2/4 -(x2-0.7)^2/2 - (x3-0.4)^2/6)
+    + exp(-(x1-0.1)^2/5 -(x2-0.3)^2/5 - (x3-0.7)^2/4)
+  y
+}
+
+N <- 500
+x1 <- runif(N)
+x2 <- runif(N)
+x3 <- runif(N)
+eps <- rnorm(N,sd=0.1)
+
+y = Wood3D(x1, x2, x3) + eps
 
 # set parameters:
-knots <- c(2, 2, 50)
+knots <- c(4, 4, 4)
 grid <- c(30,40,50)
 trace <- TRUE
 thr <- 1.0e-8  # convergence tolerance
@@ -31,8 +38,9 @@ x1lim <- c(min(x1)-0.01, max(x1)+0.01)
 x2lim <- c(min(x2)-0.01, max(x2)+0.01)
 x3lim <- c(min(x3)-0.01, max(x3)+0.01)
 
-obj1 <- LMMsolve(fixed = par~1,
-                 spline = ~spl3D(row, col, time, nseg=knots,
+df <- data.frame(y=y,x1=x1,x2=x2,x3=x3)
+obj1 <- LMMsolve(fixed = y~1,
+                 spline = ~spl3D(x1, x2, x3, nseg=knots,
                               x1lim = x1lim, x2lim = x2lim, x3lim = x3lim),
                  data = df,
                  trace = trace,

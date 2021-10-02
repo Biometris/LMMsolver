@@ -9,11 +9,7 @@ library(LMMsolver)
 data(john.alpha)
 dat <- john.alpha
 
-n <- 4     # number of units per block
-b <- 6     # number of blocks per replicate
-r <- 3     # number of replicates
-v <- 24    # number of genotypes/replicate:
-N <- n*b*r # total number of observations.
+N <- nrow(dat)
 
 # Here scaleX is FALSE in spl1D, to be consistent with model in JABES2020 paper.
 obj1 <- LMMsolve(fixed = yield~rep+gen,
@@ -38,15 +34,19 @@ obj2 <- LMMsolve(fixed = yield~rep,
                 tolerance = 1.0e-10)
 summary(obj2)
 
-
-tr <- LMMsolver:::obtainSmoothTrend1D(obj2,grid=100)
-tra <- obtainSmoothTrend(obj2,grid=100)
-identical(tr, tra)
-
-str(tr)
-plot(x=tr[[1]]$x, y=tr$eta,type='l')
-
 obj2$EDmax
 obj2$EDnominal
+
+# obtain spatial trend with genotype fixed:
+plotDat <- obtainSmoothTrend(obj1, grid=100)
+head(plotDat)
+ggplot(plotDat, aes(x = plot, y = ypred)) +
+  geom_tile(show.legend = TRUE) +
+  geom_line() +
+  labs(title = "Spatial trend for the oats data", x = "plot", y = "plot effects") +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
+
+
 
 

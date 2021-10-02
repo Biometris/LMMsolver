@@ -19,11 +19,13 @@ head(dat)
 dat$R <- as.factor(dat$row)
 dat$C <- as.factor(dat$col)
 
-# tolerance
+# set parameters
 tol = 1.0e-8
+nseg = c(20, 15)
+grid = c(80, 100)
 
 m0 <- SpATS(response = "yield",
-            spatial = ~ SAP(col, row, nseg = c(10,20), degree = 3, pord = 2),
+            spatial = ~ SAP(col, row, nseg = nseg),
             genotype = "gen",
             fixed = ~rep,
             random = ~ R + C,
@@ -38,27 +40,23 @@ dev0 <- m0$deviance
 # degree and pord not defined yet
 m1 <- LMMsolve(yield~rep,
                random=~R+C+gen,
-               spline=~spl2D(col, row, nseg = c(10,20)),
+               spline=~spl2D(col, row, nseg = nseg),
                data = dat,
                trace=TRUE,
                tolerance = tol)
-dev1 <- -2.0*m1$logL
+dev1 <- m1$dev
 
 dev0
 dev1
-dev0-dev1
+dev0 - dev1
 
-grid = c(80, 100)
 M0 <- SpATS::obtain.spatialtrend(m0, grid=grid)$fit
-tmp <- obtainSmoothTrend(m1, grid=grid)$eta
-M1 <- matrix(data = tmp, nrow=grid[1], ncol= grid[2],byrow=TRUE)
 
-# obtainSmoothTrend includes intercept, SpATS::obtain.spatialtrend doesn't
-mu <- coef(m1)$'(Intercept)'
-M1 <- M1 - mu
+df <- obtainSmoothTrend(m1, grid=grid)
+M1 <- t(matrix(data = df$ypred, nrow=grid[1], ncol= grid[2],byrow=TRUE))
 
 # only a constant difference...
-range(M0 - t(M1))
+range(M0 - M1)
 
 # give summary
 summary(m1)
