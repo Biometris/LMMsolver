@@ -174,11 +174,15 @@ sparseMixedModels <- function(y,
     logLprev <- logL
 
   }
+  if (it==maxit) {
+    warning("No convergence after ", maxit, " iterations \n", call. = FALSE)
+  }
   names(phi) <- names(lRinv)
   names(psi) <- names(lGinv)
   EDnames <- c(names(lRinv), names(lGinv))
   L <- list(logL = logL, sigma2e = 1.0 / phi, tau2e = 1.0 / psi, ED = ED,
-            EDmax = EDmax, EDnames = EDnames, a = a, yhat = W %*% a)
+            EDmax = EDmax, EDnames = EDnames, a = a, yhat = W %*% a,
+            nIter = it)
   return(L)
 }
 
