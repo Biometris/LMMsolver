@@ -217,8 +217,7 @@ spl2Dfast <- function(y,
   names(lGinv) <- c("x1", "x2")
 
   obj <- sparseMixedModels(y = y, X = X, Z = B12, lGinv = lGinv, lRinv = lRinv,
-                           maxit = 200, tolerance = tolerance,
-                           display = FALSE, trace = trace)
+                           maxit = 200, tolerance = tolerance, trace = trace)
 
   e <- proc.time()[3]
   cat("Computation time sparse SAP fast:", e - s, "seconds\n")

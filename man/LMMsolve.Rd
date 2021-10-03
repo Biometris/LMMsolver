@@ -14,7 +14,6 @@ LMMsolve(
   residual = NULL,
   tolerance = 1e-06,
   trace = FALSE,
-  display = FALSE,
   maxit = 250,
   omitConstant = TRUE
 )
@@ -46,8 +45,6 @@ modified Henderson algorithm to estimate the variance components.}
 
 \item{trace}{Should the progress of the algorithm be printed? Default
 \code{trace = FALSE}.}
-
-\item{display}{Should the sparse matrix created in the algorithm be plotted?}
 
 \item{maxit}{A numerical value. The maximum number of iterations for the
 algorithm. Default \code{maxit = 250}.}

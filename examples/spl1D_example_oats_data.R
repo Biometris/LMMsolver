@@ -5,6 +5,7 @@ rm(list=ls())
 
 library(agridat)
 library(LMMsolver)
+library(ggplot2)
 
 data(john.alpha)
 dat <- john.alpha
@@ -36,6 +37,10 @@ summary(obj2)
 
 obj2$EDmax
 obj2$EDnominal
+
+diagnosticsMME(obj2)
+displayMME(obj2, cholesky=FALSE)
+displayMME(obj2, cholesky=TRUE)
 
 # obtain spatial trend with genotype fixed:
 plotDat <- obtainSmoothTrend(obj1, grid=100)

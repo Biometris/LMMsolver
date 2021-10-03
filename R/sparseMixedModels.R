@@ -71,7 +71,6 @@ sparseMixedModels <- function(y,
                               lRinv,
                               maxit = 100,
                               tolerance = 1.0e-6,
-                              display = FALSE,
                               trace = FALSE) {
   Ntot <- length(y)
   p <- ncol(X)
@@ -102,17 +101,11 @@ sparseMixedModels <- function(y,
   phi <- rep(1.0, Nres)
   psi <- rep(1.0, Nvarcomp)
   theta <- c(psi, phi)
-  #cholRinv = chol(Rinv)
-  #if (Nvarcomp > 0.0) {cholGinv = chol(linearSum(psi, lGinv))}
-  cholC <- chol(linearSum(theta = theta, matrixList = listC),
-                memory=list(nnzcolindices=50000))
 
-  if (display) {
-    C <- linearSum(theta, listC)
-    spam::display(C)
-    L <- t(spam::as.spam(cholC))
-    spam::display(L)
-  }
+  C <- linearSum(theta = theta, matrixList = listC)
+  opt <- summary(C)
+  cholC <- chol(C, memory = list(nnzR = 8 * opt$nnz,
+                                 nnzcolindices = 4 * opt$nnz))
 
   # make ADchol for Rinv, Ginv and C:
   ADcholRinv <- ADchol(lRinv)
@@ -177,12 +170,18 @@ sparseMixedModels <- function(y,
   if (it==maxit) {
     warning("No convergence after ", maxit, " iterations \n", call. = FALSE)
   }
+  C <- linearSum(theta = theta, matrixList = listC)
+  cholC <- update(cholC, C)
+
   names(phi) <- names(lRinv)
   names(psi) <- names(lGinv)
   EDnames <- c(names(lRinv), names(lGinv))
   L <- list(logL = logL, sigma2e = 1.0 / phi, tau2e = 1.0 / psi, ED = ED,
             EDmax = EDmax, EDnames = EDnames, a = a, yhat = W %*% a,
-            nIter = it)
+            nIter = it, C=C)
   return(L)
 }
+
+
+
 

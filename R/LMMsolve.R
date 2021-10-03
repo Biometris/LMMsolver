@@ -20,7 +20,6 @@
 #' modified Henderson algorithm to estimate the variance components.
 #' @param trace Should the progress of the algorithm be printed? Default
 #' \code{trace = FALSE}.
-#' @param display Should the sparse matrix created in the algorithm be plotted?
 #' @param maxit A numerical value. The maximum number of iterations for the
 #' algorithm. Default \code{maxit = 250}.
 #' @param omitConstant Omit the constant in the restricted log-likelihood. Default is
@@ -46,7 +45,6 @@ LMMsolve <- function(fixed,
                      residual = NULL,
                      tolerance = 1.0e-6,
                      trace = FALSE,
-                     display = FALSE,
                      maxit = 250,
                      omitConstant = TRUE) {
   ## Input checks.
@@ -201,8 +199,7 @@ LMMsolve <- function(fixed,
   }
   y <- mf[, 1]
   obj <- sparseMixedModels(y = y, X = X, Z = Z, lGinv = lGinv, lRinv = lRinv,
-                           tolerance = tolerance, trace = trace,
-                           display = display, maxit = maxit)
+                           tolerance = tolerance, trace = trace, maxit = maxit)
   NomEffDimRes <- attr(lRinv,"cnt") - 1
   NomEffDimRan <- calcNomEffDim(X, Z, dim.r)
   NomEffDim <- c(NomEffDimRes, NomEffDimRan)
@@ -222,7 +219,6 @@ LMMsolve <- function(fixed,
   term.labels <- c(term.labels.f, term.labels.r)
   obj$varPar <- varPar
   obj$dim <- dim
-
   obj$Nres <- length(lRinv)
   obj$term.labels.f <- term.labels.f
   obj$term.labels.r <- term.labels.r
@@ -256,3 +252,34 @@ coef.LMMsolve <- function(object,
   names(result) <- object$term.labels
   return(result)
 }
+
+
+#' Display the sparseness of the mixed model coefficient matrix.
+#'
+#' @param object an object of class LMMsolve
+#' @param cholesky logical. If \code{cholesky==TRUE} it will plot the cholesky.
+#'
+#' @export
+displayMME <- function(object, cholesky=FALSE) {
+  if (!cholesky) {
+    spam::display(object$C)
+  } else {
+    cholC <- chol(object$C)
+    L <- t(spam::as.spam(cholC))
+    spam::display(L)
+  }
+}
+
+#' Give diagnostics for mixed model coefficient matrix C and the cholesky decomposition.
+#'
+#' @param object an object of class LMMsolve
+#'
+#' @export
+diagnosticsMME <- function(object) {
+  cat("Summary of matrix C \n")
+  print(spam::summary.spam(object$C))
+  cat("\n Summary of cholesky decomposition of C \n")
+  print(spam::summary.spam(chol(object$C)))
+}
+
+
