@@ -11,8 +11,6 @@
 #' @param group A named list where each component is a numeric vector
 #' specifying contiguous fields in data that are to be considered as a
 #' single term.
-#' @param lGinverse A named list where each component is a matrix corresponding
-#' to the group of the same name.
 #' @param data A data.frame containing the modeling data.
 #' @param residual A formula for the residual part of the model. Should be of
 #' the form "~ pred".
@@ -40,7 +38,6 @@ LMMsolve <- function(fixed,
                      random = NULL,
                      spline = NULL,
                      group = NULL,
-                     lGinverse = NULL,
                      data,
                      residual = NULL,
                      tolerance = 1.0e-6,

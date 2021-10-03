@@ -9,7 +9,6 @@ LMMsolve(
   random = NULL,
   spline = NULL,
   group = NULL,
-  lGinverse = NULL,
   data,
   residual = NULL,
   tolerance = 1e-06,
@@ -31,9 +30,6 @@ form "~ spl1D()", ~ spl2D()" or "~spl3D()".}
 \item{group}{A named list where each component is a numeric vector
 specifying contiguous fields in data that are to be considered as a
 single term.}
-
-\item{lGinverse}{A named list where each component is a matrix corresponding
-to the group of the same name.}
 
 \item{data}{A data.frame containing the modeling data.}
 
