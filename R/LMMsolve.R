@@ -57,7 +57,7 @@ LMMsolve <- function(fixed,
   if (!is.null(spline) &&
       (length(terms(spline, specials = c("spl1D", "spl2D", "spl3D"))) != 2 ||
        length(attr(terms(spline, specials = c("spl1D", "spl2D", "spl3D")),
-                   "term.labels") != 1))) {
+                   "term.labels")) != 1)) {
     stop("spline model formula must be of form \"~ spl1D()\", \"~ spl2D()\" ",
          "or \"~spl3D()\".\n")
   }
