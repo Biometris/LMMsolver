@@ -54,8 +54,12 @@ LMMsolve <- function(fixed,
   if (!is.null(random) && length(terms(random)) != 2) {
     stop("random model formula must be of form \" ~ pred\".\n")
   }
-  if (!is.null(spline) && length(terms(spline)) != 2) {
-    stop("spline model formula must be of form \"~ spl2D()\" or \"~spl3D()\".\n")
+  if (!is.null(spline) &&
+      (length(terms(spline, specials = c("spl1D", "spl2D", "spl3D"))) != 2 ||
+       length(attr(terms(spline, specials = c("spl1D", "spl2D", "spl3D")),
+                   "term.labels") != 1))) {
+    stop("spline model formula must be of form \"~ spl1D()\", \"~ spl2D()\" ",
+         "or \"~spl3D()\".\n")
   }
   if (!is.null(residual) && length(terms(residual)) != 2) {
     stop("residual model formula must be of the form \" ~ pred\".\n")
@@ -254,10 +258,11 @@ coef.LMMsolve <- function(object,
 #' Display the sparseness of the mixed model coefficient matrix.
 #'
 #' @param object an object of class LMMsolve
-#' @param cholesky logical. If \code{cholesky==TRUE} it will plot the cholesky.
+#' @param cholesky logical. If \code{cholesky = TRUE} it will plot the cholesky.
 #'
 #' @export
-displayMME <- function(object, cholesky=FALSE) {
+displayMME <- function(object,
+                       cholesky = FALSE) {
   if (!cholesky) {
     spam::display(object$C)
   } else {
@@ -267,7 +272,8 @@ displayMME <- function(object, cholesky=FALSE) {
   }
 }
 
-#' Give diagnostics for mixed model coefficient matrix C and the cholesky decomposition.
+#' Give diagnostics for mixed model coefficient matrix C and the cholesky
+#' decomposition.
 #'
 #' @param object an object of class LMMsolve
 #'
