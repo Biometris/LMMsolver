@@ -37,6 +37,14 @@ spl3D <- function(x1,
                   x1lim = NULL,
                   x2lim = NULL,
                   x3lim = NULL) {
+  if (!is.numeric(pord) || length(pord) > 1 || !pord %in% 1:2) {
+    stop("pord should be either 1 or 2.\n")
+  }
+  if (!is.numeric(degree) || length(degree) > 1 || degree < 1 ||
+      degree != round(degree)) {
+    stop("degree should be a positive integer.\n")
+  }
+
   x1Name <- deparse(substitute(x1))
   x2Name <- deparse(substitute(x2))
   x3Name <- deparse(substitute(x3))
