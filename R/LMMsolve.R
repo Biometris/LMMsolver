@@ -123,16 +123,10 @@ LMMsolve <- function(fixed,
     s <- e - dim.r + 1
 
     lGinv <- list()
-    for(i in 1:length(dim.r)) {
-      if (term.labels.r[i] %in% names(lGinverse)) {
-        tmp <- spam::diag.spam(0, sum(dim.r))
-        tmp[s[i]:e[i], s[i]:e[i]] <- lGinverse[[term.labels.r[i]]]
-        lGinv[[i]] <- tmp
-      } else {
-        tmp <- rep(0, sum(dim.r))
-        tmp[s[i]:e[i]] <- 1
-        lGinv[[i]] <- spam::diag.spam(tmp)
-      }
+    for (i in 1:length(dim.r)) {
+      tmp <- rep(0, sum(dim.r))
+      tmp[s[i]:e[i]] <- 1
+      lGinv[[i]] <- spam::diag.spam(tmp)
     }
     names(lGinv) <- term.labels.r
   } else {
