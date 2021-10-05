@@ -12,9 +12,9 @@ spl3D(
   pord = 2,
   degree = 3,
   scaleX = TRUE,
-  x1lim = NULL,
-  x2lim = NULL,
-  x3lim = NULL
+  x1lim = range(x1),
+  x2lim = range(x2),
+  x3lim = range(x3)
 )
 }
 \arguments{

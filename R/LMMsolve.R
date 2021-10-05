@@ -77,7 +77,6 @@ LMMsolve <- function(fixed,
   checkFormVars(fixed, data)
   checkFormVars(random, data)
   checkFormVars(residual, data)
-  checkFormVars(spline, data)
 
   ## Remove NA for response variable from data.
   respVar <- all.vars(fixed)[attr(terms(fixed), "response")]

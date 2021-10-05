@@ -19,13 +19,16 @@
 #'   \item \code{knots} - a list of vectors with knot positions
 #' }
 #'
+#' @importFrom stats setNames
+#'
 #' @export
 spl1D <- function(x,
                   nseg,
                   pord = 2,
                   degree = 3,
                   scaleX = TRUE,
-                  xlim = NULL) {
+                  xlim = range(x)) {
+  ## Checks.
   if (!is.numeric(pord) || length(pord) > 1 || !pord %in% 1:2) {
     stop("pord should be either 1 or 2.\n")
   }
@@ -33,11 +36,17 @@ spl1D <- function(x,
       degree != round(degree)) {
     stop("degree should be a positive integer.\n")
   }
-
+  if (!is.numeric(nseg) || length(nseg) > 1 || nseg < 1 ||
+      nseg != round(nseg)) {
+    stop("nseg should be a positive integer.\n")
+  }
+  ## Save names of the x-variables so they can be used later on in predictions.
   xName <- deparse(substitute(x))
-
-  if (is.null(xlim))
-    xlim <- c(min(x), max(x))
+  if (!exists(xName)) {
+    stop("The following variables in the spline part of the model ",
+         "are not in the data:\n", xName, "\n",
+         call. = FALSE)
+  }
 
   knots <- list()
   knots[[1]] <- PsplinesKnots(xlim[1], xlim[2], degree = degree, nseg = nseg)

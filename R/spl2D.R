@@ -23,6 +23,8 @@
 #'   \item \code{knots} - a list of vectors with knot positions
 #' }
 #'
+#' @importFrom stats setNames
+#'
 #' @export
 spl2D <- function(x1,
                   x2,
@@ -30,8 +32,9 @@ spl2D <- function(x1,
                   pord = 2,
                   degree = 3,
                   scaleX = TRUE,
-                  x1lim = NULL,
-                  x2lim = NULL) {
+                  x1lim = range(x1),
+                  x2lim = range(x2)) {
+  ## Checks.
   if (!is.numeric(pord) || length(pord) > 1 || !pord %in% 1:2) {
     stop("pord should be either 1 or 2.\n")
   }
@@ -39,14 +42,20 @@ spl2D <- function(x1,
       degree != round(degree)) {
     stop("degree should be a positive integer.\n")
   }
-
+  if (!is.numeric(nseg) || length(nseg) != 2 || any(nseg < 1) ||
+      any(nseg != round(nseg))) {
+    stop("nseg should be a vector of length two of positive integers.\n")
+  }
+  ## Save names of the x-variables so they can be used later on in predictions.
   x1Name <- deparse(substitute(x1))
   x2Name <- deparse(substitute(x2))
-
-  if (is.null(x1lim))
-    x1lim <- c(min(x1), max(x1))
-  if (is.null(x2lim))
-    x2lim <- c(min(x2), max(x2))
+  xNames <- c(x1Name, x2Name)
+  missVars <- xNames[sapply(X = xNames, FUN = exists)]
+  if (length(missVars) > 0) {
+    stop("The following variables in the spline part of the model ",
+         "are not in the data:\n", paste0(missVars, collapse = ", "), "\n",
+         call. = FALSE)
+  }
 
   knots <- list()
   knots[[1]] <- PsplinesKnots(x1lim[1], x1lim[2], degree = degree, nseg = nseg[1])

@@ -150,6 +150,8 @@ calcNomEffDim <- function(X,
 #'
 #' Check that all variables in a formula are present in the data.
 #'
+#' @importFrom utils hasName
+#'
 #' @keywords internal
 checkFormVars <- function(formula,
                           data) {
