@@ -48,21 +48,24 @@ LMMsolve <- function(fixed,
   if (!inherits(data, "data.frame")) {
     stop("data should be a data.frame.\n")
   }
-  if (length(terms(fixed)) != 3) {
-    stop("fixed model formula must be of the form \"resp ~ pred\".\n")
+  if (!inherits(fixed, "formula") || length(terms(fixed)) != 3) {
+    stop("fixed should be a formula of the form \"resp ~ pred\".\n")
   }
-  if (!is.null(random) && length(terms(random)) != 2) {
-    stop("random model formula must be of form \" ~ pred\".\n")
+  if (!is.null(random) &&
+      (!inherits(random, "formula") || length(terms(random)) != 2)) {
+    stop("random should be a formula of the form \" ~ pred\".\n")
   }
   if (!is.null(spline) &&
-      (length(terms(spline, specials = c("spl1D", "spl2D", "spl3D"))) != 2 ||
-       length(attr(terms(spline, specials = c("spl1D", "spl2D", "spl3D")),
-                   "term.labels")) != 1)) {
-    stop("spline model formula must be of form \"~ spl1D()\", \"~ spl2D()\" ",
+      (!inherits(spline, "formula") || length(terms(spline)) != 2 ||
+       ## Spline formula should consist of splxD() and nothing else.
+       sum(!sapply(attr(terms(spline, specials = c("spl1D", "spl2D", "spl3D")),
+                        "specials"), is.null)) != 1)) {
+    stop("spline should be a formula of form \"~ spl1D()\", \"~ spl2D()\" ",
          "or \"~spl3D()\".\n")
   }
-  if (!is.null(residual) && length(terms(residual)) != 2) {
-    stop("residual model formula must be of the form \" ~ pred\".\n")
+  if (!is.null(residual) &&
+      (!inherits(residual, "formula") || length(terms(residual)) != 2)) {
+    stop("residual should be a formula of the form \" ~ pred\".\n")
   }
   if (!is.numeric(tolerance) || length(tolerance) > 1 || tolerance < 0) {
     stop("tolerance should be a positive numerical value.")
@@ -70,6 +73,11 @@ LMMsolve <- function(fixed,
   if (!is.numeric(maxit) || length(maxit) > 1 || maxit < 0) {
     stop("maxit should be a positive numerical value.")
   }
+  ## Check that all variables used in formulas are in data.
+  checkFormVars(fixed, data)
+  checkFormVars(random, data)
+  checkFormVars(residual, data)
+  checkFormVars(spline, data)
 
   ## Remove NA for response variable from data.
   respVar <- all.vars(fixed)[attr(terms(fixed), "response")]
@@ -91,7 +99,7 @@ LMMsolve <- function(fixed,
                                               contrasts = FALSE))
     dim1.r <- table(attr(Z1, "assign"))[-1]
     term1.labels.r <- attr(mt, "term.labels")
-    # number of variance parameters (see Gilmour 1995) for each variance component
+    ## Number of variance parameters (see Gilmour 1995) for each variance component
     varPar1 <- rep(1, length(dim1.r))
     Z1 <- Z1[, -1]
   } else {
@@ -150,33 +158,23 @@ LMMsolve <- function(fixed,
   ## Add spline part.
   splRes <- NULL
   if (!is.null(spline)) {
-
-    if (inherits(spline, "character")) {
-      spline <- as.formula(spline)
-    }
     tf <- terms(spline, specials = c("spl1D", "spl2D", "spl3D"))
     terms <- attr(tf, "term.labels")
-    nt <- length(terms)
-
     splRes <- eval(parse(text = terms), envir = data, enclos = parent.frame())
-
-    ## Add to design matrix fixed effect X
+    ## Add to design matrix fixed effect X.
     X <- cbind(X, splRes$X)
-    ## Add to design matrix random effect Z
+    ## Add to design matrix random effect Z.
     Z <- cbind(Z, splRes$Z)
-    ## Expand matrices Ginv to the updated Z
+    ## Expand matrices Ginv to the updated Z.
     lGinv <- expandGinv(lGinv, splRes$lGinv)
-
-    # a splxD model has x parameters....
+    ## A splxD model has x parameters.
     varPar <- c(varPar, length(splRes$lGinv))
-
-    ## Add dims
+    ## Add dims.
     dim.f <- c(dim.f, splRes$dim.f)
     dim.r <- c(dim.r, splRes$dim.r)
-    ## Add labels
+    ## Add labels.
     term.labels.f <- c(term.labels.f, splRes$term.labels.f)
     term.labels.r <- c(term.labels.r, splRes$term.labels.r)
-
   }
 
   ## Add intercept.

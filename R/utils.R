@@ -123,12 +123,13 @@ removeIntercept <- function(X) {
 #' Calculate the Nominal Effective dimension
 #'
 #' @keywords internal
-calcNomEffDim <- function(X, Z, dim.r)
-{
+calcNomEffDim <- function(X,
+                          Z,
+                          dim.r) {
   if (is.null(Z)) return(NULL)
   p <- ncol(X)
 
-  EDnom <- vector(length=length(dim.r))
+  EDnom <- vector(length = length(dim.r))
   e <- cumsum(dim.r)
   s <- e - dim.r + 1
   # for each variance component in Z:
@@ -136,12 +137,33 @@ calcNomEffDim <- function(X, Z, dim.r)
     if (dim.r[i] > 100) {
       EDnom[i] <- dim.r[i]
     } else {
-      ndx <- c(s[i]:e[i])
+      ndx <- s[i]:e[i]
       XZ <- cbind(X, Z[, ndx])
       r <- qr(XZ)$rank
       EDnom[i] <- r - p
     }
   }
-  EDnom
+  return(EDnom)
+}
+
+#' Check variables in formula
+#'
+#' Check that all variables in a formula are present in the data.
+#'
+#' @keywords internal
+checkFormVars <- function(formula,
+                          data) {
+  if (!is.null(formula)) {
+    ## Get variables in formula.
+    formVars <- all.vars(formula)
+    missVars <- formVars[!hasName(data, formVars)]
+    if (length(missVars) > 0) {
+      ## Get the name of formula as passed to the function.
+      formName <- deparse(substitute(formula))
+      stop("The following variables in the ", formName, " part of the model ",
+           "are not in the data:\n", paste0(missVars, collapse = ", "), "\n",
+           call. = FALSE)
+    }
+  }
 }
 
