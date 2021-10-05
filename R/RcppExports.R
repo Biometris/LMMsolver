@@ -31,17 +31,3 @@ RowKronecker <- function(X1, X2) {
     .Call(`_LMMsolver_RowKronecker`, X1, X2)
 }
 
-#' Spectral decomposition of D'D
-#'
-#' Spectral decomposition of D'D
-#'
-#' @param q A numeric value.
-#' @param ord A numeric value.
-#'
-#' @return A q x (q-ord) matrix, the spectral decomposition D'D.
-#'
-#' @export
-calcUsc <- function(q, ord) {
-    .Call(`_LMMsolver_calcUsc`, q, ord)
-}
-

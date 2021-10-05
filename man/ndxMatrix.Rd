@@ -19,3 +19,4 @@ The index matrix.
 \description{
 Construct index matrix.
 }
+\keyword{internal}

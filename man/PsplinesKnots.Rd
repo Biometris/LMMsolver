@@ -21,3 +21,4 @@ A numerical vector of knot positions.
 \description{
 Construct equally placed knots.
 }
+\keyword{internal}

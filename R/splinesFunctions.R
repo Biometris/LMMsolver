@@ -1,5 +1,3 @@
-## some help functions, make part of LMM solve library:
-
 #' Construct index matrix
 #'
 #' Construct index matrix.
@@ -10,7 +8,7 @@
 #'
 #' @return The index matrix.
 #'
-#' @export
+#' @keywords internal
 ndxMatrix <- function(df,
                       lZ,
                       names) {
@@ -37,7 +35,7 @@ ndxMatrix <- function(df,
 #'
 #' @return A numerical vector of knot positions.
 #'
-#' @export
+#' @keywords internal
 PsplinesKnots <- function(xmin,
                           xmax,
                           degree,

@@ -72,18 +72,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// calcUsc
-arma::mat calcUsc(const double& q, const double& ord);
-RcppExport SEXP _LMMsolver_calcUsc(SEXP qSEXP, SEXP ordSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const double& >::type q(qSEXP);
-    Rcpp::traits::input_parameter< const double& >::type ord(ordSEXP);
-    rcpp_result_gen = Rcpp::wrap(calcUsc(q, ord));
-    return rcpp_result_gen;
-END_RCPP
-}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_LMMsolver_cholesky", (DL_FUNC) &_LMMsolver_cholesky, 3},
@@ -91,7 +79,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_LMMsolver_dlogdet", (DL_FUNC) &_LMMsolver_dlogdet, 2},
     {"_LMMsolver_construct_ADchol_Rcpp", (DL_FUNC) &_LMMsolver_construct_ADchol_Rcpp, 2},
     {"_LMMsolver_RowKronecker", (DL_FUNC) &_LMMsolver_RowKronecker, 2},
-    {"_LMMsolver_calcUsc", (DL_FUNC) &_LMMsolver_calcUsc, 2},
     {NULL, NULL, 0}
 };
 
