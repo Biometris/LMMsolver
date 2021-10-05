@@ -18,3 +18,4 @@ evaluated at the x positions.}
 \description{
 Construct design matrix for B-Splines.
 }
+\keyword{internal}

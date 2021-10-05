@@ -68,9 +68,9 @@ spl3D <- function(x1,
   knots[[2]] <- PsplinesKnots(x2lim[1], x2lim[2], degree = degree, nseg = nseg[2])
   knots[[3]] <- PsplinesKnots(x3lim[1], x3lim[2], degree = degree, nseg = nseg[3])
 
-  B1 <- spam::as.spam(Bsplines(knots[[1]], x1))
-  B2 <- spam::as.spam(Bsplines(knots[[2]], x2))
-  B3 <- spam::as.spam(Bsplines(knots[[3]], x3))
+  B1 <- Bsplines(knots[[1]], x1)
+  B2 <- Bsplines(knots[[2]], x2)
+  B3 <- Bsplines(knots[[3]], x3)
 
   q1 <- ncol(B1)
   q2 <- ncol(B2)
@@ -163,9 +163,9 @@ spl3Dfast <- function(y,
   knots2 <- PsplinesKnots(x2lim[1], x2lim[2], degree = degr, nseg = nseg[2])
   knots3 <- PsplinesKnots(x3lim[1], x3lim[2], degree = degr, nseg = nseg[3])
 
-  B1 <- spam::as.spam(Bsplines(knots1, x1))
-  B2 <- spam::as.spam(Bsplines(knots2, x2))
-  B3 <- spam::as.spam(Bsplines(knots3, x3))
+  B1 <- Bsplines(knots1, x1)
+  B2 <- Bsplines(knots2, x2)
+  B3 <- Bsplines(knots3, x3)
   q1 <- ncol(B1)
   q2 <- ncol(B2)
   q3 <- ncol(B3)

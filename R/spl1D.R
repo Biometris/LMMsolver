@@ -51,7 +51,7 @@ spl1D <- function(x,
   knots <- list()
   knots[[1]] <- PsplinesKnots(xlim[1], xlim[2], degree = degree, nseg = nseg)
 
-  B <- spam::as.spam(Bsplines(knots[[1]], x))
+  B <- Bsplines(knots[[1]], x)
   q <- ncol(B)
 
   DtD <- constructPenalty(q, pord)

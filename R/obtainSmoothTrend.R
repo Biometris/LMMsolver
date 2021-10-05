@@ -39,9 +39,7 @@ obtainSmoothTrend <- function(object,
     seq(min(x[[i]]), max(x[[i]]), length = grid[i])
   })
   ## Compute Bx per dimension.
-  Bx <- mapply(FUN = function(x, y) {
-    spam::as.spam(Bsplines(x, y))
-  }, knots, xGrid)
+  Bx <- mapply(FUN = Bsplines, knots, xGrid)
   ## Compute Bx over all dimensions.
   BxTot <- Reduce(`%x%`, Bx)
   ## Compute X per dimension.

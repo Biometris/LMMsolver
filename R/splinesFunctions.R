@@ -77,12 +77,12 @@ PsplinesKnots <- function(xmin,
 #' @param deriv A numerical value. The derivative of the given order is
 #' evaluated at the x positions.
 #'
-#' @export
+#' @keywords internal
 Bsplines <- function(knots,
                      x,
                      deriv = 0) {
   degree <- attr(knots, "degree")
   B <- splines::splineDesign(knots = knots, x = x, ord = degree + 1,
-                             derivs = deriv)
-  return(B)
+                             derivs = deriv, sparse = TRUE)
+  return(spam::as.spam.dgCMatrix(B))
 }

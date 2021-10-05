@@ -61,8 +61,8 @@ spl2D <- function(x1,
   knots[[1]] <- PsplinesKnots(x1lim[1], x1lim[2], degree = degree, nseg = nseg[1])
   knots[[2]] <- PsplinesKnots(x2lim[1], x2lim[2], degree = degree, nseg = nseg[2])
 
-  B1 <- spam::as.spam(Bsplines(knots[[1]], x1))
-  B2 <- spam::as.spam(Bsplines(knots[[2]], x2))
+  B1 <- Bsplines(knots[[1]], x1)
+  B2 <- Bsplines(knots[[2]], x2)
   q1 <- ncol(B1)
   q2 <- ncol(B2)
 
