@@ -14,7 +14,7 @@ Imports:
     spam, 
     splines,
     agridat
-LinkingTo: Rcpp, RcppArmadillo
+LinkingTo: Rcpp
 RoxygenNote: 7.1.2
 Encoding: UTF-8
 Suggests: 

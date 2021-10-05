@@ -17,17 +17,3 @@ construct_ADchol_Rcpp <- function(U, P_list) {
     .Call(`_LMMsolver_construct_ADchol_Rcpp`, U, P_list)
 }
 
-#' Row-wise kronecker product
-#'
-#' Row-wise kronecker product
-#'
-#' @param X1 A matrix.
-#' @param X2 A matrix.
-#'
-#' @return The row-wise kronecker product of X1 and X2.
-#'
-#' @export
-RowKronecker <- function(X1, X2) {
-    .Call(`_LMMsolver_RowKronecker`, X1, X2)
-}
-

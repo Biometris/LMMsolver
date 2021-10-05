@@ -1,3 +1,21 @@
+#' Row-wise kronecker product
+#'
+#' Row-wise kronecker product
+#'
+#' @param X1 A matrix.
+#' @param X2 A matrix.
+#'
+#' @return The row-wise kronecker product of X1 and X2.
+#'
+#' @keywords internal
+RowKronecker <- function(X1,
+                         X2) {
+  one.1 <- matrix(1, 1, ncol(X1))
+  one.2 <- matrix(1, 1, ncol(X2))
+  rowKron <- kronecker(X1, one.2) * kronecker(one.1, X2)
+  return(rowKron)
+}
+
 #' Construct index matrix
 #'
 #' Construct index matrix.
