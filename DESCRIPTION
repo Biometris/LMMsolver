@@ -9,6 +9,7 @@ Description: Linear Mixed Model solver.
 License: GPL
 Depends: R (>= 3.6)
 Imports: 
+    Matrix,
     methods,
     Rcpp (>= 0.10.4), 
     spam, 
