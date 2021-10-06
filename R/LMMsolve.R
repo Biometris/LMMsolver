@@ -254,6 +254,9 @@ coef.LMMsolve <- function(object,
 #' @export
 displayMME <- function(object,
                        cholesky = FALSE) {
+  if (!inherits(object, "LMMsolve")) {
+    stop("object should be an object of class LMMsolve.\n")
+  }
   if (!cholesky) {
     spam::display(object$C)
   } else {
@@ -270,6 +273,9 @@ displayMME <- function(object,
 #'
 #' @export
 diagnosticsMME <- function(object) {
+  if (!inherits(object, "LMMsolve")) {
+    stop("object should be an object of class LMMsolve.\n")
+  }
   cat("Summary of matrix C \n")
   print(spam::summary.spam(object$C))
   cat("\n Summary of cholesky decomposition of C \n")
