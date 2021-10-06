@@ -5,7 +5,7 @@ library(LMMsolver)
 
 # testdata Daniela NPEC, see list of closed issues LMMsolver:
 # "error after a number of iterations with spl3Dfast"
-df <- read.csv("exampleTempDiff.csv")
+df <- read.csv("./examples/exampleTempDiff.csv")
 head(df)
 
 y <- df$par
@@ -46,4 +46,9 @@ obj1$ED   # LMMsolve with spatial argument
 # compare smooth trends
 fit1 <- obtainSmoothTrend(obj1, grid=grid, includeIntercept = TRUE)
 range(fit0 - fit1$ypred)
+
+## Obtain smooth trend for row 0, col 0 only.
+newdat <- df[df$row == 0 & df$col == 0, ]
+fit2 <- obtainSmoothTrend(obj1, newdata = newdat, includeIntercept = TRUE)
+
 

@@ -8,6 +8,9 @@ library(ggplot2)
 # Get precipitation data from spam
 data(USprecip)
 dat = data.frame(USprecip)
+
+datOrig <- dat
+
 # only use observed data
 dat = subset(dat, infill==1)
 nrow(dat) # 5906 true records, as in SAP2014 paper.
@@ -76,6 +79,36 @@ ggplot(plotDat, aes(x = lon, y = lat, fill = ypred)) +
   coord_fixed() +
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank())
+
+
+## Make predictions based on coordinates in input data.
+newdat <- datOrig
+
+range(newdat$lon)
+range(newdat$lat)
+
+range(dat$lon)
+range(dat$lat)
+
+nrow(newdat)
+
+pred2 <- obtainSmoothTrend(obj1, newdata = newdat, includeIntercept = TRUE)
+head(pred2)
+
+plot(pred2$anomaly, pred2$ypred)
+abline(0,1, col = "blue")
+
+cor(pred2$anomaly, pred2$ypred)
+
+ggplot(pred2, aes(x = lon, y = lat)) +
+  ## For some reason when width and height are not specified the tiles are not plotted.
+  geom_tile(aes(fill = ypred), show.legend = TRUE, width = .4, height = .4) +
+  scale_fill_gradientn(colours = topo.colors(100))+
+  labs(title = "Precipitation anomaly", x = "Longitude", y = "Latitude") +
+  coord_fixed() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
+
 
 
 

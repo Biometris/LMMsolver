@@ -46,12 +46,23 @@ displayMME(obj2, cholesky=TRUE)
 plotDat <- obtainSmoothTrend(obj1, grid=100)
 head(plotDat)
 ggplot(plotDat, aes(x = plot, y = ypred)) +
-  geom_tile(show.legend = TRUE) +
   geom_line() +
   labs(title = "Spatial trend for the oats data", x = "plot", y = "plot effects") +
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank())
 
 
+## Obtain special trend by specifying newdat
+newdat <- data.frame(plot = seq(1, 72, length.out = 100))
 
+plotDat2 <- obtainSmoothTrend(obj1, newdata = newdat)
+
+## Results should be identical
+identical(plotDat$ypred, plotDat2$ypred)
+
+ggplot(plotDat2, aes(x = plot, y = ypred)) +
+  geom_line() +
+  labs(title = "Spatial trend for the oats data", x = "plot", y = "plot effects") +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
 

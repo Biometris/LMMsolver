@@ -42,7 +42,7 @@ spl1D <- function(x,
   }
   ## Save names of the x-variables so they can be used later on in predictions.
   xName <- deparse(substitute(x))
-  if (!exists(xName)) {
+  if (!exists(xName, where = sys.frame())) {
     stop("The following variables in the spline part of the model ",
          "are not in the data:\n", xName, "\n",
          call. = FALSE)

@@ -50,7 +50,7 @@ spl2D <- function(x1,
   x1Name <- deparse(substitute(x1))
   x2Name <- deparse(substitute(x2))
   xNames <- c(x1Name, x2Name)
-  missVars <- xNames[sapply(X = xNames, FUN = exists)]
+  missVars <- xNames[!sapply(X = xNames, FUN = exists, where = sys.frame())]
   if (length(missVars) > 0) {
     stop("The following variables in the spline part of the model ",
          "are not in the data:\n", paste0(missVars, collapse = ", "), "\n",

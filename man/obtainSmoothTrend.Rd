@@ -4,7 +4,12 @@
 \alias{obtainSmoothTrend}
 \title{Obtain Smooth Trend.}
 \usage{
-obtainSmoothTrend(object, grid, includeIntercept = FALSE)
+obtainSmoothTrend(
+  object,
+  grid = NULL,
+  newdata = NULL,
+  includeIntercept = FALSE
+)
 }
 \arguments{
 \item{object}{An object of class LMMsolve.}
@@ -12,6 +17,8 @@ obtainSmoothTrend(object, grid, includeIntercept = FALSE)
 \item{grid}{A numeric vector having the length of the dimension of the fitted
 spline component. This represents the number of grid points at which a
 surface will be computed.}
+
+\item{newdata}{...}
 
 \item{includeIntercept}{Should the value of the intercept be included in
 the computed smooth trend?}

@@ -83,6 +83,6 @@ Bsplines <- function(knots,
                      deriv = 0) {
   degree <- attr(knots, "degree")
   B <- splines::splineDesign(knots = knots, x = x, ord = degree + 1,
-                             derivs = deriv, sparse = TRUE)
+                             derivs = deriv, sparse = TRUE, outer.ok = TRUE)
   return(spam::as.spam.dgCMatrix(B))
 }
