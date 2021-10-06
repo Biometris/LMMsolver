@@ -55,6 +55,22 @@ spl3D <- function(x1,
   x1Name <- deparse(substitute(x1))
   x2Name <- deparse(substitute(x2))
   x3Name <- deparse(substitute(x3))
+  if (!is.numeric(x1lim) || length(x1lim) != 2 ||
+      x1lim[1] > range(x1)[1] || x1lim[2] < range(x1)[2]) {
+    stop("x1lim should be a vector of length two with all values of ", x1Name,
+         " between its lower and upper value.\n")
+  }
+  if (!is.numeric(x2lim) || length(x2lim) != 2 ||
+      x2lim[1] > range(x2)[1] || x2lim[2] < range(x2)[2]) {
+    stop("x2lim should be a vector of length two with all values of ", x2Name,
+         " between its lower and upper value.\n")
+  }
+  if (!is.numeric(x3lim) || length(x3lim) != 2 ||
+      x3lim[1] > range(x3)[1] || x3lim[2] < range(x3)[2]) {
+    stop("x3lim should be a vector of length two with all values of ", x3Name,
+         " between its lower and upper value.\n")
+  }
+
   xNames <- c(x1Name, x2Name, x3Name)
   missVars <- xNames[!sapply(X = xNames, FUN = exists, where = sys.frame())]
   if (length(missVars) > 0) {
