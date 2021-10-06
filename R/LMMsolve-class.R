@@ -69,6 +69,66 @@ summary.LMMsolve <- function(object,
   }
 }
 
+#' Obtain the coefficients from the mixed model equations
+#'
+#' @param object an object of class LMMsolve
+#' @param \dots some methods for this generic require additional arguments.
+#' None are used in this method.
+#'
+#' @return A list of vectors, containing the estimated effects for each fixed
+#' effect and the predictions for each random effect in the defined linear
+#' mixed model.
+#'
+#' @export
+coef.LMMsolve <- function(object,
+                          ...) {
+  result <- list()
+  dim <- object$dim
+  e <- cumsum(dim)
+  s <- e - dim + 1
+
+  for(i in 1:length(dim)) {
+    result[[i]] <- object$a[s[i]:e[i]]
+  }
+  names(result) <- object$term.labels
+  return(result)
+}
+
+#' Display the sparseness of the mixed model coefficient matrix.
+#'
+#' @param object an object of class LMMsolve
+#' @param cholesky logical. If \code{cholesky = TRUE} it will plot the cholesky.
+#'
+#' @export
+displayMME <- function(object,
+                       cholesky = FALSE) {
+  if (!inherits(object, "LMMsolve")) {
+    stop("object should be an object of class LMMsolve.\n")
+  }
+  if (!cholesky) {
+    spam::display(object$C)
+  } else {
+    cholC <- chol(object$C)
+    L <- t(spam::as.spam(cholC))
+    spam::display(L)
+  }
+}
+
+#' Give diagnostics for mixed model coefficient matrix C and the cholesky
+#' decomposition.
+#'
+#' @param object an object of class LMMsolve
+#'
+#' @export
+diagnosticsMME <- function(object) {
+  if (!inherits(object, "LMMsolve")) {
+    stop("object should be an object of class LMMsolve.\n")
+  }
+  cat("Summary of matrix C \n")
+  print(spam::summary.spam(object$C))
+  cat("\n Summary of cholesky decomposition of C \n")
+  print(spam::summary.spam(chol(object$C)))
+}
 
 
 
