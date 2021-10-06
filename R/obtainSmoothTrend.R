@@ -35,6 +35,16 @@ obtainSmoothTrend <- function(object,
   scaleX <- splRes$scaleX
   pord <- splRes$pord
   if (!is.null(newdata)) {
+    if (!inherits(newdata, "data.frame")) {
+      stop("newdata should be a data.frame.\n")
+    }
+    missX <- names(x)[!sapply(X = names(x), FUN = function(name) {
+      hasName(x = newdata, name = name)
+    })]
+    if (length(missX) > 0) {
+      stop("The following smoothing variables are not in newdata:\n",
+           paste0(missX, collapse = ", "), "\n")
+    }
     ## Construct grid for each dimension.
     xGrid <- lapply(X = seq_along(x), FUN = function(i) {
       newdata[[names(x)[i]]]
