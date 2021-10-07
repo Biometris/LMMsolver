@@ -5,7 +5,7 @@ library(LMMsolver)
 library(asreml)
 library(dplyr)
 
-df <- read.csv("multipopQTL.csv", stringsAsFactors = TRUE)
+df <- read.csv("./examples/multipopQTL.csv", stringsAsFactors = TRUE)
 head(df)
 str(df)
 
@@ -29,7 +29,7 @@ minlog10p
 
 # NULL mode, using LMMsolver:
 obj0 <- LMMsolve(fixed=pheno~cross, residual=~cross, data=df, tolerance=1.0e-8,
-                          trace=TRUE, display= FALSE)
+                          trace=TRUE)
 # check with asreml:
 obj0$logL
 obj0.asr$loglik
@@ -40,8 +40,11 @@ obj0$ED
 
 # include QTL, using LMMsolve
 lM <- list(QTL=c(3:5))
-obj1 <- LMMsolve(fixed=pheno~cross, group=lM,residual=~cross, data=df, tolerance=1.0e-8,
-                 trace=TRUE, display= FALSE)
+obj1 <- LMMsolve(fixed=pheno~cross, group=lM,
+                 random = ~grp(QTL),
+                 residual=~cross,
+                 data=df, tolerance=1.0e-8,
+                 trace=TRUE)
 
 # check with asreml:
 obj1$logL

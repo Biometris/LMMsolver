@@ -74,6 +74,9 @@ LMMsolve <- function(fixed,
     stop("maxit should be a positive numerical value.")
   }
   ## Check that all variables used in formulas are in data.
+
+  random <- checkGroup(random, group)
+
   checkFormVars(fixed, data)
   checkFormVars(random, data)
   checkFormVars(residual, data)
@@ -192,7 +195,7 @@ LMMsolve <- function(fixed,
   y <- mf[, 1]
   obj <- sparseMixedModels(y = y, X = X, Z = Z, lGinv = lGinv, lRinv = lRinv,
                            tolerance = tolerance, trace = trace, maxit = maxit)
-  NomEffDimRes <- attr(lRinv,"cnt") - 1
+  NomEffDimRes <- attr(lRinv, "cnt") - 1
   NomEffDimRan <- calcNomEffDim(X, Z, dim.r)
   NomEffDim <- c(NomEffDimRes, NomEffDimRan)
 
@@ -200,11 +203,10 @@ LMMsolve <- function(fixed,
   # as NomEffDim is per variance component:
   obj$EDnominal <- NomEffDim
 
-  if (!omitConstant)
-  {
+  if (!omitConstant) {
     Nobs <- length(y)
     p <- sum(dim.f)
-    Constant = -0.5*log(2*pi)*(Nobs-p)
+    Constant <- -0.5 * log(2 * pi) * (Nobs -p)
     obj$logL <- obj$logL + Constant
   }
   dim <- as.numeric(c(dim.f, dim.r))
@@ -216,9 +218,6 @@ LMMsolve <- function(fixed,
   obj$term.labels.r <- term.labels.r
   obj$term.labels <- term.labels
   obj$splRes <- splRes
-  obj$dev <- -2.0*obj$logL
+  obj$dev <- -2.0 * obj$logL
   return(LMMsolveObject(obj))
 }
-
-
-

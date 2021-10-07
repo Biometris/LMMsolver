@@ -169,3 +169,52 @@ checkFormVars <- function(formula,
   }
 }
 
+#' @noRd
+grp <- function(x) {
+  NULL
+}
+
+#' Check group part
+#'
+#' Check that all variables in group are also specified as grp() in random part
+#' of the model and vice versa.
+#'
+#' @importFrom utils hasName
+#'
+#' @keywords internal
+checkGroup <- function(random,
+                       group) {
+  ## Only check if at least one of random and group is not NULL
+  if (!is.null(random) || !is.null(group)) {
+    if (is.null(random)) {
+      grpVars <- NULL
+    } else {
+      ## Extract variables specified in grp() functions in random part.
+      randTerms <- terms(random, specials = "grp")
+      grpPos <- attr(randTerms, which = "specials")$grp
+      grpTerms <- sapply(X = grpPos, FUN = function(pos) {randTerms[pos]})
+      grpVars <- sapply(X = grpTerms, FUN = all.vars)
+      ## Remove grp terms from random part of the model.
+      random <- randTerms[-grpPos]
+    }
+    ## Check for variables in grp missing in group.
+    grpMiss <- grpVars[sapply(X = grpVars, FUN = function(grpVar) {
+      !hasName(x = group, name = grpVar)
+    })]
+    if (length(grpMiss) > 0) {
+      stop("The following variables are specified in grp in the random part ",
+           "of the model but not present in group:\n",
+           paste0(grpMiss, collapse = ", "), "\n", call. = FALSE)
+    }
+    ## Check for variables in group missing in grp.
+    groupMiss <- names(group)[!names(group) %in% grpVars]
+    if (length(groupMiss) > 0) {
+      stop("The following variables in group are not specified in grp in ",
+           "in the random part of the model:\n",
+           paste0(groupMiss, collapse = ", "), "\n", call. = FALSE)
+    }
+  }
+  return(random)
+}
+
+
