@@ -49,6 +49,14 @@ spl2D <- function(x1,
   ## Save names of the x-variables so they can be used later on in predictions.
   x1Name <- deparse(substitute(x1))
   x2Name <- deparse(substitute(x2))
+  xNames <- c(x1Name, x2Name)
+  missVars <- xNames[!sapply(X = xNames, FUN = exists,
+                             where = parent.frame(), inherits = FALSE)]
+  if (length(missVars) > 0) {
+    stop("The following variables in the spline part of the model ",
+         "are not in the data:\n", paste0(missVars, collapse = ", "), "\n",
+         call. = FALSE)
+  }
   if (!is.numeric(x1lim) || length(x1lim) != 2 ||
       x1lim[1] > range(x1)[1] || x1lim[2] < range(x1)[2]) {
     stop("x1lim should be a vector of length two with all values of ", x1Name,
@@ -58,14 +66,6 @@ spl2D <- function(x1,
       x2lim[1] > range(x2)[1] || x2lim[2] < range(x2)[2]) {
     stop("x2lim should be a vector of length two with all values of ", x2Name,
          " between its lower and upper value.\n")
-  }
-  xNames <- c(x1Name, x2Name)
-  missVars <- xNames[!sapply(X = xNames, FUN = exists,
-                             where = parent.frame(), inherits = FALSE)]
-  if (length(missVars) > 0) {
-    stop("The following variables in the spline part of the model ",
-         "are not in the data:\n", paste0(missVars, collapse = ", "), "\n",
-         call. = FALSE)
   }
 
   knots <- list()

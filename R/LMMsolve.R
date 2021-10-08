@@ -58,8 +58,8 @@ LMMsolve <- function(fixed,
   if (!is.null(spline) &&
       (!inherits(spline, "formula") || length(terms(spline)) != 2 ||
        ## Spline formula should consist of splxD() and nothing else.
-       sum(!sapply(attr(terms(spline, specials = c("spl1D", "spl2D", "spl3D")),
-                        "specials"), is.null)) != 1)) {
+       length(unlist(attr(terms(spline, specials = c("spl1D", "spl2D", "spl3D")),
+                          "specials"))) != 1)) {
     stop("spline should be a formula of form \"~ spl1D()\", \"~ spl2D()\" ",
          "or \"~spl3D()\".\n")
   }

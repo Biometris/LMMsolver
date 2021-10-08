@@ -42,15 +42,15 @@ spl1D <- function(x,
   }
   ## Save names of the x-variables so they can be used later on in predictions.
   xName <- deparse(substitute(x))
-  if (!is.numeric(xlim) || length(xlim) != 2 ||
-      xlim[1] > range(x)[1] || xlim[2] < range(x)[2]) {
-    stop("xlim should be a vector of length two with all values of ", xName,
-         " between its lower and upper value.\n")
-  }
   if (!exists(xName, where = parent.frame(), inherits = FALSE)) {
     stop("The following variables in the spline part of the model ",
          "are not in the data:\n", xName, "\n",
          call. = FALSE)
+  }
+  if (!is.numeric(xlim) || length(xlim) != 2 ||
+      xlim[1] > range(x)[1] || xlim[2] < range(x)[2]) {
+    stop("xlim should be a vector of length two with all values of ", xName,
+         " between its lower and upper value.\n")
   }
 
   knots <- list()
