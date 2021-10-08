@@ -18,5 +18,8 @@ y <- Wood3D(x1, x2, x3) + eps
 
 simDat <- data.frame(y = y, x1 = x1, x2 = x2, x3 = x3)
 
+## Test data for testing grp() functionality.
+testDat <- read.csv("./examples/multipopQTL.csv", stringsAsFactors = TRUE)
+
 ## Save to tinytest directory.
-save(simDat, file = "./inst/tinytest/testdata.rda")
+save(simDat, testDat, file = "./inst/tinytest/testdata.rda")

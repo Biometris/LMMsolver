@@ -16,32 +16,6 @@ RowKronecker <- function(X1,
   return(rowKron)
 }
 
-#' Construct index matrix
-#'
-#' Construct index matrix.
-#'
-#' @param df A data.frame.
-#' @param lZ A list of matrices.
-#' @param names A character vector of names.
-#'
-#' @return The index matrix.
-#'
-#' @keywords internal
-ndxMatrix <- function(df,
-                      lZ,
-                      names) {
-  n <- length(lZ)
-  dim <- sapply(X = lZ, FUN = ncol)
-  e <- cumsum(dim) + ncol(df)
-  s <- e - dim + 1
-  lM <- list()
-  for (i in 1:n) {
-    lM[[i]] <- c(s[i]:e[i])
-  }
-  names(lM) <- names
-  return(lM)
-}
-
 #' Construct equally placed knots
 #'
 #' Construct equally placed knots.
