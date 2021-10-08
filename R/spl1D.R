@@ -47,7 +47,7 @@ spl1D <- function(x,
     stop("xlim should be a vector of length two with all values of ", xName,
          " between its lower and upper value.\n")
   }
-  if (!exists(xName, where = sys.frame())) {
+  if (!exists(xName, where = parent.frame(), inherits = FALSE)) {
     stop("The following variables in the spline part of the model ",
          "are not in the data:\n", xName, "\n",
          call. = FALSE)

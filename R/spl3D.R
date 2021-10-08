@@ -72,7 +72,8 @@ spl3D <- function(x1,
   }
 
   xNames <- c(x1Name, x2Name, x3Name)
-  missVars <- xNames[!sapply(X = xNames, FUN = exists, where = sys.frame())]
+  missVars <- xNames[!sapply(X = xNames, FUN = exists,
+                             where = parent.frame(), inherits = FALSE)]
   if (length(missVars) > 0) {
     stop("The following variables in the spline part of the model ",
          "are not in the data:\n", paste0(missVars, collapse = ", "), "\n",
