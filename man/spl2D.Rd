@@ -30,10 +30,12 @@ spl2D(
 no scaling.}
 
 \item{x1lim}{numerical vector of length 2 containing the domain of covariate
-\code{x1} where the knots should be placed. Default set to \code{NULL} (covariate range).}
+\code{x1} where the knots should be placed. Default set to \code{NULL}
+(covariate range).}
 
 \item{x2lim}{numerical vector of length 2 containing the domain of covariate
-\code{x2} where the knots should be placed. Default set to \code{NULL} (covariate range).}
+\code{x2} where the knots should be placed. Default set to \code{NULL}
+(covariate range).}
 }
 \value{
 A list with the following elements:

@@ -73,7 +73,7 @@ devJABES2020paper_LV <- 54.49
 expect_equal(round(obj1$dev, 2) , devJABES2020paper_LV)
 
 ## Check that full LMM solve object is correct.
-expect_equal_to_reference(obj1, "spl1DFull")
+expect_equivalent_to_reference(obj1, "spl1DFull")
 
 
 
