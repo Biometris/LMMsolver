@@ -89,22 +89,9 @@ spl3D <- function(x1,
   B1 <- Bsplines(knots[[1]], x1)
   B2 <- Bsplines(knots[[2]], x2)
   B3 <- Bsplines(knots[[3]], x3)
+  q <- c(ncol(B1), ncol(B2), ncol(B3))
 
-  q1 <- ncol(B1)
-  q2 <- ncol(B2)
-  q3 <- ncol(B3)
-
-  # we have to calculate RowKronecker product only once:
-  one.1 <- matrix(1, 1, ncol(B1))
-  one.2 <- matrix(1, 1, ncol(B2))
-  one.3 <- matrix(1, 1, ncol(B3))
-  B123 <- (B1 %x% one.2 %x% one.3) *
-          (one.1 %x% B2 %x% one.3) *
-          (one.1 %x% one.2 %x% B3)
-
-  DtD1 <- constructPenalty(q1, pord)
-  DtD2 <- constructPenalty(q2, pord)
-  DtD3 <- constructPenalty(q3, pord)
+  B123 <- RowKronecker(RowKronecker(B1, B2), B3)
 
   X1 <- constructX(B1, x1, scaleX, pord)
   X2 <- constructX(B2, x2, scaleX, pord)
@@ -115,17 +102,8 @@ spl3D <- function(x1,
   ## Remove intercept column to avoid singularity problems.
   X  <- removeIntercept(X)
 
-  CCt1 <- constructCCt(q1, pord)
-  CCt2 <- constructCCt(q2, pord)
-  CCt3 <- constructCCt(q3, pord)
-
-  CCt <- CCt1 %x% CCt2 %x% CCt3
-
-  lGinv <- list()
-  lGinv[[1]] <- DtD1 %x% spam::diag.spam(q2) %x% spam::diag.spam(q3) + CCt
-  lGinv[[2]] <- spam::diag.spam(q1) %x% DtD2 %x% spam::diag.spam(q3) + CCt
-  lGinv[[3]] <- spam::diag.spam(q1) %x% spam::diag.spam(q2) %x% DtD3 + CCt
-
+  # construct list of sparse precision matrices.
+  lGinv <- constructGinvSplines(q, pord)
   names(lGinv) <- c("s(x1)", "s(x2)", "s(x3)")
 
   if (is.null(X)) {

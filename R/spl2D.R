@@ -75,15 +75,9 @@ spl2D <- function(x1,
 
   B1 <- Bsplines(knots[[1]], x1)
   B2 <- Bsplines(knots[[2]], x2)
-  q1 <- ncol(B1)
-  q2 <- ncol(B2)
+  q <- c(ncol(B1), ncol(B2))
 
-  one.1 <- matrix(1, 1, ncol(B1))
-  one.2 <- matrix(1, 1, ncol(B2))
-  B12 <- (B1 %x% one.2) * (one.1 %x% B2)
-
-  DtD1 <- constructPenalty(q1, pord)
-  DtD2 <- constructPenalty(q2, pord)
+  B12 <- RowKronecker(B1, B2)
 
   X1 <- constructX(B1, x1, scaleX, pord)
   X2 <- constructX(B2, x2, scaleX, pord)
@@ -92,14 +86,8 @@ spl2D <- function(x1,
   ## Remove intercept column to avoid singularity problems.
   X  <- removeIntercept(X)
 
-  CCt1 <- constructCCt(q1, pord)
-  CCt2 <- constructCCt(q2, pord)
-  CCt <- CCt1 %x% CCt2
-
-  lGinv <- list()
-  lGinv[[1]] <- DtD1 %x% spam::diag.spam(q2) + CCt
-  lGinv[[2]] <- spam::diag.spam(q1) %x% DtD2 + CCt
-
+  # construct list of sparse precision matrices.
+  lGinv <- constructGinvSplines(q, pord)
   names(lGinv) <- c("s(x1)", "s(x2)")
 
   if (is.null(X)) {
@@ -119,3 +107,4 @@ spl2D <- function(x1,
               degree = degree, scaleX = scaleX))
 
 }
+
