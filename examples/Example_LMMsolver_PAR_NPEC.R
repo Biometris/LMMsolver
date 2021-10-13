@@ -1,36 +1,33 @@
 library(tidyr)
 library(LMMsolver)
+library(wesanderson)
+library(tidyverse)
+library(fields)
+library(lubridate)
 
 # Example data
 input <- read.csv('./examples/PAR_NPEC.csv')
 input
 
-x1 <- input$row
-x2 <- input$col
-x3 <- input$time
+### Define sensor coord #####################
+pos <- data.frame(sensor = c(60598, 19445, 4567,
+                             49176, 62701, 14061,
+                             37681, 35159, 56963),
+                  coord = c('AA1', 'AA18', 'AA35',
+                            'AH1', 'AH18', 'AH35',
+                            'AN1', 'AN18', 'AN35'),
+                  rownr = c(35,18,1,
+                            35,18,1,
+                            35,18,1),
+                  colnr = c(14,14,14,
+                            8,8,8,
+                            1,1,1))
 
-# Fit spline
-fitting2 <- LMMsolver:::spl3Dfast(y = input$par,
-                                  x1 = input$row,
-                                  x2 = input$col,
-                                  x3 = input$time,
-                                  nseg = c(2, 2, 50),
-                                  tolerance = 1e-6)
-
-
-#Prediction grid
-g <- expand.grid(x1 = (c(1:35)*24-24),
-                 x2 = (c(1:14)*58-58),
-                 x3 = seq(min(x3), max(x3),
-                          by = 0.02))
-
-# Make predictions
-predPAR <- predict(fitting2, g)
-
-# error because different number of predicted vals
-g <- cbind(g, pred[[2]])
-
-
+# Sensor positions in cm
+rowdist <- 24
+coldist <- 58
+pos$colm <- (as.numeric(pos$colnr)) * coldist - coldist
+pos$rowm <- as.numeric(pos$rownr) * rowdist - rowdist
 
 #### Using new way of calling LMMsolve:
 
@@ -56,6 +53,22 @@ g2 <- expand.grid(row = (c(1:35)*24-24),
                   time = seq(min(x3), max(x3),
                              by = 0.02))
 
+
 pred2 <- obtainSmoothTrend(fittingNew, newdata = g2, includeIntercept = TRUE)
 
+# Plot predictions
+for (j in unique(pred2$time)) {
+  g2 <- subset(pred2, time == j)
+  g2 <- g2 %>%
+    arrange(col, row)
+
+  # png with common scale within day
+  X1 = matrix(data=g2$ypred, nrow= 35, ncol = 14)
+  image.plot(t(X1), x = (unique(g2$col)), y = unique(g2$row),
+             col = wes_palette("Zissou1", 100, type = "continuous"),
+             xlab='column',ylab='row',
+             main = paste0('Temp ', as_datetime(j*100000) ),
+             zlim = c(min(pred2$ypred),max(pred2$ypred)))
+  text(y=pos$rowm, x= pos$colm, col = 'black', pos$coord)
+}
 
