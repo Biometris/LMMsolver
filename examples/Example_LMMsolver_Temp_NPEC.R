@@ -33,30 +33,20 @@ x1 <- input$row
 x2 <- input$col
 x3 <- input$time
 
-#### Using new way of calling LMMsolve:
-
-## Specify xlims to replicate results from spl3Dfast.
-x1lim <- c(min(x1) - 0.01, max(x1) + 0.01)
-x2lim <- c(min(x2) - 0.01, max(x2) + 0.01)
-x3lim <- c(min(x3) - 0.01, max(x3) + 0.01)
 length(unique(input$time))
 
 fittingNew <- LMMsolve(fixed = par~1,
-                       spline = ~spl3D(row, col, time, nseg = c(2, 2, 50),
-                                       x1lim = x1lim, x2lim = x2lim,
-                                       x3lim = x3lim),
-                       data = input,
-                       tolerance = 1e-6,
-                       trace = TRUE)
+                       spline = ~spl3D(row, col, time, nseg = c(2, 2, 50)),
+                       data = input)
 
+# effective dimensions:
 fittingNew$ED
 
-#Prediction grid
+# prediction grid
 g2 <- expand.grid(row = (c(1:max(pos$rownr))*rowdist-rowdist),
                   col = (c(1:max(pos$colnr))*coldist-coldist),
                   time = seq(min(x3), max(x3),
                              by = 0.02))
-
 
 pred2 <- obtainSmoothTrend(fittingNew, newdata = g2,
                            includeIntercept = TRUE)
