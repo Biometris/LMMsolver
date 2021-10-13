@@ -6,7 +6,7 @@ library(fields)
 library(lubridate)
 
 # Example data
-input <- read.csv('./examples/PAR_NPEC.csv')
+input <- read.csv('./examples/Temp_NPEC.csv')
 input
 
 ### Define sensor coord #####################
