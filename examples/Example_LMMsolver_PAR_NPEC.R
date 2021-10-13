@@ -49,7 +49,6 @@ fittingNew <- LMMsolve(fixed = par~1,
                        tolerance = 1e-6,
                        trace = TRUE)
 
-fitting2$edf
 fittingNew$ED
 
 #Prediction grid
