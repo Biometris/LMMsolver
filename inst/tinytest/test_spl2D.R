@@ -76,4 +76,4 @@ obj1 <- LMMsolve(fixed = yield ~ 1, random = ~ gen,
                  tolerance = 1e-6)
 
 ## Check that full LMM solve object is correct.
-#expect_equivalent_to_reference(obj1, "spl2DFull")
+expect_equivalent_to_reference(obj1, "spl2DFull", tolerance = 1e-6)
