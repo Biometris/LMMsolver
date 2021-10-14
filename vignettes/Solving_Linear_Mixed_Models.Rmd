@@ -163,18 +163,22 @@ nrow(dat) # 5906 true records, as in SAP2014 paper.
 ```
 
 We can define the model as:
+
 ```{r runobj3}
 obj3 <- LMMsolve(fixed = anomaly~1,
                  spline = ~spl2D(x1 = lon, x2 = lat, nseg = c(41,41)),
                  data = dat)
 
 ```
+
 where we used the same number of segments as in the @Rodriguez-Alvarez2014 paper. The summary function gives the effective dimensions:
+
 ```{r ED_USprecip}
 summary(obj3)
 ```
 
 We can make a plot of spatial trend as follows:
+
 ```{r Plot_USprecip}
 pred <- obtainSmoothTrend(obj3, grid=c(200,300), includeIntercept = TRUE)
 plotDat <- pred
@@ -191,14 +195,45 @@ ggplot(plotDat, aes(x = lon, y = lat, fill = ypred)) +
         panel.grid.minor = element_blank())
 
 ```
+
 The LMMsolve algorithm is faster than the original approach in @Rodriguez-Alvarez2014, by using a sparse structure of the mixed model equations:
+
 ```{r obj3MME}
 displayMME(obj3)
 ```
+
 and the Cholesky matrix of the mixed model equations:
+
 ```{r obj3MMEchol}
 displayMME(obj3, cholesky = TRUE)
 ```
 
+# QTL mapping for multiparental populations.
 
+In QTL-mapping using mixed models the Identity-By-Descent (IBD) probabilities are used as genetic predictors (@Li2021). The following example is for illustration, consisting of three parents (A, B, and C), and two crosses AxB, and AxC. AxB is a population of 100 Doubled Haploids (DH), AxC 80 DHs. The probabilities are for a position on the genome close to a simulated QTL:
 
+```{r multipop}
+data(multipop)
+dat <- multipop
+head(dat)
+```
+
+The residual variances for the two populations can be different, and therefore we need to allow for heterogenous residual variance, which can be defined by using the `residual` argument:
+
+```{r residualARG}
+obj0 <- LMMsolve(fixed=pheno~cross, residual=~cross, data=dat)
+obj0$logL
+```
+
+The QTL-probabilities are defined by the columns pA, pB, pC, and can be defined in the mixed model by using the \`group' argument, and 'grp' in the random part of the model:
+
+```{r groupOPTION}
+lGrp <- list(QTL=c(3:5))
+obj1 <- LMMsolve(fixed=pheno~cross, group=lGrp,
+                 random = ~grp(QTL),
+                 residual=~cross,
+                 data=dat) 
+obj1$logL
+coef(obj1)$QTL
+
+```
