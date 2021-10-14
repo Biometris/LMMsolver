@@ -23,34 +23,63 @@ knitr::opts_chunk$set(
 
 ```{r setup}
 library(LMMsolver)
-library(agridat)
+library(ggplot2)
 ```
 
 # The LMMsolver package {.unnumbered}
 
-The `LMMsolver` package is developed as....
+The `LMMsolver` package is developed for modelling of mixed models, especially for data in statistical genetics. One important application is using splines to model spatial (@Rodriguez-Alvarez2018, @Boer2020 ) or temporal @Bustos-Korts2019 trends for phenotypic observations. Another application area is mixed model QTL analysis for multiparental populations, allowing for heterogeneous residual variance and random design matrices with Identity-By-Descent (IBD) probabilities (@Li2021).
 
-# Baseline model
+The mixed model equations are solved using efficient sparse matrix algebra, including the automated differentiation of the Cholesky matrix (@Smith1995), implemented in C++. 
 
-# A simple example using 1-dimensional P-splines
+# 1D spatial trend in a field trial
 
-```{r LV_model}
+As a first example we will use an oats trial from package agridat. There were 24 varieties in 3 replicates, each consisting of 6 incomplete blocks of 4 plots. The plots were laid out in a single line. For further details of the analysis of this data set using P-splines see @Boer2020. 
+
+```{r oatsdata}
+library(agridat)
 data(john.alpha)
 dat <- john.alpha
+head(dat)
+```
 
-n <- 4     # number of units per block
-b <- 6     # number of blocks per replicate
-r <- 3     # number of replicates
-v <- 24    # number of genotypes/replicate:
-N <- n*b*r # total number of observations.
+In the following mixed model we include rep and gen as fixed effect, and ~spl1D models a one dimensional P-spline with 20 segments, using cubical B-splines and second order differences, the default values.
 
-# Here scaleX is FALSE in spl1D, to be consistent with model in JABES2020 paper.
-obj <- LMMsolve(fixed = yield~rep+gen,
-                spline = ~spl1D(x = plot, nseg = N-1, degree = 1, pord = 1, scaleX=FALSE),
-                data = dat,
-                trace = FALSE,
-                tolerance = 1.0e-10)
-obj$ED
+```{r Pspline1D}
+
+obj1 <- LMMsolve(fixed = yield~rep+gen,
+                spline = ~spl1D(x = plot, nseg = 20),
+                data = dat)
 
 ```
+
+```{r ObtainSpatialTrend1}
+plotDat <- obtainSmoothTrend(obj1, grid=1000, includeIntercept = TRUE)
+head(plotDat)
+```
+
+```{r plot1D}
+ggplot() +
+  geom_tile(show.legend = TRUE) +
+  geom_line(data=plotDat, aes(x=plot,y = ypred), color="red",size=1) +
+  labs(title = "Smooth Spatial Trend Oats data", x = "plotnr", y = "yield") +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
+
+```
+In @Boer2020 first degree B-splines and first order differences are used to show the equivalence with other models.
+
+```{r Pspline1Db}
+
+obj2 <- LMMsolve(fixed = yield~rep+gen,
+                spline = ~spl1D(x = plot, degree=1, pord=1, 
+                                nseg = nrow(dat)-1),
+                data = dat, omitConstant = FALSE)
+round(obj2$dev, 2)
+```
+The argument `omitConstant=FALSE`is used here, including the constant in the Restricted Maximum Likelihood, to obtain the result as reported in Table 1 in @Boer2020. 
+
+
+
+
 
