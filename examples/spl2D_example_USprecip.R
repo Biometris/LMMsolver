@@ -4,6 +4,8 @@ library(LMMsolver)
 library(spam)
 library(fields)
 library(ggplot2)
+library(maps)
+library(dplyr)
 
 # Get precipitation data from spam
 data(USprecip)
@@ -80,36 +82,12 @@ ggplot(plotDat, aes(x = lon, y = lat, fill = ypred)) +
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank())
 
+# predictions for new data, using coordinates
+# from maps library:
+newdat <- us.cities %>% select(name, lat, long)
+newdat <- newdat %>% rename(lon=long)
+head(newdat)
 
-## Make predictions based on coordinates in input data.
-newdat <- datOrig
-
-range(newdat$lon)
-range(newdat$lat)
-
-range(dat$lon)
-range(dat$lat)
-
-nrow(newdat)
-
-pred2 <- obtainSmoothTrend(obj1, newdata = newdat, includeIntercept = TRUE)
+pred2 <- obtainSmoothTrend(obj1, newdata=newdat, includeIntercept = TRUE)
 head(pred2)
-
-plot(pred2$anomaly, pred2$ypred)
-abline(0,1, col = "blue")
-
-cor(pred2$anomaly, pred2$ypred)
-
-ggplot(pred2, aes(x = lon, y = lat)) +
-  ## For some reason when width and height are not specified the tiles are not plotted.
-  geom_tile(aes(fill = ypred), show.legend = TRUE, width = .4, height = .4) +
-  scale_fill_gradientn(colours = topo.colors(100))+
-  labs(title = "Precipitation anomaly", x = "Longitude", y = "Latitude") +
-  coord_fixed() +
-  theme(panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank())
-
-
-
-
 
