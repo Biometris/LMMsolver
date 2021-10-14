@@ -30,11 +30,11 @@ library(ggplot2)
 
 The `LMMsolver` package is developed for modelling of mixed models, especially for data in statistical genetics. One important application is using splines to model spatial (@Rodriguez-Alvarez2018, @Boer2020 ) or temporal @Bustos-Korts2019 trends for phenotypic observations. Another application area is mixed model QTL analysis for multiparental populations, allowing for heterogeneous residual variance and random design matrices with Identity-By-Descent (IBD) probabilities (@Li2021).
 
-The mixed model equations are solved using efficient sparse matrix algebra, including the automated differentiation of the Cholesky matrix (@Smith1995), implemented in C++. 
+The mixed model equations are solved using efficient sparse matrix algebra, using the `spam` package (@Furrer2010). The automatic differentiation of the Cholesky matrix (@Smith1995) is implemented in C++.
 
 # 1D spatial trend in a field trial
 
-As a first example we will use an oats trial from package agridat. There were 24 varieties in 3 replicates, each consisting of 6 incomplete blocks of 4 plots. The plots were laid out in a single line. For further details of the analysis of this data set using P-splines see @Boer2020. 
+As a first example we will use an oats trial from package agridat. There were 24 varieties in 3 replicates, each consisting of 6 incomplete blocks of 4 plots. The plots were laid out in a single line. For further details of the analysis of this data set using P-splines see @Boer2020.
 
 ```{r oatsdata}
 library(agridat)
@@ -43,7 +43,7 @@ dat <- john.alpha
 head(dat)
 ```
 
-In the following mixed model we include rep and gen as fixed effect, and ~spl1D models a one dimensional P-spline with 20 segments, using cubical B-splines and second order differences, the default values.
+In the following mixed model we include rep and gen as fixed effect, and \~spl1D models a one dimensional P-spline with 20 segments, using cubical B-splines and second order differences, the default values.
 
 ```{r Pspline1D}
 
@@ -67,6 +67,7 @@ ggplot() +
         panel.grid.minor = element_blank())
 
 ```
+
 In @Boer2020 first degree B-splines and first order differences are used to show the equivalence with other models.
 
 ```{r Pspline1Db}
@@ -77,9 +78,127 @@ obj2 <- LMMsolve(fixed = yield~rep+gen,
                 data = dat, omitConstant = FALSE)
 round(obj2$dev, 2)
 ```
-The argument `omitConstant=FALSE`is used here, including the constant in the Restricted Maximum Likelihood, to obtain the result as reported in Table 1 in @Boer2020. 
+
+The argument `omitConstant=FALSE`is used here, including the constant in the Restricted Maximum Likelihood, to obtain the result as reported in Table 1 in @Boer2020.
+
+# P-splines and crop growth models
+
+In this section we show a small example of using P-splines to fit a crop growth model, for details see @Bustos-Korts2019. We use the logistic growth curve defined by
+
+$$
+     y(t) = \frac{\alpha}{1 + e^{-\beta(t-\gamma)}} 
+$$ where $\alpha$ is the asymptote, $\beta$ is the initial relative growth rate, $\gamma$ the inflection point, $t$ is time, and $y(t)$ denotes biomass as function of time.
+
+```{r Logistic}
+logistic <- function(t, theta)
+{
+  theta[1]/(1+exp(-theta[2]*(t-theta[3])))
+}
+
+logistic_deriv <- function(t, theta)
+{
+  theta[1]*theta[2]*exp(-theta[2]*(t-theta[3]))/(1+exp(-theta[2]*(t-theta[3])))^2
+}
+
+set.seed(1234)
+xmin = 20
+xmax = 120
+time = seq(xmin,xmax,5)
+alpha = 1000
+beta = 0.10
+gamma = 70
+
+theta <- c(alpha, beta, gamma)
+y <- logistic(time, theta) + 50.0*rnorm(length(time))
+
+dat <- data.frame(time=time, y=y)
+head(dat)
+obj2 <- LMMsolve(y~1,spline=~spl1D(x=time,nseg=50), data=dat)
+
+plotDat <- obtainSmoothTrend(obj2, grid=1000, includeIntercept = TRUE)
+
+ggplot() +
+  geom_tile(show.legend = TRUE) +
+  geom_point(data=dat, aes(x=time,y=y),size=1.2) +
+#  geom_line(data=plotDat, aes(x=x,y = ysim), color="steelblue",size=1) +
+  geom_line(data=plotDat, aes(x=time,y = ypred), color="red",size=1) +
+  labs(title = "P-splines ", x = "day", y = "yield") +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
+
+```
+
+The growth rate (first derivative) as function of time can be obtained, using `deriv=1` in `obtainSmoothTrend`:
+
+```{r LogisticDeriv}
+plotDatDt <- obtainSmoothTrend(obj2, grid=1000, deriv=1)
+
+ggplot() +
+  geom_tile(show.legend = TRUE) +
+  geom_line(data=plotDatDt, aes(x=time,y = ypred), color="red",size=1) +
+  labs(title = "P-splines ", x = "day", y = "growth rate") +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
 
 
+```
+
+# Two-dimensional P-splines.
+
+For two-dimensional mixed P-splines we use the model defined in @Rodriguez-Alvarez2014. As an example we take the USprecip data set.
+
+```{r USprecip data}
+library(maps)
+library(dplyr)
+library(sp)
+library(spam)
+
+# Get precipitation data from spam
+data(USprecip)
+dat <- data.frame(USprecip)
+
+# only use observed data
+dat <- subset(dat, infill==1)
+nrow(dat) # 5906 true records, as in SAP2014 paper.
+```
+
+We can define the model as:
+```{r runobj3}
+obj3 <- LMMsolve(fixed = anomaly~1,
+                 spline = ~spl2D(x1 = lon, x2 = lat, nseg = c(41,41)),
+                 data = dat)
+
+```
+where we used the same number of segments as in the @Rodriguez-Alvarez2014 paper. The summary function gives the effective dimensions:
+```{r ED_USprecip}
+summary(obj3)
+```
+
+We can make a plot of spatial trend as follows:
+```{r Plot_USprecip}
+pred <- obtainSmoothTrend(obj3, grid=c(200,300), includeIntercept = TRUE)
+plotDat <- pred
+usa = maps::map("usa", regions = "main", plot = FALSE)
+v <- sp::point.in.polygon(plotDat$lon, plotDat$lat, usa$x, usa$y)
+plotDat <- plotDat[v == 1, ]
+
+ggplot(plotDat, aes(x = lon, y = lat, fill = ypred)) +
+  geom_tile(show.legend = TRUE) +
+  scale_fill_gradientn(colours = topo.colors(100))+
+  labs(title = "Precipitation anomaly", x = "Longitude", y = "Latitude") +
+  coord_fixed() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
+
+```
+The LMMsolve algorithm is faster than the original approach in @Rodriguez-Alvarez2014, by using a sparse structure of the mixed model equations:
+```{r obj3MME}
+displayMME(obj3)
+```
+and the Cholesky matrix of the mixed model equations:
+```{r obj3MMEchol}
+displayMME(obj3, cholesky = TRUE)
+```
 
 
 
