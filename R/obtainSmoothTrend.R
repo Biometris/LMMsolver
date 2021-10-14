@@ -9,7 +9,7 @@
 #' @param newdata ...
 #' @param includeIntercept Should the value of the intercept be included in
 #' the computed smooth trend?
-#'
+#' @param deriv Derivative of B-splines, default 0. At the moment only implemented for spl1D.
 #' @return A data.frame with predictions for the smooth trend on the specified
 #' grid.
 #'
@@ -17,6 +17,7 @@
 obtainSmoothTrend <- function(object,
                               grid = NULL,
                               newdata = NULL,
+                              deriv = 0,
                               includeIntercept = FALSE) {
   if (!inherits(object, "LMMsolve")) {
     stop("object should be an object of class LMMsolve.\n")
@@ -50,7 +51,7 @@ obtainSmoothTrend <- function(object,
       newdata[[names(x)[i]]]
     })
     ## Compute Bx per dimension.
-    Bx <- mapply(FUN = Bsplines, knots, xGrid)
+    Bx <- mapply(FUN = Bsplines, knots, xGrid, deriv)
     ## Compute Bx over all dimensions.
     BxTot <- Reduce(RowKronecker, Bx)
   } else {
@@ -64,7 +65,7 @@ obtainSmoothTrend <- function(object,
       seq(min(x[[i]]), max(x[[i]]), length = grid[i])
     })
     ## Compute Bx per dimension.
-    Bx <- mapply(FUN = Bsplines, knots, xGrid)
+    Bx <- mapply(FUN = Bsplines, knots, xGrid, deriv)
     ## Compute Bx over all dimensions.
     BxTot <- Reduce(`%x%`, Bx)
   }

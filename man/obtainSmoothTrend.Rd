@@ -8,6 +8,7 @@ obtainSmoothTrend(
   object,
   grid = NULL,
   newdata = NULL,
+  deriv = 0,
   includeIntercept = FALSE
 )
 }
@@ -19,6 +20,8 @@ spline component. This represents the number of grid points at which a
 surface will be computed.}
 
 \item{newdata}{...}
+
+\item{deriv}{Derivative of B-splines, default 0. At the moment only implemented for spl1D.}
 
 \item{includeIntercept}{Should the value of the intercept be included in
 the computed smooth trend?}
