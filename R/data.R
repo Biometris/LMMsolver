@@ -9,6 +9,6 @@
 #' \item{pC}{Probability that individual has alleles from parent C}
 #' \item{pheno}{simulated phenotypic value}
 #' }
-#'
+#' @usage data(multipop)
 "multipop"
 
