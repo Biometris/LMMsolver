@@ -5,9 +5,9 @@ library(LMMsolver)
 library(asreml)
 library(dplyr)
 
-df <- read.csv("./examples/multipopQTL.csv", stringsAsFactors = TRUE)
-head(df)
-str(df)
+data(multipop)
+
+df <- multipop
 
 # NULL MODEL, no marker:
 obj0.asr = asreml(fixed = pheno~cross,
