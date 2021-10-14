@@ -28,13 +28,13 @@ library(ggplot2)
 
 # The LMMsolver package {.unnumbered}
 
-The `LMMsolver` package is developed for modelling of mixed models, especially for data in statistical genetics. One important application is using splines to model spatial (@Rodriguez-Alvarez2018, @Boer2020 ) or temporal @Bustos-Korts2019 trends for phenotypic observations. Another application area is mixed model QTL analysis for multiparental populations, allowing for heterogeneous residual variance and random design matrices with Identity-By-Descent (IBD) probabilities (@Li2021).
+The aim of the `LMMsolver` package is to have an efficient and flexible system to solve sparse mixed model equations, for models that are often usedin statistical genetics. One important application is using splines to model spatial [@Rodriguez-Alvarez2018, @Boer2020] or temporal [@Bustos-Korts2019] trends for phenotypic observations. Another application area is mixed model QTL analysis for multiparental populations, allowing for heterogeneous residual variance and random design matrices with Identity-By-Descent (IBD) probabilities [@Li2021].
 
-The mixed model equations are solved using efficient sparse matrix algebra, using the `spam` package (@Furrer2010). The automatic differentiation of the Cholesky matrix (@Smith1995) is implemented in C++.
+The mixed model equations are solved using efficient sparse matrix algebra, using the `spam` package [@Furrer2010]. The automatic differentiation of the Cholesky matrix [@Smith1995] is implemented in C++.
 
-# 1D spatial trend in a field trial
+# Spatial trend with plots in a single line.
 
-As a first example we will use an oats trial from package agridat. There were 24 varieties in 3 replicates, each consisting of 6 incomplete blocks of 4 plots. The plots were laid out in a single line. For further details of the analysis of this data set using P-splines see @Boer2020.
+As a first example we will use an oats trial in the `agridat` package. There were 24 varieties in 3 replicates, each consisting of 6 incomplete blocks of 4 plots. The plots were laid out in a single line. For further details of the analysis of this data set using P-splines see @Boer2020.
 
 ```{r oatsdata}
 library(agridat)
@@ -43,7 +43,7 @@ dat <- john.alpha
 head(dat)
 ```
 
-In the following mixed model we include rep and gen as fixed effect, and \~spl1D models a one dimensional P-spline with 20 segments, using cubical B-splines and second order differences, the default values.
+In the following mixed model we include rep and gen as fixed effect, and `spl1D` models a one dimensional P-spline with 20 segments, using the default choice of cubical B-splines and second order differences:
 
 ```{r Pspline1D}
 
@@ -52,12 +52,13 @@ obj1 <- LMMsolve(fixed = yield~rep+gen,
                 data = dat)
 
 ```
+The spatial trend can be obtained as follows:
 
 ```{r ObtainSpatialTrend1}
 plotDat <- obtainSmoothTrend(obj1, grid=1000, includeIntercept = TRUE)
 head(plotDat)
 ```
-
+with plot
 ```{r plot1D}
 ggplot() +
   geom_tile(show.legend = TRUE) +
@@ -68,7 +69,7 @@ ggplot() +
 
 ```
 
-In @Boer2020 first degree B-splines and first order differences are used to show the equivalence with other models.
+If first degree B-splines and first order differences are used the P-spline model is equivalent to Linear Variance and Random Walk models, for details see @Boer2020.
 
 ```{r Pspline1Db}
 
@@ -83,7 +84,7 @@ The argument `omitConstant=FALSE`is used here, including the constant in the Res
 
 # P-splines and crop growth models
 
-In this section we show a small example of using P-splines to fit a crop growth model, for details see @Bustos-Korts2019. We use the logistic growth curve defined by
+In this section we show an example of using P-splines to fit a crop growth model, for details see @Bustos-Korts2019. We use here the logistic growth curve defined by
 
 $$
      y(t) = \frac{\alpha}{1 + e^{-\beta(t-\gamma)}} 
@@ -128,7 +129,7 @@ ggplot() +
 
 ```
 
-The growth rate (first derivative) as function of time can be obtained, using `deriv=1` in `obtainSmoothTrend`:
+The growth rate (first derivative) as function of time can be obtained using `deriv=1` in `obtainSmoothTrend`:
 
 ```{r LogisticDeriv}
 plotDatDt <- obtainSmoothTrend(obj2, grid=1000, deriv=1)
@@ -145,7 +146,7 @@ ggplot() +
 
 # Two-dimensional P-splines.
 
-For two-dimensional mixed P-splines we use the model defined in @Rodriguez-Alvarez2014. As an example we take the USprecip data set.
+For two-dimensional mixed P-splines we use the model defined in @Rodriguez-Alvarez2014. As an example we use the `USprecip` data set in the `spam` package, and analysed in @Rodriguez-Alvarez2014.  
 
 ```{r USprecip data}
 library(maps)
@@ -162,7 +163,7 @@ dat <- subset(dat, infill==1)
 nrow(dat) # 5906 true records, as in SAP2014 paper.
 ```
 
-We can define the model as:
+The two-dimensional P-spline can be defined with the `spl2D()` function:
 
 ```{r runobj3}
 obj3 <- LMMsolve(fixed = anomaly~1,
@@ -171,17 +172,16 @@ obj3 <- LMMsolve(fixed = anomaly~1,
 
 ```
 
-where we used the same number of segments as in the @Rodriguez-Alvarez2014 paper. The summary function gives the effective dimensions:
+Here the same number of segments is used as in the @Rodriguez-Alvarez2014. The summary function gives the effective dimensions:
 
 ```{r ED_USprecip}
 summary(obj3)
 ```
 
-We can make a plot of spatial trend as follows:
+A plot for the spatial trend can be obtained in a similar way as for the one-dimensional examples:
 
 ```{r Plot_USprecip}
-pred <- obtainSmoothTrend(obj3, grid=c(200,300), includeIntercept = TRUE)
-plotDat <- pred
+plotDat <- obtainSmoothTrend(obj3, grid=c(200,300), includeIntercept = TRUE)
 usa = maps::map("usa", regions = "main", plot = FALSE)
 v <- sp::point.in.polygon(plotDat$lon, plotDat$lat, usa$x, usa$y)
 plotDat <- plotDat[v == 1, ]
@@ -196,21 +196,23 @@ ggplot(plotDat, aes(x = lon, y = lat, fill = ypred)) +
 
 ```
 
-The LMMsolve algorithm is faster than the original approach in @Rodriguez-Alvarez2014, by using a sparse structure of the mixed model equations:
+Instead of using the `grid` argument, `newdata` can be used to make predictions for locations specified in a data frame:
 
-```{r obj3MME}
-displayMME(obj3)
-```
+```{r newdataARG}
+# predictions for new data, using coordinates
+# from maps library:
+newdat <- us.cities %>% select(name, lat, long)
+newdat <- newdat %>% rename(lon=long)
+head(newdat)
 
-and the Cholesky matrix of the mixed model equations:
+pred2 <- obtainSmoothTrend(obj3, newdata=newdat, includeIntercept = TRUE)
+head(pred2)
 
-```{r obj3MMEchol}
-displayMME(obj3, cholesky = TRUE)
 ```
 
 # QTL mapping for multiparental populations.
 
-In QTL-mapping using mixed models the Identity-By-Descent (IBD) probabilities are used as genetic predictors (@Li2021). The following example is for illustration, consisting of three parents (A, B, and C), and two crosses AxB, and AxC. AxB is a population of 100 Doubled Haploids (DH), AxC 80 DHs. The probabilities are for a position on the genome close to a simulated QTL:
+In QTL-mapping for multiparental population the Identity-By-Descent (IBD) probabilities are used as genetic predictors in the mixed model [@Li2021]. The following simulated example is for illustration, consisting of three parents (A, B, and C), and two crosses AxB, and AxC. AxB is a population of 100 Doubled Haploids (DH), AxC 80 DHs. The probabilities are for a position on the genome close to a simulated QTL:
 
 ```{r multipop}
 data(multipop)
@@ -218,14 +220,14 @@ dat <- multipop
 head(dat)
 ```
 
-The residual variances for the two populations can be different, and therefore we need to allow for heterogenous residual variance, which can be defined by using the `residual` argument:
+The residual variances for the two populations can be different, and therefore we need to allow for heterogeneous residual variances, which can be defined by using the `residual` argument in 'LMMsolve':
 
 ```{r residualARG}
 obj0 <- LMMsolve(fixed=pheno~cross, residual=~cross, data=dat)
 obj0$logL
 ```
 
-The QTL-probabilities are defined by the columns pA, pB, pC, and can be defined in the mixed model by using the \`group' argument, and 'grp' in the random part of the model:
+The QTL-probabilities are defined by the columns pA, pB, pC, and can be included in the random part of the mixed model by using the `group` argument:
 
 ```{r groupOPTION}
 lGrp <- list(QTL=c(3:5))
