@@ -28,22 +28,24 @@ library(ggplot2)
 
 # The LMMsolver package {.unnumbered}
 
-The aim of the `LMMsolver` package is to have an efficient and flexible system to solve sparse mixed model equations, for models that are often usedin statistical genetics. One important application is using splines to model spatial \[@Rodriguez-Alvarez2018, @Boer2020\] or temporal [@Bustos-Korts2019] trends for phenotypic observations. Another application area is mixed model QTL analysis for multiparental populations, allowing for heterogeneous residual variance and random design matrices with Identity-By-Descent (IBD) probabilities [@Li2021].
+The aim of the `LMMsolver` package is to provide an efficient and flexible system to solve sparse mixed model equations, for models that are often used in statistical genetics. One important application is using splines to model spatial [@Rodriguez-Alvarez2018, @Boer2020] or temporal [@Bustos-Korts2019] trends for phenotypic observations. Another application area is mixed model QTL analysis for multiparental populations, allowing for heterogeneous residual variance and random design matrices with Identity-By-Descent (IBD) probabilities [@Li2021].
 
-The mixed model equations are solved using efficient sparse matrix algebra, using the `spam` package [@Furrer2010]. The automatic differentiation of the Cholesky matrix [@Smith1995] is implemented in C++.
+The mixed model equations are solved using efficient sparse matrix algebra, using the `spam` package [@Furrer2010]. The automatic differentiation of the Cholesky matrix [@Smith1995] is implemented in C++ using the `Rcpp` package [@Eddelbuettel2018].
 
 # Spatial trend with plots in a single line.
 
 As a first example we will use an oats trial in the `agridat` package. There were 24 varieties in 3 replicates, each consisting of 6 incomplete blocks of 4 plots. The plots were laid out in a single line. For further details of the analysis of this data set using P-splines see @Boer2020.
 
 ```{r oatsdata}
+## Load data.
 data(john.alpha, package = "agridat")
 head(john.alpha)
 ```
 
-In the following mixed model we include rep and gen as fixed effect, and `spl1D` models a one dimensional P-spline with 20 segments, using the default choice of cubical B-splines and second order differences:
+In the following mixed model we include rep and gen as fixed effect, and `spl1D` to model a one dimensional P-spline with 20 segments, using the default choice of cubical B-splines and second order differences:
 
 ```{r Pspline1D}
+## Fit mixed model with fixed and spline part.
 obj1 <- LMMsolve(fixed = yield ~ rep + gen,
                  spline = ~spl1D(x = plot, nseg = 20),
                  data = john.alpha)
@@ -52,15 +54,17 @@ obj1 <- LMMsolve(fixed = yield ~ rep + gen,
 The spatial trend can be obtained as follows:
 
 ```{r ObtainSpatialTrend1}
+## Extract smooth trend from mixed model.
 plotDat <- obtainSmoothTrend(obj1, grid = 1000, includeIntercept = TRUE)
 head(plotDat)
 ```
 
-with plot
+The trend can then be plotted.
 
 ```{r plot1D}
+## Plot smooth trend.
 ggplot(data = plotDat, aes(x = plot, y = ypred)) +
-  geom_line(color="red",size=1) +
+  geom_line(color = "red", size = 1) +
   labs(title = "Smooth Spatial Trend Oats data", x = "plotnr", y = "yield") +
   theme(panel.grid = element_blank())
 ```
@@ -75,7 +79,7 @@ obj2 <- LMMsolve(fixed = yield ~ rep + gen,
 round(deviance(obj2), 2)
 ```
 
-The argument `omitConstant = FALSE` is used here, including the constant in the Restricted Maximum Likelihood, to obtain the result as reported in Table 1 in @Boer2020.
+The argument `omitConstant = FALSE` is used here. This includes the constant in the Restricted Maximum Likelihood, to obtain the result as reported in Table 1 in @Boer2020.
 
 # P-splines and crop growth models
 
@@ -128,7 +132,7 @@ The growth rate (first derivative) as function of time can be obtained using `de
 ```{r LogisticDeriv}
 plotDatDt <- obtainSmoothTrend(obj2, grid = 1000, deriv = 1)
 
-ggplot(data = plotDatDt, aes(x = time,y = ypred)) +
+ggplot(data = plotDatDt, aes(x = time, y = ypred)) +
   geom_line(color = "red", size = 1) +
   labs(title = "P-splines ", x = "day", y = "growth rate") +
   theme(panel.grid = element_blank())
@@ -139,13 +143,14 @@ ggplot(data = plotDatDt, aes(x = time,y = ypred)) +
 For two-dimensional mixed P-splines we use the model defined in @Rodriguez-Alvarez2014. As an example we use the `USprecip` data set in the `spam` package, and analysed in @Rodriguez-Alvarez2014.
 
 ```{r USprecip data}
-# Get precipitation data from spam
+## Get precipitation data from spam
 data(USprecip, package = "spam")
 
-# only use observed data
+## Only use observed data
 USprecip <- as.data.frame(USprecip)
 USprecip <- USprecip[USprecip$infill == 1, ]
-nrow(USprecip) # 5906 true records, as in SAP2014 paper.
+# 5906 true records, as in 2014 paper.
+nrow(USprecip) 
 ```
 
 The two-dimensional P-spline can be defined with the `spl2D()` function:
@@ -156,7 +161,7 @@ obj3 <- LMMsolve(fixed = anomaly ~ 1,
                  data = USprecip)
 ```
 
-Here the same number of segments is used as in the @Rodriguez-Alvarez2014. The summary function gives the effective dimensions:
+Here the same number of segments is used as in @Rodriguez-Alvarez2014. The summary function gives the effective dimensions:
 
 ```{r ED_USprecip}
 summary(obj3)
@@ -193,14 +198,14 @@ head(pred2)
 
 # QTL mapping for multiparental populations.
 
-In QTL-mapping for multiparental population the Identity-By-Descent (IBD) probabilities are used as genetic predictors in the mixed model [@Li2021]. The following simulated example is for illustration, consisting of three parents (A, B, and C), and two crosses AxB, and AxC. AxB is a population of 100 Doubled Haploids (DH), AxC 80 DHs. The probabilities are for a position on the genome close to a simulated QTL:
+In QTL-mapping for multiparental population the Identity-By-Descent (IBD) probabilities are used as genetic predictors in the mixed model [@Li2021]. The following simulated example is for illustration. It consist of three parents (A, B, and C), and two crosses AxB, and AxC. AxB is a population of 100 Doubled Haploids (DH), AxC 80 DHs. The probabilities, pA, pB, and pC, are for a position on the genome close to a simulated QTL:
 
 ```{r multipop}
 data(multipop)
 head(multipop)
 ```
 
-The residual variances for the two populations can be different, and therefore we need to allow for heterogeneous residual variances, which can be defined by using the `residual` argument in 'LMMsolve':
+The residual variances for the two populations can be different. Therefore we need to allow for heterogeneous residual variances, which can be defined by using the `residual` argument in `LMMsolve`:
 
 ```{r residualARG}
 obj0 <- LMMsolve(fixed = pheno ~ cross, 
@@ -221,3 +226,5 @@ obj1 <- LMMsolve(fixed = pheno ~ cross,
 logLik(obj1)
 coef(obj1)$QTL
 ```
+
+## References

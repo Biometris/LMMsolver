@@ -15,6 +15,7 @@ restricted log-likelihood \code{logL})}
 \item{EDnames}{The names of the effective dimensions}
 \item{a}{The estimated effects from the mixed model equations}
 \item{yhat}{The fitted values}
+\item{residuals}{The residuals}
 \item{dim}{The dimensions for each of the fixed and random terms in the
 mixed model}
 \item{term.labels}{The Names of the fixed and random terms in the mixed
