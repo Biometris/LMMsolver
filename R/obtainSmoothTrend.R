@@ -9,7 +9,8 @@
 #' @param newdata ...
 #' @param includeIntercept Should the value of the intercept be included in
 #' the computed smooth trend?
-#' @param deriv Derivative of B-splines, default 0. At the moment only implemented for spl1D.
+#' @param deriv Derivative of B-splines, default 0. At the moment only
+#' implemented for spl1D.
 #' @return A data.frame with predictions for the smooth trend on the specified
 #' grid.
 #'
@@ -35,6 +36,11 @@ obtainSmoothTrend <- function(object,
   knots <- splRes$knots
   scaleX <- splRes$scaleX
   pord <- splRes$pord
+  splDim <- length(x)
+  if (splDim == 1 && (!is.numeric(deriv) || length(deriv) > 1 || deriv < 0 ||
+      deriv != round(deriv))) {
+    stop("deriv should be an integer greater than or equal to zero.\n")
+  }
   if (!is.null(newdata)) {
     if (!inherits(newdata, "data.frame")) {
       stop("newdata should be a data.frame.\n")
@@ -55,7 +61,6 @@ obtainSmoothTrend <- function(object,
     ## Compute Bx over all dimensions.
     BxTot <- Reduce(RowKronecker, Bx)
   } else {
-    splDim <- length(x)
     if (!is.numeric(grid) || length(grid) != splDim) {
       stop("grid should be a numeric vector with length equal to the dimension ",
            "of the fitted spline: ", splDim,".\n")

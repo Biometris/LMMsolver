@@ -21,7 +21,8 @@ surface will be computed.}
 
 \item{newdata}{...}
 
-\item{deriv}{Derivative of B-splines, default 0. At the moment only implemented for spl1D.}
+\item{deriv}{Derivative of B-splines, default 0. At the moment only
+implemented for spl1D.}
 
 \item{includeIntercept}{Should the value of the intercept be included in
 the computed smooth trend?}
