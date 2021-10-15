@@ -94,7 +94,7 @@ coef.LMMsolve <- function(object,
   return(result)
 }
 
-#' Display the sparseness of the mixed model coefficient matrix.
+#' Display the sparseness of the mixed model coefficient matrix
 #'
 #' @param object an object of class LMMsolve
 #' @param cholesky logical. If \code{cholesky = TRUE} it will plot the cholesky.
@@ -115,7 +115,7 @@ displayMME <- function(object,
 }
 
 #' Give diagnostics for mixed model coefficient matrix C and the cholesky
-#' decomposition.
+#' decomposition
 #'
 #' @param object an object of class LMMsolve
 #'

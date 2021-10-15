@@ -3,7 +3,7 @@
 \name{diagnosticsMME}
 \alias{diagnosticsMME}
 \title{Give diagnostics for mixed model coefficient matrix C and the cholesky
-decomposition.}
+decomposition}
 \usage{
 diagnosticsMME(object)
 }
@@ -12,5 +12,5 @@ diagnosticsMME(object)
 }
 \description{
 Give diagnostics for mixed model coefficient matrix C and the cholesky
-decomposition.
+decomposition
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/LMMsolve-class.R
 \name{displayMME}
 \alias{displayMME}
-\title{Display the sparseness of the mixed model coefficient matrix.}
+\title{Display the sparseness of the mixed model coefficient matrix}
 \usage{
 displayMME(object, cholesky = FALSE)
 }
@@ -12,5 +12,5 @@ displayMME(object, cholesky = FALSE)
 \item{cholesky}{logical. If \code{cholesky = TRUE} it will plot the cholesky.}
 }
 \description{
-Display the sparseness of the mixed model coefficient matrix.
+Display the sparseness of the mixed model coefficient matrix
 }

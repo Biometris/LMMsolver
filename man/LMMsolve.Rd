@@ -45,9 +45,9 @@ modified Henderson algorithm to estimate the variance components.}
 \item{maxit}{A numerical value. The maximum number of iterations for the
 algorithm. Default \code{maxit = 250}.}
 
-\item{omitConstant}{Omit the constant in the restricted log-likelihood. Default is
-\code{TRUE}, as for example in \code{asreml}. In \code{nlme} and SAS the constant
-is included.}
+\item{omitConstant}{Omit the constant in the restricted log-likelihood.
+Default is \code{TRUE}, as for example in \code{asreml}. In \code{nlme}
+and SAS the constant is included.}
 }
 \value{
 An object of class \code{LMMsolve} representing the fitted model.
@@ -56,6 +56,53 @@ this object.
 }
 \description{
 Solve Linear Mixed Models.
+}
+\examples{
+## Fit models on john.alpha data from agridat package.
+data(john.alpha, package = "agridat")
+
+## Fit simple model with only fixed effects.
+LMM1 <- LMMsolve(fixed = yield ~ rep + gen,
+                data = john.alpha)
+
+## Fit the same model with genotype as random effect.
+LMM1_rand <- LMMsolve(fixed = yield ~ rep,
+                     random = ~gen,
+                     data = john.alpha)
+
+## Fit the model with a 1-dimensional spline at the plot level.
+LMM1_spline <- LMMsolve(fixed = yield ~ rep + gen,
+                       spline = ~spl1D(x = plot, nseg = 20),
+                       data = john.alpha)
+
+## Fit the same model omitting the constant in the restricted log-likelihood.
+LMM1_const <- LMMsolve(fixed = yield ~ rep + gen,
+                      spline = ~spl1D(x = plot, nseg = 20),
+                      data = john.alpha,
+                      omitConstant = TRUE)
+
+## Fit models on multipop data included in the package.
+data(multipop)
+
+## The residual variances for the two populations can be different.
+## Allow for heterogeneous residual variances using the residual argument.
+LMM2 <- LMMsolve(fixed = pheno ~ cross,
+                residual = ~cross,
+                data = multipop)
+
+## QTL-probabilities are defined by the columns pA, pB, pC.
+## They can be included in the random part of the model by specifying the
+## group argument and using grp() in the random part.
+
+# Define groups by specifying columns in data corresponding to groups in a list.
+# Name used in grp() should match names specified in list.
+lGrp <- list(QTL = 3:5)
+LMM2_group <- LMMsolve(fixed = pheno ~ cross,
+                      group = lGrp,
+                      random = ~grp(QTL),
+                      residual = ~cross,
+                      data = multipop)
+
 }
 \seealso{
 \code{\link{LMMsolveObject}}
