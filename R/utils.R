@@ -108,35 +108,30 @@ constructCCt <- function(q,
 #' Construct list of Ginv matrices of splines
 #'
 #' @param q vector, with dimension of the B-spline basis used.
-#' @param pord order of the penalty matrix (pord=1 or 2).
+#' @param pord order of the penalty matrix (1 or 2).
 #'
 #' @return a list of symmetric matrices of length of vector q.
 #'
 #' @keywords internal
-constructGinvSplines <- function(q, pord)
-{
-  # dimension
+constructGinvSplines <- function(q,
+                                 pord) {
+  ## dimension
   d <- length(q)
-  lCCt <- list()
-  for (i in 1:d){
-    lCCt[[i]] <- constructCCt(q[i], pord=pord)
-  }
+  lCCt <- lapply(X = q, FUN = constructCCt, pord = pord)
   CCt <- Reduce("kronecker", lCCt)
-
   lGinv <- list()
-  for (i in 1:d) {
+  for (i in seq_len(d)) {
     L <- list()
-    for (j in 1:d) {
-      if (i==j) {
-        L[[j]] <- constructPenalty(q[j],pord=pord)
+    for (j in seq_len(d)) {
+      if (i == j) {
+        L[[j]] <- constructPenalty(q[j], pord = pord)
       } else {
         L[[j]] <- spam::diag.spam(q[j])
       }
     }
     lGinv[[i]] <- Reduce("kronecker", L) + CCt
   }
-
-  lGinv
+  return(lGinv)
 }
 
 

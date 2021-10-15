@@ -9,7 +9,7 @@ constructGinvSplines(q, pord)
 \arguments{
 \item{q}{vector, with dimension of the B-spline basis used.}
 
-\item{pord}{order of the penalty matrix (pord=1 or 2).}
+\item{pord}{order of the penalty matrix (1 or 2).}
 }
 \value{
 a list of symmetric matrices of length of vector q.
