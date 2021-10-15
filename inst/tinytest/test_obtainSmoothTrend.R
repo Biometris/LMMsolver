@@ -71,6 +71,8 @@ obj2 <- LMMsolve(fixed = yield ~ 1, random = ~ gen,
 
 expect_error(obtainSmoothTrend(obj2, grid = 2),
              "grid should be a numeric vector with length equal to the")
+expect_warning(obtainSmoothTrend(obj2, grid = c(5, 5), deriv = 1),
+               "deriv is ignored for 2-dimensional splines")
 
 obj2Trend1 <- obtainSmoothTrend(obj2, grid = c(5, 5))
 
@@ -96,6 +98,8 @@ obj3 <- LMMsolve(fixed = y ~ 1,
 
 expect_error(obtainSmoothTrend(obj3, grid = 2),
              "grid should be a numeric vector with length equal to the")
+expect_warning(obtainSmoothTrend(obj3, grid = c(5, 5, 5), deriv = 1),
+               "deriv is ignored for 3-dimensional splines")
 
 obj3Trend1 <- obtainSmoothTrend(obj3, grid = c(5, 5, 5))
 

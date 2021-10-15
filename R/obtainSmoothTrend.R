@@ -41,6 +41,11 @@ obtainSmoothTrend <- function(object,
       deriv != round(deriv))) {
     stop("deriv should be an integer greater than or equal to zero.\n")
   }
+  if (splDim > 1 && deriv != 0) {
+    deriv <- 0
+    warning("deriv is ignored for ", splDim, "-dimensional splines.\n",
+            call. = FALSE)
+  }
   if (!is.null(newdata)) {
     if (!inherits(newdata, "data.frame")) {
       stop("newdata should be a data.frame.\n")
