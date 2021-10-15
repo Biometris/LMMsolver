@@ -109,6 +109,18 @@ logLik.LMMsolve <- function(object,
   return(object$logL)
 }
 
+#' Deviance of an LMMsolve object
+#'
+#' Obtain the deviance of a model fitted using LMMsolve.
+#'
+#' @inheritParams coef.LMMsolve
+#'
+#' @export
+deviance.LMMsolve <- function(object,
+                              ...) {
+  return(object$dev)
+}
+
 #' Display the sparseness of the mixed model coefficient matrix
 #'
 #' @param object an object of class LMMsolve

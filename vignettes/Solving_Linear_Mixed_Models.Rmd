@@ -72,7 +72,7 @@ obj2 <- LMMsolve(fixed = yield ~ rep + gen,
                  spline = ~spl1D(x = plot, degree = 1, pord = 1, nseg = nrow(john.alpha) - 1),
                  data = john.alpha, 
                  omitConstant = FALSE)
-round(obj2$dev, 2)
+round(deviance(obj2), 2)
 ```
 
 The argument `omitConstant = FALSE` is used here, including the constant in the Restricted Maximum Likelihood, to obtain the result as reported in Table 1 in @Boer2020.
@@ -206,7 +206,7 @@ The residual variances for the two populations can be different, and therefore w
 obj0 <- LMMsolve(fixed = pheno ~ cross, 
                  residual = ~cross, 
                  data = multipop)
-obj0$logL
+logLik(obj0)
 ```
 
 The QTL-probabilities are defined by the columns pA, pB, pC, and can be included in the random part of the mixed model by using the `group` argument:
@@ -218,6 +218,6 @@ obj1 <- LMMsolve(fixed = pheno ~ cross,
                  random = ~grp(QTL),
                  residual = ~cross,
                  data = multipop) 
-obj1$logL
+logLik(obj1)
 coef(obj1)$QTL
 ```
