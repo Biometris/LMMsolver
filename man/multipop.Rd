@@ -5,13 +5,7 @@
 \alias{multipop}
 \title{Simulated QTL mapping data set}
 \format{
-An object of class \code{data.frame} with 180 rows and 6 columns.
-}
-\usage{
-multipop
-}
-\description{
-A data.frame with 180 rows and 6 columns.\cr
+A data.frame with 180 rows and 6 columns.
 \describe{
 \item{cross}{Cross ID, two populations, AxB and AxC}
 \item{ind}{Genotype ID}
@@ -20,5 +14,11 @@ A data.frame with 180 rows and 6 columns.\cr
 \item{pC}{Probability that individual has alleles from parent C}
 \item{pheno}{simulated phenotypic value}
 }
+}
+\usage{
+multipop
+}
+\description{
+Simulated QTL mapping data set
 }
 \keyword{datasets}

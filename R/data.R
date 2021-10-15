@@ -1,6 +1,6 @@
 #' Simulated QTL mapping data set
 #'
-#' A data.frame with 180 rows and 6 columns.\cr
+#' @format A data.frame with 180 rows and 6 columns.
 #' \describe{
 #' \item{cross}{Cross ID, two populations, AxB and AxC}
 #' \item{ind}{Genotype ID}

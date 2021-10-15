@@ -17,7 +17,6 @@ Imports:
     agridat,
     ggplot2,
     maps,
-    dplyr,
     sp
 LinkingTo: Rcpp
 RoxygenNote: 7.1.2
@@ -27,3 +26,4 @@ Suggests:
     knitr,
     tinytest
 VignetteBuilder: knitr
+LazyData: true
