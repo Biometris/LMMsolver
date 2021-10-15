@@ -3,12 +3,12 @@
 \docType{data}
 \name{multipop}
 \alias{multipop}
-\title{simulated QTL mapping data set}
+\title{Simulated QTL mapping data set}
 \format{
 An object of class \code{data.frame} with 180 rows and 6 columns.
 }
 \usage{
-data(multipop)
+multipop
 }
 \description{
 A data.frame with 180 rows and 6 columns.\cr

@@ -1,4 +1,4 @@
-#' simulated QTL mapping data set
+#' Simulated QTL mapping data set
 #'
 #' A data.frame with 180 rows and 6 columns.\cr
 #' \describe{
@@ -9,6 +9,4 @@
 #' \item{pC}{Probability that individual has alleles from parent C}
 #' \item{pheno}{simulated phenotypic value}
 #' }
-#' @usage data(multipop)
 "multipop"
-
