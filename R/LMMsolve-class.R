@@ -69,7 +69,9 @@ summary.LMMsolve <- function(object,
   }
 }
 
-#' Obtain the coefficients from the mixed model equations
+#' Coefficients from the mixed model equations of an LMMsolve object.
+#'
+#' Obtain the coefficients from the mixed model equations of an LMMsolve object.
 #'
 #' @param object an object of class LMMsolve
 #' @param \dots some methods for this generic require additional arguments.
@@ -87,11 +89,24 @@ coef.LMMsolve <- function(object,
   e <- cumsum(dim)
   s <- e - dim + 1
 
-  for(i in 1:length(dim)) {
+  for (i in 1:length(dim)) {
     result[[i]] <- object$a[s[i]:e[i]]
   }
   names(result) <- object$term.labels
   return(result)
+}
+
+#' Log-likelihood of an LMMsolve object
+#'
+#' Obtain the Restricted Maximum Log-Likelihood of a model fitted using
+#' LMMsolve.
+#'
+#' @inheritParams coef.LMMsolve
+#'
+#' @export
+logLik.LMMsolve <- function(object,
+                            ...) {
+  return(object$logL)
 }
 
 #' Display the sparseness of the mixed model coefficient matrix

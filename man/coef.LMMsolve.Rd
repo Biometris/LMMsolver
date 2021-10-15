@@ -2,7 +2,7 @@
 % Please edit documentation in R/LMMsolve-class.R
 \name{coef.LMMsolve}
 \alias{coef.LMMsolve}
-\title{Obtain the coefficients from the mixed model equations}
+\title{Coefficients from the mixed model equations of an LMMsolve object.}
 \usage{
 \method{coef}{LMMsolve}(object, ...)
 }
@@ -18,5 +18,5 @@ effect and the predictions for each random effect in the defined linear
 mixed model.
 }
 \description{
-Obtain the coefficients from the mixed model equations
+Obtain the coefficients from the mixed model equations of an LMMsolve object.
 }
