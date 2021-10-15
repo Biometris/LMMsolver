@@ -28,7 +28,7 @@ library(ggplot2)
 
 # The LMMsolver package {.unnumbered}
 
-The aim of the `LMMsolver` package is to have an efficient and flexible system to solve sparse mixed model equations, for models that are often usedin statistical genetics. One important application is using splines to model spatial [@Rodriguez-Alvarez2018, @Boer2020] or temporal [@Bustos-Korts2019] trends for phenotypic observations. Another application area is mixed model QTL analysis for multiparental populations, allowing for heterogeneous residual variance and random design matrices with Identity-By-Descent (IBD) probabilities [@Li2021].
+The aim of the `LMMsolver` package is to have an efficient and flexible system to solve sparse mixed model equations, for models that are often usedin statistical genetics. One important application is using splines to model spatial \[@Rodriguez-Alvarez2018, @Boer2020\] or temporal [@Bustos-Korts2019] trends for phenotypic observations. Another application area is mixed model QTL analysis for multiparental populations, allowing for heterogeneous residual variance and random design matrices with Identity-By-Descent (IBD) probabilities [@Li2021].
 
 The mixed model equations are solved using efficient sparse matrix algebra, using the `spam` package [@Furrer2010]. The automatic differentiation of the Cholesky matrix [@Smith1995] is implemented in C++.
 
@@ -37,50 +37,45 @@ The mixed model equations are solved using efficient sparse matrix algebra, usin
 As a first example we will use an oats trial in the `agridat` package. There were 24 varieties in 3 replicates, each consisting of 6 incomplete blocks of 4 plots. The plots were laid out in a single line. For further details of the analysis of this data set using P-splines see @Boer2020.
 
 ```{r oatsdata}
-library(agridat)
-data(john.alpha)
-dat <- john.alpha
-head(dat)
+data(john.alpha, package = "agridat")
+head(john.alpha)
 ```
 
 In the following mixed model we include rep and gen as fixed effect, and `spl1D` models a one dimensional P-spline with 20 segments, using the default choice of cubical B-splines and second order differences:
 
 ```{r Pspline1D}
-
-obj1 <- LMMsolve(fixed = yield~rep+gen,
-                spline = ~spl1D(x = plot, nseg = 20),
-                data = dat)
-
+obj1 <- LMMsolve(fixed = yield ~ rep + gen,
+                 spline = ~spl1D(x = plot, nseg = 20),
+                 data = john.alpha)
 ```
+
 The spatial trend can be obtained as follows:
 
 ```{r ObtainSpatialTrend1}
-plotDat <- obtainSmoothTrend(obj1, grid=1000, includeIntercept = TRUE)
+plotDat <- obtainSmoothTrend(obj1, grid = 1000, includeIntercept = TRUE)
 head(plotDat)
 ```
-with plot
-```{r plot1D}
-ggplot() +
-  geom_tile(show.legend = TRUE) +
-  geom_line(data=plotDat, aes(x=plot,y = ypred), color="red",size=1) +
-  labs(title = "Smooth Spatial Trend Oats data", x = "plotnr", y = "yield") +
-  theme(panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank())
 
+with plot
+
+```{r plot1D}
+ggplot(data = plotDat, aes(x = plot, y = ypred)) +
+  geom_line(color="red",size=1) +
+  labs(title = "Smooth Spatial Trend Oats data", x = "plotnr", y = "yield") +
+  theme(panel.grid = element_blank())
 ```
 
 If first degree B-splines and first order differences are used the P-spline model is equivalent to Linear Variance and Random Walk models, for details see @Boer2020.
 
 ```{r Pspline1Db}
-
-obj2 <- LMMsolve(fixed = yield~rep+gen,
-                spline = ~spl1D(x = plot, degree=1, pord=1, 
-                                nseg = nrow(dat)-1),
-                data = dat, omitConstant = FALSE)
+obj2 <- LMMsolve(fixed = yield ~ rep + gen,
+                 spline = ~spl1D(x = plot, degree = 1, pord = 1, nseg = nrow(john.alpha) - 1),
+                 data = john.alpha, 
+                 omitConstant = FALSE)
 round(obj2$dev, 2)
 ```
 
-The argument `omitConstant=FALSE`is used here, including the constant in the Restricted Maximum Likelihood, to obtain the result as reported in Table 1 in @Boer2020.
+The argument `omitConstant = FALSE` is used here, including the constant in the Restricted Maximum Likelihood, to obtain the result as reported in Table 1 in @Boer2020.
 
 # P-splines and crop growth models
 
@@ -91,85 +86,74 @@ $$
 $$ where $\alpha$ is the asymptote, $\beta$ is the initial relative growth rate, $\gamma$ the inflection point, $t$ is time, and $y(t)$ denotes biomass as function of time.
 
 ```{r Logistic}
-logistic <- function(t, theta)
-{
-  theta[1]/(1+exp(-theta[2]*(t-theta[3])))
+logistic <- function(t, 
+                     theta) {
+  theta[1] / (1 + exp(-theta[2] * (t - theta[3])))
 }
 
-logistic_deriv <- function(t, theta)
-{
-  theta[1]*theta[2]*exp(-theta[2]*(t-theta[3]))/(1+exp(-theta[2]*(t-theta[3])))^2
+logistic_deriv <- function(t, 
+                           theta) {
+  theta[1] * theta[2] * exp(-theta[2] * (t - theta[3])) / (1 + exp(-theta[2] * (t - theta[3]))) ^ 2
 }
 
 set.seed(1234)
 xmin = 20
 xmax = 120
-time = seq(xmin,xmax,5)
+time = seq(xmin, xmax, 5)
 alpha = 1000
 beta = 0.10
 gamma = 70
 
 theta <- c(alpha, beta, gamma)
-y <- logistic(time, theta) + 50.0*rnorm(length(time))
+y <- logistic(time, theta) + 50.0 * rnorm(length(time))
 
-dat <- data.frame(time=time, y=y)
+dat <- data.frame(time = time, y = y)
 head(dat)
-obj2 <- LMMsolve(y~1,spline=~spl1D(x=time,nseg=50), data=dat)
 
-plotDat <- obtainSmoothTrend(obj2, grid=1000, includeIntercept = TRUE)
+obj2 <- LMMsolve(y ~ 1,
+                 spline = ~spl1D(x = time, nseg = 50), 
+                 data = dat)
 
-ggplot() +
-  geom_tile(show.legend = TRUE) +
-  geom_point(data=dat, aes(x=time,y=y),size=1.2) +
-#  geom_line(data=plotDat, aes(x=x,y = ysim), color="steelblue",size=1) +
-  geom_line(data=plotDat, aes(x=time,y = ypred), color="red",size=1) +
+plotDat <- obtainSmoothTrend(obj2, grid = 1000, includeIntercept = TRUE)
+
+ggplot(data = dat, aes(x = time, y = y)) +
+  geom_point(size = 1.2) +
+  geom_line(data = plotDat, aes(y = ypred), color = "red", size = 1) +
   labs(title = "P-splines ", x = "day", y = "yield") +
-  theme(panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank())
-
+  theme(panel.grid = element_blank())
 ```
 
-The growth rate (first derivative) as function of time can be obtained using `deriv=1` in `obtainSmoothTrend`:
+The growth rate (first derivative) as function of time can be obtained using `deriv = 1` in `obtainSmoothTrend`:
 
 ```{r LogisticDeriv}
-plotDatDt <- obtainSmoothTrend(obj2, grid=1000, deriv=1)
+plotDatDt <- obtainSmoothTrend(obj2, grid = 1000, deriv = 1)
 
-ggplot() +
-  geom_tile(show.legend = TRUE) +
-  geom_line(data=plotDatDt, aes(x=time,y = ypred), color="red",size=1) +
+ggplot(data = plotDatDt, aes(x = time,y = ypred)) +
+  geom_line(color = "red", size = 1) +
   labs(title = "P-splines ", x = "day", y = "growth rate") +
-  theme(panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank())
-
-
+  theme(panel.grid = element_blank())
 ```
 
 # Two-dimensional P-splines.
 
-For two-dimensional mixed P-splines we use the model defined in @Rodriguez-Alvarez2014. As an example we use the `USprecip` data set in the `spam` package, and analysed in @Rodriguez-Alvarez2014.  
+For two-dimensional mixed P-splines we use the model defined in @Rodriguez-Alvarez2014. As an example we use the `USprecip` data set in the `spam` package, and analysed in @Rodriguez-Alvarez2014.
 
 ```{r USprecip data}
-library(maps)
-library(dplyr)
-library(sp)
-library(spam)
-
 # Get precipitation data from spam
-data(USprecip)
-dat <- data.frame(USprecip)
+data(USprecip, package = "spam")
 
 # only use observed data
-dat <- subset(dat, infill==1)
-nrow(dat) # 5906 true records, as in SAP2014 paper.
+USprecip <- as.data.frame(USprecip)
+USprecip <- USprecip[USprecip$infill == 1, ]
+nrow(USprecip) # 5906 true records, as in SAP2014 paper.
 ```
 
 The two-dimensional P-spline can be defined with the `spl2D()` function:
 
 ```{r runobj3}
-obj3 <- LMMsolve(fixed = anomaly~1,
-                 spline = ~spl2D(x1 = lon, x2 = lat, nseg = c(41,41)),
-                 data = dat)
-
+obj3 <- LMMsolve(fixed = anomaly ~ 1,
+                 spline = ~spl2D(x1 = lon, x2 = lat, nseg = c(41, 41)),
+                 data = USprecip)
 ```
 
 Here the same number of segments is used as in the @Rodriguez-Alvarez2014. The summary function gives the effective dimensions:
@@ -181,33 +165,30 @@ summary(obj3)
 A plot for the spatial trend can be obtained in a similar way as for the one-dimensional examples:
 
 ```{r Plot_USprecip}
-plotDat <- obtainSmoothTrend(obj3, grid=c(200,300), includeIntercept = TRUE)
+plotDat <- obtainSmoothTrend(obj3, grid = c(200, 300), includeIntercept = TRUE)
 usa = maps::map("usa", regions = "main", plot = FALSE)
 v <- sp::point.in.polygon(plotDat$lon, plotDat$lat, usa$x, usa$y)
 plotDat <- plotDat[v == 1, ]
 
 ggplot(plotDat, aes(x = lon, y = lat, fill = ypred)) +
   geom_tile(show.legend = TRUE) +
-  scale_fill_gradientn(colours = topo.colors(100))+
+  scale_fill_gradientn(colors = topo.colors(100))+
   labs(title = "Precipitation anomaly", x = "Longitude", y = "Latitude") +
   coord_fixed() +
-  theme(panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank())
-
+  theme(panel.grid = element_blank())
 ```
 
 Instead of using the `grid` argument, `newdata` can be used to make predictions for locations specified in a data frame:
 
 ```{r newdataARG}
-# predictions for new data, using coordinates
-# from maps library:
-newdat <- us.cities %>% select(name, lat, long)
-newdat <- newdat %>% rename(lon=long)
-head(newdat)
+## predictions for new data, using city coordinates from maps package.
+data(us.cities, package = "maps")
+## Column names have to match column names used for fitting the model.
+colnames(us.cities)[colnames(us.cities) == "long"] <- "lon"
+head(us.cities)
 
-pred2 <- obtainSmoothTrend(obj3, newdata=newdat, includeIntercept = TRUE)
+pred2 <- obtainSmoothTrend(obj3, newdata = us.cities, includeIntercept = TRUE)
 head(pred2)
-
 ```
 
 # QTL mapping for multiparental populations.
@@ -216,26 +197,27 @@ In QTL-mapping for multiparental population the Identity-By-Descent (IBD) probab
 
 ```{r multipop}
 data(multipop)
-dat <- multipop
-head(dat)
+head(multipop)
 ```
 
 The residual variances for the two populations can be different, and therefore we need to allow for heterogeneous residual variances, which can be defined by using the `residual` argument in 'LMMsolve':
 
 ```{r residualARG}
-obj0 <- LMMsolve(fixed=pheno~cross, residual=~cross, data=dat)
+obj0 <- LMMsolve(fixed = pheno ~ cross, 
+                 residual = ~cross, 
+                 data = multipop)
 obj0$logL
 ```
 
 The QTL-probabilities are defined by the columns pA, pB, pC, and can be included in the random part of the mixed model by using the `group` argument:
 
 ```{r groupOPTION}
-lGrp <- list(QTL=c(3:5))
-obj1 <- LMMsolve(fixed=pheno~cross, group=lGrp,
+lGrp <- list(QTL = 3:5)
+obj1 <- LMMsolve(fixed = pheno ~ cross, 
+                 group = lGrp,
                  random = ~grp(QTL),
-                 residual=~cross,
-                 data=dat) 
+                 residual = ~cross,
+                 data = multipop) 
 obj1$logL
 coef(obj1)$QTL
-
 ```

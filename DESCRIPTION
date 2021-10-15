@@ -9,15 +9,15 @@ Description: Linear Mixed Model solver.
 License: GPL
 Depends: R (>= 3.6)
 Imports: 
-    Matrix,
-    methods,
-    Rcpp (>= 0.10.4), 
-    spam, 
-    splines,
     agridat,
     ggplot2,
     maps,
-    sp
+    Matrix,
+    methods,
+    Rcpp (>= 0.10.4), 
+    sp,
+    spam, 
+    splines
 LinkingTo: Rcpp
 RoxygenNote: 7.1.2
 Encoding: UTF-8
