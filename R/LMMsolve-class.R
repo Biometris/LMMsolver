@@ -31,7 +31,6 @@ LMMsolveObject <- function(object) {
             class = c("LMMsolve", "list"))
 }
 
-
 #' Summarize Linear Mixed Model fits
 #'
 #' Summary method for class "LMMsolve". Prints the effective dimensions of the
@@ -96,10 +95,41 @@ coef.LMMsolve <- function(object,
   return(result)
 }
 
+#' Fitted values of an LMMsolve object.
+#'
+#' Obtain the fitted values from a mixed model fitted using LMMSolve.
+#'
+#' @inheritParams coef.LMMsolve
+#'
+#' @return A vector of fitted values.
+#'
+#' @export
+fitted.LMMsolve <- function(object,
+                            ...) {
+  return(as.vector(object$yhat))
+}
+
+#' Residuals of an LMMsolve object.
+#'
+#' Obtain the residuals from a mixed model fitted using LMMSolve.
+#'
+#' @inheritParams coef.LMMsolve
+#'
+#' @return A vector of fitted values.
+#'
+#' @export
+residuals.LMMsolve <- function(object,
+                            ...) {
+  return(as.vector(object$residuals))
+}
+
+
 #' Log-likelihood of an LMMsolve object
 #'
 #' Obtain the Restricted Maximum Log-Likelihood of a model fitted using
 #' LMMsolve.
+#'
+#' @return The restricted maximum log-likelihood of the fitted model.
 #'
 #' @inheritParams coef.LMMsolve
 #'
@@ -114,6 +144,8 @@ logLik.LMMsolve <- function(object,
 #' Obtain the deviance of a model fitted using LMMsolve.
 #'
 #' @inheritParams coef.LMMsolve
+#'
+#' @return The deviance of the fitted model.
 #'
 #' @export
 deviance.LMMsolve <- function(object,

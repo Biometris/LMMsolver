@@ -12,6 +12,9 @@
 \item{...}{some methods for this generic require additional arguments.
 None are used in this method.}
 }
+\value{
+The restricted maximum log-likelihood of the fitted model.
+}
 \description{
 Obtain the Restricted Maximum Log-Likelihood of a model fitted using
 LMMsolve.

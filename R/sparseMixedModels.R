@@ -167,7 +167,7 @@ sparseMixedModels <- function(y,
     logLprev <- logL
 
   }
-  if (it==maxit) {
+  if (it == maxit) {
     warning("No convergence after ", maxit, " iterations \n", call. = FALSE)
   }
   C <- linearSum(theta = theta, matrixList = listC)
@@ -176,9 +176,11 @@ sparseMixedModels <- function(y,
   names(phi) <- names(lRinv)
   names(psi) <- names(lGinv)
   EDnames <- c(names(lRinv), names(lGinv))
-  L <- list(logL = logL, sigma2e = 1.0 / phi, tau2e = 1.0 / psi, ED = ED,
-            EDmax = EDmax, EDnames = EDnames, a = a, yhat = W %*% a,
-            nIter = it, C=C)
+  yhat <- W %*% a
+
+  L <- list(logL = logL, sigma2e = 1 / phi, tau2e = 1 / psi, ED = ED,
+            EDmax = EDmax, EDnames = EDnames, a = a, yhat = yhat,
+            residuals = y - yhat, nIter = it, C = C)
   return(L)
 }
 
