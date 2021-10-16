@@ -83,6 +83,9 @@ spl2D <- function(x1,
   X2 <- constructX(B2, x2, scaleX, pord)
   X <- RowKronecker(X1, X2)
 
+  # nominal effective dimension
+  EDnom = rep(ncol(B12) - ncol(X),2)
+
   ## Remove intercept column to avoid singularity problems.
   X  <- removeIntercept(X)
 
@@ -100,11 +103,12 @@ spl2D <- function(x1,
   dim.r <- ncol(B12)
   term.labels.r <- "splR"
 
+
   xList <- setNames(list(x1, x2), c(x1Name, x2Name))
   return(list(X = X, Z = B12, lGinv = lGinv, knots = knots,
               dim.f = dim.f, dim.r = dim.r, term.labels.f = term.labels.f,
               term.labels.r = term.labels.r, x = xList, pord = pord,
-              degree = degree, scaleX = scaleX))
+              degree = degree, scaleX = scaleX, EDnom=EDnom))
 
 }
 

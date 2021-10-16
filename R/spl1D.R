@@ -64,6 +64,9 @@ spl1D <- function(x,
   X <- constructX(B, x, scaleX, pord)
   CCt <- constructCCt(q, pord)
 
+  # nominal effective dimension
+  EDnom = ncol(B1) - ncol(X)
+
   ## Remove intercept column to avoid singularity problems.
   X <- removeIntercept(X)
 
@@ -85,7 +88,7 @@ spl1D <- function(x,
   return(list(X = X, Z = B, lGinv = lGinv, knots = knots,
               dim.f = dim.f, dim.r = dim.r, term.labels.f = term.labels.f,
               term.labels.r = term.labels.r, x = xList, pord = pord,
-              degree = degree, scaleX = scaleX))
+              degree = degree, scaleX = scaleX, EDnom = EDnom))
 }
 
 

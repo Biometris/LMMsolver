@@ -99,6 +99,9 @@ spl3D <- function(x1,
 
   X <- RowKronecker(RowKronecker(X1, X2), X3)
 
+  # nominal effective dimension
+  EDnom = rep(ncol(B123) - ncol(X), 3)
+
   ## Remove intercept column to avoid singularity problems.
   X  <- removeIntercept(X)
 
@@ -120,5 +123,5 @@ spl3D <- function(x1,
   return(list(X = X, Z = B123, lGinv = lGinv, knots = knots,
               dim.f = dim.f, dim.r = dim.r, term.labels.f = term.labels.f,
               term.labels.r = term.labels.r, x = xList,
-              pord = pord, degree = degree, scaleX = scaleX))
+              pord = pord, degree = degree, scaleX = scaleX, EDnom=EDnom))
 }
