@@ -23,6 +23,8 @@
 #' @param omitConstant Omit the constant in the restricted log-likelihood.
 #' Default is \code{TRUE}, as for example in \code{asreml}. In \code{nlme}
 #' and SAS the constant is included.
+#' @param theta initial values for penalty or precision parameters. Default \code{NULL},
+#' all precision parameters set equal to 1.
 #'
 #' @return An object of class \code{LMMsolve} representing the fitted model.
 #' See \code{\link{LMMsolveObject}} for a full description of the components in
@@ -89,7 +91,8 @@ LMMsolve <- function(fixed,
                      tolerance = 1.0e-6,
                      trace = FALSE,
                      maxit = 250,
-                     omitConstant = TRUE) {
+                     omitConstant = TRUE,
+                     theta = NULL) {
   ## Input checks.
   if (!inherits(data, "data.frame")) {
     stop("data should be a data.frame.\n")
@@ -240,7 +243,8 @@ LMMsolve <- function(fixed,
   }
   y <- mf[, 1]
   obj <- sparseMixedModels(y = y, X = X, Z = Z, lGinv = lGinv, lRinv = lRinv,
-                           tolerance = tolerance, trace = trace, maxit = maxit)
+                           tolerance = tolerance, trace = trace, maxit = maxit,
+                           theta=theta)
   #NomEffDimRes <- attr(lRinv, "cnt") - 1
   #NomEffDimRan <- calcNomEffDim(X, Z, dim.r)
   #NomEffDim <- c(NomEffDimRan, NomEffDimRes)

@@ -14,7 +14,8 @@ LMMsolve(
   tolerance = 1e-06,
   trace = FALSE,
   maxit = 250,
-  omitConstant = TRUE
+  omitConstant = TRUE,
+  theta = NULL
 )
 }
 \arguments{
@@ -48,6 +49,9 @@ algorithm. Default \code{maxit = 250}.}
 \item{omitConstant}{Omit the constant in the restricted log-likelihood.
 Default is \code{TRUE}, as for example in \code{asreml}. In \code{nlme}
 and SAS the constant is included.}
+
+\item{theta}{initial values for penalty or precision parameters. Default \code{NULL},
+all precision parameters set equal to 1.}
 }
 \value{
 An object of class \code{LMMsolve} representing the fitted model.

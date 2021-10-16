@@ -33,6 +33,10 @@ obj0 <- LMMsolve(fixed=pheno~cross, residual=~cross, data=df, tolerance=1.0e-8,
 # check with asreml:
 obj0$logL
 obj0.asr$loglik
+obj0$theta
+
+obj0b <- LMMsolve(fixed=pheno~cross, residual=~cross, data=df, tolerance=1.0e-8,
+                  trace=TRUE, theta=obj0$theta)
 
 # effective degrees of freedom
 df %>% group_by(cross) %>% tally()
@@ -43,13 +47,22 @@ lM <- list(QTL=c(3:5))
 obj1 <- LMMsolve(fixed=pheno~cross, group=lM,
                  random = ~grp(QTL),
                  residual=~cross,
-                 data=df, tolerance=1.0e-8,
+                 data=df, tolerance=1.0e-6,
                  trace=TRUE)
+
+obj1b <- LMMsolve(fixed=pheno~cross, group=lM,
+                 random = ~grp(QTL),
+                 residual=~cross,
+                 data=df, tolerance=1.0e-6,
+                 trace=TRUE, theta=c(1.0,obj0$theta))
+obj1b$EDdf
 
 # check with asreml:
 obj1$logL
 obj1.asr$loglik
 
+obj0$theta
+obj1$theta
 # effective degrees of freedom: maximum effective dimension for QTL is 2,
 # because of sum to one constraint:
 obj1$ED

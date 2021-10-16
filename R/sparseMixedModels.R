@@ -71,7 +71,8 @@ sparseMixedModels <- function(y,
                               lRinv,
                               maxit = 100,
                               tolerance = 1.0e-6,
-                              trace = FALSE) {
+                              trace = FALSE,
+                              theta = NULL) {
   Ntot <- length(y)
   p <- ncol(X)
   q <- ncol(Z)
@@ -98,9 +99,16 @@ sparseMixedModels <- function(y,
   lGinv <- lapply(X = lGinv, FUN = spam::cleanup)
   listC <- lapply(X = listC, FUN = spam::cleanup)
 
-  psi <- rep(1.0, Nvarcomp)
-  phi <- rep(1.0, Nres)
-  theta <- c(psi, phi)
+  if (is.null(theta)) {
+    theta <- rep(1.0, Nvarcomp + Nres)
+  }
+  if (Nvarcomp > 0) {
+    psi <- theta[c(1:Nvarcomp)]
+    phi <- theta[-c(1:Nvarcomp)]
+  } else {
+    psi <- NULL
+    phi <- theta
+  }
 
   C <- linearSum(theta = theta, matrixList = listC)
   opt <- summary(C)
