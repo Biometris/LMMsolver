@@ -243,7 +243,7 @@ LMMsolve <- function(fixed,
                            tolerance = tolerance, trace = trace, maxit = maxit)
   NomEffDimRes <- attr(lRinv, "cnt") - 1
   NomEffDimRan <- calcNomEffDim(X, Z, dim.r)
-  NomEffDim <- c(NomEffDimRes, NomEffDimRan)
+  NomEffDim <- c(NomEffDimRan, NomEffDimRes)
 
   # not working: names(NomEffDim) <- names(obj$ED),
   # as NomEffDim is per variance component:

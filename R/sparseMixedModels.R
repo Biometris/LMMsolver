@@ -42,7 +42,7 @@ calcSumSquares <- function(lRinv,
     SSa <- sapply(X = Q, FUN = function(X) {
       quadForm(a, X)
     })
-    SS_all <- c(SSr, SSa)
+    SS_all <- c(SSa, SSr)
   } else {
     SS_all <- SSr
   }
@@ -90,7 +90,7 @@ sparseMixedModels <- function(y,
     zero <- spam::spam(0, ncol = p, nrow = p)
     return(spam::bdiag.spam(zero, x))
   })
-  listC <- c(lWtRinvW, lQ)
+  listC <- c(lQ, lWtRinvW)
 
   # remove some extra zero's....
   lWtRinvW <- lapply(X = lWtRinvW, FUN = spam::cleanup)
@@ -98,8 +98,8 @@ sparseMixedModels <- function(y,
   lGinv <- lapply(X = lGinv, FUN = spam::cleanup)
   listC <- lapply(X = listC, FUN = spam::cleanup)
 
-  phi <- rep(1.0, Nres)
   psi <- rep(1.0, Nvarcomp)
+  phi <- rep(1.0, Nres)
   theta <- c(psi, phi)
 
   C <- linearSum(theta = theta, matrixList = listC)
@@ -123,11 +123,11 @@ sparseMixedModels <- function(y,
 
   for (it in 1:maxit) {
     if (Nvarcomp > 0) {
-      phi <- theta[c(1:length(phi))]
-      psi <- theta[-c(1:length(phi))]
+      psi <- theta[c(1:length(psi))]
+      phi <- theta[-c(1:length(psi))]
     } else {
-      phi <- theta
       psi <- NULL
+      phi <- theta
     }
 
     # calculate effective dimensions....
@@ -137,7 +137,7 @@ sparseMixedModels <- function(y,
     } else {
       EDmax_psi <- NULL
     }
-    EDmax <- c(EDmax_phi, EDmax_psi)
+    EDmax <- c(EDmax_psi, EDmax_phi)
     ED <- EDmax - theta * dlogdet(ADcholC, theta)
 
     # solve mixed model equations and calculate residuals...
@@ -175,7 +175,7 @@ sparseMixedModels <- function(y,
 
   names(phi) <- names(lRinv)
   names(psi) <- names(lGinv)
-  EDnames <- c(names(lRinv), names(lGinv))
+  EDnames <- c(names(lGinv), names(lRinv))
   yhat <- W %*% a
 
   L <- list(logL = logL, sigma2e = 1 / phi, tau2e = 1 / psi, ED = ED,
