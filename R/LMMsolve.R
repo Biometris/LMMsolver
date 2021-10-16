@@ -206,6 +206,9 @@ LMMsolve <- function(fixed,
   dim.f <- table(attr(X, "assign"))
   term.labels.f <- attr(mt, "term.labels")
 
+  # calculate NomEff dimension for non-spline part
+  NomEffDimRan <- calcNomEffDim(X, Z, dim.r)
+
   ## Add spline part.
   splRes <- NULL
   if (!is.null(spline)) {
@@ -223,6 +226,10 @@ LMMsolve <- function(fixed,
     ## Add dims.
     dim.f <- c(dim.f, splRes$dim.f)
     dim.r <- c(dim.r, splRes$dim.r)
+
+    ## Add nominal ED
+    NomEffDimRan <- c(NomEffDimRan, splRes$EDnom)
+
     ## Add labels.
     term.labels.f <- c(term.labels.f, splRes$term.labels.f)
     term.labels.r <- c(term.labels.r, splRes$term.labels.r)
@@ -245,19 +252,38 @@ LMMsolve <- function(fixed,
   obj <- sparseMixedModels(y = y, X = X, Z = Z, lGinv = lGinv, lRinv = lRinv,
                            tolerance = tolerance, trace = trace, maxit = maxit,
                            theta=theta)
-  #NomEffDimRes <- attr(lRinv, "cnt") - 1
-  #NomEffDimRan <- calcNomEffDim(X, Z, dim.r)
-  #NomEffDim <- c(NomEffDimRan, NomEffDimRes)
-  # not working: names(NomEffDim) <- names(obj$ED),
-  # as NomEffDim is per variance component:
-  #obj$EDnominal <- NomEffDim
+  #
+  EffDimRes <- attributes(lRinv)$cnt
+  EffDimNames <- attributes(lRinv)$names
+
+  NomEffDim <- c(NomEffDimRan, EffDimRes)
 
   # make ED table:
-  EDdf1 <- data.frame(term = term.labels.f, ED = as.numeric(dim.f),
-                      penalty = rep(0.0,length(dim.f)))
-  EDdf2 <- data.frame(term = obj$EDnames, ED = obj$ED, penalty = obj$theta)
+  EDdf1 <- data.frame(term = term.labels.f, Effective = as.numeric(dim.f),
+                      Model = as.numeric(dim.f),
+                      Nominal = as.numeric(dim.f),
+                      Ratio = rep(1.0, length(dim.f)),
+                      Penalty = rep(0.0,length(dim.f)),
+                      VarComp = rep(NA,length(dim.f)))
+  EDdf2 <- data.frame(term = obj$EDnames, Effective = obj$ED,
+                      Model = c(rep(dim.r, varPar), EffDimRes),
+                      Nominal = NomEffDim,
+                      Ratio = obj$ED / NomEffDim,
+                      Penalty = obj$theta,
+                      VarComp = c(rep(term.labels.r, varPar), EffDimNames))
+
   EDdf <- rbind(EDdf1, EDdf2)
+  EDdf$VarComp <- NULL
   rownames(EDdf) <- NULL
+
+  # make variance table:
+  f <- factor(EDdf2$VarComp, levels=unique(EDdf2$VarComp))
+  VarDf <- aggregate(x = EDdf2$Penalty,
+                  by = list(f),
+                  FUN = sum)
+  VarDf$var = 1/VarDf$x
+  VarDf$x <- NULL
+  names(VarDf) <- c('VarComp','Variance')
 
   if (!omitConstant) {
     Nobs <- length(y)
@@ -269,6 +295,7 @@ LMMsolve <- function(fixed,
   term.labels <- c(term.labels.f, term.labels.r)
   obj$varPar <- varPar
   obj$EDdf <- EDdf
+  obj$VarDf <- VarDf
   obj$dim <- dim
   obj$Nres <- length(lRinv)
   obj$term.labels.f <- term.labels.f

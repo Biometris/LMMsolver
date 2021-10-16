@@ -47,11 +47,20 @@ summary.LMMsolve <- function(object,
                              which = "dimensions",
                              ...) {
   ## Checks.
-  which <- match.arg(which)
-  tbl <- object$EDdf
-  cat("Table with effective dimensions and penalties: \n")
-  print(tbl[,-3])
-  cat("\n", "Total ED:", sum(tbl$ED),"\n")
+  #which <- match.arg(which)
+
+  # which = 'dimensions' or 'variances'
+  if(which=='dimensions') {
+    tbl <- object$EDdf
+    cat("Table with effective dimensions and penalties: \n\n")
+    print(tbl)
+    cat("\n", "Total Effective Dimension:", sum(tbl$Effective),"\n")
+  } else if (which=='variances') {
+    tbl <- object$VarDf
+    cat("Table with variances: \n\n")
+    print(tbl)
+    cat("\n")
+  }
 }
 
 #' Coefficients from the mixed model equations of an LMMsolve object.
