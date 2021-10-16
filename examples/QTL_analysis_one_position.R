@@ -7,7 +7,7 @@ library(dplyr)
 
 data(multipop)
 
-dat <- multipop
+df <- multipop
 
 # NULL MODEL, no marker:
 obj0.asr = asreml(fixed = pheno~cross,
