@@ -48,25 +48,9 @@ summary.LMMsolve <- function(object,
                              ...) {
   ## Checks.
   which <- match.arg(which)
-  ## start and end of each variance component.
-  Nres <- object$Nres
-  e <- cumsum(object$varPar) + Nres
-  s <- e - object$varPar + 1
-  ## Get number of variance components.
-  nVarComp <- length(object$term.labels.r)
-  ## Get names of effective dimensions.
-  namesED <- names(object$ED)
-  ## Print total effective dimensions per variance component.
-  for (i in 1:nVarComp) {
-    ndx <- s[i]:e[i]
-    cat(object$term.labels.r[i], "with total effective dimension ",
-        round(sum(object$ED[ndx]), 2), "\n")
-    if (length(ndx) > 1) {
-      for (k in ndx) {
-        cat("   ", namesED[k], "\t", round(object$ED[k], 2), "\n")
-      }
-    }
-  }
+  tbl <- object$EDdf
+  print(tbl)
+  cat("\n", "Total:", sum(tbl$ED),"\n")
 }
 
 #' Coefficients from the mixed model equations of an LMMsolve object.

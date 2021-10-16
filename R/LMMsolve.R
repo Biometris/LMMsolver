@@ -241,13 +241,18 @@ LMMsolve <- function(fixed,
   y <- mf[, 1]
   obj <- sparseMixedModels(y = y, X = X, Z = Z, lGinv = lGinv, lRinv = lRinv,
                            tolerance = tolerance, trace = trace, maxit = maxit)
-  NomEffDimRes <- attr(lRinv, "cnt") - 1
-  NomEffDimRan <- calcNomEffDim(X, Z, dim.r)
-  NomEffDim <- c(NomEffDimRan, NomEffDimRes)
-
+  #NomEffDimRes <- attr(lRinv, "cnt") - 1
+  #NomEffDimRan <- calcNomEffDim(X, Z, dim.r)
+  #NomEffDim <- c(NomEffDimRan, NomEffDimRes)
   # not working: names(NomEffDim) <- names(obj$ED),
   # as NomEffDim is per variance component:
-  obj$EDnominal <- NomEffDim
+  #obj$EDnominal <- NomEffDim
+
+  # make ED table:
+  EDdf1 <- data.frame(term = term.labels.f, ED = as.numeric(dim.f))
+  EDdf2 <- data.frame(term = obj$EDnames, ED = obj$ED)
+  EDdf <- rbind(EDdf1, EDdf2)
+  rownames(EDdf) <- NULL
 
   if (!omitConstant) {
     Nobs <- length(y)
@@ -258,6 +263,7 @@ LMMsolve <- function(fixed,
   dim <- as.numeric(c(dim.f, dim.r))
   term.labels <- c(term.labels.f, term.labels.r)
   obj$varPar <- varPar
+  obj$EDdf <- EDdf
   obj$dim <- dim
   obj$Nres <- length(lRinv)
   obj$term.labels.f <- term.labels.f
