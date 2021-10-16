@@ -7,9 +7,12 @@ data(john.alpha, package = "agridat")
 
 ## Fit the same model with genotype as fixed effect.
 obj <- LMMsolve(fixed = yield ~ rep + gen,
-                data = john.alpha)
+                data = john.alpha, omitConstant = FALSE)
 summary(obj)
 summary(obj, which='variances')
+
+# baseline model, as in JABES 2020 paper, 69.91:
+round(deviance(obj), 2)
 
 ## Fit the same model with genotype as random effect.
 obj <- LMMsolve(fixed = yield ~ rep,
