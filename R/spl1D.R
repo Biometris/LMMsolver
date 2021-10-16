@@ -65,7 +65,7 @@ spl1D <- function(x,
   CCt <- constructCCt(q, pord)
 
   # nominal effective dimension
-  EDnom = ncol(B1) - ncol(X)
+  EDnom = ncol(B) - ncol(X)
 
   ## Remove intercept column to avoid singularity problems.
   X <- removeIntercept(X)
