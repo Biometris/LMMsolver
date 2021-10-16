@@ -179,6 +179,7 @@ sparseMixedModels <- function(y,
   yhat <- W %*% a
 
   L <- list(logL = logL, sigma2e = 1 / phi, tau2e = 1 / psi, ED = ED,
+            theta = theta,
             EDmax = EDmax, EDnames = EDnames, a = a, yhat = yhat,
             residuals = y - yhat, nIter = it, C = C)
   return(L)

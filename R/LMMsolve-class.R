@@ -49,8 +49,9 @@ summary.LMMsolve <- function(object,
   ## Checks.
   which <- match.arg(which)
   tbl <- object$EDdf
-  print(tbl)
-  cat("\n", "Total:", sum(tbl$ED),"\n")
+  cat("Table with effective dimensions and penalties: \n")
+  print(tbl[,-3])
+  cat("\n", "Total ED:", sum(tbl$ED),"\n")
 }
 
 #' Coefficients from the mixed model equations of an LMMsolve object.

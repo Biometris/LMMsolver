@@ -249,8 +249,9 @@ LMMsolve <- function(fixed,
   #obj$EDnominal <- NomEffDim
 
   # make ED table:
-  EDdf1 <- data.frame(term = term.labels.f, ED = as.numeric(dim.f))
-  EDdf2 <- data.frame(term = obj$EDnames, ED = obj$ED)
+  EDdf1 <- data.frame(term = term.labels.f, ED = as.numeric(dim.f),
+                      penalty = rep(0.0,length(dim.f)))
+  EDdf2 <- data.frame(term = obj$EDnames, ED = obj$ED, penalty = obj$theta)
   EDdf <- rbind(EDdf1, EDdf2)
   rownames(EDdf) <- NULL
 
