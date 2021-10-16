@@ -5,6 +5,12 @@ library(agridat)
 ## Fit models on john.alpha data from agridat package.
 data(john.alpha, package = "agridat")
 
+## Fit the same model with genotype as fixed effect.
+obj <- LMMsolve(fixed = yield ~ rep + gen,
+                data = john.alpha)
+summary(obj)
+summary(obj, which='variances')
+
 ## Fit the same model with genotype as random effect.
 obj <- LMMsolve(fixed = yield ~ rep,
                       random = ~gen,
