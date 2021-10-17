@@ -6,12 +6,11 @@ library(agridat)
 data(john.alpha, package = "agridat")
 
 ## Fit the same model with genotype as fixed effect.
-obj <- LMMsolve(fixed = yield ~ rep + gen,
-                data = john.alpha, omitConstant = FALSE)
+obj <- LMMsolve(fixed = yield ~ rep + gen, data = john.alpha)
 summary(obj)
 summary(obj, which='variances')
 
-# baseline model, as in JABES 2020 paper, 69.91:
+# baseline model, as in JABES 2020 paper, Table: 69.91:
 round(deviance(obj), 2)
 
 ## Fit the same model with genotype as random effect.
@@ -20,6 +19,18 @@ obj <- LMMsolve(fixed = yield ~ rep,
                       data = john.alpha)
 summary(obj)
 summary(obj, which='variances')
+
+N <- nrow(john.alpha)
+
+# Here scaleX is FALSE in spl1D, to be consistent with model in JABES2020 paper.
+obj1 <- LMMsolve(fixed = yield~rep+gen,
+                 spline = ~spl1D(x = plot, nseg = N-1, degree = 1, pord = 1, scaleX=FALSE),
+                 data = john.alpha,
+                 trace = FALSE,
+                 tolerance = 1.0e-10)
+summary(obj1)
+# see Table 1:
+round(deviance(obj1),2)
 
 # Test 2: heterogeneous residual error:
 
@@ -54,5 +65,6 @@ obj <- LMMsolve(yield~rep,
 
 summary(obj)
 summary(obj, which='variances')
+round(deviance(obj), 2)
 
 

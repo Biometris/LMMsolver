@@ -4,7 +4,7 @@
 \alias{deviance.LMMsolve}
 \title{Deviance of an LMMsolve object}
 \usage{
-\method{deviance}{LMMsolve}(object, ...)
+\method{deviance}{LMMsolve}(object, includeConstant = TRUE, ...)
 }
 \arguments{
 \item{object}{an object of class LMMsolve}

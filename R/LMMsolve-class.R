@@ -129,9 +129,13 @@ residuals.LMMsolve <- function(object,
 #' @inheritParams coef.LMMsolve
 #'
 #' @export
-logLik.LMMsolve <- function(object,
+logLik.LMMsolve <- function(object, includeConstant=TRUE,
                             ...) {
-  return(object$logL)
+  logL <- object$logL
+  if (includeConstant) {
+    logL <- logL + object$constantREML
+  }
+  return(logL)
 }
 
 #' Deviance of an LMMsolve object
@@ -143,9 +147,14 @@ logLik.LMMsolve <- function(object,
 #' @return The deviance of the fitted model.
 #'
 #' @export
-deviance.LMMsolve <- function(object,
+deviance.LMMsolve <- function(object, includeConstant=TRUE,
                               ...) {
-  return(object$dev)
+  logL <- object$logL
+  if (includeConstant){
+    logL <- logL + object$constantREML
+  }
+  dev <- -2*logL
+  return(dev)
 }
 
 #' Display the sparseness of the mixed model coefficient matrix

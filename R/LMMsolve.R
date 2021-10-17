@@ -20,9 +20,6 @@
 #' \code{trace = FALSE}.
 #' @param maxit A numerical value. The maximum number of iterations for the
 #' algorithm. Default \code{maxit = 250}.
-#' @param omitConstant Omit the constant in the restricted log-likelihood.
-#' Default is \code{TRUE}, as for example in \code{asreml}. In \code{nlme}
-#' and SAS the constant is included.
 #' @param theta initial values for penalty or precision parameters. Default \code{NULL},
 #' all precision parameters set equal to 1.
 #'
@@ -91,7 +88,6 @@ LMMsolve <- function(fixed,
                      tolerance = 1.0e-6,
                      trace = FALSE,
                      maxit = 250,
-                     omitConstant = TRUE,
                      theta = NULL) {
   ## Input checks.
   if (!inherits(data, "data.frame")) {
@@ -254,7 +250,7 @@ LMMsolve <- function(fixed,
                            theta=theta)
   #
   EffDimRes <- attributes(lRinv)$cnt
-  EffDimNames <- attributes(lRinv)$names
+  EffDimNamesRes <- attributes(lRinv)$names
 
   NomEffDim <- c(NomEffDimRan, EffDimRes)
 
@@ -263,14 +259,14 @@ LMMsolve <- function(fixed,
                       Model = as.numeric(dim.f),
                       Nominal = as.numeric(dim.f),
                       Ratio = rep(1.0, length(dim.f)),
-                      Penalty = rep(0.0,length(dim.f)),
-                      VarComp = rep(NA,length(dim.f)))
+                      Penalty = rep(0.0, length(dim.f)),
+                      VarComp = rep(NA, length(dim.f)))
   EDdf2 <- data.frame(term = obj$EDnames, Effective = obj$ED,
                       Model = c(rep(dim.r, varPar), EffDimRes),
                       Nominal = NomEffDim,
                       Ratio = obj$ED / NomEffDim,
                       Penalty = obj$theta,
-                      VarComp = c(rep(term.labels.r, varPar), EffDimNames))
+                      VarComp = c(rep(term.labels.r, varPar), EffDimNamesRes))
 
   EDdf <- rbind(EDdf1, EDdf2)
   EDdf$VarComp <- NULL
@@ -285,12 +281,11 @@ LMMsolve <- function(fixed,
   VarDf$x <- NULL
   names(VarDf) <- c('VarComp','Variance')
 
-  if (!omitConstant) {
-    Nobs <- length(y)
-    p <- sum(dim.f)
-    Constant <- -0.5 * log(2 * pi) * (Nobs -p)
-    obj$logL <- obj$logL + Constant
-  }
+  Nobs <- length(y)
+  p <- sum(dim.f)
+  constantREML <- -0.5 * log(2 * pi) * (Nobs -p)
+  obj$constantREML = constantREML
+
   dim <- as.numeric(c(dim.f, dim.r))
   term.labels <- c(term.labels.f, term.labels.r)
   obj$varPar <- varPar
@@ -302,6 +297,5 @@ LMMsolve <- function(fixed,
   obj$term.labels.r <- term.labels.r
   obj$term.labels <- term.labels
   obj$splRes <- splRes
-  obj$dev <- -2.0 * obj$logL
   return(LMMsolveObject(obj))
 }

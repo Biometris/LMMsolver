@@ -14,7 +14,6 @@ LMMsolve(
   tolerance = 1e-06,
   trace = FALSE,
   maxit = 250,
-  omitConstant = TRUE,
   theta = NULL
 )
 }
@@ -45,10 +44,6 @@ modified Henderson algorithm to estimate the variance components.}
 
 \item{maxit}{A numerical value. The maximum number of iterations for the
 algorithm. Default \code{maxit = 250}.}
-
-\item{omitConstant}{Omit the constant in the restricted log-likelihood.
-Default is \code{TRUE}, as for example in \code{asreml}. In \code{nlme}
-and SAS the constant is included.}
 
 \item{theta}{initial values for penalty or precision parameters. Default \code{NULL},
 all precision parameters set equal to 1.}

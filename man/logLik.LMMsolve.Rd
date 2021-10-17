@@ -4,7 +4,7 @@
 \alias{logLik.LMMsolve}
 \title{Log-likelihood of an LMMsolve object}
 \usage{
-\method{logLik}{LMMsolve}(object, ...)
+\method{logLik}{LMMsolve}(object, includeConstant = TRUE, ...)
 }
 \arguments{
 \item{object}{an object of class LMMsolve}
