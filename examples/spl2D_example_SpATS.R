@@ -44,7 +44,7 @@ m1 <- LMMsolve(yield~rep,
                data = dat,
                trace=TRUE,
                tolerance = tol)
-dev1 <- m1$dev
+dev1 <- deviance(m1, includeConstant = FALSE)
 
 dev0
 dev1
