@@ -107,7 +107,9 @@ spl3D <- function(x1,
 
   # construct list of sparse precision matrices.
   lGinv <- constructGinvSplines(q, pord)
-  names(lGinv) <- c("s(x1)", "s(x2)", "s(x3)")
+  names(lGinv) <- c(paste0("s(",x1Name,")"),
+                    paste0("s(",x2Name,")"),
+                    paste0("s(",x3Name,")"))
 
   if (is.null(X)) {
     dim.f <- NULL

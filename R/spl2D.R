@@ -91,7 +91,7 @@ spl2D <- function(x1,
 
   # construct list of sparse precision matrices.
   lGinv <- constructGinvSplines(q, pord)
-  names(lGinv) <- c("s(x1)", "s(x2)")
+  names(lGinv) <- c(paste0("s(",x1Name,")"),paste0("s(",x2Name,")"))
 
   if (is.null(X)) {
     dim.f <- NULL

@@ -72,7 +72,7 @@ spl1D <- function(x,
 
   lGinv <- list()
   lGinv[[1]] <- spam::as.spam(DtD + CCt)
-  names(lGinv) <- "s(x)"
+  names(lGinv) <- paste0("s(",xName,")")
 
   if (is.null(X)) {
     dim.f <- NULL
