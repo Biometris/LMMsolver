@@ -86,14 +86,14 @@ see P-spline(1) model in Table 1 in @Boer2020.
 
 We can obtain a table with effective dimensions (see e.g. @Rodriguez-Alvarez2018) and penalties using the `summary` function:
 
-```{r summary1}
+```{r summaryED}
 summary(obj2)
 ```
 The effective dimension is a measure for complexity. In the table above the first three terms are fixed effect and penalized, and therefore the effective dimension is equal to the number of parameters in the model. The term `s(x)` is a random effect, with effective dimension is \code{14.2}, indicating that there is rather strong non-linear smooth trend, corresponding to what we see in the Figure.  
 
 We can also use the `summary` function to obtain the table with variances:
 
-```{r summary1}
+```{r summaryVAR}
 summary(obj2, which='variances')
 ```
 see Table 1 in @Boer2020. 
