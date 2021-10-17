@@ -98,60 +98,49 @@ summary(obj2, which='variances')
 ```
 see Table 1 in @Boer2020. 
 
-# P-splines and crop growth models
+# P-splines to fit biomass as function of time.
 
-In this section we show an example of using P-splines to fit a crop growth model, for details see @Bustos-Korts2019. We use here the logistic growth curve defined by
+In this section we show an example of mixed model P-splines to fit biomass as function of time. As an example we take wheat data simulated with crop growth model APSIM. For further details on this simulated data see @Bustos-Korts2019. 
 
-$$
-     y(t) = \frac{\alpha}{1 + e^{-\beta(t-\gamma)}} 
-$$ where $\alpha$ is the asymptote, $\beta$ is the initial relative growth rate, $\gamma$ the inflection point, $t$ is time, and $y(t)$ denotes biomass as function of time.
+```{r APSIMdat}
+data(APSIMdat)
+head(APSIMdat)
+```
+The first column is the environment, Emerald in 1993, the second column simulated genotype (g001), the third column is days after sowing (das), and the last column is the simulated biomass with medium measurement error.
 
-```{r Logistic}
-logistic <- function(t, 
-                     theta) {
-  theta[1] / (1 + exp(-theta[2] * (t - theta[3])))
-}
+The model can be fitted with
+``` {r APSIMmodel}
+obj2 <- LMMsolve(biomass ~ 1,
+                 spline = ~spl1D(x = das, nseg = 200), 
+                 data = APSIMdat)
+```
 
-logistic_deriv <- function(t, 
-                           theta) {
-  theta[1] * theta[2] * exp(-theta[2] * (t - theta[3])) / (1 + exp(-theta[2] * (t - theta[3]))) ^ 2
-}
+where we took `nseg=200`, just to illustrate that number of B-splines segments cannot be too high (there are only 121 observations), as we can see from the summary table with effective dimension:
+``` {r APSIMmodelSummary}
+summary(obj2)
+```
+The fitted smooth trend can be obtained as explained before:
 
-set.seed(1234)
-xmin = 20
-xmax = 120
-time = seq(xmin, xmax, 5)
-alpha = 1000
-beta = 0.10
-gamma = 70
-
-theta <- c(alpha, beta, gamma)
-y <- logistic(time, theta) + 50.0 * rnorm(length(time))
-
-dat <- data.frame(time = time, y = y)
-head(dat)
-
-obj2 <- LMMsolve(y ~ 1,
-                 spline = ~spl1D(x = time, nseg = 50), 
-                 data = dat)
-
+``` {r APSIMplot}
 plotDat <- obtainSmoothTrend(obj2, grid = 1000, includeIntercept = TRUE)
 
-ggplot(data = dat, aes(x = time, y = y)) +
+ggplot(data = APSIMdat, aes(x = das, y = biomass)) +
   geom_point(size = 1.2) +
   geom_line(data = plotDat, aes(y = ypred), color = "red", size = 1) +
-  labs(title = "P-splines ", x = "day", y = "yield") +
+  labs(title = "APSIM biomass as function of time", 
+       x = "days after sowing", y = "biomass (kg)") +
   theme(panel.grid = element_blank())
 ```
 
-The growth rate (first derivative) as function of time can be obtained using `deriv = 1` in `obtainSmoothTrend`:
+The growth rate (first derivative) as function of time can be obtained using `deriv = 1` in function `obtainSmoothTrend`:
 
-```{r LogisticDeriv}
+```{r APSIMDeriv}
 plotDatDt <- obtainSmoothTrend(obj2, grid = 1000, deriv = 1)
 
-ggplot(data = plotDatDt, aes(x = time, y = ypred)) +
+ggplot(data = plotDatDt, aes(x = das, y = ypred)) +
   geom_line(color = "red", size = 1) +
-  labs(title = "P-splines ", x = "day", y = "growth rate") +
+  labs(title = "APSIM growth rate as function of time", 
+       x = "days after sowing", y = "growth rate (kg/day)") +
   theme(panel.grid = element_blank())
 ```
 
