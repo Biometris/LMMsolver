@@ -89,12 +89,12 @@ We can obtain a table with effective dimensions (see e.g. @Rodriguez-Alvarez2018
 ```{r summaryED}
 summary(obj2)
 ```
-The effective dimension is a measure for complexity. In the table above the first three terms are fixed effect and penalized, and therefore the effective dimension is equal to the number of parameters in the model. The term `s(x)` is a random effect, with effective dimension is \code{14.2}, indicating that there is rather strong non-linear smooth trend, corresponding to what we see in the Figure.  
+The effective dimension is a measure for complexity. In the table above the first three terms are fixed effects and penalized, and therefore the effective dimension is equal to the number of parameters in the model. The term `s(plot)` is a random effect, with effective dimension is \code{14.2}, indicating that there is rather strong non-linear smooth trend, corresponding to what we see in the Figure.  
 
 We can also use the `summary` function to obtain the table with variances:
 
 ```{r summaryVAR}
-summary(obj2, which='variances')
+summary(obj2, which = "variances")
 ```
 see Table 1 in @Boer2020. 
 
@@ -146,7 +146,7 @@ ggplot(data = plotDatDt, aes(x = das, y = ypred)) +
 
 # Two-dimensional P-splines.
 
-For two-dimensional mixed P-splines we use the model defined in @Rodriguez-Alvarez2014. As an example we use the `USprecip` data set in the `spam` package, and analysed in @Rodriguez-Alvarez2014.
+For two-dimensional mixed P-splines we use the model defined in @Rodriguez-Alvarez2014. As an example we use the `USprecip` data set in the `spam` package, analysed in @Rodriguez-Alvarez2014.
 
 ```{r USprecip data}
 ## Get precipitation data from spam
@@ -204,7 +204,7 @@ head(pred2)
 
 # QTL mapping for multiparental populations.
 
-In QTL-mapping for multiparental population the Identity-By-Descent (IBD) probabilities are used as genetic predictors in the mixed model [@Li2021]. The following simulated example is for illustration. It consist of three parents (A, B, and C), and two crosses AxB, and AxC. AxB is a population of 100 Doubled Haploids (DH), AxC 80 DHs. The probabilities, pA, pB, and pC, are for a position on the genome close to a simulated QTL:
+In QTL-mapping for multiparental populations the Identity-By-Descent (IBD) probabilities are used as genetic predictors in the mixed model [@Li2021]. The following simulated example is for illustration. It consists of three parents (A, B, and C), and two crosses AxB, and AxC. AxB is a population of 100 Doubled Haploids (DH), AxC of 80 DHs. The probabilities, pA, pB, and pC, are for a position on the genome close to a simulated QTL:
 
 ```{r multipop}
 data(multipop)

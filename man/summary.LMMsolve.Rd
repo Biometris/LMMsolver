@@ -7,7 +7,7 @@
 \usage{
 \method{summary}{LMMsolve}(object, which = c("dimensions", "variances"), ...)
 
-\method{print}{summary.LMMsolve}(x)
+\method{print}{summary.LMMsolve}(x, ...)
 }
 \arguments{
 \item{object}{an object of class LMMsolve}
