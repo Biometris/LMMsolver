@@ -8,10 +8,21 @@ mod <- LMMsolve(fixed = y ~ 1,
                 tolerance = 1e-3)
 
 ## Check summary function.
-expect_stdout(summary(mod),
+dims <- summary(mod, which = "dimensions")
+expect_inherits(dims, "data.frame")
+expect_equivalent_to_reference(dims, "effDims")
+
+varcomps <- summary(mod, which = "variances")
+expect_inherits(varcomps, "data.frame")
+expect_equivalent_to_reference(varcomps, "varComps")
+
+expect_stdout(print(summary(mod)),
               "Table with effective dimensions and penalties")
-expect_stdout(summary(mod),
+expect_stdout(print(summary(mod)),
               "Total Effective Dimension: 250")
+
+expect_stdout(print(summary(mod, which = "variances")),
+              "Table with variances")
 
 ## Check logLik function.
 expect_equal(logLik(mod), 198.972874670064)

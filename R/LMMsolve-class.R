@@ -42,6 +42,9 @@ LMMsolveObject <- function(object) {
 #' @param \dots some methods for this generic require additional arguments.
 #' None are used in this method.
 #'
+#' @return A data.frame with either effective dimensions or variances depending
+#' on which.
+#'
 #' @export
 summary.LMMsolve <- function(object,
                              which = c("dimensions", "variances"),
@@ -49,16 +52,32 @@ summary.LMMsolve <- function(object,
   ## Checks.
   which <- match.arg(which)
 
-  # which = 'dimensions' or 'variances'
   if (which == "dimensions") {
     tbl <- object$EDdf
-    cat("Table with effective dimensions and penalties: \n\n")
-    print(tbl)
-    cat("\n", "Total Effective Dimension:", sum(tbl$Effective), "\n")
   } else if (which == "variances") {
     tbl <- object$VarDf
+  }
+  res <- structure(tbl,
+                   class = c("summary.LMMsolve", "data.frame"),
+                   which = which)
+  return(res)
+}
+
+#' @param x An object of class summary.LMMsolve, the result of a call to
+#' summary.LMM
+#'
+#' @describeIn summary.LMMsolve
+#'
+#' @export
+print.summary.LMMsolve <- function(x) {
+  which <- attr(x, which = "which")
+  if (which == "dimensions") {
+    cat("Table with effective dimensions and penalties: \n\n")
+    print.data.frame(x)
+    cat("\n", "Total Effective Dimension:", sum(x[["Effective"]]), "\n")
+  } else if (which == "variances") {
     cat("Table with variances: \n\n")
-    print(tbl)
+    print.data.frame(x)
     cat("\n")
   }
 }
@@ -130,6 +149,8 @@ residuals.LMMsolve <- function(object,
 #' @param includeConstant Should the constant in the restricted log-likelihood
 #' be included. Default is \code{TRUE}, as for example in \code{lme4} and SAS.
 #' In \code{asreml} the constant is omitted.
+#'
+#' @importFrom stats logLik
 #'
 #' @export
 logLik.LMMsolve <- function(object,

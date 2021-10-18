@@ -2,9 +2,12 @@
 % Please edit documentation in R/LMMsolve-class.R
 \name{summary.LMMsolve}
 \alias{summary.LMMsolve}
+\alias{print.summary.LMMsolve}
 \title{Summarize Linear Mixed Model fits}
 \usage{
 \method{summary}{LMMsolve}(object, which = c("dimensions", "variances"), ...)
+
+\method{print}{summary.LMMsolve}(x)
 }
 \arguments{
 \item{object}{an object of class LMMsolve}
@@ -13,8 +16,20 @@
 
 \item{\dots}{some methods for this generic require additional arguments.
 None are used in this method.}
+
+\item{x}{An object of class summary.LMMsolve, the result of a call to
+summary.LMM}
+}
+\value{
+A data.frame with either effective dimensions or variances depending
+on which.
 }
 \description{
 Summary method for class "LMMsolve". Prints the effective dimensions of the
 model.
 }
+\section{Functions}{
+\itemize{
+\item \code{print.summary.LMMsolve}: 
+}}
+
