@@ -69,7 +69,8 @@ summary.LMMsolve <- function(object,
 #' @describeIn summary.LMMsolve
 #'
 #' @export
-print.summary.LMMsolve <- function(x) {
+print.summary.LMMsolve <- function(x,
+                                   ...) {
   which <- attr(x, which = "which")
   if (which == "dimensions") {
     cat("Table with effective dimensions and penalties: \n\n")
