@@ -100,11 +100,11 @@ sparseMixedModels <- function(y,
   listC <- lapply(X = listC, FUN = spam::cleanup)
 
   if (is.null(theta)) {
-    theta <- rep(1.0, Nvarcomp + Nres)
+    theta <- rep(1, Nvarcomp + Nres)
   }
   if (Nvarcomp > 0) {
-    psi <- theta[c(1:Nvarcomp)]
-    phi <- theta[-c(1:Nvarcomp)]
+    psi <- theta[1:Nvarcomp]
+    phi <- theta[-(1:Nvarcomp)]
   } else {
     psi <- NULL
     phi <- theta
@@ -187,8 +187,7 @@ sparseMixedModels <- function(y,
   yhat <- W %*% a
 
   L <- list(logL = logL, sigma2e = 1 / phi, tau2e = 1 / psi, ED = ED,
-            theta = theta,
-            EDmax = EDmax, EDnames = EDnames, a = a, yhat = yhat,
+            theta = theta, EDmax = EDmax, EDnames = EDnames, a = a, yhat = yhat,
             residuals = y - yhat, nIter = it, C = C)
   return(L)
 }

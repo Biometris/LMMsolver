@@ -50,12 +50,11 @@ expect_error(LMMsolve(fixed = yield ~ rep + gen, data = john.alpha,
 ## Baseline model, only fixed effects.
 obj0 <- LMMsolve(fixed = yield ~ rep + gen,
                  data = john.alpha,
-                 tolerance = 1.0e-10,
-                 omitConstant = FALSE)
+                 tolerance = 1.0e-10)
 
 ## Compare deviance with JABES2020 paper, table 1.
 devJABES2020paper_baseline <- 69.91
-expect_equal(round(obj0$dev, 2), devJABES2020paper_baseline)
+expect_equal(round(deviance(obj0), 2), devJABES2020paper_baseline)
 
 ## Number of plots
 N <- nrow(john.alpha)
@@ -65,12 +64,11 @@ obj1 <- LMMsolve(fixed = yield ~ rep + gen,
                  spline = ~spl1D(x = plot, nseg = N - 1, degree = 1, pord = 1,
                                  scaleX = FALSE),
                  data = john.alpha,
-                 tolerance = 1.0e-10,
-                 omitConstant = FALSE)
+                 tolerance = 1.0e-10)
 
 ## Compare deviance with JABES2020 paper LV model, table 1.
 devJABES2020paper_LV <- 54.49
-expect_equal(round(obj1$dev, 2) , devJABES2020paper_LV)
+expect_equal(round(deviance(obj1), 2) , devJABES2020paper_LV)
 
 ## Check that full LMM solve object is correct.
 expect_equivalent_to_reference(obj1, "spl1DFull")

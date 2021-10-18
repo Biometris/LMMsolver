@@ -20,8 +20,8 @@
 #' \code{trace = FALSE}.
 #' @param maxit A numerical value. The maximum number of iterations for the
 #' algorithm. Default \code{maxit = 250}.
-#' @param theta initial values for penalty or precision parameters. Default \code{NULL},
-#' all precision parameters set equal to 1.
+#' @param theta initial values for penalty or precision parameters. Default
+#' \code{NULL}, all precision parameters set equal to 1.
 #'
 #' @return An object of class \code{LMMsolve} representing the fitted model.
 #' See \code{\link{LMMsolveObject}} for a full description of the components in
@@ -44,12 +44,6 @@
 #' LMM1_spline <- LMMsolve(fixed = yield ~ rep + gen,
 #'                        spline = ~spl1D(x = plot, nseg = 20),
 #'                        data = john.alpha)
-#'
-#' ## Fit the same model omitting the constant in the restricted log-likelihood.
-#' LMM1_const <- LMMsolve(fixed = yield ~ rep + gen,
-#'                       spline = ~spl1D(x = plot, nseg = 20),
-#'                       data = john.alpha,
-#'                       omitConstant = TRUE)
 #'
 #' ## Fit models on multipop data included in the package.
 #' data(multipop)
@@ -76,7 +70,7 @@
 #' @seealso \code{\link{LMMsolveObject}}
 #'
 #' @importFrom stats model.frame terms model.matrix contrasts as.formula
-#' terms.formula
+#' terms.formula aggregate
 #'
 #' @export
 LMMsolve <- function(fixed,
@@ -247,8 +241,8 @@ LMMsolve <- function(fixed,
   y <- mf[, 1]
   obj <- sparseMixedModels(y = y, X = X, Z = Z, lGinv = lGinv, lRinv = lRinv,
                            tolerance = tolerance, trace = trace, maxit = maxit,
-                           theta=theta)
-  #
+                           theta = theta)
+
   EffDimRes <- attributes(lRinv)$cnt
   EffDimNamesRes <- attributes(lRinv)$names
 
@@ -258,8 +252,8 @@ LMMsolve <- function(fixed,
   EDdf1 <- data.frame(term = term.labels.f, Effective = as.numeric(dim.f),
                       Model = as.numeric(dim.f),
                       Nominal = as.numeric(dim.f),
-                      Ratio = rep(1.0, length(dim.f)),
-                      Penalty = rep(0.0, length(dim.f)),
+                      Ratio = rep(1, length(dim.f)),
+                      Penalty = rep(0, length(dim.f)),
                       VarComp = rep(NA, length(dim.f)))
   EDdf2 <- data.frame(term = obj$EDnames, Effective = obj$ED,
                       Model = c(rep(dim.r, varPar), EffDimRes),
@@ -273,17 +267,17 @@ LMMsolve <- function(fixed,
   rownames(EDdf) <- NULL
 
   # make variance table:
-  f <- factor(EDdf2$VarComp, levels=unique(EDdf2$VarComp))
+  f <- factor(EDdf2$VarComp, levels = unique(EDdf2$VarComp))
   VarDf <- aggregate(x = EDdf2$Penalty,
-                  by = list(f),
-                  FUN = sum)
-  VarDf$var = 1/VarDf$x
+                     by = list(f),
+                     FUN = sum)
+  VarDf$var = 1 / VarDf$x
   VarDf$x <- NULL
-  names(VarDf) <- c('VarComp','Variance')
+  names(VarDf) <- c("VarComp", "Variance")
 
   Nobs <- length(y)
   p <- sum(dim.f)
-  constantREML <- -0.5 * log(2 * pi) * (Nobs -p)
+  constantREML <- -0.5 * log(2 * pi) * (Nobs - p)
   obj$constantREML = constantREML
 
   dim <- as.numeric(c(dim.f, dim.r))

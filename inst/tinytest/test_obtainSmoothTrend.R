@@ -6,8 +6,7 @@ data("john.alpha", package = "agridat")
 ## Baseline model, only fixed effects.
 obj0 <- LMMsolve(fixed = yield ~ rep + gen,
                  data = john.alpha,
-                 tolerance = 1.0e-10,
-                 omitConstant = FALSE)
+                 tolerance = 1.0e-10)
 
 ## Number of plots
 N <- nrow(john.alpha)
@@ -17,8 +16,7 @@ obj1 <- LMMsolve(fixed = yield ~ rep + gen,
                  spline = ~spl1D(x = plot, nseg = N - 1, degree = 1, pord = 1,
                                  scaleX = FALSE),
                  data = john.alpha,
-                 tolerance = 1.0e-10,
-                 omitConstant = FALSE)
+                 tolerance = 1.0e-10)
 
 ## Test input checks in obtainSmoothTrend.
 expect_error(obtainSmoothTrend("obj0"),

@@ -45,8 +45,8 @@ modified Henderson algorithm to estimate the variance components.}
 \item{maxit}{A numerical value. The maximum number of iterations for the
 algorithm. Default \code{maxit = 250}.}
 
-\item{theta}{initial values for penalty or precision parameters. Default \code{NULL},
-all precision parameters set equal to 1.}
+\item{theta}{initial values for penalty or precision parameters. Default
+\code{NULL}, all precision parameters set equal to 1.}
 }
 \value{
 An object of class \code{LMMsolve} representing the fitted model.
@@ -73,12 +73,6 @@ LMM1_rand <- LMMsolve(fixed = yield ~ rep,
 LMM1_spline <- LMMsolve(fixed = yield ~ rep + gen,
                        spline = ~spl1D(x = plot, nseg = 20),
                        data = john.alpha)
-
-## Fit the same model omitting the constant in the restricted log-likelihood.
-LMM1_const <- LMMsolve(fixed = yield ~ rep + gen,
-                      spline = ~spl1D(x = plot, nseg = 20),
-                      data = john.alpha,
-                      omitConstant = TRUE)
 
 ## Fit models on multipop data included in the package.
 data(multipop)

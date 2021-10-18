@@ -12,7 +12,7 @@ A data.frame with 180 rows and 6 columns.
 \item{pA}{Probability that individual has alleles from parent A}
 \item{pB}{Probability that individual has alleles from parent B}
 \item{pC}{Probability that individual has alleles from parent C}
-\item{pheno}{simulated phenotypic value}
+\item{pheno}{Simulated phenotypic value}
 }
 }
 \usage{

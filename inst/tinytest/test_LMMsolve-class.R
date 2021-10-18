@@ -9,19 +9,17 @@ mod <- LMMsolve(fixed = y ~ 1,
 
 ## Check summary function.
 expect_stdout(summary(mod),
-              "splR with total effective dimension  19.69")
+              "Table with effective dimensions and penalties")
 expect_stdout(summary(mod),
-              "s(x1) \t 6.58", fixed = TRUE)
-expect_stdout(summary(mod),
-              "s(x2) \t 6.89", fixed = TRUE)
-expect_stdout(summary(mod),
-              "s(x3) \t 6.21", fixed = TRUE)
+              "Total Effective Dimension: 250")
 
 ## Check logLik function.
-expect_equal(logLik(mod), 421.35599970558)
+expect_equal(logLik(mod), 198.972874670064)
+expect_equal(logLik(mod, includeConstant = FALSE), 421.355999705594)
 
 ## Check deviance function.
-expect_equal(deviance(mod), -842.71199941116)
+expect_equal(deviance(mod), -397.945749340128)
+expect_equal(deviance(mod, includeConstant = FALSE), -842.71199941116)
 
 ## Check coef function.
 coefMod <- coef(mod)
