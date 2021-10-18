@@ -4,7 +4,7 @@
 \alias{summary.LMMsolve}
 \title{Summarize Linear Mixed Model fits}
 \usage{
-\method{summary}{LMMsolve}(object, which = "dimensions", ...)
+\method{summary}{LMMsolve}(object, which = c("dimensions", "variances"), ...)
 }
 \arguments{
 \item{object}{an object of class LMMsolve}

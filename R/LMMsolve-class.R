@@ -44,18 +44,18 @@ LMMsolveObject <- function(object) {
 #'
 #' @export
 summary.LMMsolve <- function(object,
-                             which = "dimensions",
+                             which = c("dimensions", "variances"),
                              ...) {
   ## Checks.
-  #which <- match.arg(which)
+  which <- match.arg(which)
 
   # which = 'dimensions' or 'variances'
-  if(which=='dimensions') {
+  if (which == "dimensions") {
     tbl <- object$EDdf
     cat("Table with effective dimensions and penalties: \n\n")
     print(tbl)
-    cat("\n", "Total Effective Dimension:", sum(tbl$Effective),"\n")
-  } else if (which=='variances') {
+    cat("\n", "Total Effective Dimension:", sum(tbl$Effective), "\n")
+  } else if (which == "variances") {
     tbl <- object$VarDf
     cat("Table with variances: \n\n")
     print(tbl)
@@ -127,9 +127,13 @@ residuals.LMMsolve <- function(object,
 #' @return The restricted maximum log-likelihood of the fitted model.
 #'
 #' @inheritParams coef.LMMsolve
+#' @param includeConstant Should the constant in the restricted log-likelihood
+#' be included. Default is \code{TRUE}, as for example in \code{lme4} and SAS.
+#' In \code{asreml} the constant is omitted.
 #'
 #' @export
-logLik.LMMsolve <- function(object, includeConstant=TRUE,
+logLik.LMMsolve <- function(object,
+                            includeConstant = TRUE,
                             ...) {
   logL <- object$logL
   if (includeConstant) {
@@ -142,18 +146,16 @@ logLik.LMMsolve <- function(object, includeConstant=TRUE,
 #'
 #' Obtain the deviance of a model fitted using LMMsolve.
 #'
-#' @inheritParams coef.LMMsolve
+#' @inheritParams logLik.LMMsolve
 #'
 #' @return The deviance of the fitted model.
 #'
 #' @export
-deviance.LMMsolve <- function(object, includeConstant=TRUE,
+deviance.LMMsolve <- function(object,
+                              includeConstant = TRUE,
                               ...) {
-  logL <- object$logL
-  if (includeConstant){
-    logL <- logL + object$constantREML
-  }
-  dev <- -2*logL
+  logL <- logLik(object, includeConstant = includeConstant)
+  dev <- -2 * logL
   return(dev)
 }
 

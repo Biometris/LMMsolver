@@ -9,6 +9,10 @@
 \arguments{
 \item{object}{an object of class LMMsolve}
 
+\item{includeConstant}{Should the constant in the restricted log-likelihood
+be included. Default is \code{TRUE}, as for example in \code{lme4} and SAS.
+In \code{asreml} the constant is omitted.}
+
 \item{...}{some methods for this generic require additional arguments.
 None are used in this method.}
 }
