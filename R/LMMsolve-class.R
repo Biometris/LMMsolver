@@ -27,8 +27,42 @@
 #'
 #' @rdname LMMsolveObject
 #' @export
-LMMsolveObject <- function(object) {
-  structure(object,
+LMMsolveObject <- function(logL,
+                           sigma2e,
+                           tau2e,
+                           EDdf,
+                           varPar,
+                           VarDf,
+                           theta,
+                           coefficients,
+                           yhat,
+                           residuals,
+                           nIter,
+                           C,
+                           constantREML,
+                           dim,
+                           Nres,
+                           term.labels.f,
+                           term.labels.r,
+                           splRes) {
+  structure(list(logL = logL,
+                 sigma2e = sigma2e,
+                 tau2e = tau2e,
+                 EDdf = EDdf,
+                 varPar = varPar,
+                 VarDf = VarDf,
+                 theta = theta,
+                 coefficients = coefficients,
+                 yhat = yhat,
+                 residuals = residuals,
+                 nIter = nIter,
+                 C = C,
+                 constantREML = constantREML,
+                 dim = dim,
+                 Nres = Nres,
+                 term.labels.f = term.labels.f,
+                 term.labels.r = term.labels.r,
+                 splRes = splRes),
             class = c("LMMsolve", "list"))
 }
 
@@ -128,16 +162,7 @@ print.summary.LMMsolve <- function(x,
 #' @export
 coef.LMMsolve <- function(object,
                           ...) {
-  result <- list()
-  dim <- object$dim
-  e <- cumsum(dim)
-  s <- e - dim + 1
-
-  for (i in 1:length(dim)) {
-    result[[i]] <- object$a[s[i]:e[i]]
-  }
-  names(result) <- object$term.labels
-  return(result)
+  return(object$coefficients)
 }
 
 #' Fitted values of an LMMsolve object.

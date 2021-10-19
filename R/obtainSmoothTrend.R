@@ -121,16 +121,17 @@ obtainSmoothTrend <- function(object,
   XTot <- removeIntercept(XTot)
   ## Get intercept and compute contribution of fixed and random terms.
   if (includeIntercept) {
-    mu <- coef.LMMsolve(object)$'(Intercept)'
+    mu <- coef(object)$'(Intercept)'
   } else {
     mu <- 0
   }
   if (is.null(XTot)) {
     bc <- 0
   } else {
-    bc <- as.vector(XTot %*% coef.LMMsolve(object)$splF)
+    ## Remove leading zero, added for reference level.
+    bc <- as.vector(XTot %*% coef(object)$splF[-1])
   }
-  sc <- as.vector(BxTot %*% coef.LMMsolve(object)$splR)
+  sc <- as.vector(BxTot %*% coef(object)$splR)
   ## Compute fitted values.
   fit <- mu + bc + sc
   ## Construct output data.frame.

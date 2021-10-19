@@ -50,8 +50,8 @@ expect_equal(obj1Trend1$ypred, obj1Trend2$ypred)
 ## Include intercept.
 obj1Trend3 <- obtainSmoothTrend(obj1, newdata = john.alpha,
                                 includeIntercept = TRUE)
-expect_equal(obj1Trend3$ypred - obj1Trend2$ypred,
-             rep(coef(obj1)$`(Intercept)`, N))
+expect_equivalent(obj1Trend3$ypred - obj1Trend2$ypred,
+                  rep(coef(obj1)$`(Intercept)`, N))
 
 
 

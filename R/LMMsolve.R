@@ -113,14 +113,13 @@ LMMsolve <- function(fixed,
   if (!is.numeric(maxit) || length(maxit) > 1 || maxit < 0) {
     stop("maxit should be a positive numerical value.")
   }
+  ## Drop unused factor levels from data.
+  data <- droplevels(data)
   ## Check that all variables used in formulas are in data.
-
   random <- checkGroup(random, group)
-
   checkFormVars(fixed, data)
   checkFormVars(random, data)
   checkFormVars(residual, data)
-
   ## Remove NA for response variable from data.
   respVar <- all.vars(fixed)[attr(terms(fixed), "response")]
   respVarNA <- is.na(data[[respVar]])
@@ -129,7 +128,6 @@ LMMsolve <- function(fixed,
             respVar, ".\n", call. = FALSE)
     data <- data[!respVarNA, ]
   }
-
   ## Make random part.
   if (!is.null(random)) {
     mf <- model.frame(random, data, drop.unused.levels = TRUE, na.action = NULL)
@@ -150,7 +148,6 @@ LMMsolve <- function(fixed,
     Z1 <- NULL
     varPar1 <- NULL
   }
-
   if (!is.null(group)) {
     ndx <- unlist(group)
     dim2.r <- sapply(X = group, FUN = length)
@@ -163,7 +160,6 @@ LMMsolve <- function(fixed,
     Z2 <- NULL
     varPar2 <- NULL
   }
-
   if (!(is.null(random) & is.null(group))) {
     Z <- cbind(Z1, Z2)
     dim.r <- c(dim1.r, dim2.r)
@@ -171,7 +167,6 @@ LMMsolve <- function(fixed,
     varPar <- c(varPar1, varPar2)
     e <- cumsum(dim.r)
     s <- e - dim.r + 1
-
     lGinv <- list()
     for (i in 1:length(dim.r)) {
       tmp <- rep(0, sum(dim.r))
@@ -186,7 +181,6 @@ LMMsolve <- function(fixed,
     term.labels.r <- NULL
     varPar <- NULL
   }
-
   ## Make fixed part.
   mf <- model.frame(fixed, data, drop.unused.levels = TRUE)
   mt <- terms(mf)
@@ -194,12 +188,10 @@ LMMsolve <- function(fixed,
   X = model.matrix(mt, data = mf,
                    contrasts.arg = lapply(X = mf[, f.terms, drop = FALSE],
                                           FUN = contrasts, contrasts = TRUE))
-  dim.f <- table(attr(X, "assign"))
+  dim.f <- as.numeric(table(attr(X, "assign")))
   term.labels.f <- attr(mt, "term.labels")
-
   # calculate NomEff dimension for non-spline part
   NomEffDimRan <- calcNomEffDim(X, Z, dim.r)
-
   ## Add spline part.
   splRes <- NULL
   if (!is.null(spline)) {
@@ -217,20 +209,16 @@ LMMsolve <- function(fixed,
     ## Add dims.
     dim.f <- c(dim.f, splRes$dim.f)
     dim.r <- c(dim.r, splRes$dim.r)
-
     ## Add nominal ED
     NomEffDimRan <- c(NomEffDimRan, splRes$EDnom)
-
     ## Add labels.
     term.labels.f <- c(term.labels.f, splRes$term.labels.f)
     term.labels.r <- c(term.labels.r, splRes$term.labels.r)
   }
-
   ## Add intercept.
   if (attr(mt, "intercept") == 1) {
     term.labels.f <- c("(Intercept)", term.labels.f)
   }
-
   ## Make residual part.
   if (!is.null(residual)) {
     residVar <- all.vars(residual)
@@ -243,54 +231,93 @@ LMMsolve <- function(fixed,
   obj <- sparseMixedModels(y = y, X = X, Z = Z, lGinv = lGinv, lRinv = lRinv,
                            tolerance = tolerance, trace = trace, maxit = maxit,
                            theta = theta)
-
+  ## Add names to coefficients.
+  ## Fixed terms.
+  ef <- cumsum(dim.f)
+  sf <- ef - dim.f + 1
+  coefF <- vector(mode = "list", length = length(dim.f))
+  for (i in seq_along(coefF)) {
+    coefFi <- obj$a[sf[i]:ef[i]]
+    if (term.labels.f[i] == "(Intercept)") {
+      names(coefFi) <- "(Intercept)"
+      ## For fixed terms an extra 0 for the reference level has to be added.
+    } else if (term.labels.f[i] == "splF") {
+      coefFi <- c(0, coefFi)
+      ## Spline terms are just named 1...n.
+      names(coefFi) <- paste0("splF_", seq_along(coefFi))
+    } else {
+      coefFi <- c(0, coefFi)
+      names(coefFi) <- paste(term.labels.f[i],
+                             levels(data[[term.labels.f[i]]]) , sep = "_")
+    }
+    coefF[[i]] <- coefFi
+  }
+  ## Similar for random terms.
+  er <- sum(dim.f) + cumsum(dim.r)
+  sr <- er - dim.r + 1
+  coefR <- vector(mode = "list", length = length(dim.r))
+  for (i in seq_along(coefR)) {
+    coefRi <- obj$a[sr[i]:er[i]]
+    if (term.labels.r[i] == "splR") {
+      ## Spline terms are just named 1...n.
+      names(coefRi) <- paste0("splR_", seq_along(coefRi))
+    } else {
+      names(coefRi) <- paste(term.labels.r[i],
+                             levels(data[[term.labels.r[i]]]) , sep = "_")
+    }
+    coefR[[i]] <- coefRi
+  }
+  ## Combine result for fixed and random terms.
+  coefTot <- c(coefF, coefR)
+  names(coefTot) <- c(term.labels.f, term.labels.r)
+  ## Extract effective dimensions from fitted model.
   EffDimRes <- attributes(lRinv)$cnt
   EffDimNamesRes <- attributes(lRinv)$names
-
   NomEffDim <- c(NomEffDimRan, EffDimRes)
-
-  # make ED table:
-  EDdf1 <- data.frame(term = term.labels.f, Effective = as.numeric(dim.f),
-                      Model = as.numeric(dim.f),
-                      Nominal = as.numeric(dim.f),
+  ## Make ED table for fixed effects.
+  EDdf1 <- data.frame(term = term.labels.f,
+                      Effective = dim.f,
+                      Model = dim.f,
+                      Nominal = dim.f,
                       Ratio = rep(1, length(dim.f)),
                       Penalty = rep(0, length(dim.f)),
                       VarComp = rep(NA, length(dim.f)))
-  EDdf2 <- data.frame(term = obj$EDnames, Effective = obj$ED,
+  ## Make ED table for random effects.
+  EDdf2 <- data.frame(term = obj$EDnames,
+                      Effective = obj$ED,
                       Model = c(rep(dim.r, varPar), EffDimRes),
                       Nominal = NomEffDim,
                       Ratio = obj$ED / NomEffDim,
                       Penalty = obj$theta,
                       VarComp = c(rep(term.labels.r, varPar), EffDimNamesRes))
-
+  ## Make full ED table.
   EDdf <- rbind(EDdf1, EDdf2)
-  EDdf$VarComp <- NULL
+  EDdf <- EDdf[-which(colnames(EDdf) == "VarComp")]
   rownames(EDdf) <- NULL
-
-  # make variance table:
-  f <- factor(EDdf2$VarComp, levels = unique(EDdf2$VarComp))
-  VarDf <- aggregate(x = EDdf2$Penalty,
-                     by = list(f),
-                     FUN = sum)
-  VarDf$var = 1 / VarDf$x
-  VarDf$x <- NULL
-  names(VarDf) <- c("VarComp", "Variance")
-
-  Nobs <- length(y)
-  p <- sum(dim.f)
-  constantREML <- -0.5 * log(2 * pi) * (Nobs - p)
-  obj$constantREML = constantREML
-
-  dim <- as.numeric(c(dim.f, dim.r))
-  term.labels <- c(term.labels.f, term.labels.r)
-  obj$varPar <- varPar
-  obj$EDdf <- EDdf
-  obj$VarDf <- VarDf
-  obj$dim <- dim
-  obj$Nres <- length(lRinv)
-  obj$term.labels.f <- term.labels.f
-  obj$term.labels.r <- term.labels.r
-  obj$term.labels <- term.labels
-  obj$splRes <- splRes
-  return(LMMsolveObject(obj))
+  ## Make variance table.
+  varComp <- factor(EDdf2[["VarComp"]], levels = unique(EDdf2[["VarComp"]]))
+  VarDf <- aggregate(x = EDdf2$Penalty, by = list(VarComp = varComp), FUN = sum)
+  VarDf[["Variance"]] = 1 / VarDf[["x"]]
+  VarDf <- VarDf[c("VarComp", "Variance")]
+  ## Compute REML constant.
+  constantREML <- -0.5 * log(2 * pi) * (length(y) - sum(dim.f))
+  dim <- c(dim.f, dim.r)
+  return(LMMsolveObject(logL = obj$logL,
+                        sigma2e = obj$sigma2e,
+                        tau2e = obj$tau2e,
+                        EDdf = EDdf,
+                        varPar = varPar,
+                        VarDf = VarDf,
+                        theta = obj$theta,
+                        coefficients = coefTot,
+                        yhat = obj$yhat,
+                        residuals = obj$residuals,
+                        nIter = obj$nIter,
+                        C = obj$C,
+                        constantREML = constantREML,
+                        dim = dim,
+                        Nres = length(lRinv),
+                        term.labels.f = term.labels.f,
+                        term.labels.r = term.labels.r,
+                        splRes = splRes))
 }
