@@ -159,6 +159,8 @@ print.summary.LMMsolve <- function(x,
 #' ## Obtain coefficients.
 #' coefs1 <- coef(LMM1)
 #'
+#' @importFrom stats coef
+#'
 #' @export
 coef.LMMsolve <- function(object,
                           ...) {
