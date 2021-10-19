@@ -1,15 +1,16 @@
-#' fit 1D P-splines
+#' Fit P-splines
 #'
-#' fit 1D P-splines using sparse implementation.
+#' Fit multi dimensional P-splines using sparse implementation.
 #'
-#' @param x numerical vector containing the values of x covariate.
-#' @param nseg number of segments
-#' @param scaleX logical, scale fixed effect or not. Default is TRUE,
-#' no scaling.
-#' @param pord order of penalty, default \code{pord=2}
-#' @param degree degree of B-spline basis, default \code{degree=3}
-#' @param xlim numerical vector of length 2 containing the domain of covariate
-#' x where the knots should be placed. Default set to \code{NULL} (covariate range).
+#' @param x,x1,x2,x3 The variables in the data containing the values of
+#' the \code{x} covariates.
+#' @param nseg The number of segments
+#' @param scaleX Should the fixed effects be scaled.
+#' @param pord The order of penalty, default \code{pord = 2}
+#' @param degree The degree of B-spline basis, default \code{degree = 3}
+#' @param xlim,x1lim,x2lim,x3lim A numerical vector of length 2 containing the
+#' domain of the corresponding x covariate where the knots should be placed.
+#' Default set to \code{NULL} (covariate range).
 #'
 #' @return A list with the following elements:
 #' \itemize{
@@ -17,7 +18,43 @@
 #'   \item \code{Z} - design matrix for random effect.
 #'   \item \code{lGinv} - a list of precision matrices
 #'   \item \code{knots} - a list of vectors with knot positions
+#'   \item \code{dim.f} - the dimensions of the fixed effect.
+#'   \item \code{dim.r} - the dimensions of the random effect.
+#'   \item \code{term.labels.f} - the labels for the fixed effect terms.
+#'   \item \code{term.labels.r} - the labels for the random effect terms.
+#'   \item \code{x} - a list of vectors for the spline variables.
+#'   \item \code{pord} - the order of the penalty.
+#'   \item \code{degree} - the degree of the B-spline basis.
+#'   \item \code{scaleX} - logical indicating if the fixed effects are scaled.
+#'   \item \code{EDnom} - the nominal effective dimensions.
 #' }
+#'
+#' @examples
+#' ## Fit model on john.alpha data from agridat package.
+#' data(john.alpha, package = "agridat")
+#'
+#' ## Fit a model with a 1-dimensional spline at the plot level.
+#' LMM1_spline <- LMMsolve(fixed = yield ~ rep + gen,
+#'                        spline = ~spl1D(x = plot, nseg = 20),
+#'                        data = john.alpha)
+#'
+#' summary(LMM1_spline)
+#'
+#' ## Fit model on US precipitation data from spam package.
+#' data(USprecip, package = "spam")
+#'
+#' ## Only use observed data
+#' USprecip <- as.data.frame(USprecip)
+#' USprecip <- USprecip[USprecip$infill == 1, ]
+#'
+#' ## Fit a model with a 2-dimensional P-spline.
+#' LMM2_spline <- LMMsolve(fixed = anomaly ~ 1,
+#'                        spline = ~spl2D(x1 = lon, x2 = lat, nseg = c(41, 41)),
+#'                        data = USprecip)
+#'
+#' summary(LMM2_spline)
+#'
+#' @seealso \code{\link{LMMsolve}}
 #'
 #' @importFrom stats setNames
 #'
@@ -64,7 +101,7 @@ spl1D <- function(x,
   X <- constructX(B, x, scaleX, pord)
   CCt <- constructCCt(q, pord)
 
-  # nominal effective dimension
+  ## nominal effective dimension.
   EDnom = ncol(B) - ncol(X)
 
   ## Remove intercept column to avoid singularity problems.

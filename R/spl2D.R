@@ -1,30 +1,4 @@
-#' fit 2D P-splines
-#'
-#' fit 2D P-splines using sparse implementation.
-#'
-#' @param x1 numerical vector containing the values of \code{x1} covariate.
-#' @param x2 numerical vector containing the values of \code{x2} covariate.
-#' @param nseg number of segments
-#' @param scaleX logical, scale fixed effect or not. Default is TRUE,
-#' no scaling.
-#' @param pord order of penalty, default \code{pord=2}
-#' @param degree degree of B-spline basis, default \code{degree=3}
-#' @param x1lim numerical vector of length 2 containing the domain of covariate
-#' \code{x1} where the knots should be placed. Default set to \code{NULL}
-#' (covariate range).
-#' @param x2lim numerical vector of length 2 containing the domain of covariate
-#' \code{x2} where the knots should be placed. Default set to \code{NULL}
-#' (covariate range).
-#'
-#' @return A list with the following elements:
-#' \itemize{
-#'   \item \code{X} - design matrix for fixed effect. The intercept is not included.
-#'   \item \code{Z} - design matrix for random effect.
-#'   \item \code{lGinv} - a list of precision matrices
-#'   \item \code{knots} - a list of vectors with knot positions
-#' }
-#'
-#' @importFrom stats setNames
+#' @describeIn spl1D 2-dimensional splines
 #'
 #' @export
 spl2D <- function(x1,

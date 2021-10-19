@@ -98,5 +98,6 @@ LMM2_group <- LMMsolve(fixed = pheno ~ cross,
 
 }
 \seealso{
-\code{\link{LMMsolveObject}}
+\code{\link{LMMsolveObject}}, \code{\link{spl1D}},
+\code{\link{spl2D}}, \code{\link{spl3D}}
 }

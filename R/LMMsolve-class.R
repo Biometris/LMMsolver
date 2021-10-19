@@ -85,7 +85,7 @@ summary.LMMsolve <- function(object,
 #' @param x An object of class summary.LMMsolve, the result of a call to
 #' summary.LMM
 #'
-#' @describeIn summary.LMMsolve
+#' @describeIn summary.LMMsolve print summary
 #'
 #' @export
 print.summary.LMMsolve <- function(x,

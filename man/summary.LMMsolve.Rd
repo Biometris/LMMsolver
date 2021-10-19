@@ -32,7 +32,7 @@ dimensions (which = "dimensions") or a table of variances (which =
 }
 \section{Functions}{
 \itemize{
-\item \code{print.summary.LMMsolve}: 
+\item \code{print.summary.LMMsolve}: print summary
 }}
 
 \examples{
