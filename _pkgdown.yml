@@ -1,0 +1,67 @@
+home:
+  title: An R package for providing an efficient and flexible system to solve sparse mixed model equations
+
+navbar:
+  title: "LMMsolver"
+  left:
+    - icon: fa-home
+      href: index.html
+    - text: "Vignettes"
+      href: articles/index.html
+  right:
+    - icon: fa-newspaper-o
+      text: "news"
+      href: news/index.html
+    - icon: fa-file-code-o
+      text: "functions"
+      href: reference/index.html
+    - icon: fa-seedling
+      text: "other packages"
+      menu:
+        - text: "statgenSTA"
+          href: https://biometris.github.io/statgenSTA
+        - text: "statgenGxE"
+          href: https://biometris.github.io/statgenGxE
+        - text: "statgenGWAS"
+          href: https://biometris.github.io/statgenGWAS
+        - text: "statgenHTP"
+          href: https://biometris.github.io/statgenHTP
+        - text: "statgenIBD"
+          href: https://biometris.github.io/statgenIBD
+    - icon: fa-github fa-lg fab
+      text: "github"
+      href: https://github.com/Biometris/LMMsolver
+
+
+articles:
+  - title: "Vignettes"
+    desc: >
+      This vignette provides a description of the LMMsolver package including
+      some fully worked examples.
+    contents:
+      - Solving_Linear_Mixed_Models
+
+reference:
+- title: Solve mixed models
+- contents:
+  - LMMsolve
+  - LMMsolveObject
+  - summary.LMMsolve
+  - print.summary.LMMsolve
+  - coef.LMMsolve
+  - fitted.LMMsolve
+  - residuals.LMMsolve
+  - logLik.LMMsolve
+  - deviance.LMMsolve
+  - diagnosticsMME
+  - displayMME
+- title: Spline functions
+- contents:
+  - spl1D
+  - spl2D
+  - spl3D
+  - obtainSmoothTrend
+- title: data
+- contents:
+  - APSIMdat
+  - multipop

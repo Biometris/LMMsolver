@@ -5,3 +5,6 @@ unused functions
 .gitlab-ci.yml
 data_raw
 ^README\.Rmd$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
