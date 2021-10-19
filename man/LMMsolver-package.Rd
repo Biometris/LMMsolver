@@ -4,8 +4,17 @@
 \name{LMMsolver-package}
 \alias{LMMsolver}
 \alias{LMMsolver-package}
-\title{LMMsolver: Linear Mixed Model solver}
+\title{LMMsolver: Linear Mixed Model Solver}
 \description{
-Linear Mixed Model solver.
+An efficient and flexible system to solve sparse mixed model equations, for models that are often used in statistical genetics. Important applications are the use of splines to model spatial or temporal trends. Another application area is mixed model QTL analysis for multiparental populations, allowing for heterogeneous residual variance and random design matrices with Identity-By-Descent (IBD) probabilities.
+}
+\author{
+\strong{Maintainer}: Bart-Jan van Rossum \email{bart-jan.vanrossum@wur.nl} (\href{https://orcid.org/0000-0002-8673-2514}{ORCID})
+
+Authors:
+\itemize{
+  \item Martin Boer \email{martin.boer@wur.nl}
+}
+
 }
 \keyword{internal}
