@@ -10,11 +10,12 @@
 \method{print}{summary.LMMsolve}(x, ...)
 }
 \arguments{
-\item{object}{an object of class LMMsolve}
+\item{object}{An object of class LMMsolve}
 
-\item{which}{default dimensions (only option so far).}
+\item{which}{A character string indicating which summary table should be
+created.}
 
-\item{\dots}{some methods for this generic require additional arguments.
+\item{\dots}{Some methods for this generic require additional arguments.
 None are used in this method.}
 
 \item{x}{An object of class summary.LMMsolve, the result of a call to
@@ -25,11 +26,30 @@ A data.frame with either effective dimensions or variances depending
 on which.
 }
 \description{
-Summary method for class "LMMsolve". Prints the effective dimensions of the
-model.
+Summary method for class "LMMsolve". Creates either a table of effective
+dimensions (which = "dimensions") or a table of variances (which =
+"variances").
 }
 \section{Functions}{
 \itemize{
 \item \code{print.summary.LMMsolve}: 
 }}
 
+\examples{
+## Fit model on john.alpha data from agridat package.
+data(john.alpha, package = "agridat")
+
+## Fit simple model with only fixed effects.
+LMM1 <- LMMsolve(fixed = yield ~ rep + gen,
+                data = john.alpha)
+
+## Obtain table of effective dimensions.
+summ1 <- summary(LMM1)
+print(summ1)
+
+## Obtain table of variances.
+summ2 <- summary(LMM1,
+                which = "variances")
+print(summ2)
+
+}

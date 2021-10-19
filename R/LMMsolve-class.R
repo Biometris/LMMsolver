@@ -34,16 +34,35 @@ LMMsolveObject <- function(object) {
 
 #' Summarize Linear Mixed Model fits
 #'
-#' Summary method for class "LMMsolve". Prints the effective dimensions of the
-#' model.
+#' Summary method for class "LMMsolve". Creates either a table of effective
+#' dimensions (which = "dimensions") or a table of variances (which =
+#' "variances").
 #'
-#' @param object an object of class LMMsolve
-#' @param which default dimensions (only option so far).
-#' @param \dots some methods for this generic require additional arguments.
+#' @param object An object of class LMMsolve
+#' @param which A character string indicating which summary table should be
+#' created.
+#' @param \dots Some methods for this generic require additional arguments.
 #' None are used in this method.
 #'
 #' @return A data.frame with either effective dimensions or variances depending
 #' on which.
+#'
+#' @examples
+#' ## Fit model on john.alpha data from agridat package.
+#' data(john.alpha, package = "agridat")
+#'
+#' ## Fit simple model with only fixed effects.
+#' LMM1 <- LMMsolve(fixed = yield ~ rep + gen,
+#'                 data = john.alpha)
+#'
+#' ## Obtain table of effective dimensions.
+#' summ1 <- summary(LMM1)
+#' print(summ1)
+#'
+#' ## Obtain table of variances.
+#' summ2 <- summary(LMM1,
+#'                 which = "variances")
+#' print(summ2)
 #'
 #' @export
 summary.LMMsolve <- function(object,
