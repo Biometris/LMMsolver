@@ -58,14 +58,14 @@ spl2D <- function(x1,
   X <- RowKronecker(X1, X2)
 
   # nominal effective dimension
-  EDnom = rep(ncol(B12) - ncol(X),2)
+  EDnom = rep(ncol(B12) - ncol(X), 2)
 
   ## Remove intercept column to avoid singularity problems.
   X  <- removeIntercept(X)
 
   # construct list of sparse precision matrices.
   lGinv <- constructGinvSplines(q, pord)
-  names(lGinv) <- c(paste0("s(",x1Name,")"),paste0("s(",x2Name,")"))
+  names(lGinv) <- paste0("s(", xNames, ")")
 
   if (is.null(X)) {
     dim.f <- NULL
@@ -78,7 +78,7 @@ spl2D <- function(x1,
   term.labels.r <- "splR"
 
 
-  xList <- setNames(list(x1, x2), c(x1Name, x2Name))
+  xList <- setNames(list(x1, x2), xNames)
   return(list(X = X, Z = B12, lGinv = lGinv, knots = knots,
               dim.f = dim.f, dim.r = dim.r, term.labels.f = term.labels.f,
               term.labels.r = term.labels.r, x = xList, pord = pord,
