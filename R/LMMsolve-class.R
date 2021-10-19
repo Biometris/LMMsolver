@@ -95,6 +95,17 @@ print.summary.LMMsolve <- function(x,
 #' effect and the predictions for each random effect in the defined linear
 #' mixed model.
 #'
+#' @examples
+#' ## Fit model on john.alpha data from agridat package.
+#' data(john.alpha, package = "agridat")
+#'
+#' ## Fit simple model with only fixed effects.
+#' LMM1 <- LMMsolve(fixed = yield ~ rep + gen,
+#'                 data = john.alpha)
+#'
+#' ## Obtain coefficients.
+#' coefs1 <- coef(LMM1)
+#'
 #' @export
 coef.LMMsolve <- function(object,
                           ...) {
@@ -118,6 +129,17 @@ coef.LMMsolve <- function(object,
 #'
 #' @return A vector of fitted values.
 #'
+#' @examples
+#' ## Fit model on john.alpha data from agridat package.
+#' data(john.alpha, package = "agridat")
+#'
+#' ## Fit simple model with only fixed effects.
+#' LMM1 <- LMMsolve(fixed = yield ~ rep + gen,
+#'                 data = john.alpha)
+#'
+#' ## Obtain fitted values.
+#' fitted1 <- fitted(LMM1)
+#'
 #' @export
 fitted.LMMsolve <- function(object,
                             ...) {
@@ -130,7 +152,18 @@ fitted.LMMsolve <- function(object,
 #'
 #' @inheritParams coef.LMMsolve
 #'
-#' @return A vector of fitted values.
+#' @return A vector of residuals.
+#'
+#' @examples
+#' ## Fit model on john.alpha data from agridat package.
+#' data(john.alpha, package = "agridat")
+#'
+#' ## Fit simple model with only fixed effects.
+#' LMM1 <- LMMsolve(fixed = yield ~ rep + gen,
+#'                 data = john.alpha)
+#'
+#' ## Obtain fitted values.
+#' residuals1 <- residuals(LMM1)
 #'
 #' @export
 residuals.LMMsolve <- function(object,
@@ -138,18 +171,31 @@ residuals.LMMsolve <- function(object,
   return(as.vector(object$residuals))
 }
 
-
 #' Log-likelihood of an LMMsolve object
 #'
 #' Obtain the Restricted Maximum Log-Likelihood of a model fitted using
 #' LMMsolve.
 #'
-#' @return The restricted maximum log-likelihood of the fitted model.
-#'
 #' @inheritParams coef.LMMsolve
 #' @param includeConstant Should the constant in the restricted log-likelihood
 #' be included. Default is \code{TRUE}, as for example in \code{lme4} and SAS.
 #' In \code{asreml} the constant is omitted.
+#'
+#' @return The restricted maximum log-likelihood of the fitted model.
+#'
+#' @examples
+#' ## Fit model on john.alpha data from agridat package.
+#' data(john.alpha, package = "agridat")
+#'
+#' ## Fit simple model with only fixed effects.
+#' LMM1 <- LMMsolve(fixed = yield ~ rep + gen,
+#'                 data = john.alpha)
+#'
+#' ## Obtain log-likelihood.
+#' logLik(LMM1)
+#'
+#' ## Obtain log-likelihood without constant.
+#' logLik(LMM1, includeConstant = FALSE)
 #'
 #' @importFrom stats logLik
 #'
@@ -172,6 +218,20 @@ logLik.LMMsolve <- function(object,
 #'
 #' @return The deviance of the fitted model.
 #'
+#' @examples
+#' ## Fit model on john.alpha data from agridat package.
+#' data(john.alpha, package = "agridat")
+#'
+#' ## Fit simple model with only fixed effects.
+#' LMM1 <- LMMsolve(fixed = yield ~ rep + gen,
+#'                 data = john.alpha)
+#'
+#' ## Obtain deviance.
+#' logLik(LMM1)
+#'
+#' ## Obtain deviance. without constant.
+#' logLik(LMM1, includeConstant = FALSE)
+#'
 #' @export
 deviance.LMMsolve <- function(object,
                               includeConstant = TRUE,
@@ -183,8 +243,22 @@ deviance.LMMsolve <- function(object,
 
 #' Display the sparseness of the mixed model coefficient matrix
 #'
-#' @param object an object of class LMMsolve
-#' @param cholesky logical. If \code{cholesky = TRUE} it will plot the cholesky.
+#' @param object an object of class LMMsolve.
+#' @param cholesky Should the cholesky decomposition of the coefficient matrix
+#' be plotted?
+#'
+#' @return A plot of the sparseness of the mixed model coefficient matrix.
+#'
+#' @examples
+#' ## Fit model on john.alpha data from agridat package.
+#' data(john.alpha, package = "agridat")
+#'
+#' ## Fit simple model with only fixed effects.
+#' LMM1 <- LMMsolve(fixed = yield ~ rep + gen,
+#'                 data = john.alpha)
+#'
+#' ## Obtain deviance.
+#' displayMME(LMM1)
 #'
 #' @export
 displayMME <- function(object,
@@ -204,7 +278,21 @@ displayMME <- function(object,
 #' Give diagnostics for mixed model coefficient matrix C and the cholesky
 #' decomposition
 #'
-#' @param object an object of class LMMsolve
+#' @param object an object of class LMMsolve.
+#'
+#' @return A summary of the mixed model coefficient matrix and its choleski
+#' decomposition.
+#'
+#' @examples
+#' ## Fit model on john.alpha data from agridat package.
+#' data(john.alpha, package = "agridat")
+#'
+#' ## Fit simple model with only fixed effects.
+#' LMM1 <- LMMsolve(fixed = yield ~ rep + gen,
+#'                 data = john.alpha)
+#'
+#' ## Obtain deviance.
+#' diagnosticsMME(LMM1)
 #'
 #' @export
 diagnosticsMME <- function(object) {

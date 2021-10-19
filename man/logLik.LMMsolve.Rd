@@ -23,3 +23,18 @@ The restricted maximum log-likelihood of the fitted model.
 Obtain the Restricted Maximum Log-Likelihood of a model fitted using
 LMMsolve.
 }
+\examples{
+## Fit model on john.alpha data from agridat package.
+data(john.alpha, package = "agridat")
+
+## Fit simple model with only fixed effects.
+LMM1 <- LMMsolve(fixed = yield ~ rep + gen,
+                data = john.alpha)
+
+## Obtain log-likelihood.
+logLik(LMM1)
+
+## Obtain log-likelihood without constant.
+logLik(LMM1, includeConstant = FALSE)
+
+}

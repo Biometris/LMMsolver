@@ -8,9 +8,25 @@ decomposition}
 diagnosticsMME(object)
 }
 \arguments{
-\item{object}{an object of class LMMsolve}
+\item{object}{an object of class LMMsolve.}
+}
+\value{
+A summary of the mixed model coefficient matrix and its choleski
+decomposition.
 }
 \description{
 Give diagnostics for mixed model coefficient matrix C and the cholesky
 decomposition
+}
+\examples{
+## Fit model on john.alpha data from agridat package.
+data(john.alpha, package = "agridat")
+
+## Fit simple model with only fixed effects.
+LMM1 <- LMMsolve(fixed = yield ~ rep + gen,
+                data = john.alpha)
+
+## Obtain deviance.
+diagnosticsMME(LMM1)
+
 }

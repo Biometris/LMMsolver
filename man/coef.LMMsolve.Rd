@@ -20,3 +20,15 @@ mixed model.
 \description{
 Obtain the coefficients from the mixed model equations of an LMMsolve object.
 }
+\examples{
+## Fit model on john.alpha data from agridat package.
+data(john.alpha, package = "agridat")
+
+## Fit simple model with only fixed effects.
+LMM1 <- LMMsolve(fixed = yield ~ rep + gen,
+                data = john.alpha)
+
+## Obtain coefficients.
+coefs1 <- coef(LMM1)
+
+}

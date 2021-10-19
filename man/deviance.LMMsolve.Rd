@@ -22,3 +22,18 @@ The deviance of the fitted model.
 \description{
 Obtain the deviance of a model fitted using LMMsolve.
 }
+\examples{
+## Fit model on john.alpha data from agridat package.
+data(john.alpha, package = "agridat")
+
+## Fit simple model with only fixed effects.
+LMM1 <- LMMsolve(fixed = yield ~ rep + gen,
+                data = john.alpha)
+
+## Obtain deviance.
+logLik(LMM1)
+
+## Obtain deviance. without constant.
+logLik(LMM1, includeConstant = FALSE)
+
+}
