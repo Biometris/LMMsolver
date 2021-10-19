@@ -1,6 +1,5 @@
 # Martin Boer, Biometris
 
-# using asreml4 for comparison with LMMsolver:
 library(LMMsolver)
 library(asreml)
 library(dplyr)
@@ -35,13 +34,6 @@ obj0$logL
 obj0.asr$loglik
 obj0$theta
 
-obj0b <- LMMsolve(fixed=pheno~cross, residual=~cross, data=df, tolerance=1.0e-8,
-                  trace=TRUE, theta=obj0$theta)
-
-# effective degrees of freedom
-df %>% group_by(cross) %>% tally()
-obj0$ED
-
 # include QTL, using LMMsolve
 lM <- list(QTL=c(3:5))
 obj1 <- LMMsolve(fixed=pheno~cross, group=lM,
@@ -50,28 +42,17 @@ obj1 <- LMMsolve(fixed=pheno~cross, group=lM,
                  data=df, tolerance=1.0e-6,
                  trace=TRUE)
 
-obj1b <- LMMsolve(fixed=pheno~cross, group=lM,
-                 random = ~grp(QTL),
-                 residual=~cross,
-                 data=df, tolerance=1.0e-6,
-                 trace=TRUE, theta=c(1.0,obj0$theta))
-obj1b$EDdf
-
 # check with asreml:
 obj1$logL
 obj1.asr$loglik
 
-obj0$theta
-obj1$theta
-# effective degrees of freedom: maximum effective dimension for QTL is 2,
-# because of sum to one constraint:
-obj1$ED
+# strong QTL effect, eff dimension close to two:
+summary(obj1)
 
-# coefficients for QTL-effect:
-coefficients(obj1.asr,list=TRUE)
-coef(obj1)
+# coefficients for QTL-effect asreml:
+coefficients(obj1.asr, list=TRUE)
 
-coefficients(obj1.asr,list=TRUE)
+# coefficients with LMMsolver
 coef(obj1)
 
 # sum of effects equal to zero:
