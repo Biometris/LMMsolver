@@ -28,9 +28,19 @@ library(ggplot2)
 
 # The LMMsolver package {.unnumbered}
 
-The aim of the `LMMsolver` package is to provide an efficient and flexible system to solve sparse mixed model equations, for models that are often used in statistical genetics. One important application is using splines to model spatial [@Rodriguez-Alvarez2018; @Boer2020] or temporal [@Bustos-Korts2019] trends for phenotypic observations. Another application area is mixed model QTL analysis for multiparental populations, allowing for heterogeneous residual variance and random design matrices with Identity-By-Descent (IBD) probabilities [@Li2021].
+The aim of the `LMMsolver` package is to provide an efficient and flexible system to estimate variance components using restricted maximum likelihood or REML [@Patterson1971], for models where the mixed model equations are sparse. An example of an application is using splines to model spatial [@Rodriguez-Alvarez2018; @Boer2020] or temporal [@Bustos-Korts2019] trends for phenotypic observations. Another example is mixed model QTL analysis for multiparental populations, allowing for heterogeneous residual variance and random design matrices with Identity-By-Descent (IBD) probabilities [@Li2021].
 
-The mixed model equations are solved using efficient sparse matrix algebra, using the `spam` package [@Furrer2010]. The automatic differentiation of the Cholesky matrix [@Smith1995] is implemented in C++ using the `Rcpp` package [@Eddelbuettel2018].
+The linear mixed model has the form
+
+$$
+  y = X \beta + Z u + e, \quad u \sim N(0,G), \quad e \sim N(0,R) 
+$$ where $y$ is a vector of observations, $\beta$ is a vector with the fixed effects, $u$ is a vector with the random effects, and $e$ a vector of random residuals. $X$ and $Z$ are design matrices.
+
+The `LMMsolve` package can fit models where the matrices $G^{-1}$ and $R^{-1}$ are a linear combination of precision matrices $Q_{G,i}$ and $Q_{R,i}$: $$
+  G^{-1} = \sum_{i} \psi_i Q_{G,i} \;, \quad   R^{-1} = \sum_{i} \psi_i Q_{R,i} 
+$$ where the precision parameters $\psi_i$ and $\phi_i$ are estimated using REML. For most standard mixed models $1/{\psi_i}$ are the variance components and $1/{\phi_i}$ the residual variance(s), but we use a formulation in terms of precision parameters to allow for non-standard mixed models using tensor product splines [\@Rodriguez-Alvarez2014].
+
+If the matrices $G^{-1}$ and $R^{-1}$ are sparse, the mixed model equations can be solved using efficient sparse matrix algebra implemented in the `spam` package [@Furrer2010]. To calculate the derivatives of the log-likelihood in an efficient way, the automatic differentiation of the Cholesky matrix [@Smith1995] was implemented in C++ using the `Rcpp` package [@Eddelbuettel2018].
 
 # Spatial trend with plots in a single line.
 
@@ -42,7 +52,7 @@ data(john.alpha, package = "agridat")
 head(john.alpha)
 ```
 
-In the following mixed model we include rep and gen as fixed effect, and `spl1D` to model a one dimensional P-spline with 20 segments, using the default choice of cubical B-splines and second order differences:
+In the following mixed model we include rep and gen as fixed effect, and `spl1D` to model a one dimensional P-spline [@Eilers1996] with 20 segments, using the default choice of cubical B-splines and second order differences:
 
 ```{r Pspline1D}
 ## Fit mixed model with fixed and spline part.
@@ -65,7 +75,7 @@ The trend can then be plotted.
 ## Plot smooth trend.
 ggplot(data = plotDat, aes(x = plot, y = ypred)) +
   geom_line(color = "red", size = 1) +
-  labs(title = "Smooth Spatial Trend Oats data", x = "plotnr", y = "yield") +
+  labs(title = "Smooth Trend Oats data", x = "plotnr", y = "yield") +
   theme(panel.grid = element_blank())
 ```
 
@@ -77,51 +87,58 @@ obj2 <- LMMsolve(fixed = yield ~ rep + gen,
                  data = john.alpha)
 ```
 
-The deviance ($dev = -2 \log L_R$) is 
+The deviance ($dev = -2 \log L_R$) is
 
 ```{r deviance}
 round(deviance(obj2), 2)
 ```
-see P-spline(1) model in Table 1 in @Boer2020.
 
-We can obtain a table with effective dimensions (see e.g. @Rodriguez-Alvarez2018) and penalties using the `summary` function:
+see the P-spline(1) model in Table 1 in @Boer2020.
+
+We can obtain a table with effective dimensions (see e.g. @Rodriguez-Alvarez2018) and penalties (the precision parameters $\psi_i$ and $\phi_i$) using the `summary` function:
 
 ```{r summaryED}
 summary(obj2)
 ```
-The effective dimension is a measure for complexity. In the table above the first three terms are fixed effects and penalized, and therefore the effective dimension is equal to the number of parameters in the model. The term `s(plot)` is a random effect, with effective dimension is \code{14.2}, indicating that there is rather strong non-linear smooth trend, corresponding to what we see in the Figure.  
+
+The effective dimension is a measure for complexity. In the table above the first three terms are fixed effects and not penalized, and therefore the effective dimension is equal to the number of parameters in the model. The term `s(plot)` is a random effect, with effective dimension \code{14.2}, indicating that there is rather strong non-linear smooth trend in the field, corresponding to what we see in the Figure.
 
 We can also use the `summary` function to obtain the table with variances:
 
 ```{r summaryVAR}
 summary(obj2, which = "variances")
 ```
-see Table 1 in @Boer2020. 
+
+see Table 1 in @Boer2020.
 
 # P-splines to fit biomass as function of time.
 
-In this section we show an example of mixed model P-splines to fit biomass as function of time. As an example we take wheat data simulated with crop growth model APSIM. For further details on this simulated data see @Bustos-Korts2019. 
+In this section we show an example of mixed model P-splines to fit biomass as function of time. As an example we take wheat data simulated with crop growth model APSIM. For further details on this simulated data see @Bustos-Korts2019.
 
 ```{r APSIMdat}
 data(APSIMdat)
 head(APSIMdat)
 ```
-The first column is the environment, Emerald in 1993, the second column simulated genotype (g001), the third column is days after sowing (das), and the last column is the simulated biomass with medium measurement error.
+
+The first column is the environment, Emerald in 1993, the second column the simulated genotype (g001), the third column is days after sowing (das), and the last column is the simulated biomass with medium measurement error.
 
 The model can be fitted with
-``` {r APSIMmodel}
+
+```{r APSIMmodel}
 obj2 <- LMMsolve(biomass ~ 1,
                  spline = ~spl1D(x = das, nseg = 200), 
                  data = APSIMdat)
 ```
 
-where we took `nseg=200`, just to illustrate that number of B-splines segments cannot be too high (there are only 121 observations), as we can see from the summary table with effective dimension:
-``` {r APSIMmodelSummary}
+where we took a high number of segments (`nseg=200`), as the computations are very fast because of the sparse structure of the mixed model equations. The effective dimension are:
+
+```{r APSIMmodelSummary}
 summary(obj2)
 ```
+
 The fitted smooth trend can be obtained as explained before:
 
-``` {r APSIMplot}
+```{r APSIMplot}
 plotDat <- obtainSmoothTrend(obj2, grid = 1000, includeIntercept = TRUE)
 
 ggplot(data = APSIMdat, aes(x = das, y = biomass)) +
@@ -146,7 +163,7 @@ ggplot(data = plotDatDt, aes(x = das, y = ypred)) +
 
 # Two-dimensional P-splines.
 
-For two-dimensional mixed P-splines we use the model defined in @Rodriguez-Alvarez2014. As an example we use the `USprecip` data set in the `spam` package, analysed in @Rodriguez-Alvarez2014.
+For two-dimensional mixed P-splines we use the model defined in @Rodriguez-Alvarez2014. The use of sparse matrix algebra makes the computations even faster as reported in @Rodriguez-Alvarez2014. As an example we use the `USprecip` data set in the `spam` package [@Furrer2010], analysed in @Rodriguez-Alvarez2014.
 
 ```{r USprecip data}
 ## Get precipitation data from spam
@@ -155,11 +172,10 @@ data(USprecip, package = "spam")
 ## Only use observed data
 USprecip <- as.data.frame(USprecip)
 USprecip <- USprecip[USprecip$infill == 1, ]
-# 5906 true records, as in 2014 paper.
 nrow(USprecip) 
 ```
 
-The two-dimensional P-spline can be defined with the `spl2D()` function:
+The two-dimensional P-spline can be defined with the `spl2D()` functions, and with latitude and longitude as covariates. The number of segments chosen here is equal to as used in @Rodriguez-Alvarez2014.
 
 ```{r runobj3}
 obj3 <- LMMsolve(fixed = anomaly ~ 1,
@@ -167,13 +183,13 @@ obj3 <- LMMsolve(fixed = anomaly ~ 1,
                  data = USprecip)
 ```
 
-Here the same number of segments is used as in @Rodriguez-Alvarez2014. The summary function gives a table with the effective dimensions and the penalty parameters:
+The summary function gives a table with the effective dimensions and the penalty parameters:
 
 ```{r ED_USprecip}
 summary(obj3)
 ```
 
-A plot for the spatial trend can be obtained in a similar way as for the one-dimensional examples:
+A plot for the smooth trend can be obtained in a similar way as for the one-dimensional examples:
 
 ```{r Plot_USprecip}
 plotDat <- obtainSmoothTrend(obj3, grid = c(200, 300), includeIntercept = TRUE)
