@@ -38,11 +38,11 @@ $$ where $y$ is a vector of observations, $\beta$ is a vector with the fixed eff
 
 The `LMMsolve` package can fit models where the matrices $G^{-1}$ and $R^{-1}$ are a linear combination of precision matrices $Q_{G,i}$ and $Q_{R,i}$: $$
   G^{-1} = \sum_{i} \psi_i Q_{G,i} \;, \quad   R^{-1} = \sum_{i} \psi_i Q_{R,i} 
-$$ where the precision parameters $\psi_i$ and $\phi_i$ are estimated using REML. For most standard mixed models $1/{\psi_i}$ are the variance components and $1/{\phi_i}$ the residual variance(s), but we use a formulation in terms of precision parameters to allow for non-standard mixed models using tensor product splines [\@Rodriguez-Alvarez2014].
+$$ where the precision parameters $\psi_i$ and $\phi_i$ are estimated using REML. For most standard mixed models $1/{\psi_i}$ are the variance components and $1/{\phi_i}$ the residual variances. We use a formulation in terms of precision parameters to allow for non-standard mixed models using tensor product splines introduced in @Rodriguez-Alvarez2015.
 
 If the matrices $G^{-1}$ and $R^{-1}$ are sparse, the mixed model equations can be solved using efficient sparse matrix algebra implemented in the `spam` package [@Furrer2010]. To calculate the derivatives of the log-likelihood in an efficient way, the automatic differentiation of the Cholesky matrix [@Smith1995] was implemented in C++ using the `Rcpp` package [@Eddelbuettel2018].
 
-# Spatial trend with plots in a single line.
+# Smooth trend with plots in a single line.
 
 As a first example we will use an oats trial in the `agridat` package. There were 24 varieties in 3 replicates, each consisting of 6 incomplete blocks of 4 plots. The plots were laid out in a single line. For further details of the analysis of this data set using P-splines see @Boer2020.
 
@@ -52,7 +52,7 @@ data(john.alpha, package = "agridat")
 head(john.alpha)
 ```
 
-In the following mixed model we include rep and gen as fixed effect, and `spl1D` to model a one dimensional P-spline [@Eilers1996] with 20 segments, using the default choice of cubical B-splines and second order differences:
+In the following mixed model we include rep and gen as fixed effect, and `spl1D` to model a one dimensional P-spline [@Eilers1996] with 20 segments, and using the default choice of cubical B-splines and second order differences:
 
 ```{r Pspline1D}
 ## Fit mixed model with fixed and spline part.
@@ -61,9 +61,9 @@ obj1 <- LMMsolve(fixed = yield ~ rep + gen,
                  data = john.alpha)
 ```
 
-The spatial trend can be obtained as follows:
+The smooth trend along the field can be obtained as follows:
 
-```{r ObtainSpatialTrend1}
+```{r ObtainSmoothTrend1}
 ## Extract smooth trend from mixed model.
 plotDat <- obtainSmoothTrend(obj1, grid = 1000, includeIntercept = TRUE)
 head(plotDat)
@@ -111,7 +111,7 @@ summary(obj2, which = "variances")
 
 see Table 1 in @Boer2020.
 
-# P-splines to fit biomass as function of time.
+# Model biomass as function of time.
 
 In this section we show an example of mixed model P-splines to fit biomass as function of time. As an example we take wheat data simulated with crop growth model APSIM. For further details on this simulated data see @Bustos-Korts2019.
 
@@ -163,7 +163,7 @@ ggplot(data = plotDatDt, aes(x = das, y = ypred)) +
 
 # Two-dimensional P-splines.
 
-For two-dimensional mixed P-splines we use the model defined in @Rodriguez-Alvarez2014. The use of sparse matrix algebra makes the computations even faster as reported in @Rodriguez-Alvarez2014. As an example we use the `USprecip` data set in the `spam` package [@Furrer2010], analysed in @Rodriguez-Alvarez2014.
+For two-dimensional mixed P-splines we use the model defined in @Rodriguez-Alvarez2015. As an example we use the `USprecip` data set in the `spam` package [@Furrer2010], analysed in @Rodriguez-Alvarez2015.
 
 ```{r USprecip data}
 ## Get precipitation data from spam
@@ -175,7 +175,7 @@ USprecip <- USprecip[USprecip$infill == 1, ]
 nrow(USprecip) 
 ```
 
-The two-dimensional P-spline can be defined with the `spl2D()` functions, and with latitude and longitude as covariates. The number of segments chosen here is equal to as used in @Rodriguez-Alvarez2014.
+The two-dimensional P-spline can be defined with the `spl2D()` functions, and with latitude and longitude as covariates. The number of segments chosen here is equal to as used in @Rodriguez-Alvarez2015.
 
 ```{r runobj3}
 obj3 <- LMMsolve(fixed = anomaly ~ 1,
@@ -218,7 +218,7 @@ pred2 <- obtainSmoothTrend(obj3, newdata = us.cities, includeIntercept = TRUE)
 head(pred2)
 ```
 
-# QTL mapping for multiparental populations.
+# QTL mapping 
 
 In QTL-mapping for multiparental populations the Identity-By-Descent (IBD) probabilities are used as genetic predictors in the mixed model [@Li2021]. The following simulated example is for illustration. It consists of three parents (A, B, and C), and two crosses AxB, and AxC. AxB is a population of 100 Doubled Haploids (DH), AxC of 80 DHs. The probabilities, pA, pB, and pC, are for a position on the genome close to a simulated QTL:
 
