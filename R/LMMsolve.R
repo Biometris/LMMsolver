@@ -243,7 +243,6 @@ LMMsolve <- function(fixed,
       names(coefFi) <- "(Intercept)"
       ## For fixed terms an extra 0 for the reference level has to be added.
     } else if (labFi == "splF") {
-      coefFi <- c(0, coefFi)
       ## Spline terms are just named 1...n.
       names(coefFi) <- paste0("splF_", seq_along(coefFi))
     } else {

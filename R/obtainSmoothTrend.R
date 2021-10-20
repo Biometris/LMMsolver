@@ -129,7 +129,7 @@ obtainSmoothTrend <- function(object,
     bc <- 0
   } else {
     ## Remove leading zero, added for reference level.
-    bc <- as.vector(XTot %*% coef(object)$splF[-1])
+    bc <- as.vector(XTot %*% coef(object)$splF)
   }
   sc <- as.vector(BxTot %*% coef(object)$splR)
   ## Compute fitted values.
