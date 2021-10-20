@@ -238,17 +238,17 @@ LMMsolve <- function(fixed,
   coefF <- vector(mode = "list", length = length(dim.f))
   for (i in seq_along(coefF)) {
     coefFi <- obj$a[sf[i]:ef[i]]
-    if (term.labels.f[i] == "(Intercept)") {
+    labFi <- term.labels.f[i]
+    if (labFi == "(Intercept)") {
       names(coefFi) <- "(Intercept)"
       ## For fixed terms an extra 0 for the reference level has to be added.
-    } else if (term.labels.f[i] == "splF") {
+    } else if (labFi == "splF") {
       coefFi <- c(0, coefFi)
       ## Spline terms are just named 1...n.
       names(coefFi) <- paste0("splF_", seq_along(coefFi))
     } else {
       coefFi <- c(0, coefFi)
-      names(coefFi) <- paste(term.labels.f[i],
-                             levels(data[[term.labels.f[i]]]) , sep = "_")
+      names(coefFi) <- paste(labFi, levels(data[[labFi]]) , sep = "_")
     }
     coefF[[i]] <- coefFi
   }
@@ -258,12 +258,15 @@ LMMsolve <- function(fixed,
   coefR <- vector(mode = "list", length = length(dim.r))
   for (i in seq_along(coefR)) {
     coefRi <- obj$a[sr[i]:er[i]]
-    if (term.labels.r[i] == "splR") {
+    labRi <- term.labels.r[i]
+    if (labRi == "splR") {
       ## Spline terms are just named 1...n.
       names(coefRi) <- paste0("splR_", seq_along(coefRi))
+    } else if (labRi %in% names(group)) {
+      ## For group combine group name and column name.
+      names(coefRi) <- paste(labRi, colnames(data)[group[[labRi]]], sep = "_")
     } else {
-      names(coefRi) <- paste(term.labels.r[i],
-                             levels(data[[term.labels.r[i]]]) , sep = "_")
+      names(coefRi) <- paste(labRi, levels(data[[labRi]]), sep = "_")
     }
     coefR[[i]] <- coefRi
   }
