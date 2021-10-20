@@ -28,7 +28,7 @@ library(ggplot2)
 
 # The LMMsolver package {.unnumbered}
 
-The aim of the `LMMsolver` package is to provide an efficient and flexible system to solve sparse mixed model equations, for models that are often used in statistical genetics. One important application is using splines to model spatial [@Rodriguez-Alvarez2018, @Boer2020] or temporal [@Bustos-Korts2019] trends for phenotypic observations. Another application area is mixed model QTL analysis for multiparental populations, allowing for heterogeneous residual variance and random design matrices with Identity-By-Descent (IBD) probabilities [@Li2021].
+The aim of the `LMMsolver` package is to provide an efficient and flexible system to solve sparse mixed model equations, for models that are often used in statistical genetics. One important application is using splines to model spatial [@Rodriguez-Alvarez2018; @Boer2020] or temporal [@Bustos-Korts2019] trends for phenotypic observations. Another application area is mixed model QTL analysis for multiparental populations, allowing for heterogeneous residual variance and random design matrices with Identity-By-Descent (IBD) probabilities [@Li2021].
 
 The mixed model equations are solved using efficient sparse matrix algebra, using the `spam` package [@Furrer2010]. The automatic differentiation of the Cholesky matrix [@Smith1995] is implemented in C++ using the `Rcpp` package [@Eddelbuettel2018].
 
