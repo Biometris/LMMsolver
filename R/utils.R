@@ -159,17 +159,22 @@ calcNomEffDim <- function(X,
                           dim.r) {
   if (is.null(Z)) return(NULL)
   p <- ncol(X)
-
   EDnom <- vector(length = length(dim.r))
   e <- cumsum(dim.r)
   s <- e - dim.r + 1
   # for each variance component in Z:
   for (i in 1:length(dim.r)) {
+    ndx <- s[i]:e[i]
+    Zi <- Z[, ndx]
+    # if number of columns is high, use upper bound:
     if (dim.r[i] > 100) {
-      EDnom[i] <- dim.r[i]
+      colSum <- colSums(Zi)
+      if (all(colSum==colSum[1]))
+        EDnom[i] <- dim.r[i] - 1
+      else
+        EDnom[i] <- dim.r[i]
     } else {
-      ndx <- s[i]:e[i]
-      XZ <- cbind(X, Z[, ndx])
+      XZ <- cbind(X, Zi)
       r <- qr(XZ)$rank
       EDnom[i] <- r - p
     }
