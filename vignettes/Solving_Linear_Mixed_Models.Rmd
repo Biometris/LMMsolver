@@ -28,9 +28,9 @@ library(ggplot2)
 
 # The LMMsolver package {.unnumbered}
 
-The aim of the `LMMsolver` package is to provide an efficient and flexible system to estimate variance components using restricted maximum likelihood or REML [@Patterson1971], for models where the mixed model equations are sparse. An example of an application is using splines to model spatial [@Rodriguez-Alvarez2018; @Boer2020] or temporal [@Bustos-Korts2019] trends for phenotypic observations. Another example is mixed model QTL analysis for multiparental populations, allowing for heterogeneous residual variance and random design matrices with Identity-By-Descent (IBD) probabilities [@Li2021].
+The aim of the `LMMsolver` package is to provide an efficient and flexible system to estimate variance components using restricted maximum likelihood or REML [@Patterson1971], for models where the mixed model equations are sparse. An example of an application is using splines to model spatial [@Rodriguez-Alvarez2018; @Boer2020] or temporal [@Bustos-Korts2019] trends. Another example is mixed model Quantitative Trait Locus (QTL) analysis for multiparental populations, allowing for heterogeneous residual variance and design matrices with Identity-By-Descent (IBD) probabilities [@Li2021].
 
-The linear mixed model has the form
+A Linear Mixed Model (LMM) has the form
 
 $$
   y = X \beta + Z u + e, \quad u \sim N(0,G), \quad e \sim N(0,R) 
@@ -42,7 +42,9 @@ $$ where the precision parameters $\psi_i$ and $\phi_i$ are estimated using REML
 
 If the matrices $G^{-1}$ and $R^{-1}$ are sparse, the mixed model equations can be solved using efficient sparse matrix algebra implemented in the `spam` package [@Furrer2010]. To calculate the derivatives of the log-likelihood in an efficient way, the automatic differentiation of the Cholesky matrix [@Smith1995] was implemented in C++ using the `Rcpp` package [@Eddelbuettel2018].
 
-# Smooth trend with plots in a single line.
+# Smooth trend in one dimension.
+
+## Smooth spatial trend in one direction
 
 As a first example we will use an oats trial in the `agridat` package. There were 24 varieties in 3 replicates, each consisting of 6 incomplete blocks of 4 plots. The plots were laid out in a single line. For further details of the analysis of this data set using P-splines see @Boer2020.
 
@@ -52,16 +54,18 @@ data(john.alpha, package = "agridat")
 head(john.alpha)
 ```
 
-In the following mixed model we include rep and gen as fixed effect, and `spl1D` to model a one dimensional P-spline [@Eilers1996] with 20 segments, and using the default choice of cubical B-splines and second order differences:
+
+In the following mixed model we include rep and gen as fixed effect, and `spl1D` to model a one dimensional P-spline [@Eilers1996] with 200 segments, and using the default choice of cubical B-splines and second order differences:
 
 ```{r Pspline1D}
 ## Fit mixed model with fixed and spline part.
 obj1 <- LMMsolve(fixed = yield ~ rep + gen,
-                 spline = ~spl1D(x = plot, nseg = 20),
+                 spline = ~spl1D(x = plot, nseg = 200),
                  data = john.alpha)
 ```
+A high number of segments can be used for splines in one dimension, as the corresponding mixed model equations are sparse. 
 
-The smooth trend along the field can be obtained as follows:
+The smooth trend along the field on a dense grid of 1000 points can be obtained as follows:
 
 ```{r ObtainSmoothTrend1}
 ## Extract smooth trend from mixed model.
@@ -100,8 +104,13 @@ We can obtain a table with effective dimensions (see e.g. @Rodriguez-Alvarez2018
 ```{r summaryED}
 summary(obj2)
 ```
+```{r summaryED2, echo=FALSE}
+tbl <- summary(obj2)
+EDs <- round(tbl$Effective[4], 1)
+```
 
-The effective dimension is a measure for complexity. In the table above the first three terms are fixed effects and not penalized, and therefore the effective dimension is equal to the number of parameters in the model. The term `s(plot)` is a random effect, with effective dimension \code{14.2}, indicating that there is rather strong non-linear smooth trend in the field, corresponding to what we see in the Figure.
+
+The effective dimension is a measure for complexity. In the table above the first three terms are fixed effects and not penalized, and therefore the effective dimension is equal to the number of parameters in the model. The term `s(plot)` is a random effect, with effective dimension `r EDs`, indicating that there is rather strong non-linear smooth trend in the field, corresponding to what we see in the Figure.
 
 We can also use the `summary` function to obtain the table with variances:
 
@@ -111,7 +120,15 @@ summary(obj2, which = "variances")
 
 see Table 1 in @Boer2020.
 
-# Model biomass as function of time.
+The estimated genetic effects are given by the 'coef' function:
+```{r coeff_example}
+genEff <- coef(obj2)$gen
+head(genEff, 4)
+```
+
+with the first genotype (G01) is the reference, as genotypes were modelled as fixed effect in the model.
+
+## Model biomass as function of time.
 
 In this section we show an example of mixed model P-splines to fit biomass as function of time. As an example we take wheat data simulated with crop growth model APSIM. For further details on this simulated data see @Bustos-Korts2019.
 
@@ -130,11 +147,12 @@ obj2 <- LMMsolve(biomass ~ 1,
                  data = APSIMdat)
 ```
 
-where we took a high number of segments (`nseg=200`), as the computations are very fast because of the sparse structure of the mixed model equations. The effective dimension are:
+The effective dimensions are:
 
 ```{r APSIMmodelSummary}
 summary(obj2)
 ```
+where `splF` is the fixed part of the spline, the linear trend. 
 
 The fitted smooth trend can be obtained as explained before:
 
@@ -161,7 +179,7 @@ ggplot(data = plotDatDt, aes(x = das, y = ypred)) +
   theme(panel.grid = element_blank())
 ```
 
-# Two-dimensional P-splines.
+# Smooth trends in two dimensions
 
 For two-dimensional mixed P-splines we use the model defined in @Rodriguez-Alvarez2015. As an example we use the `USprecip` data set in the `spam` package [@Furrer2010], analysed in @Rodriguez-Alvarez2015.
 
@@ -172,7 +190,6 @@ data(USprecip, package = "spam")
 ## Only use observed data
 USprecip <- as.data.frame(USprecip)
 USprecip <- USprecip[USprecip$infill == 1, ]
-nrow(USprecip) 
 ```
 
 The two-dimensional P-spline can be defined with the `spl2D()` functions, and with latitude and longitude as covariates. The number of segments chosen here is equal to as used in @Rodriguez-Alvarez2015.
@@ -214,11 +231,11 @@ data(us.cities, package = "maps")
 colnames(us.cities)[colnames(us.cities) == "long"] <- "lon"
 head(us.cities)
 
-pred2 <- obtainSmoothTrend(obj3, newdata = us.cities, includeIntercept = TRUE)
-head(pred2)
+pred3 <- obtainSmoothTrend(obj3, newdata = us.cities, includeIntercept = TRUE)
+head(pred3)
 ```
 
-# QTL mapping 
+# QTL mapping with IBD probabilities.
 
 In QTL-mapping for multiparental populations the Identity-By-Descent (IBD) probabilities are used as genetic predictors in the mixed model [@Li2021]. The following simulated example is for illustration. It consists of three parents (A, B, and C), and two crosses AxB, and AxC. AxB is a population of 100 Doubled Haploids (DH), AxC of 80 DHs. The probabilities, pA, pB, and pC, are for a position on the genome close to a simulated QTL:
 
@@ -227,13 +244,13 @@ data(multipop)
 head(multipop)
 ```
 
-The residual variances for the two populations can be different. Therefore we need to allow for heterogeneous residual variances, which can be defined by using the `residual` argument in `LMMsolve`:
+The residual (genetic) variances for the two populations can be different. Therefore we need to allow for heterogeneous residual variances, which can be defined by using the `residual` argument in `LMMsolve`:
 
 ```{r residualARG}
 obj0 <- LMMsolve(fixed = pheno ~ cross, 
                  residual = ~cross, 
                  data = multipop)
-logLik(obj0)
+dev0 <- deviance(obj0)
 ```
 
 The QTL-probabilities are defined by the columns pA, pB, pC, and can be included in the random part of the mixed model by using the `group` argument:
@@ -245,8 +262,9 @@ obj1 <- LMMsolve(fixed = pheno ~ cross,
                  random = ~grp(QTL),
                  residual = ~cross,
                  data = multipop) 
-logLik(obj1)
-coef(obj1)$QTL
+dev1 <- deviance(obj1)
+## deviance difference between null and alternative model
+dev0 - dev1
 ```
 
 ## References
