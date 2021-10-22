@@ -277,7 +277,7 @@ LMMsolve <- function(fixed,
   EffDimNamesRes <- attributes(lRinv)$names
   NomEffDim <- c(NomEffDimRan, EffDimRes)
   ## Make ED table for fixed effects.
-  EDdf1 <- data.frame(term = term.labels.f,
+  EDdf1 <- data.frame(Term = term.labels.f,
                       Effective = dim.f,
                       Model = dim.f,
                       Nominal = dim.f,
@@ -285,7 +285,7 @@ LMMsolve <- function(fixed,
                       Penalty = rep(0, length(dim.f)),
                       VarComp = rep(NA, length(dim.f)))
   ## Make ED table for random effects.
-  EDdf2 <- data.frame(term = obj$EDnames,
+  EDdf2 <- data.frame(Term = obj$EDnames,
                       Effective = obj$ED,
                       Model = c(rep(dim.r, varPar), EffDimRes),
                       Nominal = NomEffDim,

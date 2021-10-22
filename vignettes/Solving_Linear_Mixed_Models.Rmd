@@ -37,7 +37,7 @@ $$
 $$ where $y$ is a vector of observations, $\beta$ is a vector with the fixed effects, $u$ is a vector with the random effects, and $e$ a vector of random residuals. $X$ and $Z$ are design matrices.
 
 The `LMMsolve` package can fit models where the matrices $G^{-1}$ and $R^{-1}$ are a linear combination of precision matrices $Q_{G,i}$ and $Q_{R,i}$: $$
-  G^{-1} = \sum_{i} \psi_i Q_{G,i} \;, \quad   R^{-1} = \sum_{i} \psi_i Q_{R,i} 
+  G^{-1} = \sum_{i} \psi_i Q_{G,i} \;, \quad   R^{-1} = \sum_{i} \phi_i Q_{R,i} 
 $$ where the precision parameters $\psi_i$ and $\phi_i$ are estimated using REML. For most standard mixed models $1/{\psi_i}$ are the variance components and $1/{\phi_i}$ the residual variances. We use a formulation in terms of precision parameters to allow for non-standard mixed models using tensor product splines introduced in @Rodriguez-Alvarez2015.
 
 If the matrices $G^{-1}$ and $R^{-1}$ are sparse, the mixed model equations can be solved using efficient sparse matrix algebra implemented in the `spam` package [@Furrer2010]. To calculate the derivatives of the log-likelihood in an efficient way, the automatic differentiation of the Cholesky matrix [@Smith1995] was implemented in C++ using the `Rcpp` package [@Eddelbuettel2018].
@@ -46,7 +46,7 @@ If the matrices $G^{-1}$ and $R^{-1}$ are sparse, the mixed model equations can 
 
 ## Smooth spatial trend in one direction
 
-As a first example we will use an oats trial in the `agridat` package. There were 24 varieties in 3 replicates, each consisting of 6 incomplete blocks of 4 plots. The plots were laid out in a single line. For further details of the analysis of this data set using P-splines see @Boer2020.
+As a first example we will use an oats trial from the `agridat` package. There were 24 varieties in 3 replicates, each consisting of 6 incomplete blocks of 4 plots. The plots were laid out in a single line. For further details of the analysis of this data set using P-splines see @Boer2020.
 
 ```{r oatsdata}
 ## Load data.
@@ -54,8 +54,7 @@ data(john.alpha, package = "agridat")
 head(john.alpha)
 ```
 
-
-In the following mixed model we include rep and gen as fixed effect, and `spl1D` to model a one dimensional P-spline [@Eilers1996] with 200 segments, and using the default choice of cubical B-splines and second order differences:
+In the following mixed model we include rep and gen as fixed effect, and we use `spl1D` to model a one dimensional P-spline [@Eilers1996] with 200 segments, and the default choice of cubical B-splines and second order differences:
 
 ```{r Pspline1D}
 ## Fit mixed model with fixed and spline part.
@@ -69,23 +68,24 @@ The smooth trend along the field on a dense grid of 1000 points can be obtained 
 
 ```{r ObtainSmoothTrend1}
 ## Extract smooth trend from mixed model.
-plotDat <- obtainSmoothTrend(obj1, grid = 1000, includeIntercept = TRUE)
-head(plotDat)
+plotDat1 <- obtainSmoothTrend(obj1, grid = 1000, includeIntercept = TRUE)
+head(plotDat1)
 ```
 
 The trend can then be plotted.
 
 ```{r plot1D}
 ## Plot smooth trend.
-ggplot(data = plotDat, aes(x = plot, y = ypred)) +
+ggplot(data = plotDat1, aes(x = plot, y = ypred)) +
   geom_line(color = "red", size = 1) +
   labs(title = "Smooth Trend Oats data", x = "plotnr", y = "yield") +
   theme(panel.grid = element_blank())
 ```
 
-If first degree B-splines and first order differences are used the P-spline model is equivalent to Linear Variance and Random Walk models, for details see @Boer2020.
+If first degree B-splines and first order differences are used, the P-spline model is equivalent to Linear Variance and Random Walk models, for details see @Boer2020.
 
 ```{r Pspline1Db}
+## Fit mixed model with first degree B-splines and first order differences.
 obj2 <- LMMsolve(fixed = yield ~ rep + gen,
                  spline = ~spl1D(x = plot, degree = 1, pord = 1, nseg = nrow(john.alpha) - 1),
                  data = john.alpha)
@@ -109,7 +109,6 @@ tbl <- summary(obj2)
 EDs <- round(tbl$Effective[4], 1)
 ```
 
-
 The effective dimension is a measure for complexity. In the table above the first three terms are fixed effects and not penalized, and therefore the effective dimension is equal to the number of parameters in the model. The term `s(plot)` is a random effect, with effective dimension `r EDs`, indicating that there is rather strong non-linear smooth trend in the field, corresponding to what we see in the Figure.
 
 We can also use the `summary` function to obtain the table with variances:
@@ -120,17 +119,17 @@ summary(obj2, which = "variances")
 
 see Table 1 in @Boer2020.
 
-The estimated genetic effects are given by the 'coef' function:
+The estimated genetic effects are given by the `coef` function:
 ```{r coeff_example}
 genEff <- coef(obj2)$gen
 head(genEff, 4)
 ```
 
-with the first genotype (G01) is the reference, as genotypes were modelled as fixed effect in the model.
+The first genotype (G01) is the reference, as genotypes were modelled as fixed effect in the model.
 
 ## Model biomass as function of time.
 
-In this section we show an example of mixed model P-splines to fit biomass as function of time. As an example we take wheat data simulated with crop growth model APSIM. For further details on this simulated data see @Bustos-Korts2019.
+In this section we show an example of mixed model P-splines to fit biomass as function of time. As an example we use wheat data simulated with the crop growth model APSIM. This data set is included in the package. For details on this simulated data see @Bustos-Korts2019.
 
 ```{r APSIMdat}
 data(APSIMdat)
@@ -157,11 +156,11 @@ where `splF` is the fixed part of the spline, the linear trend.
 The fitted smooth trend can be obtained as explained before:
 
 ```{r APSIMplot}
-plotDat <- obtainSmoothTrend(obj2, grid = 1000, includeIntercept = TRUE)
+plotDat2 <- obtainSmoothTrend(obj2, grid = 1000, includeIntercept = TRUE)
 
 ggplot(data = APSIMdat, aes(x = das, y = biomass)) +
   geom_point(size = 1.2) +
-  geom_line(data = plotDat, aes(y = ypred), color = "red", size = 1) +
+  geom_line(data = plotDat2, aes(y = ypred), color = "red", size = 1) +
   labs(title = "APSIM biomass as function of time", 
        x = "days after sowing", y = "biomass (kg)") +
   theme(panel.grid = element_blank())
@@ -192,7 +191,7 @@ USprecip <- as.data.frame(USprecip)
 USprecip <- USprecip[USprecip$infill == 1, ]
 ```
 
-The two-dimensional P-spline can be defined with the `spl2D()` functions, and with latitude and longitude as covariates. The number of segments chosen here is equal to as used in @Rodriguez-Alvarez2015.
+The two-dimensional P-spline can be defined with the `spl2D()` functions, and with longitude and latitude as covariates. The number of segments chosen here is equal to as used in @Rodriguez-Alvarez2015.
 
 ```{r runobj3}
 obj3 <- LMMsolve(fixed = anomaly ~ 1,
@@ -209,12 +208,12 @@ summary(obj3)
 A plot for the smooth trend can be obtained in a similar way as for the one-dimensional examples:
 
 ```{r Plot_USprecip}
-plotDat <- obtainSmoothTrend(obj3, grid = c(200, 300), includeIntercept = TRUE)
+plotDat3 <- obtainSmoothTrend(obj3, grid = c(200, 300), includeIntercept = TRUE)
 usa = maps::map("usa", regions = "main", plot = FALSE)
-v <- sp::point.in.polygon(plotDat$lon, plotDat$lat, usa$x, usa$y)
-plotDat <- plotDat[v == 1, ]
+v <- sp::point.in.polygon(plotDat3$lon, plotDat3$lat, usa$x, usa$y)
+plotDat3 <- plotDat3[v == 1, ]
 
-ggplot(plotDat, aes(x = lon, y = lat, fill = ypred)) +
+ggplot(plotDat3, aes(x = lon, y = lat, fill = ypred)) +
   geom_tile(show.legend = TRUE) +
   scale_fill_gradientn(colors = topo.colors(100))+
   labs(title = "Precipitation (anomaly) US April 1948", x = "Longitude", y = "Latitude") +
@@ -222,10 +221,10 @@ ggplot(plotDat, aes(x = lon, y = lat, fill = ypred)) +
   theme(panel.grid = element_blank())
 ```
 
-Instead of using the `grid` argument, `newdata` can be used to make predictions for locations specified in a data frame:
+Instead of using the `grid` argument, `newdata` can be used to make predictions for locations specified in a `data.frame`:
 
 ```{r newdataARG}
-## predictions for new data, using city coordinates from maps package.
+## Predictions for new data, using city coordinates from maps package.
 data(us.cities, package = "maps")
 ## Column names have to match column names used for fitting the model.
 colnames(us.cities)[colnames(us.cities) == "long"] <- "lon"
@@ -237,9 +236,10 @@ head(pred3)
 
 # QTL mapping with IBD probabilities.
 
-In QTL-mapping for multiparental populations the Identity-By-Descent (IBD) probabilities are used as genetic predictors in the mixed model [@Li2021]. The following simulated example is for illustration. It consists of three parents (A, B, and C), and two crosses AxB, and AxC. AxB is a population of 100 Doubled Haploids (DH), AxC of 80 DHs. The probabilities, pA, pB, and pC, are for a position on the genome close to a simulated QTL:
+In QTL-mapping for multiparental populations the Identity-By-Descent (IBD) probabilities are used as genetic predictors in the mixed model [@Li2021]. The following simulated example is for illustration. It consists of three parents (A, B, and C), and two crosses AxB, and AxC. AxB is a population of 100 Doubled Haploids (DH), AxC of 80 DHs. The probabilities, pA, pB, and pC, are for a position on the genome close to a simulated QTL. This simulated data is included in the package.
 
 ```{r multipop}
+## Load data for multiparental population.
 data(multipop)
 head(multipop)
 ```
@@ -247,24 +247,26 @@ head(multipop)
 The residual (genetic) variances for the two populations can be different. Therefore we need to allow for heterogeneous residual variances, which can be defined by using the `residual` argument in `LMMsolve`:
 
 ```{r residualARG}
-obj0 <- LMMsolve(fixed = pheno ~ cross, 
+## Fit null model.
+obj4 <- LMMsolve(fixed = pheno ~ cross, 
                  residual = ~cross, 
                  data = multipop)
-dev0 <- deviance(obj0)
+dev4 <- deviance(obj4)
 ```
 
 The QTL-probabilities are defined by the columns pA, pB, pC, and can be included in the random part of the mixed model by using the `group` argument:
 
 ```{r groupOPTION}
+## Fit alternative model - include QTL.
 lGrp <- list(QTL = 3:5)
-obj1 <- LMMsolve(fixed = pheno ~ cross, 
+obj5 <- LMMsolve(fixed = pheno ~ cross, 
                  group = lGrp,
                  random = ~grp(QTL),
                  residual = ~cross,
                  data = multipop) 
-dev1 <- deviance(obj1)
-## deviance difference between null and alternative model
-dev0 - dev1
+dev5 <- deviance(obj5)
+## Deviance difference between null and alternative model.
+dev4 - dev5
 ```
 
 ## References
