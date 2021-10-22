@@ -191,7 +191,7 @@ USprecip <- as.data.frame(USprecip)
 USprecip <- USprecip[USprecip$infill == 1, ]
 ```
 
-The two-dimensional P-spline can be defined with the `spl2D()` functions, and with longitude and latitude as covariates. The number of segments chosen here is equal to as used in @Rodriguez-Alvarez2015.
+The two-dimensional P-spline can be defined with the `spl2D()` function, and with longitude and latitude as covariates. The number of segments chosen here is equal to the number of segments used in @Rodriguez-Alvarez2015.
 
 ```{r runobj3}
 obj3 <- LMMsolve(fixed = anomaly ~ 1,

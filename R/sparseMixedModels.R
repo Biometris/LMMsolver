@@ -171,7 +171,7 @@ sparseMixedModels <- function(y,
       break
     }
 
-    theta <- ED / (SS_all + sqrt(.Machine$double.eps))
+    theta <- ED / (SS_all + 1e-20)
     logLprev <- logL
 
   }
