@@ -1,19 +1,22 @@
 library(LMMsolver)
 library(agridat)
+
 data("piepho.barley.uniformity")
 dat <- piepho.barley.uniformity
 head(dat)
 
-# negative eff. dimension for s(col):
-obj1 <- LMMsolve(yield~1,
-                 spline=~spl2D(x1=col,x2=row,nseg=c(20, 20)), data=dat,
-                 trace=TRUE)
-summary(obj1)
+Nseg <- seq(10, 80, by=10)
 
-# error...
-obj2 <- LMMsolve(yield~1,
-                 spline=~spl2D(x1=col,x2=row,nseg=c(15, 15),pord=2), data=dat,
-                 trace=TRUE)
-summary(obj2)
+for (i in Nseg){
+  s <- proc.time()[3]
+  nseg <- c(i,i)
+  obj <- LMMsolve(yield~1,
+                  spline=~spl2D(x1=col, x2=row, nseg=nseg),
+                  data=dat)
+  e <- proc.time()[3]
+  tbl <- summary(obj)
+  pen <- tbl$Penalty[3]
+  cat(sprintf("%4d %4d %8.3g %8.1f  \n", i, obj$nIter, pen, e-s))
+}
 
 

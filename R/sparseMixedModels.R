@@ -81,6 +81,9 @@ sparseMixedModels <- function(y,
   NvarcompTot <- Nres + Nvarcomp
   dimMME <- p + q
 
+  # fix a penalty theta, if value becomes high.
+  fixedTheta <- rep(FALSE, length=NvarcompTot)
+
   W <- spam::as.spam(cbind(X, Z))
   Wt <- t(W)
 
@@ -170,10 +173,11 @@ sparseMixedModels <- function(y,
     if (abs(logLprev - logL) < tolerance) {
       break
     }
-
-    theta <- ED / (SS_all + 1e-20)
+    # update the penalties theta that are not fixed:
+    theta <- ifelse(fixedTheta, theta, ED/SS_all)
+    # set elements of theta fixed if penalty > 1.0e6:
+    fixedTheta <- ifelse(theta > 1.0e6, TRUE, fixedTheta)
     logLprev <- logL
-
   }
   if (it == maxit) {
     warning("No convergence after ", maxit, " iterations \n", call. = FALSE)
