@@ -97,7 +97,7 @@ The deviance ($dev = -2 \log L_R$) is
 round(deviance(obj2), 2)
 ```
 
-see the P-spline(1) model in Table 1 in @Boer2020.
+as reported in @Boer2020, Table 1.
 
 We can obtain a table with effective dimensions (see e.g. @Rodriguez-Alvarez2018) and penalties (the precision parameters $\psi_i$ and $\phi_i$) using the `summary` function:
 
@@ -117,7 +117,7 @@ We can also use the `summary` function to obtain the table with variances:
 summary(obj2, which = "variances")
 ```
 
-see Table 1 in @Boer2020.
+as reported in @Boer2020, Table 1. 
 
 The estimated genetic effects are given by the `coef` function:
 ```{r coeff_example}
@@ -216,7 +216,7 @@ plotDat3 <- plotDat3[v == 1, ]
 ggplot(plotDat3, aes(x = lon, y = lat, fill = ypred)) +
   geom_tile(show.legend = TRUE) +
   scale_fill_gradientn(colors = topo.colors(100))+
-  labs(title = "Precipitation (anomaly) US April 1948", x = "Longitude", y = "Latitude") +
+  labs(title = "Precipitation (anomaly)", x = "Longitude", y = "Latitude") +
   coord_fixed() +
   theme(panel.grid = element_blank())
 ```
@@ -257,7 +257,7 @@ dev4 <- deviance(obj4)
 The QTL-probabilities are defined by the columns pA, pB, pC, and can be included in the random part of the mixed model by using the `group` argument:
 
 ```{r groupOPTION}
-## Fit alternative model - include QTL.
+## Fit alternative model - include QTL with probabilities defined in columns 3:5 
 lGrp <- list(QTL = 3:5)
 obj5 <- LMMsolve(fixed = pheno ~ cross, 
                  group = lGrp,
@@ -265,8 +265,18 @@ obj5 <- LMMsolve(fixed = pheno ~ cross,
                  residual = ~cross,
                  data = multipop) 
 dev5 <- deviance(obj5)
-## Deviance difference between null and alternative model.
-dev4 - dev5
 ```
+
+The approximate $-log10(p)$ value is given by
+
+```{r approxPvalue}
+## Deviance difference between null and alternative model.
+dev <- dev4 - dev5
+## Calculate approximate p-value 
+minlog10p <- -log10(0.5*pchisq(dev, 1, lower.tail=FALSE))
+round(minlog10p, 2)
+```
+which indicates that there is a strong QTL effect. 
+
 
 ## References
