@@ -386,7 +386,11 @@
 <span class="va">minlog10p</span> <span class="op">&lt;-</span> <span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html">log10</a></span><span class="op">(</span><span class="fl">0.5</span><span class="op">*</span><span class="fu"><a href="https://rdrr.io/r/stats/Chisquare.html">pchisq</a></span><span class="op">(</span><span class="va">dev</span>, <span class="fl">1</span>, lower.tail<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="va">minlog10p</span>, <span class="fl">2</span><span class="op">)</span>
 <span class="co">#&gt; [1] 8.76</span></code></pre></div>
-<p>which indicates that there is a strong QTL effect.</p>
+<p>The estimated effects of the parents A, B, and C are given by:</p>
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span><span class="op">(</span><span class="va">obj5</span><span class="op">)</span><span class="op">$</span><span class="va">QTL</span>
+<span class="co">#&gt;     QTL_pA     QTL_pB     QTL_pC </span>
+<span class="co">#&gt; -1.2676362  0.6829275  0.5847088</span></code></pre></div>
 <div id="references" class="section level2 unnumbered">
 <h2 class="hasAnchor">
 <a href="#references" class="anchor"></a>References</h2>
