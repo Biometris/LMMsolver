@@ -276,7 +276,10 @@ dev <- dev4 - dev5
 minlog10p <- -log10(0.5*pchisq(dev, 1, lower.tail=FALSE))
 round(minlog10p, 2)
 ```
-which indicates that there is a strong QTL effect. 
+The estimated effects of the parents A, B, and C are given by:
 
+```{r QTLeffects}
+coef(obj5)$QTL
+```
 
 ## References
