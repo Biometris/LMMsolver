@@ -190,7 +190,7 @@
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/deviance.html">deviance</a></span><span class="op">(</span><span class="va">obj2</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>
 <span class="co">#&gt; [1] 54.49</span></code></pre></div>
-<p>see the P-spline(1) model in Table 1 in <span class="citation">Boer, Piepho, and Williams (<a href="#ref-Boer2020" role="doc-biblioref">2020</a>)</span>.</p>
+<p>as reported in <span class="citation">Boer, Piepho, and Williams (<a href="#ref-Boer2020" role="doc-biblioref">2020</a>)</span>, Table 1.</p>
 <p>We can obtain a table with effective dimensions (see e.g. <span class="citation">Rodríguez-Álvarez et al. (<a href="#ref-Rodriguez-Alvarez2018" role="doc-biblioref">2018</a>)</span>) and penalties (the precision parameters <span class="math inline">\(\psi_i\)</span> and <span class="math inline">\(\phi_i\)</span>) using the <code>summary</code> function:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">obj2</span><span class="op">)</span>
@@ -213,7 +213,7 @@
 <span class="co">#&gt;    VarComp   Variance</span>
 <span class="co">#&gt; 1     splR 0.01961659</span>
 <span class="co">#&gt; 2 residual 0.05740004</span></code></pre></div>
-<p>see Table 1 in <span class="citation">Boer, Piepho, and Williams (<a href="#ref-Boer2020" role="doc-biblioref">2020</a>)</span>.</p>
+<p>as reported in <span class="citation">Boer, Piepho, and Williams (<a href="#ref-Boer2020" role="doc-biblioref">2020</a>)</span>, Table 1.</p>
 <p>The estimated genetic effects are given by the <code>coef</code> function:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">genEff</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span><span class="op">(</span><span class="va">obj2</span><span class="op">)</span><span class="op">$</span><span class="va">gen</span>
@@ -317,7 +317,7 @@
 <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">plotDat3</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">lon</span>, y <span class="op">=</span> <span class="va">lat</span>, fill <span class="op">=</span> <span class="va">ypred</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html">geom_tile</a></span><span class="op">(</span>show.legend <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_gradient.html">scale_fill_gradientn</a></span><span class="op">(</span>colors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/grDevices/palettes.html">topo.colors</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span><span class="op">)</span><span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Precipitation (anomaly) US April 1948"</span>, x <span class="op">=</span> <span class="st">"Longitude"</span>, y <span class="op">=</span> <span class="st">"Latitude"</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Precipitation (anomaly)"</span>, x <span class="op">=</span> <span class="st">"Longitude"</span>, y <span class="op">=</span> <span class="st">"Latitude"</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_fixed.html">coord_fixed</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html">theme</a></span><span class="op">(</span>panel.grid <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html">element_blank</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p><img src="Solving_Linear_Mixed_Models_files/figure-html/Plot_USprecip-1.png" width="672"></p>
@@ -370,17 +370,23 @@
 <span class="va">dev4</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/deviance.html">deviance</a></span><span class="op">(</span><span class="va">obj4</span><span class="op">)</span></code></pre></div>
 <p>The QTL-probabilities are defined by the columns pA, pB, pC, and can be included in the random part of the mixed model by using the <code>group</code> argument:</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co">## Fit alternative model - include QTL.</span>
+<code class="sourceCode R"><span class="co">## Fit alternative model - include QTL with probabilities defined in columns 3:5 </span>
 <span class="va">lGrp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>QTL <span class="op">=</span> <span class="fl">3</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span>
 <span class="va">obj5</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/LMMsolve.html">LMMsolve</a></span><span class="op">(</span>fixed <span class="op">=</span> <span class="va">pheno</span> <span class="op">~</span> <span class="va">cross</span>, 
                  group <span class="op">=</span> <span class="va">lGrp</span>,
                  random <span class="op">=</span> <span class="op">~</span><span class="fu">grp</span><span class="op">(</span><span class="va">QTL</span><span class="op">)</span>,
                  residual <span class="op">=</span> <span class="op">~</span><span class="va">cross</span>,
                  data <span class="op">=</span> <span class="va">multipop</span><span class="op">)</span> 
-<span class="va">dev5</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/deviance.html">deviance</a></span><span class="op">(</span><span class="va">obj5</span><span class="op">)</span>
-<span class="co">## Deviance difference between null and alternative model.</span>
-<span class="va">dev4</span> <span class="op">-</span> <span class="va">dev5</span>
-<span class="co">#&gt; [1] 34.90795</span></code></pre></div>
+<span class="va">dev5</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/deviance.html">deviance</a></span><span class="op">(</span><span class="va">obj5</span><span class="op">)</span></code></pre></div>
+<p>The approximate <span class="math inline">\(-log10(p)\)</span> value is given by</p>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co">## Deviance difference between null and alternative model.</span>
+<span class="va">dev</span> <span class="op">&lt;-</span> <span class="va">dev4</span> <span class="op">-</span> <span class="va">dev5</span>
+<span class="co">## Calculate approximate p-value </span>
+<span class="va">minlog10p</span> <span class="op">&lt;-</span> <span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html">log10</a></span><span class="op">(</span><span class="fl">0.5</span><span class="op">*</span><span class="fu"><a href="https://rdrr.io/r/stats/Chisquare.html">pchisq</a></span><span class="op">(</span><span class="va">dev</span>, <span class="fl">1</span>, lower.tail<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="va">minlog10p</span>, <span class="fl">2</span><span class="op">)</span>
+<span class="co">#&gt; [1] 8.76</span></code></pre></div>
+<p>which indicates that there is a strong QTL effect.</p>
 <div id="references" class="section level2 unnumbered">
 <h2 class="hasAnchor">
 <a href="#references" class="anchor"></a>References</h2>
