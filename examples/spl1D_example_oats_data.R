@@ -17,11 +17,29 @@ obj1 <- LMMsolve(fixed = yield~rep+gen,
                 spline = ~spl1D(x = plot, nseg = N-1, degree = 1, pord= 1, scaleX=FALSE),
                 data = dat,
                 trace = FALSE,
-                tolerance = 1.0e-10,
-                omitConstant = FALSE)
+                tolerance = 1.0e-10)
 summary(obj1)
 
-round(obj1$dev, 2)
+# use LV model....
+cN <- c(1/sqrt(N-1), rep(0, N-2),1/sqrt(N-1))
+D <- diff(diag(N), diff = 1)
+Delta <- 0.5*crossprod(D)
+LVinv <- 2*Delta + cN %*% t(cN)
+lGinv <- list(plotF=LVinv)
+
+dat$plotF <- as.factor(dat$plot)
+
+obj1b <- LMMsolve(fixed = yield~rep+gen,
+                 random = ~plotF,
+                 ginverse = lGinv,
+                 data = dat,
+                 trace = FALSE,
+                 tolerance = 1.0e-10)
+summary(obj1b)
+
+dev1  <- deviance(obj1)
+dev1b <- deviance(obj1b)
+dev1 - dev1b
 
 # residual variance, see JABES 2020 paper, table 1:
 round(obj1$sigma2e, 5)
@@ -35,12 +53,35 @@ obj2 <- LMMsolve(fixed = yield~rep,
                 tolerance = 1.0e-10)
 summary(obj2)
 
-obj2$EDmax
-obj2$EDnominal
+# genotype random, not in JABES paper
+obj2b <- LMMsolve(fixed = yield~rep,
+                 random = ~gen+plotF,
+                 ginverse = lGinv,
+                 data = dat,
+                 trace = FALSE,
+                 tolerance = 1.0e-10)
+# genotype random, not in JABES paper
+obj2c <- LMMsolve(fixed = yield~rep,
+                  random = ~plotF+gen,
+                  ginverse = lGinv,
+                  data = dat,
+                  trace = FALSE,
+                  tolerance = 1.0e-10)
+
+summary(obj2b)
+
+dev2  <- deviance(obj2)
+dev2b <- deviance(obj2b)
+dev2c <- deviance(obj2c)
+dev2 - dev2b
+dev2 - dev2c
 
 diagnosticsMME(obj2)
 displayMME(obj2, cholesky=FALSE)
 displayMME(obj2, cholesky=TRUE)
+
+displayMME(obj2b, cholesky=FALSE)
+
 
 # obtain spatial trend with genotype fixed:
 plotDat <- obtainSmoothTrend(obj1, grid=100)

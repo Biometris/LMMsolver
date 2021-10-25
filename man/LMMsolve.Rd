@@ -9,6 +9,7 @@ LMMsolve(
   random = NULL,
   spline = NULL,
   group = NULL,
+  ginverse = NULL,
   data,
   residual = NULL,
   tolerance = 1e-06,

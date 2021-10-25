@@ -11,6 +11,8 @@
 #' @param group A named list where each component is a numeric vector
 #' specifying contiguous fields in data that are to be considered as a
 #' single term.
+#' @param ginverse A named list with each component a symmetric matrix, the inverse of
+#' vcov matrix of a random term in the model.
 #' @param data A data.frame containing the modeling data.
 #' @param residual A formula for the residual part of the model. Should be of
 #' the form "~ pred".
@@ -78,6 +80,7 @@ LMMsolve <- function(fixed,
                      random = NULL,
                      spline = NULL,
                      group = NULL,
+                     ginverse = NULL,
                      data,
                      residual = NULL,
                      tolerance = 1.0e-6,
@@ -181,6 +184,32 @@ LMMsolve <- function(fixed,
     term.labels.r <- NULL
     varPar <- NULL
   }
+  # replace identity matrix with ginverse for random terms:
+  if (!is.null(ginverse)) {
+    # make spam
+    ginverse <- lapply(ginverse, as.spam)
+    # check whether the matrices in ginverse are symmetric:
+    Symmetric <- sapply(ginverse, isSymmetric.spam)
+    if (!all(Symmetric)) {
+      msg <- paste("Not all the matrices in ginverse are symmetric")
+      stop(msg)
+    }
+    e <- cumsum(dim.r)
+    s <- e - dim.r + 1
+    Nelem <- length(ginverse)
+    names_ginv <- names(ginverse)
+    for (i in 1:Nelem) {
+      k <- which(term.labels.r == names_ginv[i])
+      if (length(k)==0) {
+        msg <- paste("ginverse element", names_ginv[i],
+                     "not defined in random part")
+        stop(msg)
+      }
+      ndx <- c(s[k]:e[k])
+      lGinv[[k]][ndx, ndx] <- ginverse[[i]]
+    }
+  }
+
   ## Make fixed part.
   mf <- model.frame(fixed, data, drop.unused.levels = TRUE)
   mt <- terms(mf)
