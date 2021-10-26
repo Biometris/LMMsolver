@@ -44,9 +44,9 @@ If the matrices $G^{-1}$ and $R^{-1}$ are sparse, the mixed model equations can 
 
 # Smooth trend in one dimension.
 
-## Smooth spatial trend in one direction
+## Oats field trial
 
-As a first example we will use an oats trial from the `agridat` package. There were 24 varieties in 3 replicates, each consisting of 6 incomplete blocks of 4 plots. The plots were laid out in a single line. For further details of the analysis of this data set using P-splines see @Boer2020.
+As a first example we will use an oats field trial from the `agridat` package. There were 24 varieties in 3 replicates, each consisting of 6 incomplete blocks of 4 plots. The plots were laid out in a single row. 
 
 ```{r oatsdata}
 ## Load data.
@@ -54,15 +54,45 @@ data(john.alpha, package = "agridat")
 head(john.alpha)
 ```
 
-In the following mixed model we include rep and gen as fixed effect, and we use `spl1D` to model a one dimensional P-spline [@Eilers1996] with 200 segments, and the default choice of cubical B-splines and second order differences:
+In the following subsections we will use two methods to correct for spatial trend, to show some of the options of the package. 
+
+### Modelling spatial trend using P-splines
+
+In this subsection we will illustrate how the package can be used to fit mixed model P-splines, for details see @Boer2020.
+
+In the following mixed model we include rep and gen as fixed effect, and we use `spl1D` to model a one dimensional P-spline [@Eilers1996] with 100 segments, and the default choice of cubical B-splines and second order differences:
 
 ```{r Pspline1D}
 ## Fit mixed model with fixed and spline part.
 obj1 <- LMMsolve(fixed = yield ~ rep + gen,
-                 spline = ~spl1D(x = plot, nseg = 200),
+                 spline = ~spl1D(x = plot, nseg = 100),
                  data = john.alpha)
 ```
-A high number of segments can be used for splines in one dimension, as the corresponding mixed model equations are sparse. 
+A high number of segments can be used for splines in one dimension, as the corresponding mixed model equations are sparse, and therefore can be solved fast [@Smith1995; @Furrer2010]. 
+
+```{r deviance}
+round(deviance(obj1), 2)
+```
+
+We can obtain a table with effective dimensions (see e.g. @Rodriguez-Alvarez2018) and penalties (the precision parameters $\psi_i$ and $\phi_i$) using the `summary` function:
+
+```{r summaryED}
+summary(obj1)
+```
+```{r summaryED2, echo=FALSE}
+tbl <- summary(obj1)
+EDs <- round(tbl$Effective[5], 1)
+```
+
+The effective dimension gives a good balance between model complexity and fit to the data for the random terms in the model.  In the table above the first four terms are fixed effects and not penalized, and therefore the effective dimension is equal to the number of parameters in the model. The `splF` is the fixed part of the spline, the linear trend. The term `s(plot)` is a random effect, with effective dimension `r EDs`, indicating that is important to correct for spatial trend. 
+
+The estimated genetic effects are given by the `coef` function:
+```{r coeff_example}
+genEff <- coef(obj1)$gen
+head(genEff, 4)
+```
+
+The first genotype (G01) is the reference, as genotypes were modelled as fixed effect in the model.
 
 The smooth trend along the field on a dense grid of 1000 points can be obtained as follows:
 
@@ -78,54 +108,42 @@ The trend can then be plotted.
 ## Plot smooth trend.
 ggplot(data = plotDat1, aes(x = plot, y = ypred)) +
   geom_line(color = "red", size = 1) +
-  labs(title = "Smooth Trend Oats data", x = "plotnr", y = "yield") +
+  labs(title = "Smooth spatial trend oats data", x = "plotnr", y = "yield") +
   theme(panel.grid = element_blank())
 ```
 
-If first degree B-splines and first order differences are used, the P-spline model is equivalent to Linear Variance and Random Walk models, for details see @Boer2020.
+### Modelling spatial trend using `random` and `ginverse` arguments.
 
-```{r Pspline1Db}
+Another way to correct for spatial trend is using the Linear Variance (LV) model, which is closely connected to the P-splines model [@Boer2020]. First we need to define the precision matrix for the LV model, see Appendix in @Boer2020 for details:
+
+```{r define LVmodel}
+## add plot as factor
+john.alpha$plotF <- as.factor(john.alpha$plot)
+## define the precision matrix, see eq. A1 in Boer et al (2020):
+N <- nrow(john.alpha)
+cN <- c(1/sqrt(N-1), rep(0, N-2), 1/sqrt(N-1))
+D <- diff(diag(N), diff = 1)
+Delta <- 0.5*crossprod(D)
+LVinv <- 0.5*(2*Delta + cN %*% t(cN))
+## add LVinv to list, with name corresponding to random term:
+lGinv <- list(plotF=LVinv)
+```
+
+Given the precision matrix for the LV model we can define the model in LMMsolve using the `random` and `ginverse` arguments:
+```{r modelLV}
 ## Fit mixed model with first degree B-splines and first order differences.
 obj2 <- LMMsolve(fixed = yield ~ rep + gen,
-                 spline = ~spl1D(x = plot, degree = 1, pord = 1, nseg = nrow(john.alpha) - 1),
+                 random = ~plotF, 
+                 ginverse = lGinv, 
                  data = john.alpha)
 ```
 
-The deviance ($dev = -2 \log L_R$) is
-
-```{r deviance}
-round(deviance(obj2), 2)
-```
-
-as reported in @Boer2020, Table 1.
-
-We can obtain a table with effective dimensions (see e.g. @Rodriguez-Alvarez2018) and penalties (the precision parameters $\psi_i$ and $\phi_i$) using the `summary` function:
-
-```{r summaryED}
-summary(obj2)
-```
-```{r summaryED2, echo=FALSE}
-tbl <- summary(obj2)
-EDs <- round(tbl$Effective[4], 1)
-```
-
-The effective dimension is a measure for complexity. In the table above the first three terms are fixed effects and not penalized, and therefore the effective dimension is equal to the number of parameters in the model. The term `s(plot)` is a random effect, with effective dimension `r EDs`, indicating that there is rather strong non-linear smooth trend in the field, corresponding to what we see in the Figure.
-
-We can also use the `summary` function to obtain the table with variances:
+The deviance for the LV-model is `r round(deviance(obj2), 2)` and the variances
 
 ```{r summaryVAR}
-summary(obj2, which = "variances")
+summary(obj1, which = "variances")
 ```
-
-as reported in @Boer2020, Table 1. 
-
-The estimated genetic effects are given by the `coef` function:
-```{r coeff_example}
-genEff <- coef(obj2)$gen
-head(genEff, 4)
-```
-
-The first genotype (G01) is the reference, as genotypes were modelled as fixed effect in the model.
+as reported @Boer2020, Table 1. 
 
 ## Model biomass as function of time.
 
@@ -151,7 +169,6 @@ The effective dimensions are:
 ```{r APSIMmodelSummary}
 summary(obj2)
 ```
-where `splF` is the fixed part of the spline, the linear trend. 
 
 The fitted smooth trend can be obtained as explained before:
 
@@ -228,6 +245,8 @@ Instead of using the `grid` argument, `newdata` can be used to make predictions 
 data(us.cities, package = "maps")
 ## Column names have to match column names used for fitting the model.
 colnames(us.cities)[colnames(us.cities) == "long"] <- "lon"
+## Select columns name, lat and lon
+us.cities <- us.cities[, c(1,4,5)]
 head(us.cities)
 
 pred3 <- obtainSmoothTrend(obj3, newdata = us.cities, includeIntercept = TRUE)
@@ -276,7 +295,7 @@ dev <- dev4 - dev5
 minlog10p <- -log10(0.5*pchisq(dev, 1, lower.tail=FALSE))
 round(minlog10p, 2)
 ```
-The estimated effects of the parents A, B, and C are given by:
+The estimated QTL effects of the parents A, B, and C are given by:
 
 ```{r QTLeffects}
 coef(obj5)$QTL
