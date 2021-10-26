@@ -187,9 +187,9 @@ LMMsolve <- function(fixed,
   # replace identity matrix with ginverse for random terms:
   if (!is.null(ginverse)) {
     # make spam
-    ginverse <- lapply(ginverse, as.spam)
+    ginverse <- lapply(ginverse, spam::as.spam)
     # check whether the matrices in ginverse are symmetric:
-    Symmetric <- sapply(ginverse, isSymmetric.spam)
+    Symmetric <- sapply(ginverse, spam::isSymmetric.spam)
     if (!all(Symmetric)) {
       msg <- paste("Not all the matrices in ginverse are symmetric")
       stop(msg)
