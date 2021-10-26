@@ -21,7 +21,8 @@ obj1 <- LMMsolve(fixed = yield~rep+gen,
 summary(obj1)
 
 # use LV model....
-cN <- c(1/sqrt(N-1), rep(0, N-2),1/sqrt(N-1))
+alpha <- 1/sqrt(N-1)
+cN <- c(alpha, rep(0, N-2), alpha)
 D <- diff(diag(N), diff = 1)
 Delta <- 0.5*crossprod(D)
 LVinv <- 2*Delta + cN %*% t(cN)

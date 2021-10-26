@@ -32,6 +32,9 @@ form "~ spl1D()", ~ spl2D()" or "~spl3D()".}
 specifying contiguous fields in data that are to be considered as a
 single term.}
 
+\item{ginverse}{A named list with each component a symmetric matrix, the inverse of
+vcov matrix of a random term in the model.}
+
 \item{data}{A data.frame containing the modeling data.}
 
 \item{residual}{A formula for the residual part of the model. Should be of

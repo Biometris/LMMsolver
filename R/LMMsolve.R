@@ -305,6 +305,12 @@ LMMsolve <- function(fixed,
   EffDimRes <- attributes(lRinv)$cnt
   EffDimNamesRes <- attributes(lRinv)$names
   NomEffDim <- c(NomEffDimRan, EffDimRes)
+
+  # Calc upper bound for nominal effective dimension:
+  N <- nrow(X)
+  p <- ncol(X)
+  NomEffDim <- pmin(NomEffDim, N-p)
+
   ## Make ED table for fixed effects.
   EDdf1 <- data.frame(Term = term.labels.f,
                       Effective = dim.f,
