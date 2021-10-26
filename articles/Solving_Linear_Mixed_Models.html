@@ -110,7 +110,7 @@
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Solving Linear Mixed Models using LMMsolver</h1>
             
-            <h4 class="date">2021-10-25</h4>
+            <h4 class="date">2021-10-26</h4>
       
       
       <div class="hidden name"><code>Solving_Linear_Mixed_Models.Rmd</code></div>
@@ -200,8 +200,8 @@
 <span class="co">#&gt; 1 (Intercept)   1.00000     1       1 1.0000000  0.00000</span>
 <span class="co">#&gt; 2         rep   2.00000     2       2 1.0000000  0.00000</span>
 <span class="co">#&gt; 3         gen  23.00000    23      23 1.0000000  0.00000</span>
-<span class="co">#&gt; 4     s(plot)  14.16994    72      71 0.1995766 50.97726</span>
-<span class="co">#&gt; 5    residual  31.83006    72      72 0.4420842 17.42159</span>
+<span class="co">#&gt; 4     s(plot)  14.16994    72      46 0.3080422 50.97726</span>
+<span class="co">#&gt; 5    residual  31.83006    72      46 0.6919578 17.42159</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt;  Total Effective Dimension: 72</span></code></pre></div>
 <p>The effective dimension is a measure for complexity. In the table above the first three terms are fixed effects and not penalized, and therefore the effective dimension is equal to the number of parameters in the model. The term <code>s(plot)</code> is a random effect, with effective dimension 14.2, indicating that there is rather strong non-linear smooth trend in the field, corresponding to what we see in the Figure.</p>
@@ -250,8 +250,8 @@
 <span class="co">#&gt;          Term  Effective Model Nominal      Ratio      Penalty</span>
 <span class="co">#&gt; 1 (Intercept)   1.000000     1       1 1.00000000 0.000000e+00</span>
 <span class="co">#&gt; 2        splF   1.000000     1       1 1.00000000 0.000000e+00</span>
-<span class="co">#&gt; 3      s(das)   6.556916   203     201 0.03262147 4.738743e-02</span>
-<span class="co">#&gt; 4    residual 112.443084   121     121 0.92928169 1.003077e-05</span>
+<span class="co">#&gt; 3      s(das)   6.556916   203     119 0.05510013 4.738743e-02</span>
+<span class="co">#&gt; 4    residual 112.443084   121     119 0.94489987 1.003077e-05</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt;  Total Effective Dimension: 121</span></code></pre></div>
 <p>where <code>splF</code> is the fixed part of the spline, the linear trend.</p>
@@ -304,7 +304,7 @@
 <span class="co">#&gt; 2        splF    3.0000     3       3 1.0000000  0.00000000</span>
 <span class="co">#&gt; 3      s(lon)  302.6004  1936    1932 0.1566255  0.09679905</span>
 <span class="co">#&gt; 4      s(lat)  409.0868  1936    1932 0.2117426  0.36223681</span>
-<span class="co">#&gt; 5    residual 5190.3128  5906    5906 0.8788203 13.52577270</span>
+<span class="co">#&gt; 5    residual 5190.3128  5906    5902 0.8794159 13.52577270</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt;  Total Effective Dimension: 5906</span></code></pre></div>
 <p>A plot for the smooth trend can be obtained in a similar way as for the one-dimensional examples:</p>
