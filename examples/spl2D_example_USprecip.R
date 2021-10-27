@@ -87,7 +87,7 @@ ggplot(plotDat, aes(x = lon, y = lat, fill = ypred)) +
 
 # predictions for new data, using coordinates
 # from maps library:
-newdat <- us.cities %>% select(name, lat, long)
+newdat <- us.cities %>% dplyr::select(name, lat, long)
 newdat <- newdat %>% rename(lon=long)
 head(newdat)
 
