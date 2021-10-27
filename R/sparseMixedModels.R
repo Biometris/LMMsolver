@@ -64,7 +64,7 @@ solveMME <- function(cholC,
 
 
 #' @keywords internal
-sparseMixedModels <- function(y,
+sparseMixedModelsOrg <- function(y,
                               X,
                               Z,
                               lGinv,
@@ -195,6 +195,157 @@ sparseMixedModels <- function(y,
             residuals = y - yhat, nIter = it, C = C)
   return(L)
 }
+
+#' @keywords internal
+sparseMixedModels <- function(y,
+                                 X,
+                                 Z,
+                                 lGinv,
+                                 lRinv,
+                                 maxit = 100,
+                                 tolerance = 1.0e-6,
+                                 trace = FALSE,
+                                 theta = NULL) {
+  Ntot <- length(y)
+  p <- ncol(X)
+  q <- ncol(Z)
+  Nres <- length(lRinv)
+  Nvarcomp <- length(lGinv)
+  NvarcompTot <- Nres + Nvarcomp
+  dimMME <- p + q
+
+  # fix a penalty theta, if value becomes high.
+  fixedTheta <- rep(FALSE, length=NvarcompTot)
+
+  W <- spam::as.spam(cbind(X, Z))
+  Wt <- t(W)
+
+  lWtRinvW <- lapply(X = lRinv, FUN = function(x) { Wt %*% x %*% W})
+  lWtRinvY <- lapply(X = lRinv, FUN = function(x) { Wt %*% (x %*% y)})
+  # extend lGinv with extra zero's for fixed effect...
+  lQ <- lapply(X = lGinv, FUN = function(x) {
+    zero <- spam::spam(0, ncol = p, nrow = p)
+    return(spam::bdiag.spam(zero, x))
+  })
+  listC <- c(lQ, lWtRinvW)
+
+  # remove some extra zero's....
+  lWtRinvW <- lapply(X = lWtRinvW, FUN = spam::cleanup)
+  lQ <- lapply(X = lQ, FUN = spam::cleanup)
+  lGinv <- lapply(X = lGinv, FUN = spam::cleanup)
+  listC <- lapply(X = listC, FUN = spam::cleanup)
+
+  if (is.null(theta)) {
+    theta <- rep(1, Nvarcomp + Nres)
+  }
+  if (Nvarcomp > 0) {
+    psi <- theta[1:Nvarcomp]
+    phi <- theta[-(1:Nvarcomp)]
+  } else {
+    psi <- NULL
+    phi <- theta
+  }
+
+  C <- linearSum(theta = theta, matrixList = listC)
+  opt <- summary(C)
+  cholC <- chol(C, memory = list(nnzR = 8 * opt$nnz,
+                                 nnzcolindices = 4 * opt$nnz))
+
+  # make ADchol for Rinv, Ginv and C:
+  ADcholRinv <- ADchol(lRinv)
+  if (Nvarcomp > 0) {
+    ADcholGinv <- ADchol(lGinv)
+  } else {
+    ADcholGinv <- NULL
+  }
+  ADcholC <- ADchol(listC)
+
+  logLprev <- Inf
+  if (trace) {
+    cat("iter logLik\n")
+  }
+
+  for (it in 1:maxit) {
+    if (Nvarcomp > 0) {
+      psi <- theta[c(1:length(psi))]
+      phi <- theta[-c(1:length(psi))]
+    } else {
+      psi <- NULL
+      phi <- theta
+    }
+    # Rinv:
+    resultRinv <- logdetPlusDeriv(ADcholRinv, phi)
+    logdetR <- -resultRinv[1]
+    dlogdetRinv <- resultRinv[-1]
+
+    # Ginv, if exists:
+    if (Nvarcomp > 0) {
+      resultGinv <- logdetPlusDeriv(ADcholGinv, psi)
+      logdetG <- -resultGinv[1]
+      dlogdetGinv <- resultGinv[-1]
+    } else {
+      logdetG <- 0.0
+    }
+    # matrix C:
+    resultC <- logdetPlusDeriv(ADcholC, theta)
+    logdetC <-  resultC[1]
+    dlogdetC <- resultC[-1]
+
+    # calculate effective dimensions....
+    EDmax_phi <- phi * dlogdetRinv
+    if (!is.null(ADcholGinv)) {
+      EDmax_psi <- psi * dlogdetGinv
+    } else {
+      EDmax_psi <- NULL
+    }
+    EDmax <- c(EDmax_psi, EDmax_phi)
+    ED <- EDmax - theta * dlogdetC
+
+    # solve mixed model equations and calculate residuals...
+    a <- solveMME(cholC = cholC, listC = listC, lWtRinvY = lWtRinvY,
+                  phi = phi, theta = theta)
+    r <- y - W %*% a
+
+    SS_all <- calcSumSquares(lRinv = lRinv, Q = lQ, r = r, a = a,
+                             Nvarcomp = Nvarcomp)
+    Rinv <- linearSum(phi, lRinv)
+    # here we use Johnson and Thompson 1995:
+    yPy <- quadForm(x = y, A = Rinv, y = r)
+    # yPy2 = sum(theta*SS_all) (should give same results?)
+
+    # REML-loglikehood, ee e.g. Smith 1995..
+    logL <- -0.5 * (logdetR + logdetG + logdetC + yPy)
+
+    if (trace) {
+      cat(sprintf("%4d %8.4f\n", it, logL))
+    }
+    if (abs(logLprev - logL) < tolerance) {
+      break
+    }
+    # update the penalties theta that are not fixed:
+    theta <- ifelse(fixedTheta, theta, ED/SS_all)
+    # set elements of theta fixed if penalty > 1.0e6:
+    fixedTheta <- ifelse(theta > 1.0e6, TRUE, fixedTheta)
+    logLprev <- logL
+  }
+  if (it == maxit) {
+    warning("No convergence after ", maxit, " iterations \n", call. = FALSE)
+  }
+  C <- linearSum(theta = theta, matrixList = listC)
+  cholC <- update(cholC, C)
+
+  names(phi) <- names(lRinv)
+  names(psi) <- names(lGinv)
+  EDnames <- c(names(lGinv), names(lRinv))
+  yhat <- W %*% a
+
+  L <- list(logL = logL, sigma2e = 1 / phi, tau2e = 1 / psi, ED = ED,
+            theta = theta, EDmax = EDmax, EDnames = EDnames, a = a, yhat = yhat,
+            residuals = y - yhat, nIter = it, C = C)
+  return(L)
+}
+
+
 
 
 

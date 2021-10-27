@@ -267,6 +267,59 @@ NumericVector dlogdet(SEXP arg,
   return gradient;
 }
 
+
+// backwards Automatic Differentiation, using Left-looking Cholesky:
+// returns both the logdet and the first derivatives.
+//
+// [[Rcpp::export]]
+NumericVector logdetPlusDeriv(SEXP arg,
+                      NumericVector lambda)
+{
+  Rcpp::S4 obj(arg);
+
+  IntegerVector colpointers = obj.slot("colpointers");
+  IntegerVector rowindices = obj.slot("rowindices");
+  NumericMatrix P = Rcpp::clone<Rcpp::NumericMatrix>(obj.slot("P"));
+
+  const int sz = rowindices.size();
+  const int n_prec_mat = P.ncol();
+  NumericVector C(sz, 0.0);
+  for (int i=0;i<sz;i++)
+  {
+    for (int k=0;k<n_prec_mat;k++)
+    {
+      C[i] += lambda[k]*P(i,k);
+    }
+  }
+
+  NumericVector L = cholesky(C, colpointers, rowindices);
+  NumericVector F = AD_cholesky(L, colpointers, rowindices);
+
+  // evaluate dL/dlambda:
+  NumericVector result(n_prec_mat+1);
+
+  // 1. calculate the logdet
+  const int N = colpointers.size()-1;
+  double sum = 0;
+  for (int k=0;k<N;k++)
+  {
+    int s = colpointers[k];
+    sum += 2.0*log(L[s]);
+  }
+  result[0] = sum;
+
+  // 2. calculate the derivatives
+  NumericVector gradient(n_prec_mat);
+  for (int i=0;i<F.size();i++)
+  {
+    for (int k=0;k<n_prec_mat;k++)
+      result[k+1] += F[i]*P(i,k);
+  }
+
+  return result;
+}
+
+
 /*
  // forward Automatic Differentation, using Left-looking Cholesky:
  // [[Rcpp::export]]
