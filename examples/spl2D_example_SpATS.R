@@ -38,6 +38,7 @@ plot(m0)
 dev0 <- m0$deviance
 
 # degree and pord not defined yet
+s <- proc.time()[3]
 m1 <- LMMsolve(yield~rep,
                random=~R+C+gen,
                spline=~spl2D(col, row, nseg = nseg),
@@ -45,6 +46,8 @@ m1 <- LMMsolve(yield~rep,
                trace=TRUE,
                tolerance = tol)
 dev1 <- deviance(m1, includeConstant = FALSE)
+e <- proc.time()[3]
+cat("Time LMMsolver: ", e-s, " seconds\n")
 
 dev0
 dev1

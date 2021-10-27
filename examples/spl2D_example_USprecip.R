@@ -45,12 +45,15 @@ x2lim <- c(min(x2)-0.01, max(x2)+0.01)
 #
 # use spatial option in LMMsolve:
 #
+s <- proc.time()[3]
 obj1 <- LMMsolve(fixed = anomaly~1,
                  spline = ~spl2D(x1 = lon, x2 = lat, nseg = nseg,
                                   x1lim=x1lim, x2lim=x2lim),
                  data = dat,
                  trace = trace,
                  tolerance = thr)
+e <- proc.time()[3]
+cat("Time LMMsolve ", e-s, " seconds\n")
 summary(obj1)
 
 # compare effective dimensions, in SAP2014 paper
