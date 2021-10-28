@@ -1,6 +1,21 @@
 #' Solve Linear Mixed Models
 #'
-#' Solve Linear Mixed Models.
+#' Solve Linear Mixed Models using REML.
+#'
+#' A Linear Mixed Model (LMM) has the form
+#' \deqn{y = X \beta + Z u + e, \quad u \sim N(0,G), \quad e \sim N(0,R)} where
+#' \eqn{y} is a vector of observations, \eqn{\beta} is a vector with the fixed
+#' effects, \eqn{u} is a vector with the random effects, and \eqn{e} a vector of
+#' random residuals. \eqn{X} and \eqn{Z} are design matrices.
+#'
+#' LMMsolve can fit models where the matrices \eqn{G^{-1}} and \eqn{R^{-1}} are
+#' a linear combination of precision matrices \eqn{Q_{G,i}} and \eqn{Q_{R,i}}:
+#' \deqn{G^{-1} = \sum_{i} \psi_i Q_{G,i} \;, \quad R^{-1} = \sum_{i} \phi_i Q_{R,i}}
+#' where the precision parameters \eqn{\psi_i} and \eqn{\phi_i} are estimated
+#' using REML. For most standard mixed models \eqn{1/{\psi_i}} are the variance
+#' components and \eqn{1/{\phi_i}} the residual variances. We use a formulation
+#' in terms of precision parameters to allow for non-standard mixed models using
+#' tensor product splines.
 #'
 #' @param fixed A formula for the fixed part of the model. Should be of the
 #' form "response ~ pred"
@@ -12,7 +27,9 @@
 #' specifying contiguous fields in data that are to be considered as a
 #' single term.
 #' @param ginverse A named list with each component a symmetric matrix, the
-#' inverse of the vcov matrix of a random term in the model.
+#' precision matrix of a corresponding random term in the model. The row and
+#' column order of the precision matrices should match the order of the
+#' levels of the corresponding factor in the data.
 #' @param data A data.frame containing the modeling data.
 #' @param residual A formula for the residual part of the model. Should be of
 #' the form "~ pred".
