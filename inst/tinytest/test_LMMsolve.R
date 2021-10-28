@@ -21,6 +21,17 @@ expect_error(LMMsolve(fixed = pheno ~ cross, random = ~tst, data = testDat),
 expect_error(LMMsolve(fixed = pheno ~ cross, residual = ~tst, data = testDat),
              "The following variables in the residual part of the model are not")
 
+## Test ginverse.
+ginv <- matrix(1:4, nrow = 2)
+ginvL <- list(ginv = ginv)
+ginvLS <- list(ginv = ginv %*% t(ginv))
+expect_error(LMMsolve(fixed = pheno ~ cross, ginverse = ginv, data = testDat),
+             "ginverse should be a named list of symmetric matrices")
+expect_error(LMMsolve(fixed = pheno ~ cross, ginverse = ginvL, data = testDat),
+             "ginverse should be a named list of symmetric matrices")
+expect_error(LMMsolve(fixed = pheno ~ cross, ginverse = ginvLS, data = testDat),
+             "ginverse element ginv not defined in random part")
+
 ## Test other input parameters.
 expect_error(LMMsolve(fixed = pheno ~ cross, data = testDat, tolerance = -1),
              "tolerance should be a positive numerical value")

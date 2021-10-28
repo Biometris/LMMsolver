@@ -220,7 +220,7 @@ grp <- function(x) {
 #' @keywords internal
 checkGroup <- function(random,
                        group) {
-  ## Only check if at least one of random and group is not NULL
+  ## Only check if at least one of random and group is not NULL.
   if (!is.null(random) || !is.null(group)) {
     if (is.null(random)) {
       grpVars <- NULL

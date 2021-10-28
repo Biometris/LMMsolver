@@ -117,16 +117,16 @@ ggplot(data = plotDat1, aes(x = plot, y = ypred)) +
 Another way to correct for spatial trend is using the Linear Variance (LV) model, which is closely connected to the P-splines model [@Boer2020]. First we need to define the precision matrix for the LV model, see Appendix in @Boer2020 for details:
 
 ```{r define LVmodel}
-## add plot as factor
+## Add plot as factor.
 john.alpha$plotF <- as.factor(john.alpha$plot)
-## define the precision matrix, see eq. A1 in Boer et al (2020):
+## Define the precision matrix, see eq. A1 in Boer et al (2020).
 N <- nrow(john.alpha)
-cN <- c(1/sqrt(N-1), rep(0, N-2), 1/sqrt(N-1))
+cN <- c(1 / sqrt(N - 1), rep(0, N - 2), 1 / sqrt(N - 1))
 D <- diff(diag(N), diff = 1)
-Delta <- 0.5*crossprod(D)
-LVinv <- 0.5*(2*Delta + cN %*% t(cN))
-## add LVinv to list, with name corresponding to random term:
-lGinv <- list(plotF=LVinv)
+Delta <- 0.5 * crossprod(D)
+LVinv <- 0.5 * (2 * Delta + cN %*% t(cN))
+## Add LVinv to list, with name corresponding to random term.
+lGinv <- list(plotF = LVinv)
 ```
 
 Given the precision matrix for the LV model we can define the model in LMMsolve using the `random` and `ginverse` arguments:
@@ -143,7 +143,7 @@ The deviance for the LV-model is `r round(deviance(obj2), 2)` and the variances
 ```{r summaryVAR}
 summary(obj1, which = "variances")
 ```
-as reported @Boer2020, Table 1. 
+as reported in @Boer2020, Table 1. 
 
 ## Model biomass as function of time.
 
@@ -291,8 +291,8 @@ The approximate $-log10(p)$ value is given by
 ```{r approxPvalue}
 ## Deviance difference between null and alternative model.
 dev <- dev4 - dev5
-## Calculate approximate p-value 
-minlog10p <- -log10(0.5*pchisq(dev, 1, lower.tail=FALSE))
+## Calculate approximate p-value. 
+minlog10p <- -log10(0.5 * pchisq(dev, 1, lower.tail = FALSE))
 round(minlog10p, 2)
 ```
 The estimated QTL effects of the parents A, B, and C are given by:

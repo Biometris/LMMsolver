@@ -11,8 +11,8 @@
 #' @param group A named list where each component is a numeric vector
 #' specifying contiguous fields in data that are to be considered as a
 #' single term.
-#' @param ginverse A named list with each component a symmetric matrix, the inverse of
-#' vcov matrix of a random term in the model.
+#' @param ginverse A named list with each component a symmetric matrix, the
+#' inverse of the vcov matrix of a random term in the model.
 #' @param data A data.frame containing the modeling data.
 #' @param residual A formula for the residual part of the model. Should be of
 #' the form "~ pred".
@@ -106,6 +106,13 @@ LMMsolve <- function(fixed,
     stop("spline should be a formula of form \"~ spl1D()\", \"~ spl2D()\" ",
          "or \"~spl3D()\".\n")
   }
+  if (!is.null(ginverse) &&
+      (!is.list(ginverse) ||
+       length(names(ginverse)) == 0 ||
+       (!all(sapply(X = ginverse, FUN = function(x) {
+         (is.matrix(x) || spam::is.spam(x)) && isSymmetric(x)}))))) {
+    stop("ginverse should be a named list of symmetric matrices.\n")
+  }
   if (!is.null(residual) &&
       (!inherits(residual, "formula") || length(terms(residual)) != 2)) {
     stop("residual should be a formula of the form \" ~ pred\".\n")
@@ -184,32 +191,23 @@ LMMsolve <- function(fixed,
     term.labels.r <- NULL
     varPar <- NULL
   }
-  # replace identity matrix with ginverse for random terms:
+  ## Replace identity matrix with ginverse for random terms.
   if (!is.null(ginverse)) {
-    # make spam
-    ginverse <- lapply(ginverse, spam::as.spam)
-    # check whether the matrices in ginverse are symmetric:
-    Symmetric <- sapply(ginverse, spam::isSymmetric.spam)
-    if (!all(Symmetric)) {
-      msg <- paste("Not all the matrices in ginverse are symmetric")
-      stop(msg)
-    }
+    ## Convert to spam.
+    ginverse <- lapply(X = ginverse, FUN = spam::as.spam)
     e <- cumsum(dim.r)
     s <- e - dim.r + 1
     Nelem <- length(ginverse)
     names_ginv <- names(ginverse)
-    for (i in 1:Nelem) {
+    for (i in seq_len(Nelem)) {
       k <- which(term.labels.r == names_ginv[i])
-      if (length(k)==0) {
-        msg <- paste("ginverse element", names_ginv[i],
-                     "not defined in random part")
-        stop(msg)
+      if (length(k) == 0) {
+        stop("ginverse element ", names_ginv[i], " not defined in random part.\n")
       }
-      ndx <- c(s[k]:e[k])
+      ndx <- s[k]:e[k]
       lGinv[[k]][ndx, ndx] <- ginverse[[i]]
     }
   }
-
   ## Make fixed part.
   mf <- model.frame(fixed, data, drop.unused.levels = TRUE)
   mt <- terms(mf)
@@ -305,12 +303,10 @@ LMMsolve <- function(fixed,
   EffDimRes <- attributes(lRinv)$cnt
   EffDimNamesRes <- attributes(lRinv)$names
   NomEffDim <- c(NomEffDimRan, EffDimRes)
-
   # Calc upper bound for nominal effective dimension:
   N <- nrow(X)
   p <- ncol(X)
-  NomEffDim <- pmin(NomEffDim, N-p)
-
+  NomEffDim <- pmin(NomEffDim, N - p)
   ## Make ED table for fixed effects.
   EDdf1 <- data.frame(Term = term.labels.f,
                       Effective = dim.f,
