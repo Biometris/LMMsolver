@@ -119,7 +119,7 @@ Another way to correct for spatial trend is using the Linear Variance (LV) model
 ```{r define LVmodel}
 ## Add plot as factor.
 john.alpha$plotF <- as.factor(john.alpha$plot)
-## Define the precision matrix, see eq. A1 in Boer et al (2020).
+## Define the precision matrix, see eqn (A2) in Boer et al (2020).
 N <- nrow(john.alpha)
 cN <- c(1 / sqrt(N - 1), rep(0, N - 2), 1 / sqrt(N - 1))
 D <- diff(diag(N), diff = 1)
@@ -141,7 +141,7 @@ obj2 <- LMMsolve(fixed = yield ~ rep + gen,
 The deviance for the LV-model is `r round(deviance(obj2), 2)` and the variances
 
 ```{r summaryVAR}
-summary(obj1, which = "variances")
+summary(obj2, which = "variances")
 ```
 as reported in @Boer2020, Table 1. 
 
