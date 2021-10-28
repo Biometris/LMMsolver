@@ -40,7 +40,7 @@
 
 
 <meta property="og:title" content="Solve Linear Mixed Models — LMMsolve" />
-<meta property="og:description" content="Solve Linear Mixed Models." />
+<meta property="og:description" content="Solve Linear Mixed Models using REML." />
 
 
 
@@ -155,7 +155,7 @@
     </div>
 
     <div class="ref-description">
-    <p>Solve Linear Mixed Models.</p>
+    <p>Solve Linear Mixed Models using REML.</p>
     </div>
 
     <pre class="usage"><span class='fu'>LMMsolve</span><span class='op'>(</span>
@@ -199,7 +199,9 @@ single term.</p></td>
     <tr>
       <th>ginverse</th>
       <td><p>A named list with each component a symmetric matrix, the
-inverse of the vcov matrix of a random term in the model.</p></td>
+precision matrix of a corresponding random term in the model. The row and
+column order of the precision matrices should match the order of the
+levels of the corresponding factor in the data.</p></td>
     </tr>
     <tr>
       <th>data</th>
@@ -237,6 +239,21 @@ algorithm. Default <code>maxit = 250</code>.</p></td>
     <p>An object of class <code>LMMsolve</code> representing the fitted model.
 See <code><a href='LMMsolveObject.html'>LMMsolveObject</a></code> for a full description of the components in
 this object.</p>
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+
+    <p>A Linear Mixed Model (LMM) has the form
+$$y = X \beta + Z u + e, \quad u \sim N(0,G), \quad e \sim N(0,R)$$ where
+\(y\) is a vector of observations, \(\beta\) is a vector with the fixed
+effects, \(u\) is a vector with the random effects, and \(e\) a vector of
+random residuals. \(X\) and \(Z\) are design matrices.</p>
+<p>LMMsolve can fit models where the matrices \(G^{-1}\) and \(R^{-1}\) are
+a linear combination of precision matrices \(Q_{G,i}\) and \(Q_{R,i}\):
+$$G^{-1} = \sum_{i} \psi_i Q_{G,i} \;, \quad R^{-1} = \sum_{i} \phi_i Q_{R,i}$$
+where the precision parameters \(\psi_i\) and \(\phi_i\) are estimated
+using REML. For most standard mixed models \(1/{\psi_i}\) are the variance
+components and \(1/{\phi_i}\) the residual variances. We use a formulation
+in terms of precision parameters to allow for non-standard mixed models using
+tensor product splines.</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
     <div class='dont-index'><p><code><a href='LMMsolveObject.html'>LMMsolveObject</a></code>, <code><a href='spl1D.html'>spl1D</a></code>,
