@@ -25,18 +25,31 @@ expect_error(LMMsolve(fixed = pheno ~ cross, residual = ~tst, data = testDat),
 ginv <- matrix(1:4, nrow = 2)
 ginvL <- list(ginv = ginv)
 ginvLS <- list(ginv = ginv %*% t(ginv))
+ginvLS2 <- list(ind = ginv %*% t(ginv))
+indMat <- diag(nrow = nlevels(testDat$ind))
+ginvLS3 <- list(ind = indMat)
+rownames(indMat) <- colnames(indMat) <- levels(testDat$ind)
+ginvLS4 <- list(ind = indMat)
 expect_error(LMMsolve(fixed = pheno ~ cross, ginverse = ginv, data = testDat),
              "ginverse should be a named list of symmetric matrices")
 expect_error(LMMsolve(fixed = pheno ~ cross, ginverse = ginvL, data = testDat),
              "ginverse should be a named list of symmetric matrices")
 expect_error(LMMsolve(fixed = pheno ~ cross, ginverse = ginvLS, data = testDat),
              "ginverse element ginv not defined in random part")
+expect_error(LMMsolve(fixed = pheno ~ cross, random = ~ind, ginverse = ginvLS2,
+                      data = testDat),
+             "Dimensions of ind should match number of levels")
+expect_error(LMMsolve(fixed = pheno ~ cross, random = ~ind, ginverse = ginvLS3,
+                      data = testDat),
+             "Row and column names of ind should match levels")
 
 ## Test other input parameters.
 expect_error(LMMsolve(fixed = pheno ~ cross, data = testDat, tolerance = -1),
              "tolerance should be a positive numerical value")
 expect_error(LMMsolve(fixed = pheno ~ cross, data = testDat, maxit= -1),
              "maxit should be a positive numerical value")
+expect_warning(LMMsolve(fixed = pheno ~ cross, data = testDat, maxit= 1),
+               "No convergence after 1 iterations")
 
 ## Test use of grp - group.
 Lgrp <- list(QTL = 3:5)
@@ -52,6 +65,7 @@ expect_error(LMMsolve(fixed = pheno ~ cross, random = ~grp(QTL),
                       group = c(Lgrp, list(QTL2 = 1:2)), data = testDat),
              "The following variables in group are not specified in grp")
 
+
 ## Fit models with different components.
 mod0 <- LMMsolve(fixed = pheno ~ cross, data = testDat)
 mod1 <- LMMsolve(fixed = pheno ~ cross, residual = ~cross, data = testDat)
@@ -60,6 +74,8 @@ mod2 <- LMMsolve(fixed = pheno ~ cross, random = ~grp(QTL),
 mod3 <- LMMsolve(fixed = pheno ~ cross, random = ~grp(QTL) + ind,
                  group = Lgrp, data = testDat)
 mod4 <- LMMsolve(fixed = pheno ~ cross, random = ~ind, data = testDat)
+mod5 <- LMMsolve(fixed = pheno ~ cross, random = ~ind, ginverse = ginvLS4,
+                 data = testDat)
 
 ## Compare results with predefined output.
 expect_equivalent_to_reference(mod0, "LMMsolve0")
@@ -67,4 +83,12 @@ expect_equivalent_to_reference(mod1, "LMMsolve1")
 expect_equivalent_to_reference(mod2, "LMMsolve2")
 expect_equivalent_to_reference(mod3, "LMMsolve3")
 expect_equivalent_to_reference(mod4, "LMMsolve4")
+expect_equivalent_to_reference(mod5, "LMMsolve5")
+
+
+## Test option trace.
+expect_stdout(LMMsolve(fixed = pheno ~ cross, data = testDat, trace = TRUE),
+              "iter logLik")
+expect_stdout(LMMsolve(fixed = pheno ~ cross, data = testDat, trace = TRUE),
+              "2 -207.1218")
 

@@ -109,13 +109,13 @@ spl1D <- function(x,
 
   lGinv <- list()
   lGinv[[1]] <- spam::as.spam(DtD + CCt)
-  names(lGinv) <- paste0("s(",xName,")")
+  names(lGinv) <- paste0("s(", xName, ")")
 
   if (is.null(X)) {
     dim.f <- NULL
     term.labels.f <- NULL
   } else {
-    dim.f <- c(ncol(X))
+    dim.f <- ncol(X)
     term.labels.f <- "splF"
   }
   dim.r <- ncol(B)

@@ -110,7 +110,7 @@ LMMsolve <- function(fixed,
       (!is.list(ginverse) ||
        length(names(ginverse)) == 0 ||
        (!all(sapply(X = ginverse, FUN = function(x) {
-         (is.matrix(x) || spam::is.spam(x)) && isSymmetric(x)}))))) {
+         is.matrix(x) && isSymmetric(x)}))))) {
     stop("ginverse should be a named list of symmetric matrices.\n")
   }
   if (!is.null(residual) &&
@@ -194,18 +194,28 @@ LMMsolve <- function(fixed,
   ## Replace identity matrix with ginverse for random terms.
   if (!is.null(ginverse)) {
     ## Convert to spam.
-    ginverse <- lapply(X = ginverse, FUN = spam::as.spam)
     e <- cumsum(dim.r)
     s <- e - dim.r + 1
-    Nelem <- length(ginverse)
-    names_ginv <- names(ginverse)
-    for (i in seq_len(Nelem)) {
-      k <- which(term.labels.r == names_ginv[i])
+    for (i in seq_along(ginverse)) {
+      ginvVar <- names(ginverse)[i]
+      ginvMat <- ginverse[[i]]
+      k <- which(term.labels.r == ginvVar)
       if (length(k) == 0) {
-        stop("ginverse element ", names_ginv[i], " not defined in random part.\n")
+        stop("ginverse element ", ginvVar, " not defined in random part.\n")
+      }
+      if (dim.r[k] != nrow(ginvMat)) {
+        stop("Dimensions of ", ginvVar, " should match number of levels ",
+             "for corresponding factor in data.\n")
+      }
+      if (!isTRUE(all(rownames(ginvMat) == levels(data[[ginvVar]]))) ||
+          !isTRUE(all(colnames(ginvMat) == levels(data[[ginvVar]])))) {
+        stop("Row and column names of ", ginvVar, " should match levels ",
+             "of corresponding factor in data.\n")
       }
       ndx <- s[k]:e[k]
-      lGinv[[k]][ndx, ndx] <- ginverse[[i]]
+      ## as.spam drops row and column names, so only converting to spam
+      ## after all checking is done.
+      lGinv[[k]][ndx, ndx] <- spam::as.spam(ginvMat)
     }
   }
   ## Make fixed part.

@@ -45,7 +45,12 @@ solveMME <- function(cholC,
 }
 
 #' @keywords internal
-calcEffDim <- function(ADcholGinv, ADcholRinv, ADcholC, phi, psi, theta) {
+calcEffDim <- function(ADcholGinv,
+                       ADcholRinv,
+                       ADcholC,
+                       phi,
+                       psi,
+                       theta) {
   resultRinv <- logdetPlusDeriv(ADcholRinv, phi)
   logdetR <- -resultRinv[1]
   dlogdetRinv <- resultRinv[-1]
@@ -56,7 +61,7 @@ calcEffDim <- function(ADcholGinv, ADcholRinv, ADcholC, phi, psi, theta) {
     logdetG <- -resultGinv[1]
     dlogdetGinv <- resultGinv[-1]
   } else {
-    logdetG <- 0.0
+    logdetG <- 0
   }
   # matrix C:
   resultC <- logdetPlusDeriv(ADcholC, theta)
@@ -79,8 +84,8 @@ calcEffDim <- function(ADcholGinv, ADcholRinv, ADcholC, phi, psi, theta) {
 }
 
 #' @keywords internal
-REMLlogL <- function(ED, yPy)
-{
+REMLlogL <- function(ED,
+                     yPy) {
   logdetC <- attr(ED, "logdetC")
   logdetG <- attr(ED, "logdetG")
   logdetR <- attr(ED, "logdetR")
@@ -92,14 +97,14 @@ REMLlogL <- function(ED, yPy)
 
 #' @keywords internal
 sparseMixedModels <- function(y,
-                                 X,
-                                 Z,
-                                 lGinv,
-                                 lRinv,
-                                 maxit = 100,
-                                 tolerance = 1.0e-6,
-                                 trace = FALSE,
-                                 theta = NULL) {
+                              X,
+                              Z,
+                              lGinv,
+                              lRinv,
+                              maxit = 100,
+                              tolerance = 1.0e-6,
+                              trace = FALSE,
+                              theta = NULL) {
   Ntot <- length(y)
   p <- ncol(X)
   q <- ncol(Z)
@@ -107,9 +112,6 @@ sparseMixedModels <- function(y,
   Nvarcomp <- length(lGinv)
   NvarcompTot <- Nres + Nvarcomp
   dimMME <- p + q
-
-  # fix a penalty theta, if value becomes high.
-  fixedTheta <- rep(FALSE, length=NvarcompTot)
 
   W <- spam::as.spam(cbind(X, Z))
   Wt <- t(W)
@@ -145,7 +147,7 @@ sparseMixedModels <- function(y,
   cholC <- chol(C, memory = list(nnzR = 8 * opt$nnz,
                                  nnzcolindices = 4 * opt$nnz))
 
-  # make ADchol for Rinv, Ginv and C:
+  ## Make ADchol for Rinv, Ginv and C:
   ADcholRinv <- ADchol(lRinv)
   if (Nvarcomp > 0) {
     ADcholGinv <- ADchol(lGinv)
@@ -153,49 +155,46 @@ sparseMixedModels <- function(y,
     ADcholGinv <- NULL
   }
   ADcholC <- ADchol(listC)
-
+  ## Initialize values for loop.
   logLprev <- Inf
+  ## Fix a penalty theta, if value becomes high.
+  fixedTheta <- rep(FALSE, length = NvarcompTot)
   if (trace) {
     cat("iter logLik\n")
   }
-
   for (it in 1:maxit) {
     if (Nvarcomp > 0) {
-      psi <- theta[c(1:length(psi))]
-      phi <- theta[-c(1:length(psi))]
+      psi <- theta[1:length(psi)]
+      phi <- theta[-(1:length(psi))]
     } else {
       psi <- NULL
       phi <- theta
     }
-
-    # calculate the effective dimension (plus logdet as attributes):
+    ## calculate the effective dimension (plus logdet as attributes).
     ED <- calcEffDim(ADcholGinv, ADcholRinv, ADcholC, phi, psi, theta)
-
-    # solve mixed model equations:
+    ## solve mixed model equations.
     a <- solveMME(cholC = cholC, listC = listC, lWtRinvY = lWtRinvY,
                   phi = phi, theta = theta)
-    # calculate the residuals:
+    ## calculate the residuals.
     r <- y - W %*% a
 
     SS_all <- calcSumSquares(lRinv = lRinv, Q = lQ, r = r, a = a,
                              Nvarcomp = Nvarcomp)
     Rinv <- linearSum(phi, lRinv)
-    # Johnson and Thompson 1995, see below eq [A5]: Py = R^{-1} r
+    ## Johnson and Thompson 1995, see below eq [A5]: Py = R^{-1} r
     yPy <- quadForm(x = y, A = Rinv, y = r)
-
-    # calculate REMLlogL, ED has logdet as attributes:
+    ## calculate REMLlogL, ED has logdet as attributes:
     logL <- REMLlogL(ED, yPy)
-
     if (trace) {
       cat(sprintf("%4d %8.4f\n", it, logL))
     }
     if (abs(logLprev - logL) < tolerance) {
       break
     }
-    # update the penalties theta that are not fixed:
-    theta <- ifelse(fixedTheta, theta, ED/SS_all)
-    # set elements of theta fixed if penalty > 1.0e6:
-    fixedTheta <- ifelse(theta > 1.0e6, TRUE, fixedTheta)
+    ## Update the penalties theta that are not fixed.
+    theta <- ifelse(fixedTheta, theta, ED / SS_all)
+    ## Set elements of theta fixed if penalty > 1.0e6.
+    fixedTheta <- theta > 1.0e6
     logLprev <- logL
   }
   if (it == maxit) {
@@ -207,11 +206,10 @@ sparseMixedModels <- function(y,
   names(phi) <- names(lRinv)
   names(psi) <- names(lGinv)
   EDnames <- c(names(lGinv), names(lRinv))
-  yhat <- W %*% a
 
   L <- list(logL = logL, sigma2e = 1 / phi, tau2e = 1 / psi, ED = ED,
-            theta = theta, EDnames = EDnames, a = a, yhat = yhat,
-            residuals = y - yhat, nIter = it, C = C)
+            theta = theta, EDnames = EDnames, a = a, yhat = y - r,
+            residuals = r, nIter = it, C = C)
   return(L)
 }
 
