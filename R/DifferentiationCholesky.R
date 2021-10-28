@@ -11,15 +11,7 @@ setClass("ADchol",
 #' @importFrom methods new
 #' @keywords internal
 ADchol <- function(P_list) {
-  nelem <- length(P_list)
-  nCol <- ncol(P_list[[1]])
-
-  lambda <- rep(1.0, nelem)
-
-  C <- spam::spam(0, nrow = nCol, ncol = nCol)
-  for (i in 1:nelem) {
-    C <- C + lambda[i] * P_list[[i]]
-  }
+  C <- Reduce(`+`, P_list)
   opt <- summary(C)
   cholC <- chol(C, memory = list(nnzR = 8 * opt$nnz,
                                  nnzcolindices = 4 * opt$nnz))
