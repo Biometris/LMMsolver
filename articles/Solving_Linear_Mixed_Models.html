@@ -110,7 +110,7 @@
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Solving Linear Mixed Models using LMMsolver</h1>
             
-            <h4 class="date">2021-10-27</h4>
+            <h4 class="date">2021-10-28</h4>
       
       
       <div class="hidden name"><code>Solving_Linear_Mixed_Models.Rmd</code></div>
@@ -216,16 +216,16 @@
 <a href="#modelling-spatial-trend-using-random-and-ginverse-arguments-" class="anchor"></a>Modelling spatial trend using <code>random</code> and <code>ginverse</code> arguments.</h3>
 <p>Another way to correct for spatial trend is using the Linear Variance (LV) model, which is closely connected to the P-splines model <span class="citation">(Boer, Piepho, and Williams <a href="#ref-Boer2020" role="doc-biblioref">2020</a>)</span>. First we need to define the precision matrix for the LV model, see Appendix in <span class="citation">Boer, Piepho, and Williams (<a href="#ref-Boer2020" role="doc-biblioref">2020</a>)</span> for details:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co">## add plot as factor</span>
+<code class="sourceCode R"><span class="co">## Add plot as factor.</span>
 <span class="va">john.alpha</span><span class="op">$</span><span class="va">plotF</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">as.factor</a></span><span class="op">(</span><span class="va">john.alpha</span><span class="op">$</span><span class="va">plot</span><span class="op">)</span>
-<span class="co">## define the precision matrix, see eq. A1 in Boer et al (2020):</span>
+<span class="co">## Define the precision matrix, see eq. A1 in Boer et al (2020).</span>
 <span class="va">N</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">john.alpha</span><span class="op">)</span>
-<span class="va">cN</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="va">N</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">N</span><span class="op">-</span><span class="fl">2</span><span class="op">)</span>, <span class="fl">1</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="va">N</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span>
+<span class="va">cN</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="va">N</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">N</span> <span class="op">-</span> <span class="fl">2</span><span class="op">)</span>, <span class="fl">1</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="va">N</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span>
 <span class="va">D</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/diff.html">diff</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diag.html">diag</a></span><span class="op">(</span><span class="va">N</span><span class="op">)</span>, diff <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>
-<span class="va">Delta</span> <span class="op">&lt;-</span> <span class="fl">0.5</span><span class="op">*</span><span class="fu"><a href="https://rdrr.io/r/base/crossprod.html">crossprod</a></span><span class="op">(</span><span class="va">D</span><span class="op">)</span>
-<span class="va">LVinv</span> <span class="op">&lt;-</span> <span class="fl">0.5</span><span class="op">*</span><span class="op">(</span><span class="fl">2</span><span class="op">*</span><span class="va">Delta</span> <span class="op">+</span> <span class="va">cN</span> <span class="op">%*%</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">cN</span><span class="op">)</span><span class="op">)</span>
-<span class="co">## add LVinv to list, with name corresponding to random term:</span>
-<span class="va">lGinv</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>plotF<span class="op">=</span><span class="va">LVinv</span><span class="op">)</span></code></pre></div>
+<span class="va">Delta</span> <span class="op">&lt;-</span> <span class="fl">0.5</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/crossprod.html">crossprod</a></span><span class="op">(</span><span class="va">D</span><span class="op">)</span>
+<span class="va">LVinv</span> <span class="op">&lt;-</span> <span class="fl">0.5</span> <span class="op">*</span> <span class="op">(</span><span class="fl">2</span> <span class="op">*</span> <span class="va">Delta</span> <span class="op">+</span> <span class="va">cN</span> <span class="op">%*%</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">cN</span><span class="op">)</span><span class="op">)</span>
+<span class="co">## Add LVinv to list, with name corresponding to random term.</span>
+<span class="va">lGinv</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>plotF <span class="op">=</span> <span class="va">LVinv</span><span class="op">)</span></code></pre></div>
 <p>Given the precision matrix for the LV model we can define the model in LMMsolve using the <code>random</code> and <code>ginverse</code> arguments:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co">## Fit mixed model with first degree B-splines and first order differences.</span>
@@ -241,7 +241,7 @@
 <span class="co">#&gt;    VarComp     Variance</span>
 <span class="co">#&gt; 1     splR 0.0001042904</span>
 <span class="co">#&gt; 2 residual 0.0752848705</span></code></pre></div>
-<p>as reported <span class="citation">Boer, Piepho, and Williams (<a href="#ref-Boer2020" role="doc-biblioref">2020</a>)</span>, Table 1.</p>
+<p>as reported in <span class="citation">Boer, Piepho, and Williams (<a href="#ref-Boer2020" role="doc-biblioref">2020</a>)</span>, Table 1.</p>
 </div>
 </div>
 <div id="model-biomass-as-function-of-time-" class="section level2">
@@ -405,8 +405,8 @@
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co">## Deviance difference between null and alternative model.</span>
 <span class="va">dev</span> <span class="op">&lt;-</span> <span class="va">dev4</span> <span class="op">-</span> <span class="va">dev5</span>
-<span class="co">## Calculate approximate p-value </span>
-<span class="va">minlog10p</span> <span class="op">&lt;-</span> <span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html">log10</a></span><span class="op">(</span><span class="fl">0.5</span><span class="op">*</span><span class="fu"><a href="https://rdrr.io/r/stats/Chisquare.html">pchisq</a></span><span class="op">(</span><span class="va">dev</span>, <span class="fl">1</span>, lower.tail<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span>
+<span class="co">## Calculate approximate p-value. </span>
+<span class="va">minlog10p</span> <span class="op">&lt;-</span> <span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html">log10</a></span><span class="op">(</span><span class="fl">0.5</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/stats/Chisquare.html">pchisq</a></span><span class="op">(</span><span class="va">dev</span>, <span class="fl">1</span>, lower.tail <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="va">minlog10p</span>, <span class="fl">2</span><span class="op">)</span>
 <span class="co">#&gt; [1] 8.76</span></code></pre></div>
 <p>The estimated QTL effects of the parents A, B, and C are given by:</p>
