@@ -27,9 +27,8 @@ ginvL <- list(ginv = ginv)
 ginvLS <- list(ginv = ginv %*% t(ginv))
 ginvLS2 <- list(ind = ginv %*% t(ginv))
 indMat <- diag(nrow = nlevels(testDat$ind))
-ginvLS3 <- list(ind = indMat)
 rownames(indMat) <- colnames(indMat) <- levels(testDat$ind)
-ginvLS4 <- list(ind = indMat)
+ginvLS3 <- list(ind = indMat)
 expect_error(LMMsolve(fixed = pheno ~ cross, ginverse = ginv, data = testDat),
              "ginverse should be a named list of symmetric matrices")
 expect_error(LMMsolve(fixed = pheno ~ cross, ginverse = ginvL, data = testDat),
@@ -39,9 +38,6 @@ expect_error(LMMsolve(fixed = pheno ~ cross, ginverse = ginvLS, data = testDat),
 expect_error(LMMsolve(fixed = pheno ~ cross, random = ~ind, ginverse = ginvLS2,
                       data = testDat),
              "Dimensions of ind should match number of levels")
-expect_error(LMMsolve(fixed = pheno ~ cross, random = ~ind, ginverse = ginvLS3,
-                      data = testDat),
-             "Row and column names of ind should match levels")
 
 ## Test other input parameters.
 expect_error(LMMsolve(fixed = pheno ~ cross, data = testDat, tolerance = -1),
@@ -74,7 +70,7 @@ mod2 <- LMMsolve(fixed = pheno ~ cross, random = ~grp(QTL),
 mod3 <- LMMsolve(fixed = pheno ~ cross, random = ~grp(QTL) + ind,
                  group = Lgrp, data = testDat)
 mod4 <- LMMsolve(fixed = pheno ~ cross, random = ~ind, data = testDat)
-mod5 <- LMMsolve(fixed = pheno ~ cross, random = ~ind, ginverse = ginvLS4,
+mod5 <- LMMsolve(fixed = pheno ~ cross, random = ~ind, ginverse = ginvLS3,
                  data = testDat)
 
 ## Compare results with predefined output.

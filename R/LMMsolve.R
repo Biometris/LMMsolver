@@ -110,7 +110,7 @@ LMMsolve <- function(fixed,
       (!is.list(ginverse) ||
        length(names(ginverse)) == 0 ||
        (!all(sapply(X = ginverse, FUN = function(x) {
-         is.matrix(x) && isSymmetric(x)}))))) {
+         (is.matrix(x) || spam::is.spam(x)) && isSymmetric(x)}))))) {
     stop("ginverse should be a named list of symmetric matrices.\n")
   }
   if (!is.null(residual) &&
@@ -206,13 +206,6 @@ LMMsolve <- function(fixed,
       if (dim.r[k] != nrow(ginvMat)) {
         stop("Dimensions of ", ginvVar, " should match number of levels ",
              "for corresponding factor in data.\n")
-      }
-      if (is.null(rownames(ginvMat)) ||
-          !all(rownames(ginvMat) == levels(data[[ginvVar]])) ||
-          is.null(colnames(ginvMat)) ||
-          !all(colnames(ginvMat) == levels(data[[ginvVar]]))) {
-        stop("Row and column names of ", ginvVar, " should match levels ",
-             "of corresponding factor in data.\n")
       }
       ndx <- s[k]:e[k]
       ## as.spam drops row and column names, so only converting to spam
