@@ -64,14 +64,14 @@ Solve Linear Mixed Models using REML.
 }
 \details{
 A Linear Mixed Model (LMM) has the form
-\deqn{y = X \beta + Z u + e, \quad u \sim N(0,G), \quad e \sim N(0,R)} where
+\deqn{y = X \beta + Z u + e, u ~ N(0,G), e ~ N(0,R)} where
 \eqn{y} is a vector of observations, \eqn{\beta} is a vector with the fixed
 effects, \eqn{u} is a vector with the random effects, and \eqn{e} a vector of
 random residuals. \eqn{X} and \eqn{Z} are design matrices.
 
 LMMsolve can fit models where the matrices \eqn{G^{-1}} and \eqn{R^{-1}} are
 a linear combination of precision matrices \eqn{Q_{G,i}} and \eqn{Q_{R,i}}:
-\deqn{G^{-1} = \sum_{i} \psi_i Q_{G,i} \;, \quad R^{-1} = \sum_{i} \phi_i Q_{R,i}}
+\deqn{G^{-1} = \sum_{i} \psi_i Q_{G,i} \;, R^{-1} = \sum_{i} \phi_i Q_{R,i}}
 where the precision parameters \eqn{\psi_i} and \eqn{\phi_i} are estimated
 using REML. For most standard mixed models \eqn{1/{\psi_i}} are the variance
 components and \eqn{1/{\phi_i}} the residual variances. We use a formulation
