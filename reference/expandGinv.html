@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Construct list of Ginv matrices of splines — constructGinvSplines • LMMsolver</title>
+<title>Combine two lists of Ginv matrices — expandGinv • LMMsolver</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,12 @@
 
 
 
-<meta property="og:title" content="Construct list of Ginv matrices of splines — constructGinvSplines" />
-<meta property="og:description" content="Construct list of Ginv matrices of splines" />
+<meta property="og:title" content="Combine two lists of Ginv matrices — expandGinv" />
+<meta property="og:description" content="output is a combined list, of dimension (d1+d2) x (d1+d2),
+with matrices in lGinv1 extended to [A1 0]
+                                    [0  0]
+and              lGinv2 extended to [0  0]
+                                    [0 A2]" />
 
 
 
@@ -149,33 +153,37 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Construct list of Ginv matrices of splines</h1>
+    <h1>Combine two lists of Ginv matrices</h1>
     
-    <div class="hidden name"><code>constructGinvSplines.Rd</code></div>
+    <div class="hidden name"><code>expandGinv.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Construct list of Ginv matrices of splines</p>
+    <p>output is a combined list, of dimension (d1+d2) x (d1+d2),
+with matrices in lGinv1 extended to [A1 0]
+                                    [0  0]
+and              lGinv2 extended to [0  0]
+                                    [0 A2]</p>
     </div>
 
-    <pre class="usage"><span class='fu'>constructGinvSplines</span><span class='op'>(</span><span class='va'>q</span>, <span class='va'>pord</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>expandGinv</span><span class='op'>(</span><span class='va'>lGinv1</span>, <span class='va'>lGinv2</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>q</th>
-      <td><p>vector, with dimension of the B-spline basis used.</p></td>
+      <th>lGinv1</th>
+      <td><p>a list of sparse matrices.</p></td>
     </tr>
     <tr>
-      <th>pord</th>
-      <td><p>order of the penalty matrix (1 or 2).</p></td>
+      <th>lGinv2</th>
+      <td><p>a list of sparse matrices.</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>a list of symmetric matrices of length of vector q.</p>
+    <p>a list of sparse matrices of dimension (d1+d2) x (d1+d2)</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

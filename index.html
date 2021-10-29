@@ -36,7 +36,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">LMMsolver</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
       </span>
     </div>
 
@@ -116,7 +116,10 @@
 <div id="lmmsolver" class="section level1">
 <div class="page-header"><h1 class="hasAnchor">
 <a href="#lmmsolver" class="anchor"></a>LMMsolver</h1></div>
-
+<!-- [![](https://www.r-pkg.org/badges/version/LMMsolver)](https://www.r-pkg.org/pkg/LMMsolver) -->
+<!-- [![CRAN RStudio mirror downloads](https://cranlogs.r-pkg.org/badges/LMMsolver)](https://www.r-pkg.org/pkg/LMMsolver) -->
+<!-- [![R-CMD-check](https://github.com/Biometris/LMMsolver/workflows/R-CMD-check/badge.svg)](https://github.com/Biometris/LMMsolver/actions?workflow=R-CMD-check) -->
+<!-- [![codecov](https://codecov.io/gh/Biometris/LMMsolver/branch/master/graph/badge.svg)](https://codecov.io/gh/Biometris/LMMsolver) -->
 <p>The aim of the <code>LMMsolver</code> package is to provide an efficient and flexible system to estimate variance components using restricted maximum likelihood or REML (Patterson and Thompson 1971), for models where the mixed model equations are sparse. An example of an application is using splines to model spatial (Rodríguez-Álvarez et al. 2018; Boer, Piepho, and Williams 2020) or temporal (Bustos-Korts et al. 2019) trends. Another example is mixed model Quantitative Trait Locus (QTL) analysis for multiparental populations, allowing for heterogeneous residual variance and design matrices with Identity-By-Descent (IBD) probabilities (Li et al. 2021).</p>
 <div id="installation" class="section level2">
 <h2 class="hasAnchor">
@@ -161,7 +164,7 @@
 <span class="co">#&gt; 2        splF    3.0000     3       3 1.0000000  0.00000000</span>
 <span class="co">#&gt; 3      s(lon)  302.6004  1936    1932 0.1566255  0.09679905</span>
 <span class="co">#&gt; 4      s(lat)  409.0868  1936    1932 0.2117426  0.36223681</span>
-<span class="co">#&gt; 5    residual 5190.3128  5906    5906 0.8788203 13.52577271</span>
+<span class="co">#&gt; 5    residual 5190.3128  5906    5902 0.8794159 13.52577271</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt;  Total Effective Dimension: 5906</span></code></pre></div>
 <p>The spatial trend for the precipitation can now be plotted on the map of the USA.</p>
@@ -191,16 +194,16 @@
 <p>Boer, Martin P., Hans Peter Piepho, and Emlyn R. Williams. 2020. “Linear Variance, P-splines and Neighbour Differences for Spatial Adjustment in Field Trials: How are they Related?” <em>J. Agric. Biol. Environ. Stat.</em> 25 (4). Springer: 676–98. <a href="https://doi.org/10.1007/S13253-020-00412-4" class="uri">https://doi.org/10.1007/S13253-020-00412-4</a>.</p>
 </div>
 <div id="ref-Bustos-Korts2019">
-<p>Bustos-Korts, Daniela, Martin P. Boer, Marcos Malosetti, Scott Chapman, Karine Chenu, Bangyou Zheng, and Fred A. van Eeuwijk. 2019. “Combining Crop Growth Modeling and Statistical Genetic Modeling to Evaluate Phenotyping Strategies.” <em>Front. Plant Sci.</em> 10 (November). Frontiers Media S.A. <a href="https://doi.org/10.3389/FPLS.2019.01491/FULL" class="uri">https://doi.org/10.3389/FPLS.2019.01491/FULL</a>.</p>
+<p>Bustos-Korts, Daniela, Martin P. Boer, Marcos Malosetti, Scott Chapman, Karine Chenu, Bangyou Zheng, and Fred A. van Eeuwijk. 2019. “Combining Crop Growth Modeling and Statistical Genetic Modeling to Evaluate Phenotyping Strategies.” <em>Front. Plant Sci.</em> 10 (November). Frontiers Media S.A. <a href="https://doi.org/10.3389/fpls.2019.01491" class="uri">https://doi.org/10.3389/fpls.2019.01491</a>.</p>
 </div>
 <div id="ref-Furrer2010">
-<p>Furrer, R, and SR Sain. 2010. “spam: A sparse matrix R package with emphasis on MCMC methods for Gaussian Markov random fields.” <em>J. Stat. Softw.</em> <a href="http://core.kmi.open.ac.uk/download/pdf/6340272.pdf" class="uri">http://core.kmi.open.ac.uk/download/pdf/6340272.pdf</a>.</p>
+<p>Furrer, R, and SR Sain. 2010. “spam: A sparse matrix R package with emphasis on MCMC methods for Gaussian Markov random fields.” <em>J. Stat. Softw.</em> <a href="https://core.ac.uk/download/pdf/6340272.pdf" class="uri">https://core.ac.uk/download/pdf/6340272.pdf</a>.</p>
 </div>
 <div id="ref-Li2021">
 <p>Li, Wenhao, Martin P. Boer, Chaozhi Zheng, Ronny V. L. Joosen, and Fred A. van Eeuwijk. 2021. “An IBD-based mixed model approach for QTL mapping in multiparental populations.” <em>Theor. Appl. Genet. 2021</em> 1 (August). Springer: 1–18. <a href="https://doi.org/10.1007/S00122-021-03919-7" class="uri">https://doi.org/10.1007/S00122-021-03919-7</a>.</p>
 </div>
 <div id="ref-Patterson1971">
-<p>Patterson, HD, and R Thompson. 1971. “Recovery of inter-block information when block sizes are unequal.” <em>Biometrika</em>. <a href="http://biomet.oxfordjournals.org/content/58/3/545.short" class="uri">http://biomet.oxfordjournals.org/content/58/3/545.short</a>.</p>
+<p>Patterson, HD, and R Thompson. 1971. “Recovery of inter-block information when block sizes are unequal.” <em>Biometrika</em>. <a href="https://doi.org/10.1093/biomet/58.3.545" class="uri">https://doi.org/10.1093/biomet/58.3.545</a>.</p>
 </div>
 <div id="ref-Rodriguez-Alvarez2018">
 <p>Rodríguez-Álvarez, María Xosé, Martin P. Boer, Fred A. van Eeuwijk, and Paul H.C. Eilers. 2018. “Correcting for spatial heterogeneity in plant breeding experiments with P-splines.” <em>Spat. Stat.</em> 23 (March). Elsevier: 52–71. <a href="https://doi.org/10.1016/J.SPASTA.2017.10.003" class="uri">https://doi.org/10.1016/J.SPASTA.2017.10.003</a>.</p>
@@ -228,16 +231,7 @@
 </ul>
 </div>
 
-  <div class="dev-status">
-<h2>Dev status</h2>
-<ul class="list-unstyled">
-<li><a href="https://www.r-pkg.org/pkg/LMMsolver"><img src="https://www.r-pkg.org/badges/version/LMMsolver"></a></li>
-<li><a href="https://www.r-pkg.org/pkg/LMMsolver"><img src="https://cranlogs.r-pkg.org/badges/LMMsolver" alt="CRAN RStudio mirror downloads"></a></li>
-<li><a href="https://github.com/Biometris/LMMsolver/actions?workflow=R-CMD-check"><img src="https://github.com/Biometris/LMMsolver/workflows/R-CMD-check/badge.svg" alt="R-CMD-check"></a></li>
-<li><a href="https://codecov.io/gh/Biometris/LMMsolver"><img src="https://codecov.io/gh/Biometris/LMMsolver/branch/master/graph/badge.svg" alt="codecov"></a></li>
-</ul>
-</div>
-</div>
+  </div>
 </div>
 
 

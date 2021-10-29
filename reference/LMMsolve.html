@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">LMMsolver</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.11</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
       </span>
     </div>
 
@@ -242,13 +242,13 @@ this object.</p>
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
     <p>A Linear Mixed Model (LMM) has the form
-$$y = X \beta + Z u + e, \quad u \sim N(0,G), \quad e \sim N(0,R)$$ where
+$$y = X \beta + Z u + e, u ~ N(0,G), e ~ N(0,R)$$ where
 \(y\) is a vector of observations, \(\beta\) is a vector with the fixed
 effects, \(u\) is a vector with the random effects, and \(e\) a vector of
 random residuals. \(X\) and \(Z\) are design matrices.</p>
 <p>LMMsolve can fit models where the matrices \(G^{-1}\) and \(R^{-1}\) are
 a linear combination of precision matrices \(Q_{G,i}\) and \(Q_{R,i}\):
-$$G^{-1} = \sum_{i} \psi_i Q_{G,i} \;, \quad R^{-1} = \sum_{i} \phi_i Q_{R,i}$$
+$$G^{-1} = \sum_{i} \psi_i Q_{G,i} \;, R^{-1} = \sum_{i} \phi_i Q_{R,i}$$
 where the precision parameters \(\psi_i\) and \(\phi_i\) are estimated
 using REML. For most standard mixed models \(1/{\psi_i}\) are the variance
 components and \(1/{\phi_i}\) the residual variances. We use a formulation
