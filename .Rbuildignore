@@ -9,3 +9,4 @@ data_raw
 ^docs$
 ^pkgdown$
 ^\.github$
+public

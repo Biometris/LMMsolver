@@ -248,17 +248,13 @@ checkGroup <- function(random,
         random <- randTerms[-grpPos]
       }
     }
-    ## Check for variables in group missing in grp.
-    groupMiss <- names(group)[!names(group) %in% grpVars]
-    if (length(groupMiss) > 0) {
-      stop("The following variables in group are not specified in grp in ",
-           "in the random part of the model:\n",
-           paste0(groupMiss, collapse = ", "), "\n", call. = FALSE)
+    ## Remove variables from group missing in grp.
+    if (any(names(group) %in% grpVars)) {
+      group <- group[names(group) %in% grpVars]
+    } else {
+      group <- NULL
     }
   }
-  return(random)
+  return(list(random = random, group = group))
 }
-
-
-
 

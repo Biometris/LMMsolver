@@ -49,18 +49,12 @@ expect_warning(LMMsolve(fixed = pheno ~ cross, data = testDat, maxit= 1),
 
 ## Test use of grp - group.
 Lgrp <- list(QTL = 3:5)
-expect_error(LMMsolve(fixed = pheno ~ cross, group = Lgrp, data = testDat),
-             "The following variables in group are not specified in grp")
 expect_error(LMMsolve(fixed = pheno ~ cross, random = ~grp(QTL2),
                       data = testDat),
              "The following variables are specified in grp in the random part")
 expect_error(LMMsolve(fixed = pheno ~ cross, random = ~grp(QTL2),
                       group = Lgrp, data = testDat),
              "The following variables are specified in grp in the random part")
-expect_error(LMMsolve(fixed = pheno ~ cross, random = ~grp(QTL),
-                      group = c(Lgrp, list(QTL2 = 1:2)), data = testDat),
-             "The following variables in group are not specified in grp")
-
 
 ## Fit models with different components.
 mod0 <- LMMsolve(fixed = pheno ~ cross, data = testDat)
@@ -81,6 +75,10 @@ expect_equivalent_to_reference(mod3, "LMMsolve3")
 expect_equivalent_to_reference(mod4, "LMMsolve4")
 expect_equivalent_to_reference(mod5, "LMMsolve5")
 
+## Group not used in random part should be ignored.
+mod3a <- LMMsolve(fixed = pheno ~ cross, random = ~grp(QTL) + ind,
+                  group = c(Lgrp, list(QTL2 = 1:2)), data = testDat)
+expect_equivalent(mod3, mod3a)
 
 ## Test option trace.
 expect_stdout(LMMsolve(fixed = pheno ~ cross, data = testDat, trace = TRUE),

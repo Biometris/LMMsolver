@@ -3,7 +3,7 @@ library(asreml)
 library(LMMsolver)
 
 # two crosses, AxB an AxC
-df <- read.csv("Example3QTLs.csv",stringsAsFactors = TRUE)
+df <- read.csv("examples/Example3QTLs.csv",stringsAsFactors = TRUE)
 str(df)
 
 Lgrp <- list(QTL1=c(3:5), QTL2=c(6:8), QTL3=c(9:11))
