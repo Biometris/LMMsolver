@@ -3,11 +3,13 @@
 
 # LMMsolver
 
-[![](https://www.r-pkg.org/badges/version/LMMsolver)](https://www.r-pkg.org/pkg/LMMsolver)
-[![CRAN RStudio mirror
-downloads](https://cranlogs.r-pkg.org/badges/LMMsolver)](https://www.r-pkg.org/pkg/LMMsolver)
-[![R-CMD-check](https://github.com/Biometris/LMMsolver/workflows/R-CMD-check/badge.svg)](https://github.com/Biometris/LMMsolver/actions?workflow=R-CMD-check)
-[![codecov](https://codecov.io/gh/Biometris/LMMsolver/branch/master/graph/badge.svg)](https://codecov.io/gh/Biometris/LMMsolver)
+<!-- [![](https://www.r-pkg.org/badges/version/LMMsolver)](https://www.r-pkg.org/pkg/LMMsolver) -->
+
+<!-- [![CRAN RStudio mirror downloads](https://cranlogs.r-pkg.org/badges/LMMsolver)](https://www.r-pkg.org/pkg/LMMsolver) -->
+
+<!-- [![R-CMD-check](https://github.com/Biometris/LMMsolver/workflows/R-CMD-check/badge.svg)](https://github.com/Biometris/LMMsolver/actions?workflow=R-CMD-check) -->
+
+<!-- [![codecov](https://codecov.io/gh/Biometris/LMMsolver/branch/master/graph/badge.svg)](https://codecov.io/gh/Biometris/LMMsolver) -->
 
 The aim of the `LMMsolver` package is to provide an efficient and
 flexible system to estimate variance components using restricted maximum
@@ -131,7 +133,7 @@ Bustos-Korts, Daniela, Martin P. Boer, Marcos Malosetti, Scott Chapman,
 Karine Chenu, Bangyou Zheng, and Fred A. van Eeuwijk. 2019. “Combining
 Crop Growth Modeling and Statistical Genetic Modeling to Evaluate
 Phenotyping Strategies.” *Front. Plant Sci.* 10 (November). Frontiers
-Media S.A. <https://doi.org/10.3389/FPLS.2019.01491/FULL>.
+Media S.A. <https://doi.org/10.3389/fpls.2019.01491>.
 
 </div>
 
@@ -139,7 +141,7 @@ Media S.A. <https://doi.org/10.3389/FPLS.2019.01491/FULL>.
 
 Furrer, R, and SR Sain. 2010. “spam: A sparse matrix R package with
 emphasis on MCMC methods for Gaussian Markov random fields.” *J. Stat.
-Softw.* <http://core.kmi.open.ac.uk/download/pdf/6340272.pdf>.
+Softw.* <https://core.ac.uk/download/pdf/6340272.pdf>.
 
 </div>
 
@@ -156,7 +158,7 @@ Springer: 1–18. <https://doi.org/10.1007/S00122-021-03919-7>.
 
 Patterson, HD, and R Thompson. 1971. “Recovery of inter-block
 information when block sizes are unequal.” *Biometrika*.
-<http://biomet.oxfordjournals.org/content/58/3/545.short>.
+<https://doi.org/10.1093/biomet/58.3.545>.
 
 </div>
 

@@ -1,6 +1,7 @@
 ## New release
 
 - Initial CRAN release
+- After earlier release fixed links in vignette and README
 
 ----
 
@@ -28,6 +29,18 @@ New submission
 Possibly misspelled words in DESCRIPTION:
   IBD (9:54)
   multiparental (8:5)
+  
+These are spelled correctly.   
 
-These are spelled correctly. 
+Found the following (possibly) invalid URLs:
+  URL: https://doi.org/10.2307/1390762
+    From: inst/doc/Solving_Linear_Mixed_Models.html
+    Status: 403
+    Message: Forbidden
+  URL: https://www.jstor.org/stable/2246049
+    From: inst/doc/Solving_Linear_Mixed_Models.html
+    Status: 403
+    Message: Forbidden
+
+These links work correctly when opened from my browser.
 
