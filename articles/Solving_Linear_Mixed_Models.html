@@ -110,7 +110,7 @@
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Solving Linear Mixed Models using LMMsolver</h1>
             
-            <h4 class="date">2021-10-29</h4>
+            <h4 class="date">2021-11-02</h4>
       
       
       <div class="hidden name"><code>Solving_Linear_Mixed_Models.Rmd</code></div>
@@ -223,7 +223,7 @@
 <span class="va">cN</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="va">N</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">N</span> <span class="op">-</span> <span class="fl">2</span><span class="op">)</span>, <span class="fl">1</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="va">N</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span>
 <span class="va">D</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/diff.html">diff</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diag.html">diag</a></span><span class="op">(</span><span class="va">N</span><span class="op">)</span>, diff <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>
 <span class="va">Delta</span> <span class="op">&lt;-</span> <span class="fl">0.5</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/crossprod.html">crossprod</a></span><span class="op">(</span><span class="va">D</span><span class="op">)</span>
-<span class="va">LVinv</span> <span class="op">&lt;-</span> <span class="fl">0.5</span> <span class="op">*</span> <span class="op">(</span><span class="fl">2</span> <span class="op">*</span> <span class="va">Delta</span> <span class="op">+</span> <span class="va">cN</span> <span class="op">%*%</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">cN</span><span class="op">)</span><span class="op">)</span>
+<span class="va">LVinv</span> <span class="op">&lt;-</span> <span class="fl">0.5</span> <span class="op">*</span> <span class="op">(</span><span class="fl">2</span> <span class="op">*</span> <span class="va">Delta</span> <span class="op">+</span> <span class="va">cN</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">cN</span><span class="op">)</span><span class="op">)</span>
 <span class="co">## Add LVinv to list, with name corresponding to random term.</span>
 <span class="va">lGinv</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>plotF <span class="op">=</span> <span class="va">LVinv</span><span class="op">)</span></code></pre></div>
 <p>Given the precision matrix for the LV model we can define the model in LMMsolve using the <code>random</code> and <code>ginverse</code> arguments:</p>

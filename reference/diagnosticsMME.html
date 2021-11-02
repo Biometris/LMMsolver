@@ -180,27 +180,28 @@ decomposition</p>
 decomposition.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='co'>## Fit model on john.alpha data from agridat package.</span>
-<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>john.alpha</span>, package <span class='op'>=</span> <span class='st'>"agridat"</span><span class='op'>)</span>
-
-<span class='co'>## Fit simple model with only fixed effects.</span>
-<span class='va'>LMM1</span> <span class='op'>&lt;-</span> <span class='fu'><a href='LMMsolve.html'>LMMsolve</a></span><span class='op'>(</span>fixed <span class='op'>=</span> <span class='va'>yield</span> <span class='op'>~</span> <span class='va'>rep</span> <span class='op'>+</span> <span class='va'>gen</span>,
-                data <span class='op'>=</span> <span class='va'>john.alpha</span><span class='op'>)</span>
-
-<span class='co'>## Obtain deviance.</span>
-<span class='fu'>diagnosticsMME</span><span class='op'>(</span><span class='va'>LMM1</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; Summary of matrix C 
-#&gt; Matrix object of class 'spam' of dimension 26x26,
-#&gt;     with 168 (row-wise) nonzero elements.
-#&gt;     Density of the matrix is 24.9%.
-#&gt; Class 'spam' (32-bit)
-#&gt; 
-#&gt;  Summary of cholesky decomposition of C 
-#&gt; Matrix object of class 'spam' of dimension 26x26,
-#&gt;     with 98 (row-wise) nonzero elements.
-#&gt;     Density of the matrix is 14.5%.
-#&gt; Class 'spam' (32-bit)</div><div class='input'>
-</div></pre>
+    <pre class="examples"><span class='r-in'><span class='co'>## Fit model on john.alpha data from agridat package.</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>john.alpha</span>, package <span class='op'>=</span> <span class='st'>"agridat"</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'>## Fit simple model with only fixed effects.</span></span>
+<span class='r-in'><span class='va'>LMM1</span> <span class='op'>&lt;-</span> <span class='fu'><a href='LMMsolve.html'>LMMsolve</a></span><span class='op'>(</span>fixed <span class='op'>=</span> <span class='va'>yield</span> <span class='op'>~</span> <span class='va'>rep</span> <span class='op'>+</span> <span class='va'>gen</span>,</span>
+<span class='r-in'>                data <span class='op'>=</span> <span class='va'>john.alpha</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'>## Obtain deviance.</span></span>
+<span class='r-in'><span class='fu'>diagnosticsMME</span><span class='op'>(</span><span class='va'>LMM1</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Summary of matrix C </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Matrix object of class 'spam' of dimension 26x26,</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>     with 168 (row-wise) nonzero elements.</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>     Density of the matrix is 24.9%.</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Class 'spam' (32-bit)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  Summary of cholesky decomposition of C </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Matrix object of class 'spam' of dimension 26x26,</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>     with 98 (row-wise) nonzero elements.</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>     Density of the matrix is 14.5%.</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Class 'spam' (32-bit)</span>
+<span class='r-in'></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

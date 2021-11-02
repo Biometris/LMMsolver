@@ -204,35 +204,37 @@ on which.</p>
 </ul>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='co'>## Fit model on john.alpha data from agridat package.</span>
-<span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>john.alpha</span>, package <span class='op'>=</span> <span class='st'>"agridat"</span><span class='op'>)</span>
-
-<span class='co'>## Fit simple model with only fixed effects.</span>
-<span class='va'>LMM1</span> <span class='op'>&lt;-</span> <span class='fu'><a href='LMMsolve.html'>LMMsolve</a></span><span class='op'>(</span>fixed <span class='op'>=</span> <span class='va'>yield</span> <span class='op'>~</span> <span class='va'>rep</span> <span class='op'>+</span> <span class='va'>gen</span>,
-                data <span class='op'>=</span> <span class='va'>john.alpha</span><span class='op'>)</span>
-
-<span class='co'>## Obtain table of effective dimensions.</span>
-<span class='va'>summ1</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>LMM1</span><span class='op'>)</span>
-<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>summ1</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; Table with effective dimensions and penalties: 
-#&gt; 
-#&gt;          Term Effective Model Nominal Ratio  Penalty
-#&gt; 1 (Intercept)         1     1       1     1 0.000000
-#&gt; 2         rep         2     2       2     1 0.000000
-#&gt; 3         gen        23    23      23     1 0.000000
-#&gt; 4    residual        46    72      46     1 7.430195
-#&gt; 
-#&gt;  Total Effective Dimension: 72 </div><div class='input'>
-<span class='co'>## Obtain table of variances.</span>
-<span class='va'>summ2</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>LMM1</span>,
-                which <span class='op'>=</span> <span class='st'>"variances"</span><span class='op'>)</span>
-<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>summ2</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; Table with variances: 
-#&gt; 
-#&gt;    VarComp Variance
-#&gt; 1 residual 0.134586
-#&gt; </div><div class='input'>
-</div></pre>
+    <pre class="examples"><span class='r-in'><span class='co'>## Fit model on john.alpha data from agridat package.</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span><span class='op'>(</span><span class='va'>john.alpha</span>, package <span class='op'>=</span> <span class='st'>"agridat"</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'>## Fit simple model with only fixed effects.</span></span>
+<span class='r-in'><span class='va'>LMM1</span> <span class='op'>&lt;-</span> <span class='fu'><a href='LMMsolve.html'>LMMsolve</a></span><span class='op'>(</span>fixed <span class='op'>=</span> <span class='va'>yield</span> <span class='op'>~</span> <span class='va'>rep</span> <span class='op'>+</span> <span class='va'>gen</span>,</span>
+<span class='r-in'>                data <span class='op'>=</span> <span class='va'>john.alpha</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'>## Obtain table of effective dimensions.</span></span>
+<span class='r-in'><span class='va'>summ1</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>LMM1</span><span class='op'>)</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>summ1</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Table with effective dimensions and penalties: </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>          Term Effective Model Nominal Ratio  Penalty</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 1 (Intercept)         1     1       1     1 0.000000</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 2         rep         2     2       2     1 0.000000</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 3         gen        23    23      23     1 0.000000</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 4    residual        46    72      46     1 7.430195</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  Total Effective Dimension: 72 </span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'>## Obtain table of variances.</span></span>
+<span class='r-in'><span class='va'>summ2</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span><span class='op'>(</span><span class='va'>LMM1</span>,</span>
+<span class='r-in'>                which <span class='op'>=</span> <span class='st'>"variances"</span><span class='op'>)</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>summ2</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Table with variances: </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>    VarComp Variance</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> 1 residual 0.134586</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-in'></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
