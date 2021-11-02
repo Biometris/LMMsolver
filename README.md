@@ -3,13 +3,11 @@
 
 # LMMsolver
 
-<!-- [![](https://www.r-pkg.org/badges/version/LMMsolver)](https://www.r-pkg.org/pkg/LMMsolver) -->
-
-<!-- [![CRAN RStudio mirror downloads](https://cranlogs.r-pkg.org/badges/LMMsolver)](https://www.r-pkg.org/pkg/LMMsolver) -->
-
-<!-- [![R-CMD-check](https://github.com/Biometris/LMMsolver/workflows/R-CMD-check/badge.svg)](https://github.com/Biometris/LMMsolver/actions?workflow=R-CMD-check) -->
-
-<!-- [![codecov](https://codecov.io/gh/Biometris/LMMsolver/branch/master/graph/badge.svg)](https://codecov.io/gh/Biometris/LMMsolver) -->
+[![](https://www.r-pkg.org/badges/version/LMMsolver)](https://www.r-pkg.org/pkg/LMMsolver)
+[![CRAN RStudio mirror
+downloads](https://cranlogs.r-pkg.org/badges/LMMsolver)](https://www.r-pkg.org/pkg/LMMsolver)
+[![R-CMD-check](https://github.com/Biometris/LMMsolver/workflows/R-CMD-check/badge.svg)](https://github.com/Biometris/LMMsolver/actions?workflow=R-CMD-check)
+[![codecov](https://codecov.io/gh/Biometris/LMMsolver/branch/master/graph/badge.svg)](https://codecov.io/gh/Biometris/LMMsolver)
 
 The aim of the `LMMsolver` package is to provide an efficient and
 flexible system to estimate variance components using restricted maximum
