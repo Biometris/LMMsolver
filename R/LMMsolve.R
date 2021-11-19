@@ -30,6 +30,8 @@
 #' precision matrix of a corresponding random term in the model. The row and
 #' column order of the precision matrices should match the order of the
 #' levels of the corresponding factor in the data.
+#' @param weights an optional vector of prior weights to be used in the fitting
+#' process. Should be NULL (default) or a numeric vector.
 #' @param data A data.frame containing the modeling data.
 #' @param residual A formula for the residual part of the model. Should be of
 #' the form "~ pred".
@@ -98,6 +100,7 @@ LMMsolve <- function(fixed,
                      spline = NULL,
                      group = NULL,
                      ginverse = NULL,
+                     weights = NULL,
                      data,
                      residual = NULL,
                      tolerance = 1.0e-6,
@@ -274,10 +277,14 @@ LMMsolve <- function(fixed,
   if (!is.null(residual)) {
     residVar <- all.vars(residual)
     lRinv <- makeRlist(df = data, column = residVar)
+  } else if (!is.null(weights)) {
+      lRinv <- list(residual = spam::diag.spam(weights))
+      attr(lRinv, "cnt") <- nrow(data)
   } else {
-    lRinv <- list(residual = spam::diag.spam(1, nrow(data)))
-    attr(lRinv, "cnt") <- nrow(data)
+      lRinv <- list(residual = spam::diag.spam(1, nrow(data)))
+      attr(lRinv, "cnt") <- nrow(data)
   }
+
   y <- mf[, 1]
   obj <- sparseMixedModels(y = y, X = X, Z = Z, lGinv = lGinv, lRinv = lRinv,
                            tolerance = tolerance, trace = trace, maxit = maxit,

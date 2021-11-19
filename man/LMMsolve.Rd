@@ -10,6 +10,7 @@ LMMsolve(
   spline = NULL,
   group = NULL,
   ginverse = NULL,
+  weights = NULL,
   data,
   residual = NULL,
   tolerance = 1e-06,
@@ -36,6 +37,9 @@ single term.}
 precision matrix of a corresponding random term in the model. The row and
 column order of the precision matrices should match the order of the
 levels of the corresponding factor in the data.}
+
+\item{weights}{A character string identifying the column in the data frame
+to use as weights in the fit. Default \code{NULL}, no weights.}
 
 \item{data}{A data.frame containing the modeling data.}
 
