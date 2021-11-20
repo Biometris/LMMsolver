@@ -133,6 +133,14 @@ LMMsolve <- function(fixed,
          (is.matrix(x) || spam::is.spam(x)) && isSymmetric(x)}))))) {
     stop("ginverse should be a named list of symmetric matrices.\n")
   }
+  if (!is.null(weights)) {
+    if (!is.numeric(weights) || sum(is.na(weights)) != 0 || min(weights) <= 0) {
+      stop("weights should be a numeric vector with positive values")
+    }
+    if (length(weights) != nrow(data)) {
+      stop("length of weights should correspond with number of rows in data")
+    }
+  }
   if (!is.null(residual) &&
       (!inherits(residual, "formula") || length(terms(residual)) != 2)) {
     stop("residual should be a formula of the form \" ~ pred\".\n")
@@ -152,6 +160,7 @@ LMMsolve <- function(fixed,
   checkFormVars(fixed, data)
   checkFormVars(random, data)
   checkFormVars(residual, data)
+
   ## Remove NA for response variable from data.
   respVar <- all.vars(fixed)[attr(terms(fixed), "response")]
   respVarNA <- is.na(data[[respVar]])
