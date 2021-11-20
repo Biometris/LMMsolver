@@ -32,6 +32,9 @@ dat <- data.frame(block = rep(c("B1","B2"), each=nTrt),
 
 head(dat)
 
+# some missing values for y:
+dat$y[sample(x=c(1:nrow(dat)), size=4)] <- NA
+
 # weight as number of samples, more samples, more weight (less penalty):
 dat$w <- c(nS1, nS2)
 
