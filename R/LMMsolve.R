@@ -159,6 +159,10 @@ LMMsolve <- function(fixed,
     warning(sum(respVarNA), " observations removed with missing value for ",
             respVar, ".\n", call. = FALSE)
     data <- data[!respVarNA, ]
+    ## if weights defined, remove missing values
+    if (!is.null(weights)) {
+      weights <- weights[!respVarNA]
+    }
   }
   ## Make random part.
   if (!is.null(random)) {
