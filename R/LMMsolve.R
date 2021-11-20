@@ -273,17 +273,9 @@ LMMsolve <- function(fixed,
   if (attr(mt, "intercept") == 1) {
     term.labels.f <- c("(Intercept)", term.labels.f)
   }
-  ## Make residual part.
-  if (!is.null(residual)) {
-    residVar <- all.vars(residual)
-    lRinv <- makeRlist(df = data, column = residVar)
-  } else if (!is.null(weights)) {
-      lRinv <- list(residual = spam::diag.spam(weights))
-      attr(lRinv, "cnt") <- nrow(data)
-  } else {
-      lRinv <- list(residual = spam::diag.spam(1, nrow(data)))
-      attr(lRinv, "cnt") <- nrow(data)
-  }
+
+  ## construct inverse of residual matrix R.
+  lRinv <- constructRinv(df = data, residual=residual, weights=weights)
 
   y <- mf[, 1]
   obj <- sparseMixedModels(y = y, X = X, Z = Z, lGinv = lGinv, lRinv = lRinv,
