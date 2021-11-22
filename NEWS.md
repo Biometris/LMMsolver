@@ -1,3 +1,7 @@
-# LMMsolver 1.0
+# LMMsolver 1.0.1
 
-* Initial CRAN version
+-   `weights` arguments in LMMsolve function added
+
+# LMMsolver 1.0.0
+
+-   Initial CRAN version
