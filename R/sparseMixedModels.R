@@ -51,23 +51,19 @@ calcEffDim <- function(ADcholGinv,
                        phi,
                        psi,
                        theta) {
-  resultRinv <- logdetPlusDeriv(ADcholRinv, phi)
-  logdetR <- -resultRinv[1]
-  dlogdetRinv <- resultRinv[-1]
+  dlogdetRinv <- dlogdet(ADcholRinv, phi)
+  logdetR <- -attr(dlogdetRinv, which = "logdet")
 
   # Ginv, if exists:
   if (!is.null(ADcholGinv)) {
-    resultGinv <- logdetPlusDeriv(ADcholGinv, psi)
-    logdetG <- -resultGinv[1]
-    dlogdetGinv <- resultGinv[-1]
+    dlogdetGinv <- dlogdet(ADcholGinv, psi)
+    logdetG <- -attr(dlogdetGinv, "logdet")
   } else {
     logdetG <- 0
   }
   # matrix C:
-  resultC <- logdetPlusDeriv(ADcholC, theta)
-  logdetC <-  resultC[1]
-  dlogdetC <- resultC[-1]
-
+  dlogdetC <- dlogdet(ADcholC, theta)
+  logdetC <- attr(dlogdetC, which = "logdet")
   # calculate effective dimensions....
   EDmax_phi <- phi * dlogdetRinv
   if (!is.null(ADcholGinv)) {
@@ -77,8 +73,9 @@ calcEffDim <- function(ADcholGinv,
   }
   EDmax <- c(EDmax_psi, EDmax_phi)
   ED <- EDmax - theta * dlogdetC
-  attr(ED, "logdetC") <- logdetC
+  attributes(ED) <- NULL
   attr(ED, "logdetG") <- logdetG
+  attr(ED, "logdetC") <- logdetC
   attr(ED, "logdetR") <- logdetR
   return(ED)
 }

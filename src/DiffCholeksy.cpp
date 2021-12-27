@@ -1,4 +1,4 @@
-#include "DiffCholeksy.h"
+#include <Rcpp.h>
 #include <set>
 #include <vector>
 
@@ -228,6 +228,7 @@ double logdet(SEXP arg,
 }
 
 // backwards Automatic Differentiation, using Left-looking Cholesky:
+// returns a vector with partial derivatives.
 //
 // [[Rcpp::export]]
 NumericVector dlogdet(SEXP arg,
@@ -250,153 +251,30 @@ NumericVector dlogdet(SEXP arg,
     }
   }
 
-  //Rcout << "start Cholesky" << endl;
-  NumericVector L = cholesky(C,colpointers, rowindices);
-  //Rcout << "start AD Cholesky" << endl;
-  NumericVector F = AD_cholesky(L,colpointers, rowindices);
-  //Rcout << "end AD Cholesky" << endl;
-
-  // evaluate dL/dlambda:
-  NumericVector gradient(n_prec_mat);
-  for (int i=0;i<F.size();i++)
-  {
-    for (int k=0;k<n_prec_mat;k++)
-      gradient[k] += F[i]*P(i,k);
-  }
-
-  return gradient;
-}
-
-
-// backwards Automatic Differentiation, using Left-looking Cholesky:
-// returns both the logdet and the first derivatives.
-//
-// [[Rcpp::export]]
-NumericVector logdetPlusDeriv(SEXP arg,
-                      NumericVector lambda)
-{
-  Rcpp::S4 obj(arg);
-
-  IntegerVector colpointers = obj.slot("colpointers");
-  IntegerVector rowindices = obj.slot("rowindices");
-  NumericMatrix P = Rcpp::clone<Rcpp::NumericMatrix>(obj.slot("P"));
-
-  const int sz = rowindices.size();
-  const int n_prec_mat = P.ncol();
-  NumericVector C(sz, 0.0);
-  for (int i=0;i<sz;i++)
-  {
-    for (int k=0;k<n_prec_mat;k++)
-    {
-      C[i] += lambda[k]*P(i,k);
-    }
-  }
-
   NumericVector L = cholesky(C, colpointers, rowindices);
   NumericVector F = AD_cholesky(L, colpointers, rowindices);
 
-  // evaluate dL/dlambda:
-  NumericVector result(n_prec_mat+1);
-
-  // 1. calculate the logdet
+  // calculate the logdet
   const int N = colpointers.size()-1;
-  double sum = 0;
+  double logdet = 0;
   for (int k=0;k<N;k++)
   {
     int s = colpointers[k];
-    sum += 2.0*log(L[s]);
+    logdet += 2.0*log(L[s]);
   }
-  result[0] = sum;
 
-  // 2. calculate the derivatives
+  // evaluate dL/dlambda:
+  NumericVector result(n_prec_mat);
   NumericVector gradient(n_prec_mat);
   for (int i=0;i<F.size();i++)
   {
     for (int k=0;k<n_prec_mat;k++)
-      result[k+1] += F[i]*P(i,k);
+      result[k] += F[i]*P(i,k);
   }
+  result.attr("logdet") = logdet;
 
   return result;
 }
-
-
-/*
- // forward Automatic Differentation, using Left-looking Cholesky:
- // [[Rcpp::export]]
- double dlogdet_AD_forward(double lambda , SEXP arg)
- {
- Rcpp::S4 obj(arg);
-
- IntegerVector colpointers = obj.slot("colpointers");
- IntegerVector rowindices = obj.slot("rowindices");
- NumericVector entriesA = Rcpp::clone<Rcpp::NumericVector>(obj.slot("ZtZ"));
- NumericVector entriesB = Rcpp::clone<Rcpp::NumericVector>(obj.slot("P"));
-
- NumericVector L = entriesA + lambda * entriesB;
- NumericVector F = entriesB;
-
- const int N = colpointers.size()-1;
-
- // current headings of columns:
- IntegerVector colhead = clone(colpointers);
- for (int j=0;j<N;j++)
- {
- // see Ng and Peyton 1993, p. 1040-1041 for details:
- map<int,int> indmap = make_indmap(colpointers,rowindices,j);
-
- int s = colpointers[j];
- int e = colpointers[j+1];
- int sz = e-s;
-
- vector<double> t0(sz,0.0), t1(sz,0.0);
-
- for (int k=0;k<j;k++)
- {
- if (rowindices[colhead[k]] == j)
- {
- int jk = colhead[k];
- for (int i = colhead[k]; i < colpointers[k+1];i++)
- {
- int ndx = indmap[rowindices[i]];
- t0[ndx] += L[i]*L[jk];
- t1[ndx] += L[i]*F[jk] + F[i]*L[jk]; // deriv
- }
- colhead[k]++;
- }
- }
-
- // update column j with dense vector t:
- int cnt = 0;
- for (int i = e-1; i>=s ;i--)
- {
- L[i] -= t0[cnt];
- F[i] -= t1[cnt];
- cnt++;
- }
-
- // pivot:
- L[s] = sqrt(L[s]);
- F[s] = 0.5*F[s]/L[s];
-
- // update column j:
- for (int i = s + 1; i < e; i++)
- {
- L[i] /= L[s];
- F[i] = (F[i] - L[i]*F[s])/L[s];
- }
- colhead[j]++;
- }
-
- double sum = 0;
- for (int k=0;k<N;k++)
- {
- int s = colpointers[k];
- sum += 2.0*F[s]/L[s];
- }
- return sum;
- }
-
- */
 
 vector<double> convert_matrix(const vector<int>& rowindices_ext,
                               const vector<int>& colindices_ext,

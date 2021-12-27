@@ -47,18 +47,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// logdetPlusDeriv
-NumericVector logdetPlusDeriv(SEXP arg, NumericVector lambda);
-RcppExport SEXP _LMMsolver_logdetPlusDeriv(SEXP argSEXP, SEXP lambdaSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type arg(argSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type lambda(lambdaSEXP);
-    rcpp_result_gen = Rcpp::wrap(logdetPlusDeriv(arg, lambda));
-    return rcpp_result_gen;
-END_RCPP
-}
 // construct_ADchol_Rcpp
 List construct_ADchol_Rcpp(SEXP U, const List& P_list);
 RcppExport SEXP _LMMsolver_construct_ADchol_Rcpp(SEXP USEXP, SEXP P_listSEXP) {
@@ -76,7 +64,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_LMMsolver_cholesky", (DL_FUNC) &_LMMsolver_cholesky, 3},
     {"_LMMsolver_logdet", (DL_FUNC) &_LMMsolver_logdet, 2},
     {"_LMMsolver_dlogdet", (DL_FUNC) &_LMMsolver_dlogdet, 2},
-    {"_LMMsolver_logdetPlusDeriv", (DL_FUNC) &_LMMsolver_logdetPlusDeriv, 2},
     {"_LMMsolver_construct_ADchol_Rcpp", (DL_FUNC) &_LMMsolver_construct_ADchol_Rcpp, 2},
     {NULL, NULL, 0}
 };
