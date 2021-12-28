@@ -2,6 +2,7 @@ library(ggplot2)
 library(SemiPar)
 library(gridExtra)
 library(JOPS)
+library(LMMsolver)
 
 # Get the data
 data(ethanol)
@@ -17,6 +18,7 @@ obj <- LMMsolve(fixed = NOx~1,
                  trace = FALSE)
 
 summary(obj)
+cf <- coef(obj)
 
 displayMME(obj, cholesky=FALSE)
 displayMME(obj, cholesky=TRUE)
