@@ -11,7 +11,7 @@ expect_error(LMMsolve(fixed = yield ~ 1, data = durban.rowcol,
              "spline should be a formula of form")
 expect_error(LMMsolve(fixed = yield ~ 1, data = durban.rowcol,
                       spline = ~spl2D(x1 = bed, x2 = row, nseg = c(10, 10)) +
-                        spl2D(x1 = bed, x2 = row, nseg = c(20, 20))),
+                        spl4D(x1 = bed, x2 = row, nseg = c(20, 20))),
              "spline should be a formula of form")
 expect_error(LMMsolve(fixed = yield ~ 1, data = durban.rowcol,
                       spline = ~spl2D(x1 = tst, x2 = row, nseg = c(10, 10))),

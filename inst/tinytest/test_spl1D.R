@@ -9,7 +9,7 @@ expect_error(LMMsolve(fixed = yield ~ rep + gen, data = john.alpha,
              "spline should be a formula of form")
 expect_error(LMMsolve(fixed = yield ~ rep + gen, data = john.alpha,
                       spline = ~spl1D(x = plot, nseg = 10) +
-                        spl1D(x = plot, nseg = 20)),
+                        spl4D(x = plot, nseg = 20)),
              "spline should be a formula of form")
 expect_error(LMMsolve(fixed = yield ~ rep + gen, data = john.alpha,
                       spline = ~spl1D(x = tst, nseg = 10) ),

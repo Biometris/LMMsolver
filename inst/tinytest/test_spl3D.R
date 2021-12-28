@@ -10,7 +10,7 @@ expect_error(LMMsolve(fixed = y ~ 1, data = simDat,
 expect_error(LMMsolve(fixed = y ~ 1, data = simDat,
                       spline = ~spl3D(x1 = x1, x2 = x2, x3 = x3,
                                       nseg = c(4, 4, 4)) +
-                        spl3D(x1 = x1, x2 = x2, x3 = x3, nseg = c(20, 20, 20))),
+                        spl4D(x1 = x1, x2 = x2, x3 = x3, nseg = c(20, 20, 20))),
              "spline should be a formula of form")
 expect_error(LMMsolve(fixed = y ~ 1, data = simDat,
                       spline = ~spl3D(x1 = tst, x2 = x2, x3 = x3,
