@@ -118,14 +118,16 @@ LMMsolve <- function(fixed,
       (!inherits(random, "formula") || length(terms(random)) != 2)) {
     stop("random should be a formula of the form \" ~ pred\".\n")
   }
-  #if (!is.null(spline) &&
-  #    (!inherits(spline, "formula") || length(terms(spline)) != 2 ||
-  #     ## Spline formula should consist of splxD() and nothing else.
-  #     length(unlist(attr(terms(spline, specials = c("spl1D", "spl2D", "spl3D")),
-  #                        "specials"))) != 1)) {
-  #  stop("spline should be a formula of form \"~ spl1D()\", \"~ spl2D()\" ",
-  #       "or \"~spl3D()\".\n")
-  #}
+  if (!is.null(spline) && (!inherits(spline, "formula") ||
+                             length(terms(spline)) != 2 ||
+    ## Spline formula should consist of splxD() terms and nothing else.
+    length(unlist(attr(terms(spline,
+                      specials = c("spl1D", "spl2D", "spl3D")),
+                        "specials"))) !=
+    length(attr(terms(spline),"term.labels")))) {
+    stop("spline should be a formula of form \"~ spl1D()\", \"~ spl2D()\" ",
+         "or \"~spl3D()\".\n")
+  }
   if (!is.null(ginverse) &&
       (!is.list(ginverse) ||
        length(names(ginverse)) == 0 ||
