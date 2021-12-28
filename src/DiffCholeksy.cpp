@@ -1,3 +1,18 @@
+// Martin Boer, 28 dec 2021
+// Biometris, Wageningen University and Research The Netherlands
+//
+// Backwards Automated Differentation of Cholesky Algorithm
+// to calculate the partial derivatives of log-determinant of
+// a positive definite symmetric (sparse) matrix.
+//
+// For details on the implementation of sparse Cholesky, see:
+// Ng and Peyton 1993, Furrer and Sain 2010
+//
+// For details on Backwards Automated Differentiation see:
+// S.P. Smith 1995, Differentiation of the Cholesky Algorithm
+// S.P. Smith 2000, A TUTORIAL ON SIMPLICITY AND COMPUTATIONAL DIFFERENTIATION FOR
+// STATISTICIANS
+//
 #include <Rcpp.h>
 #include <set>
 #include <vector>
@@ -30,9 +45,7 @@ double getvalueC(IntegerVector rowpointers,
   return 0.0;
 }
 
-// left looking cholesky
-//
-// [[Rcpp::export]]
+// left looking Cholesky, see Ng and Peyton 1993
 NumericVector cholesky(NumericVector L,
                        const IntegerVector& colpointers,
                        const IntegerVector& rowindices)
@@ -110,9 +123,9 @@ NumericVector cholesky(NumericVector L,
   return L;
 }
 
-NumericVector AD_cholesky(const NumericVector& L,
-                          const IntegerVector& colpointers,
-                          const IntegerVector& rowindices)
+NumericVector ADcholesky(const NumericVector& L,
+                         const IntegerVector& colpointers,
+                         const IntegerVector& rowindices)
 {
   const int N = colpointers.size()-1;
 
@@ -191,42 +204,6 @@ NumericVector AD_cholesky(const NumericVector& L,
   return F;
 }
 
-// Calculate log determinant using Left-looking Cholesky:
-//
-// [[Rcpp::export]]
-double logdet(SEXP arg,
-              NumericVector lambda)
-{
-  Rcpp::S4 obj(arg);
-
-  IntegerVector colpointers = obj.slot("colpointers");
-  IntegerVector rowindices = obj.slot("rowindices");
-  NumericMatrix P = Rcpp::clone<Rcpp::NumericMatrix>(obj.slot("P"));
-
-  const int sz = rowindices.size();
-  const int n_prec_mat = P.ncol();
-  NumericVector C(sz,0.0);
-
-  for (int i=0;i<sz;i++)
-  {
-    for (int k=0;k<n_prec_mat;k++)
-    {
-      C[i] += lambda[k]*P(i,k);
-    }
-  }
-
-  NumericVector L = cholesky(C,colpointers, rowindices);
-
-  const int N = colpointers.size()-1;
-  double sum = 0;
-  for (int k=0;k<N;k++)
-  {
-    int s = colpointers[k];
-    sum += 2.0*log(L[s]);
-  }
-  return sum;
-}
-
 // backwards Automatic Differentiation, using Left-looking Cholesky:
 // returns a vector with partial derivatives.
 //
@@ -252,7 +229,7 @@ NumericVector dlogdet(SEXP arg,
   }
 
   NumericVector L = cholesky(C, colpointers, rowindices);
-  NumericVector F = AD_cholesky(L, colpointers, rowindices);
+  NumericVector F = ADcholesky(L, colpointers, rowindices);
 
   // calculate the logdet
   const int N = colpointers.size()-1;
@@ -263,17 +240,16 @@ NumericVector dlogdet(SEXP arg,
     logdet += 2.0*log(L[s]);
   }
 
-  // evaluate dL/dlambda:
-  NumericVector result(n_prec_mat);
+  // calculate the partial derivatives:
   NumericVector gradient(n_prec_mat);
   for (int i=0;i<F.size();i++)
   {
     for (int k=0;k<n_prec_mat;k++)
-      result[k] += F[i]*P(i,k);
+      gradient[k] += F[i]*P(i,k);
   }
-  result.attr("logdet") = logdet;
+  gradient.attr("logdet") = logdet;
 
-  return result;
+  return gradient;
 }
 
 vector<double> convert_matrix(const vector<int>& rowindices_ext,
@@ -373,3 +349,43 @@ List construct_ADchol_Rcpp(SEXP U,
   L["P"] = P_matrix;
   return L;
 }
+
+/*
+
+// Calculate log determinant using Left-looking Cholesky:
+//
+// [[Rcpp::export]]
+double logdet(SEXP arg,
+              NumericVector lambda)
+{
+  Rcpp::S4 obj(arg);
+
+  IntegerVector colpointers = obj.slot("colpointers");
+  IntegerVector rowindices = obj.slot("rowindices");
+  NumericMatrix P = Rcpp::clone<Rcpp::NumericMatrix>(obj.slot("P"));
+
+  const int sz = rowindices.size();
+  const int n_prec_mat = P.ncol();
+  NumericVector C(sz,0.0);
+
+  for (int i=0;i<sz;i++)
+  {
+    for (int k=0;k<n_prec_mat;k++)
+    {
+      C[i] += lambda[k]*P(i,k);
+    }
+  }
+
+  NumericVector L = cholesky(C,colpointers, rowindices);
+
+  const int N = colpointers.size()-1;
+  double sum = 0;
+  for (int k=0;k<N;k++)
+  {
+    int s = colpointers[k];
+    sum += 2.0*log(L[s]);
+  }
+  return sum;
+}
+
+*/

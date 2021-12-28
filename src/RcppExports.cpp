@@ -10,31 +10,6 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// cholesky
-NumericVector cholesky(NumericVector L, const IntegerVector& colpointers, const IntegerVector& rowindices);
-RcppExport SEXP _LMMsolver_cholesky(SEXP LSEXP, SEXP colpointersSEXP, SEXP rowindicesSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type L(LSEXP);
-    Rcpp::traits::input_parameter< const IntegerVector& >::type colpointers(colpointersSEXP);
-    Rcpp::traits::input_parameter< const IntegerVector& >::type rowindices(rowindicesSEXP);
-    rcpp_result_gen = Rcpp::wrap(cholesky(L, colpointers, rowindices));
-    return rcpp_result_gen;
-END_RCPP
-}
-// logdet
-double logdet(SEXP arg, NumericVector lambda);
-RcppExport SEXP _LMMsolver_logdet(SEXP argSEXP, SEXP lambdaSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type arg(argSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type lambda(lambdaSEXP);
-    rcpp_result_gen = Rcpp::wrap(logdet(arg, lambda));
-    return rcpp_result_gen;
-END_RCPP
-}
 // dlogdet
 NumericVector dlogdet(SEXP arg, NumericVector lambda);
 RcppExport SEXP _LMMsolver_dlogdet(SEXP argSEXP, SEXP lambdaSEXP) {
@@ -61,8 +36,6 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_LMMsolver_cholesky", (DL_FUNC) &_LMMsolver_cholesky, 3},
-    {"_LMMsolver_logdet", (DL_FUNC) &_LMMsolver_logdet, 2},
     {"_LMMsolver_dlogdet", (DL_FUNC) &_LMMsolver_dlogdet, 2},
     {"_LMMsolver_construct_ADchol_Rcpp", (DL_FUNC) &_LMMsolver_construct_ADchol_Rcpp, 2},
     {NULL, NULL, 0}
