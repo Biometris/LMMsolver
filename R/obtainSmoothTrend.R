@@ -13,6 +13,8 @@
 #' the computed smooth trend?
 #' @param deriv Derivative of B-splines, default 0. At the moment only
 #' implemented for spl1D.
+#' @param which An integer, for if there are multiple splxD terms in the model.
+#' Default value is 1.
 #'
 #' @return A data.frame with predictions for the smooth trend on the specified
 #' grid.

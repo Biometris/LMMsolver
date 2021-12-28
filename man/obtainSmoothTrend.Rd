@@ -29,6 +29,9 @@ implemented for spl1D.}
 
 \item{includeIntercept}{Should the value of the intercept be included in
 the computed smooth trend?}
+
+\item{which}{An integer, for if there are multiple splxD terms in the model.
+Default value is 1.}
 }
 \value{
 A data.frame with predictions for the smooth trend on the specified
