@@ -47,7 +47,8 @@ obtainSmoothTrend <- function(object,
                               grid = NULL,
                               newdata = NULL,
                               deriv = 0,
-                              includeIntercept = FALSE) {
+                              includeIntercept = FALSE,
+                              which = 1) {
   if (!inherits(object, "LMMsolve")) {
     stop("object should be an object of class LMMsolve.\n")
   }
@@ -58,7 +59,10 @@ obtainSmoothTrend <- function(object,
     stop("Specify either grid or newdata.\n")
   }
   ## Get dimension of fitted spline component.
-  splRes <- object$splRes
+  splRes <- object$splRes[[which]]
+  splF_name <- paste0('splF', which)
+  splR_name <- paste0('splR', which)
+
   ## Get content from splRes.
   x <- splRes$x
   knots <- splRes$knots
@@ -129,9 +133,9 @@ obtainSmoothTrend <- function(object,
     bc <- 0
   } else {
     ## Remove leading zero, added for reference level.
-    bc <- as.vector(XTot %*% coef(object)$splF)
+    bc <- as.vector(XTot %*% coef(object)[[splF_name]])
   }
-  sc <- as.vector(BxTot %*% coef(object)$splR)
+  sc <- as.vector(BxTot %*% coef(object)[[splR_name]])
   ## Compute fitted values.
   fit <- mu + bc + sc
   ## Construct output data.frame.

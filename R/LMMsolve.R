@@ -118,14 +118,14 @@ LMMsolve <- function(fixed,
       (!inherits(random, "formula") || length(terms(random)) != 2)) {
     stop("random should be a formula of the form \" ~ pred\".\n")
   }
-  if (!is.null(spline) &&
-      (!inherits(spline, "formula") || length(terms(spline)) != 2 ||
-       ## Spline formula should consist of splxD() and nothing else.
-       length(unlist(attr(terms(spline, specials = c("spl1D", "spl2D", "spl3D")),
-                          "specials"))) != 1)) {
-    stop("spline should be a formula of form \"~ spl1D()\", \"~ spl2D()\" ",
-         "or \"~spl3D()\".\n")
-  }
+  #if (!is.null(spline) &&
+  #    (!inherits(spline, "formula") || length(terms(spline)) != 2 ||
+  #     ## Spline formula should consist of splxD() and nothing else.
+  #     length(unlist(attr(terms(spline, specials = c("spl1D", "spl2D", "spl3D")),
+  #                        "specials"))) != 1)) {
+  #  stop("spline should be a formula of form \"~ spl1D()\", \"~ spl2D()\" ",
+  #       "or \"~spl3D()\".\n")
+  #}
   if (!is.null(ginverse) &&
       (!is.list(ginverse) ||
        length(names(ginverse)) == 0 ||
@@ -260,27 +260,37 @@ LMMsolve <- function(fixed,
   # calculate NomEff dimension for non-spline part
   NomEffDimRan <- calcNomEffDim(X, Z, dim.r)
   ## Add spline part.
-  splRes <- NULL
+  splResList <- NULL
   if (!is.null(spline)) {
     tf <- terms(spline, specials = c("spl1D", "spl2D", "spl3D"))
     terms <- attr(tf, "term.labels")
-    splRes <- eval(parse(text = terms), envir = data, enclos = parent.frame())
-    ## Add to design matrix fixed effect X.
-    X <- cbind(X, splRes$X)
-    ## Add to design matrix random effect Z.
-    Z <- cbind(Z, splRes$Z)
-    ## Expand matrices Ginv to the updated Z.
-    lGinv <- expandGinv(lGinv, splRes$lGinv)
-    ## A splxD model has x parameters.
-    varPar <- c(varPar, length(splRes$lGinv))
-    ## Add dims.
-    dim.f <- c(dim.f, splRes$dim.f)
-    dim.r <- c(dim.r, splRes$dim.r)
-    ## Add nominal ED
-    NomEffDimRan <- c(NomEffDimRan, splRes$EDnom)
-    ## Add labels.
-    term.labels.f <- c(term.labels.f, splRes$term.labels.f)
-    term.labels.r <- c(term.labels.r, splRes$term.labels.r)
+    Nterms <- length(terms)
+    splResList <- list()
+    for (i in 1:Nterms) {
+      splRes <- eval(parse(text = terms[i]), envir = data, enclos = parent.frame())
+      # add list number to labels (probably better to use names instead):
+      if (!is.null(splRes$term.labels.f)) {
+        splRes$term.labels.f <- paste0(splRes$term.labels.f, i)
+      }
+      splRes$term.labels.r <- paste0(splRes$term.labels.r, i)
+      splResList[[i]] <- splRes
+      ## Add to design matrix fixed effect X.
+      X <- cbind(X, splRes$X)
+      ## Add to design matrix random effect Z.
+      Z <- cbind(Z, splRes$Z)
+      ## Expand matrices Ginv to the updated Z.
+      lGinv <- expandGinv(lGinv, splRes$lGinv)
+      ## A splxD model has x parameters.
+      varPar <- c(varPar, length(splRes$lGinv))
+      ## Add dims.
+      dim.f <- c(dim.f, splRes$dim.f)
+      dim.r <- c(dim.r, splRes$dim.r)
+      ## Add nominal ED
+      NomEffDimRan <- c(NomEffDimRan, splRes$EDnom)
+      ## Add labels.
+      term.labels.f <- c(term.labels.f, splRes$term.labels.f)
+      term.labels.r <- c(term.labels.r, splRes$term.labels.r)
+    }
   }
   ## Add intercept.
   if (attr(mt, "intercept") == 1) {
@@ -305,9 +315,9 @@ LMMsolve <- function(fixed,
     if (labFi == "(Intercept)") {
       names(coefFi) <- "(Intercept)"
       ## For fixed terms an extra 0 for the reference level has to be added.
-    } else if (labFi == "splF") {
+    } else if (startsWith(labFi, prefix = "splF")) {
       ## Spline terms are just named 1...n.
-      names(coefFi) <- paste0("splF_", seq_along(coefFi))
+      names(coefFi) <- paste0(labFi, "_", seq_along(coefFi))
     } else {
       coefFi <- c(0, coefFi)
       names(coefFi) <- paste(labFi, levels(data[[labFi]]) , sep = "_")
@@ -321,9 +331,9 @@ LMMsolve <- function(fixed,
   for (i in seq_along(coefR)) {
     coefRi <- obj$a[sr[i]:er[i]]
     labRi <- term.labels.r[i]
-    if (labRi == "splR") {
+    if (startsWith(labRi,"splR")) {
       ## Spline terms are just named 1...n.
-      names(coefRi) <- paste0("splR_", seq_along(coefRi))
+      names(coefRi) <- paste0(labRi, "_", seq_along(coefRi))
     } else if (labRi %in% names(group)) {
       ## For group combine group name and column name.
       names(coefRi) <- paste(labRi, colnames(data)[group[[labRi]]], sep = "_")
@@ -388,5 +398,5 @@ LMMsolve <- function(fixed,
                         Nres = length(lRinv),
                         term.labels.f = term.labels.f,
                         term.labels.r = term.labels.r,
-                        splRes = splRes))
+                        splRes = splResList))
 }
