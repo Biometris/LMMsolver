@@ -247,6 +247,18 @@ NumericVector dlogdet(SEXP arg,
     for (int k=0;k<n_prec_mat;k++)
       gradient[k] += F[i]*P(i,k);
   }
+  double sum = 0.0;
+  for (int i=0;i<n_prec_mat;i++)
+  {
+    sum += lambda[i]*gradient[i];
+  }
+  // correction, to make inproduct
+  // between lambda and gradient equal to N:
+  for (int i=0;i<n_prec_mat;i++)
+  {
+    gradient[i] *= N/sum;
+  }
+
   gradient.attr("logdet") = logdet;
 
   return gradient;
