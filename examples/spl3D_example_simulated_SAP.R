@@ -39,12 +39,17 @@ x2lim <- c(min(x2)-0.01, max(x2)+0.01)
 x3lim <- c(min(x3)-0.01, max(x3)+0.01)
 
 df <- data.frame(y=y,x1=x1,x2=x2,x3=x3)
+s <- proc.time()[3]
+
 obj1 <- LMMsolve(fixed = y~1,
                  spline = ~spl3D(x1, x2, x3, nseg=knots,
                               x1lim = x1lim, x2lim = x2lim, x3lim = x3lim),
                  data = df,
                  trace = trace,
                  tolerance = thr)
+e <- proc.time()[3]
+cat("Time LMMsolve ", e-s, " seconds\n")
+
 summary(obj1)
 
 # compare effective dimensions:
