@@ -34,26 +34,26 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// construct_ADchol_Rcpp_new
-List construct_ADchol_Rcpp_new(SEXP U, const List& P_list);
-RcppExport SEXP _LMMsolver_construct_ADchol_Rcpp_new(SEXP USEXP, SEXP P_listSEXP) {
+// construct_ADchol_Rcpp_NgPeyton
+List construct_ADchol_Rcpp_NgPeyton(SEXP U, const List& P_list);
+RcppExport SEXP _LMMsolver_construct_ADchol_Rcpp_NgPeyton(SEXP USEXP, SEXP P_listSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< SEXP >::type U(USEXP);
     Rcpp::traits::input_parameter< const List& >::type P_list(P_listSEXP);
-    rcpp_result_gen = Rcpp::wrap(construct_ADchol_Rcpp_new(U, P_list));
+    rcpp_result_gen = Rcpp::wrap(construct_ADchol_Rcpp_NgPeyton(U, P_list));
     return rcpp_result_gen;
 END_RCPP
 }
 // PrintADchol
-double PrintADchol(SEXP arg, NumericVector lambda);
+double PrintADchol(SEXP arg, double lambda);
 RcppExport SEXP _LMMsolver_PrintADchol(SEXP argSEXP, SEXP lambdaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< SEXP >::type arg(argSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
     rcpp_result_gen = Rcpp::wrap(PrintADchol(arg, lambda));
     return rcpp_result_gen;
 END_RCPP
@@ -62,7 +62,7 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_LMMsolver_dlogdet", (DL_FUNC) &_LMMsolver_dlogdet, 2},
     {"_LMMsolver_construct_ADchol_Rcpp", (DL_FUNC) &_LMMsolver_construct_ADchol_Rcpp, 2},
-    {"_LMMsolver_construct_ADchol_Rcpp_new", (DL_FUNC) &_LMMsolver_construct_ADchol_Rcpp_new, 2},
+    {"_LMMsolver_construct_ADchol_Rcpp_NgPeyton", (DL_FUNC) &_LMMsolver_construct_ADchol_Rcpp_NgPeyton, 2},
     {"_LMMsolver_PrintADchol", (DL_FUNC) &_LMMsolver_PrintADchol, 2},
     {NULL, NULL, 0}
 };

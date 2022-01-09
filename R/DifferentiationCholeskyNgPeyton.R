@@ -12,12 +12,12 @@ setClass("ADcholnew",
 #'
 #' @importFrom methods new
 #' @keywords internal
-ADcholnew <- function(P_list) {
+ADcholNgPeyton <- function(P_list) {
   C <- Reduce(`+`, P_list)
   opt <- summary(C)
   cholC <- chol(C, memory = list(nnzR = 8 * opt$nnz,
                                  nnzcolindices = 4 * opt$nnz))
-  L <- construct_ADchol_Rcpp_new(cholC, P_list)
+  L <- construct_ADchol_Rcpp_NgPeyton(cholC, P_list)
   new("ADcholnew",
       supernodes = L$supernodes,
       rowpointers = L$rowpointers,

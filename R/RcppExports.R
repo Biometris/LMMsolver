@@ -9,8 +9,8 @@ construct_ADchol_Rcpp <- function(U, P_list) {
     .Call(`_LMMsolver_construct_ADchol_Rcpp`, U, P_list)
 }
 
-construct_ADchol_Rcpp_new <- function(U, P_list) {
-    .Call(`_LMMsolver_construct_ADchol_Rcpp_new`, U, P_list)
+construct_ADchol_Rcpp_NgPeyton <- function(U, P_list) {
+    .Call(`_LMMsolver_construct_ADchol_Rcpp_NgPeyton`, U, P_list)
 }
 
 PrintADchol <- function(arg, lambda) {
