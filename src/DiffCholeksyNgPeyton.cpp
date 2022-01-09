@@ -114,24 +114,37 @@ double PrintADchol(SEXP arg, double lambda)
   Rcout << "colpointers: " <<  colpointers << endl;
   Rcout << "rowindices:  " <<  rowindices << endl;
   Rcout << endl;
-  Rcout << "Explain how combination of rowpointers and rowindices work:" << endl << endl;
-  for (int i=0;i<supernodes.size()-1;i++) {
-    int NodeSize = supernodes[i+1] - supernodes[i];
-    Rcout << "SuperNode " << i << " of size " << NodeSize << ":" << endl;
-    for (int j=0;j<NodeSize;j++)
+  Rcout << "Explain the structure of sparse matrix:" << endl << endl;
+  // in the code below we use variables:
+  // s for supernode
+  // j for column
+  // r for row
+  // i for indices
+  int Nsupernodes = supernodes.size()-1;
+  // for each supernode:
+  for (int s=0; s<Nsupernodes;s++) {
+    // print current supernode and size:
+    Rcout << "SuperNode " << s << " of size "
+          << supernodes[s+1] - supernodes[s] << ":" << endl;
+
+    int head = rowpointers[s];
+    int end = rowpointers[s+1];
+    // for column j:
+    for (int j=supernodes[s];j<supernodes[s+1];j++)
     {
-      int c = supernodes[i] + j;
-      Rcout << " column " << supernodes[i] + j << ", rows ";
-      int s=rowpointers[i] + j;
-      int e=rowpointers[i+1];
-      for (int k=s;k<e;k++)
-        Rcout << setw(3) << rowindices[k];
-      int sc = colpointers[c];
-      int ec = colpointers[c+1];
-      Rcout << " at indices ";
-      for (int k=sc;k<ec;k++)
-        Rcout << setw(3) << k;
+      Rcout << " column " << j << ", rows ";
+      // get the rows r:
+      for (int r=head;r<end;r++)
+        Rcout << setw(3) << rowindices[r];
+      // get index
+      int sc = colpointers[j];
+      int ec = colpointers[j+1];
+      Rcout << " at indices in entries";
+      for (int i=sc;i<ec;i++)
+        Rcout << setw(3) << i;
       Rcout << endl;
+      // increase head:
+      head++;
     }
   }
 
