@@ -148,13 +148,14 @@ vector<int> makeIntMap(int s,
   {
     indmap[l++] = rowindices[i];
   }
-
+  /*
   Rcout << "  Indmap supernode " << s << ": ";
   for (vector<int>::const_iterator it=indmap.begin();it!=indmap.end();it++)
   {
     Rcout << " " << *it;
   }
   Rcout << endl;
+  */
   return indmap;
 }
 
@@ -185,6 +186,16 @@ void PrintSuperNodeInfo(int s,
   }
 }
 
+
+// just a very simple test...
+void mult2(NumericVector& L, double alpha)
+{
+  const int N = L.size();
+  for (int i=0;i<N;i++) {
+    L[i] *= alpha;
+  }
+}
+
 // [[Rcpp::export]]
 double PrintADchol(SEXP arg, NumericVector lambda)
 {
@@ -204,26 +215,42 @@ double PrintADchol(SEXP arg, NumericVector lambda)
   Rcout << "rowindices:  " <<  rowindices << endl;
   Rcout << endl;
 
-  // define matrix C, not used at the moment:
+  // define matrix L (lower triangle matrix values)
   const int sz = P.nrow();
   const int n_prec_mat = P.ncol();
-  NumericVector C(sz, 0.0);
+  NumericVector L(sz, 0.0);
   for (int i=0;i<sz;i++)
   {
     for (int k=0;k<n_prec_mat;k++)
     {
-      C[i] += lambda[k]*P(i,k);
+      L[i] += lambda[k]*P(i,k);
     }
+  }
+
+  // simple test.....
+  NumericVector L2 = Rcpp::clone<Rcpp::NumericVector>(L);
+  mult2(L2, 2.0);
+  for (int i=0;i<L.size();i++) {
+    Rcout << setw(3) << i << setw(10) << L[i] << setw(10) << L2[i] << endl;
   }
 
   // make set S_j for each column j, see Ng and Peyton:
   vector<set<int> > S = makeSetS(supernodes, rowpointers, colpointers, rowindices);
 
-  // for each supernode s:
   const int Nsupernodes = supernodes.size()-1;
   for (int s=0; s<Nsupernodes;s++) {
-    PrintSuperNodeInfo(s, supernodes, rowpointers, colpointers, rowindices);
+    Rcout << "for supernode " << s << endl;
     vector<int> indmap = makeIntMap(s, rowpointers, rowindices);
+    for (int j=supernodes[s];j<supernodes[s+1];j++)
+    {
+      Rcout << "  for column " << j << endl;
+      for (set<int>::const_iterator it=S[j].begin(); it!=S[j].end(); it++)
+      {
+        Rcout << "    correct for columns in supernode " << *it << endl;
+      }
+      Rcout << "    correct for columns in current supernode " << s << endl;
+      Rcout << "    pivot; cdiv" << endl;
+    }
   }
 
   return 0.0;
