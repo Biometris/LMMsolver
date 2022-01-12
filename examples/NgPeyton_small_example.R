@@ -31,3 +31,5 @@ slotNames(obj)
 
 LMMsolver:::PrintADchol(obj, lambda=1.0)
 
+determinant(U)
+

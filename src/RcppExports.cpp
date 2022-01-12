@@ -47,13 +47,13 @@ BEGIN_RCPP
 END_RCPP
 }
 // PrintADchol
-double PrintADchol(SEXP arg, double lambda);
+double PrintADchol(SEXP arg, NumericVector lambda);
 RcppExport SEXP _LMMsolver_PrintADchol(SEXP argSEXP, SEXP lambdaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< SEXP >::type arg(argSEXP);
-    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type lambda(lambdaSEXP);
     rcpp_result_gen = Rcpp::wrap(PrintADchol(arg, lambda));
     return rcpp_result_gen;
 END_RCPP

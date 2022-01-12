@@ -76,14 +76,14 @@ List construct_ADchol_Rcpp_NgPeyton(SEXP U,
 
 
   const int n_prec_matrices = P_list.size();
-  int nelem = Dim[1];
+  //int nelem = Dim[1];
   //Rcout << "Number of precision matrices: " << n_prec_matrices << endl;
-  NumericMatrix P_matrix(nelem, n_prec_matrices);
+  NumericMatrix P_matrix(size, n_prec_matrices);
   for (int i=0;i<n_prec_matrices;i++)
   {
     Rcpp::S4 obj_P(P_list[i]);
     vector<double> entries_P = convert_matrix(rowindices_ext, colindices_ext, pivot, obj_P);
-    for (int j=0;j<nelem;j++)
+    for (int j=0;j<size;j++)
     {
       P_matrix(j,i) = entries_P[j];
     }
@@ -99,8 +99,94 @@ List construct_ADchol_Rcpp_NgPeyton(SEXP U,
 }
 
 
+vector< set<int> > makeSetS(const IntegerVector& supernodes,
+                          const IntegerVector& rowpointers,
+                         const IntegerVector& colpointers,
+                         const IntegerVector& rowindices)
+{
+  const int Nsupernodes = supernodes.size()-1;
+  const int N = colpointers.size()-1;
+  vector< set<int> > S(N);
+  Rcout << "make sets S:" << endl;
+
+  // for each supernode:
+  for (int s=0; s<Nsupernodes;s++) {
+    // for column j:
+    for (int j=supernodes[s];j<supernodes[s+1];j++)
+    {
+      int sz = supernodes[s+1] - supernodes[s];
+      for (int r = rowpointers[s]+sz; r < rowpointers[s+1];r++)
+      {
+        int ndx = rowindices[r];
+        S[ndx].insert(s);
+      }
+
+      // diagnostics....
+      Rcout << "   set  S[" << j << "] = { ";
+      for (set<int>::const_iterator it=S[j].begin();it!=S[j].end();it++)
+      {
+        Rcout << *it << " ";
+      }
+      Rcout << "}" << endl;
+    }
+  }
+  Rcout << endl;
+  return S;
+}
+
+vector<int> makeIntMap(int s,
+                       const IntegerVector& rowpointers,
+                       const IntegerVector& rowindices)
+{
+  // make indmap for current supernode s:
+  int start = rowpointers[s];
+  int end  = rowpointers[s+1];
+  int sz = end-start;
+  vector<int> indmap(sz);
+  int l = 0;
+  for (int i=end-1; i>=start;i--)
+  {
+    indmap[l++] = rowindices[i];
+  }
+
+  Rcout << "  Indmap supernode " << s << ": ";
+  for (vector<int>::const_iterator it=indmap.begin();it!=indmap.end();it++)
+  {
+    Rcout << " " << *it;
+  }
+  Rcout << endl;
+  return indmap;
+}
+
+// print current supernode and size:
+void PrintSuperNodeInfo(int s,
+                        const IntegerVector& supernodes,
+                        const IntegerVector& rowpointers,
+                        const IntegerVector& colpointers,
+                        const IntegerVector& rowindices)
+{
+  Rcout << "SuperNode " << s << " of size "
+        << supernodes[s+1] - supernodes[s] << ":" << endl;
+
+  int startRowPtr = rowpointers[s];
+  // for column j:
+  for (int j=supernodes[s];j<supernodes[s+1];j++)
+  {
+    Rcout << " column " << j << ": ";
+    int r = startRowPtr;
+    for (int i=colpointers[j];i<colpointers[j+1];i++)
+    {
+      Rcout << "r" << rowindices[r] << "[k=" << i << "] ";
+      r++;
+    }
+    Rcout << endl;
+    // increase startRowPtr:
+    startRowPtr++;
+  }
+}
+
 // [[Rcpp::export]]
-double PrintADchol(SEXP arg, double lambda)
+double PrintADchol(SEXP arg, NumericVector lambda)
 {
   Rcpp::S4 obj(arg);
   IntegerVector supernodes = obj.slot("supernodes");
@@ -109,46 +195,36 @@ double PrintADchol(SEXP arg, double lambda)
   IntegerVector rowindices = obj.slot("rowindices");
   NumericMatrix P = Rcpp::clone<Rcpp::NumericMatrix>(obj.slot("P"));
 
+  Rcout << "P.nrow " << P.nrow() << endl;
+  Rcout << "P.ncol " << P.ncol() << endl;
   Rcout << "superNodes:  " <<  supernodes << endl;
   Rcout << "rowpointers: " <<  rowpointers << endl;
   Rcout << "colpointers: " <<  colpointers << endl;
   Rcout << "rowindices:  " <<  rowindices << endl;
   Rcout << endl;
-  Rcout << "Explain the structure of sparse matrix:" << endl << endl;
-  // in the code below we use variables:
-  // s for supernode
-  // j for column
-  // r for row
-  // i for indices
-  int Nsupernodes = supernodes.size()-1;
-  // for each supernode:
-  for (int s=0; s<Nsupernodes;s++) {
-    // print current supernode and size:
-    Rcout << "SuperNode " << s << " of size "
-          << supernodes[s+1] - supernodes[s] << ":" << endl;
 
-    int head = rowpointers[s];
-    int end = rowpointers[s+1];
-    // for column j:
-    for (int j=supernodes[s];j<supernodes[s+1];j++)
+  const int sz = P.nrow();
+  const int n_prec_mat = P.ncol();
+  NumericVector C(sz, 0.0);
+  for (int i=0;i<sz;i++)
+  {
+    for (int k=0;k<n_prec_mat;k++)
     {
-      Rcout << " column " << j << ", rows ";
-      // get the rows r:
-      for (int r=head;r<end;r++)
-        Rcout << setw(3) << rowindices[r];
-      // get index
-      int sc = colpointers[j];
-      int ec = colpointers[j+1];
-      Rcout << " at indices in entries";
-      for (int i=sc;i<ec;i++)
-        Rcout << setw(3) << i;
-      Rcout << endl;
-      // increase head:
-      head++;
+      C[i] += lambda[k]*P(i,k);
     }
   }
 
-  return lambda;
+  const int Nsupernodes = supernodes.size()-1;
+  const int N = colpointers.size()-1;
+  vector<set<int> > S = makeSetS(supernodes, rowpointers, colpointers, rowindices);
+
+  // for each supernode:
+  for (int s=0; s<Nsupernodes;s++) {
+    PrintSuperNodeInfo(s, supernodes, rowpointers, colpointers, rowindices);
+    vector<int> indmap = makeIntMap(s, rowpointers, rowindices);
+  }
+
+  return 0.0;
 }
 
 
