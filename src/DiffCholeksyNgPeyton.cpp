@@ -195,6 +195,7 @@ double PrintADchol(SEXP arg, NumericVector lambda)
   IntegerVector rowindices = obj.slot("rowindices");
   NumericMatrix P = Rcpp::clone<Rcpp::NumericMatrix>(obj.slot("P"));
 
+  // give some info:
   Rcout << "P.nrow " << P.nrow() << endl;
   Rcout << "P.ncol " << P.ncol() << endl;
   Rcout << "superNodes:  " <<  supernodes << endl;
@@ -203,6 +204,7 @@ double PrintADchol(SEXP arg, NumericVector lambda)
   Rcout << "rowindices:  " <<  rowindices << endl;
   Rcout << endl;
 
+  // define matrix C, not used at the moment:
   const int sz = P.nrow();
   const int n_prec_mat = P.ncol();
   NumericVector C(sz, 0.0);
@@ -214,11 +216,11 @@ double PrintADchol(SEXP arg, NumericVector lambda)
     }
   }
 
-  const int Nsupernodes = supernodes.size()-1;
-  const int N = colpointers.size()-1;
+  // make set S_j for each column j, see Ng and Peyton:
   vector<set<int> > S = makeSetS(supernodes, rowpointers, colpointers, rowindices);
 
-  // for each supernode:
+  // for each supernode s:
+  const int Nsupernodes = supernodes.size()-1;
   for (int s=0; s<Nsupernodes;s++) {
     PrintSuperNodeInfo(s, supernodes, rowpointers, colpointers, rowindices);
     vector<int> indmap = makeIntMap(s, rowpointers, rowindices);
