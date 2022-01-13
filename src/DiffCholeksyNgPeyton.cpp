@@ -148,14 +148,14 @@ vector<int> makeIntMap(int s,
   {
     indmap[l++] = rowindices[i];
   }
-  /*
+
   Rcout << "  Indmap supernode " << s << ": ";
   for (vector<int>::const_iterator it=indmap.begin();it!=indmap.end();it++)
   {
     Rcout << " " << *it;
   }
   Rcout << endl;
-  */
+
   return indmap;
 }
 
@@ -186,6 +186,55 @@ void PrintSuperNodeInfo(int s,
   }
 }
 
+// j is current column in Supernode J
+void Cmod_inside_J(NumericVector& L, int j, int J,
+                   const IntegerVector& supernodes,
+                   const IntegerVector& colpointers)
+{
+  // for all columns in supernode J left to j:
+  for (int k=supernodes[J];k<j;k++)
+  {
+    int jk = colpointers[k] + (j-k);
+    int ik = jk;
+    for (int ij=colpointers[j]; ij<colpointers[j+1]; ij++)
+    {
+       L[ij] = L[ij] - L[ik]*L[jk];
+       ik++;
+    }
+  }
+}
+
+// Adjust column j for all columns in supernode K:
+NumericVector Cmod_outside_J(NumericVector& L, int j, int K,
+                            const IntegerVector& supernodes,
+                            const IntegerVector& rowpointers,
+                            const IntegerVector& colpointers,
+                            const IntegerVector& rowindices)
+{
+  // get number of elements r >= j in supernode K:
+  int sz = 0;
+  for (int r = rowpointers[K+1] - 1;r>=rowpointers[K];r--)
+  {
+    sz++;
+    if (rowindices[r]==j) break;
+  }
+  NumericVector result(sz, 0.0);
+
+  // for all columns k in supernode K:
+  for (int k=supernodes[K]; k<supernodes[K]; k++)
+  {
+    int jk = colpointers[k+1]-1-sz;
+    int ik = jk;
+    for (int m=sz-1;m>=0;m--)
+    {
+      // intermediate results can be stored in dense matrix, but makes
+      // translations to AD more complicated.
+      result[m] += L[ik]*L[jk];
+      ik++;
+    }
+  }
+  return result;
+}
 
 // just a very simple test...
 void mult2(NumericVector& L, double alpha)
