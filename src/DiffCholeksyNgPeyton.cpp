@@ -134,25 +134,32 @@ vector< set<int> > makeSetS(const IntegerVector& supernodes,
   return S;
 }
 
-vector<int> makeIntMap(int s,
+// make intmap for supernode J:
+map<int, int> makeIntMap(int J, int N,
                        const IntegerVector& rowpointers,
                        const IntegerVector& rowindices)
 {
   // make indmap for current supernode s:
-  int start = rowpointers[s];
-  int end  = rowpointers[s+1];
-  int sz = end-start;
-  vector<int> indmap(sz);
+  int s = rowpointers[J];
+  int e  = rowpointers[J+1];
+  //int sz = end-start;
+  map<int, int> indmap;
   int l = 0;
-  for (int i=end-1; i>=start;i--)
+  for (int i=e-1; i>=s;i--)
   {
-    indmap[l++] = rowindices[i];
+    indmap[rowindices[i]] = l++;
   }
 
-  Rcout << "  Indmap supernode " << s << ": ";
-  for (vector<int>::const_iterator it=indmap.begin();it!=indmap.end();it++)
+  //int l = 0;
+  //for (int i=end-1; i>=start;i--)
+  //{
+  //  indmap[l++] = rowindices[i];
+  //}
+
+  Rcout << "  Indmap supernode " << J << ": ";
+  for (map<int,int>::const_iterator it=indmap.begin();it!=indmap.end();it++)
   {
-    Rcout << " " << *it;
+    Rcout << " [k=" << it->first << ",v=" << it->second << "] ";
   }
   Rcout << endl;
 
@@ -205,7 +212,7 @@ void Cmod_inside_J(NumericVector& L, int j, int J,
 }
 
 // Adjust column j for all columns in supernode K:
-NumericVector Cmod_outside_J(NumericVector& L, int j, int K,
+void Cmod_outside_J(NumericVector& L, int j, int K,
                             const IntegerVector& supernodes,
                             const IntegerVector& rowpointers,
                             const IntegerVector& colpointers,
@@ -218,7 +225,8 @@ NumericVector Cmod_outside_J(NumericVector& L, int j, int K,
     sz++;
     if (rowindices[r]==j) break;
   }
-  NumericVector result(sz, 0.0);
+  // initialize Lj with current values of L_j using indmap:
+  NumericVector Lj(sz, 0.0);
 
   // for all columns k in supernode K:
   for (int k=supernodes[K]; k<supernodes[K]; k++)
@@ -227,16 +235,16 @@ NumericVector Cmod_outside_J(NumericVector& L, int j, int K,
     int ik = jk;
     for (int m=sz-1;m>=0;m--)
     {
-      // intermediate results can be stored in dense matrix, but makes
-      // translations to AD more complicated.
-      result[m] += L[ik]*L[jk];
+      Lj[m] -= L[ik]*L[jk];
       ik++;
     }
   }
-  return result;
+  //
+  // write result back to column j:
+  //
 }
 
-// just a very simple test...
+// just a very simple test how to update L
 void mult2(NumericVector& L, double alpha)
 {
   const int N = L.size();
@@ -279,25 +287,28 @@ double PrintADchol(SEXP arg, NumericVector lambda)
   // simple test.....
   NumericVector L2 = Rcpp::clone<Rcpp::NumericVector>(L);
   mult2(L2, 2.0);
-  for (int i=0;i<L.size();i++) {
+  // just print header....
+  Rcout << "Header of mult2:" << endl;
+  for (int i=0;i<5;i++) {
     Rcout << setw(3) << i << setw(10) << L[i] << setw(10) << L2[i] << endl;
   }
+  Rcout << endl;
 
   // make set S_j for each column j, see Ng and Peyton:
   vector<set<int> > S = makeSetS(supernodes, rowpointers, colpointers, rowindices);
-
+  const int N = colpointers.size() - 1;
   const int Nsupernodes = supernodes.size()-1;
-  for (int s=0; s<Nsupernodes;s++) {
-    Rcout << "for supernode " << s << endl;
-    vector<int> indmap = makeIntMap(s, rowpointers, rowindices);
-    for (int j=supernodes[s];j<supernodes[s+1];j++)
+  for (int J=0; J<Nsupernodes;J++) {
+    Rcout << "for supernode " << J << endl;
+    map<int, int> indmap = makeIntMap(J, N, rowpointers, rowindices);
+    for (int j=supernodes[J];j<supernodes[J+1];j++)
     {
       Rcout << "  for column " << j << endl;
       for (set<int>::const_iterator it=S[j].begin(); it!=S[j].end(); it++)
       {
         Rcout << "    correct for columns in supernode " << *it << endl;
       }
-      Rcout << "    correct for columns in current supernode " << s << endl;
+      Rcout << "    correct for columns in current supernode " << J << endl;
       Rcout << "    pivot; cdiv" << endl;
     }
   }
