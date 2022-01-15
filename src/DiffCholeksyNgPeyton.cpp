@@ -198,6 +198,11 @@ void Cmod_inside_J(NumericVector& L, int j, int J,
                    const IntegerVector& supernodes,
                    const IntegerVector& colpointers)
 {
+  Rcout << "    Cmod_inside_J: correct for columns in current supernode " << J << endl;
+
+  // first simple check, without calculations:
+  return;
+
   // for all columns in supernode J left to j:
   for (int k=supernodes[J];k<j;k++)
   {
@@ -213,35 +218,64 @@ void Cmod_inside_J(NumericVector& L, int j, int J,
 
 // Adjust column j for all columns in supernode K:
 void Cmod_outside_J(NumericVector& L, int j, int K,
+                    map<int,int>& indmap,
                             const IntegerVector& supernodes,
                             const IntegerVector& rowpointers,
                             const IntegerVector& colpointers,
                             const IntegerVector& rowindices)
 {
+  Rcout << "    Cmod_outside_J: correct for columns in supernode " << K << endl;
+  Rcout << "      Indmap supernode: ";
+  for (map<int,int>::const_iterator it=indmap.begin();it!=indmap.end();it++)
+  {
+    Rcout << " [k=" << it->first << ",v=" << it->second << "] ";
+  }
+  Rcout << endl;
+
   // get number of elements r >= j in supernode K:
-  int sz = 0;
+  int sz =0;
+
+  // t is dense version of L[j], updated values at end of function:
+  NumericVector t;
+  IntegerVector posL;
+  //Rcout << "      init dense vector t " << endl;
   for (int r = rowpointers[K+1] - 1;r>=rowpointers[K];r--)
   {
-    sz++;
-    if (rowindices[r]==j) break;
-  }
-  // initialize Lj with current values of L_j using indmap:
-  NumericVector Lj(sz, 0.0);
+    int ndx = rowindices[r];
 
+    //int e = colpointers[j+1];
+    int pos = colpointers[j+1] - 1 - indmap[ndx];
+    posL.push_back(pos);
+    t.push_back(L[pos]);
+
+    Rcout << "         in init dense:" << setw(3) << r
+          << setw(3) << ndx << setw(3) << indmap[ndx] << setw(4) << pos
+          << setw(5) << L[pos] << endl;
+    sz++;
+    if (ndx==j)
+    {
+      break;
+    }
+  }
+
+  /*
   // for all columns k in supernode K:
   for (int k=supernodes[K]; k<supernodes[K]; k++)
   {
     int jk = colpointers[k+1]-1-sz;
     int ik = jk;
-    for (int m=sz-1;m>=0;m--)
+    for (int i=sz-1;i>=0;i--)
     {
-      Lj[m] -= L[ik]*L[jk];
+      t[i] = t[i] - L[ik]*L[jk];
       ik++;
     }
   }
-  //
-  // write result back to column j:
-  //
+  */
+  // write results dense matrix t back to L_j
+  for (int i=0;i<sz;i++)
+  {
+     L[posL[i]] = t[i];
+  }
 }
 
 // just a very simple test how to update L
@@ -286,11 +320,11 @@ double PrintADchol(SEXP arg, NumericVector lambda)
 
   // simple test.....
   NumericVector L2 = Rcpp::clone<Rcpp::NumericVector>(L);
-  mult2(L2, 2.0);
+  //mult2(L2, 2.0);
   // just print header....
-  Rcout << "Header of mult2:" << endl;
-  for (int i=0;i<5;i++) {
-    Rcout << setw(3) << i << setw(10) << L[i] << setw(10) << L2[i] << endl;
+  Rcout << "Entries:" << endl;
+  for (int i=0;i<sz;i++) {
+    Rcout << setw(3) << i << setw(10) << L[i] << endl;
   }
   Rcout << endl;
 
@@ -306,12 +340,27 @@ double PrintADchol(SEXP arg, NumericVector lambda)
       Rcout << "  for column " << j << endl;
       for (set<int>::const_iterator it=S[j].begin(); it!=S[j].end(); it++)
       {
-        Rcout << "    correct for columns in supernode " << *it << endl;
+        int K = *it;
+        Cmod_outside_J(L, j, K, indmap,
+                       supernodes, rowpointers, colpointers, rowindices);
       }
-      Rcout << "    correct for columns in current supernode " << J << endl;
+      Cmod_inside_J(L, j, J, supernodes, colpointers);
       Rcout << "    pivot; cdiv" << endl;
+      const int s = colpointers[j];
+      const int e = colpointers[j+1];
+      // pivot:
+      //L[s] = sqrt(L[s]);
+      // update column j:
+      //for (int i = s + 1; i < e; i++)
+      //{
+      //  L[i] /= L[s];
+      //}
     }
   }
+
+  Rcout << "check output" << endl;
+  for (int i=0;i<sz;i++)
+    Rcout << setw(3) << i << setw(3) << L[i] - L2[i] << endl;
 
   return 0.0;
 }
