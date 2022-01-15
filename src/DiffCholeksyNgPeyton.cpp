@@ -288,7 +288,7 @@ void mult2(NumericVector& L, double alpha)
 }
 
 // [[Rcpp::export]]
-NumericVector PrintADchol(SEXP arg, NumericVector lambda)
+double logdet(SEXP arg, NumericVector lambda)
 {
   Rcpp::S4 obj(arg);
   IntegerVector supernodes = obj.slot("supernodes");
@@ -358,7 +358,6 @@ NumericVector PrintADchol(SEXP arg, NumericVector lambda)
     }
   }
 
-  /*
   double sum = 0;
   for (int k=0;k<N;k++)
   {
@@ -366,12 +365,6 @@ NumericVector PrintADchol(SEXP arg, NumericVector lambda)
     sum += 2.0*log(L[s]);
   }
   return sum;
-  */
-  //Rcout << "check output" << endl;
-  //for (int i=0;i<sz;i++)
-  //  Rcout << setw(3) << i << setw(12) << L[i] << endl;
-
-  return L;
 }
 
 

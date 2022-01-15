@@ -13,7 +13,7 @@ construct_ADchol_Rcpp_NgPeyton <- function(U, P_list) {
     .Call(`_LMMsolver_construct_ADchol_Rcpp_NgPeyton`, U, P_list)
 }
 
-PrintADchol <- function(arg, lambda) {
-    .Call(`_LMMsolver_PrintADchol`, arg, lambda)
+logdet <- function(arg, lambda) {
+    .Call(`_LMMsolver_logdet`, arg, lambda)
 }
 

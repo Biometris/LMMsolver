@@ -30,7 +30,9 @@ obj <- LMMsolver:::ADcholNgPeyton(lP)
 slotNames(obj)
 
 lambda = 1.0
-chol <- LMMsolver:::PrintADchol(obj, lambda=lambda)
+det1 <- LMMsolver:::logdet(obj, lambda=lambda)
+det2 <- as.numeric(determinant(lambda*B)$modulus)
 
-range(chol - U@entries)
-
+det1
+det2
+det1-det2
