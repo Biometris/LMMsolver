@@ -47,7 +47,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // PrintADchol
-double PrintADchol(SEXP arg, NumericVector lambda);
+NumericVector PrintADchol(SEXP arg, NumericVector lambda);
 RcppExport SEXP _LMMsolver_PrintADchol(SEXP argSEXP, SEXP lambdaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;

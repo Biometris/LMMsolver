@@ -29,7 +29,8 @@ lP[[1]] <- B
 obj <- LMMsolver:::ADcholNgPeyton(lP)
 slotNames(obj)
 
-LMMsolver:::PrintADchol(obj, lambda=1.0)
+lambda = 1.0
+chol <- LMMsolver:::PrintADchol(obj, lambda=lambda)
 
-determinant(U)
+range(chol - U@entries)
 

@@ -201,7 +201,7 @@ void Cmod_inside_J(NumericVector& L, int j, int J,
   Rcout << "    Cmod_inside_J: correct for columns in current supernode " << J << endl;
 
   // first simple check, without calculations:
-  return;
+  // return;
 
   // for all columns in supernode J left to j:
   for (int k=supernodes[J];k<j;k++)
@@ -258,11 +258,11 @@ void Cmod_outside_J(NumericVector& L, int j, int K,
     }
   }
 
-  /*
   // for all columns k in supernode K:
-  for (int k=supernodes[K]; k<supernodes[K]; k++)
+  for (int k=supernodes[K]; k<supernodes[K+1]; k++)
   {
-    int jk = colpointers[k+1]-1-sz;
+    int jk = colpointers[k+1]-sz;
+    Rcout << "..........k = " << k << "jk = "<< jk << "sz=" << sz << endl;
     int ik = jk;
     for (int i=sz-1;i>=0;i--)
     {
@@ -270,7 +270,7 @@ void Cmod_outside_J(NumericVector& L, int j, int K,
       ik++;
     }
   }
-  */
+
   // write results dense matrix t back to L_j
   for (int i=0;i<sz;i++)
   {
@@ -288,7 +288,7 @@ void mult2(NumericVector& L, double alpha)
 }
 
 // [[Rcpp::export]]
-double PrintADchol(SEXP arg, NumericVector lambda)
+NumericVector PrintADchol(SEXP arg, NumericVector lambda)
 {
   Rcpp::S4 obj(arg);
   IntegerVector supernodes = obj.slot("supernodes");
@@ -349,20 +349,29 @@ double PrintADchol(SEXP arg, NumericVector lambda)
       const int s = colpointers[j];
       const int e = colpointers[j+1];
       // pivot:
-      //L[s] = sqrt(L[s]);
+      L[s] = sqrt(L[s]);
       // update column j:
-      //for (int i = s + 1; i < e; i++)
-      //{
-      //  L[i] /= L[s];
-      //}
+      for (int i = s + 1; i < e; i++)
+      {
+        L[i] /= L[s];
+      }
     }
   }
 
-  Rcout << "check output" << endl;
-  for (int i=0;i<sz;i++)
-    Rcout << setw(3) << i << setw(3) << L[i] - L2[i] << endl;
+  /*
+  double sum = 0;
+  for (int k=0;k<N;k++)
+  {
+    int s = colpointers[k];
+    sum += 2.0*log(L[s]);
+  }
+  return sum;
+  */
+  //Rcout << "check output" << endl;
+  //for (int i=0;i<sz;i++)
+  //  Rcout << setw(3) << i << setw(12) << L[i] << endl;
 
-  return 0.0;
+  return L;
 }
 
 
