@@ -85,12 +85,21 @@ ED <- theta * LMMsolver:::dlogdet(ADobj,theta)
 # supernodes....
 displayMME(obj1, cholesky=TRUE)
 
-C <- listP[[1]] + listP[[2]] + listP[[3]]
+C <- theta[1]*listP[[1]] + theta[2]*listP[[2]] + theta[3]*listP[[3]]
 cholC <- chol(C)
 slotNames(cholC)
 sn <- cholC@supernodes
 length(sn)
 ns <- diff(sn, diff=1)
 table(ns)
+
+obj <- LMMsolver:::ADcholNgPeyton(listP)
+
+det1 <- LMMsolver:::logdet(obj, lambda=theta)
+det2 <- as.numeric(determinant(C)$modulus)
+
+det1
+det2
+det1-det2
 
 
