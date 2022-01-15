@@ -9,11 +9,15 @@ construct_ADchol_Rcpp <- function(U, P_list) {
     .Call(`_LMMsolver_construct_ADchol_Rcpp`, U, P_list)
 }
 
+logdet <- function(arg, lambda) {
+    .Call(`_LMMsolver_logdet`, arg, lambda)
+}
+
 construct_ADchol_Rcpp_NgPeyton <- function(U, P_list) {
     .Call(`_LMMsolver_construct_ADchol_Rcpp_NgPeyton`, U, P_list)
 }
 
-logdet <- function(arg, lambda) {
-    .Call(`_LMMsolver_logdet`, arg, lambda)
+logdetNgPeyton <- function(arg, lambda) {
+    .Call(`_LMMsolver_logdetNgPeyton`, arg, lambda)
 }
 

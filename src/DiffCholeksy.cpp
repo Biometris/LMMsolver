@@ -314,7 +314,7 @@ List construct_ADchol_Rcpp(SEXP U,
   return L;
 }
 
-/*
+
 
 // Calculate log determinant using Left-looking Cholesky:
 //
@@ -352,4 +352,4 @@ double logdet(SEXP arg,
   return sum;
 }
 
-*/
+

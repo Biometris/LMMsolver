@@ -26,13 +26,17 @@ abline(v=6.5, col='red')
 lP <- list()
 lP[[1]] <- B
 
-obj <- LMMsolver:::ADcholNgPeyton(lP)
-slotNames(obj)
+obj0 <- LMMsolver:::ADchol(lP)
+obj1 <- LMMsolver:::ADcholNgPeyton(lP)
 
 lambda = 1.0
-det1 <- LMMsolver:::logdet(obj, lambda=lambda)
+det0 <- LMMsolver:::logdet(obj0, lambda=lambda)
+det1 <- LMMsolver:::logdetNgPeyton(obj1, lambda=lambda)
 det2 <- as.numeric(determinant(lambda*B)$modulus)
 
+det0
 det1
 det2
+det0-det2
 det1-det2
+

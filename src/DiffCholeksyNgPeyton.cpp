@@ -108,10 +108,10 @@ vector< set<int> > makeSetS(const IntegerVector& supernodes,
   // for each supernode:
   for (int s=0; s<Nsupernodes;s++) {
     // for column j:
+    int szNode = supernodes[s+1] - supernodes[s];
     for (int j=supernodes[s];j<supernodes[s+1];j++)
     {
-      int sz = supernodes[s+1] - supernodes[s];
-      for (int r = rowpointers[s]+sz; r < rowpointers[s+1];r++)
+      for (int r = rowpointers[s]+szNode; r < rowpointers[s+1];r++)
       {
         int ndx = rowindices[r];
         S[ndx].insert(s);
@@ -122,20 +122,21 @@ vector< set<int> > makeSetS(const IntegerVector& supernodes,
 }
 
 // make intmap for supernode J:
-map<int, int> makeIndMap(int J, int N,
+void makeIndMap(IntegerVector& indmap,
+                       int J, int N,
                        const IntegerVector& rowpointers,
                        const IntegerVector& rowindices)
 {
   // make indmap for current supernode J:
   int s = rowpointers[J];
   int e  = rowpointers[J+1];
-  map<int, int> indmap;
+  //vector<int> indmap(N,0);
   int l = 0;
   for (int i=e-1; i>=s;i--)
   {
     indmap[rowindices[i]] = l++;
   }
-  return indmap;
+  //return indmap;
 }
 
 // j is current column in Supernode J
@@ -148,9 +149,10 @@ void cmod1(NumericVector& L, int j, int J,
   {
     int jk = colpointers[k] + (j-k);
     int ik = jk;
+    double Ljk = L[jk];
     for (int ij=colpointers[j]; ij<colpointers[j+1]; ij++)
     {
-       L[ij] = L[ij] - L[ik]*L[jk];
+       L[ij] -= L[ik]*Ljk;
        ik++;
     }
   }
@@ -158,7 +160,8 @@ void cmod1(NumericVector& L, int j, int J,
 
 // Adjust column j for all columns in supernode K:
 void cmod2(NumericVector& L, int j, int K,
-                    map<int,int>& indmap,
+                    NumericVector& t,
+                    const IntegerVector& indmap,
                             const IntegerVector& supernodes,
                             const IntegerVector& rowpointers,
                             const IntegerVector& colpointers,
@@ -168,14 +171,12 @@ void cmod2(NumericVector& L, int j, int K,
   int sz =0;
 
   // t is dense version of L[j], updated values at end of function:
-  NumericVector t;
-  IntegerVector posL;
+  //const int N = colpointers.size() - 1;
   for (int r = rowpointers[K+1] - 1;r>=rowpointers[K];r--)
   {
     int ndx = rowindices[r];
     int pos = colpointers[j+1] - 1 - indmap[ndx];
-    posL.push_back(pos);
-    t.push_back(L[pos]);
+    t[sz] = L[pos];
     sz++;
     if (ndx==j)
     {
@@ -188,17 +189,26 @@ void cmod2(NumericVector& L, int j, int K,
   {
     int jk = colpointers[k+1]-sz;
     int ik = jk;
+    double Ljk = L[jk];
     for (int i=sz-1;i>=0;i--)
     {
-      t[i] = t[i] - L[ik]*L[jk];
+      t[i] -= L[ik]*Ljk;
       ik++;
     }
   }
 
   // write results dense matrix t back to L_j
-  for (int i=0;i<sz;i++)
+  sz=0;
+  for (int r = rowpointers[K+1] - 1;r>=rowpointers[K];r--)
   {
-     L[posL[i]] = t[i];
+    int ndx = rowindices[r];
+    int pos = colpointers[j+1] - 1 - indmap[ndx];
+    L[pos] = t[sz];
+    sz++;
+    if (ndx==j)
+    {
+      break;
+    }
   }
 }
 
@@ -228,7 +238,7 @@ double logdet(const NumericVector& L, const IntegerVector& colpointers)
 }
 
 // [[Rcpp::export]]
-double logdet(SEXP arg, NumericVector lambda)
+double logdetNgPeyton(SEXP arg, NumericVector lambda)
 {
   Rcpp::S4 obj(arg);
   IntegerVector supernodes = obj.slot("supernodes");
@@ -253,13 +263,15 @@ double logdet(SEXP arg, NumericVector lambda)
   vector<set<int> > S = makeSetS(supernodes, rowpointers, colpointers, rowindices);
   const int N = colpointers.size() - 1;
   const int Nsupernodes = supernodes.size()-1;
+  IntegerVector indmap(N,0);
+  NumericVector t(N);
   for (int J=0; J<Nsupernodes;J++) {
-    map<int, int> indmap = makeIndMap(J, N, rowpointers, rowindices);
+    makeIndMap(indmap, J, N, rowpointers, rowindices);
     for (int j=supernodes[J];j<supernodes[J+1];j++)
     {
       for (set<int>::const_iterator it=S[j].begin(); it!=S[j].end(); it++)
       {
-        cmod2(L, j, *it, indmap, supernodes, rowpointers, colpointers, rowindices);
+        cmod2(L, j, *it, t, indmap, supernodes, rowpointers, colpointers, rowindices);
       }
       cmod1(L, j, J, supernodes, colpointers);
       cdiv(L, j, colpointers);

@@ -6,6 +6,7 @@ library(fields)
 library(ggplot2)
 library(maps)
 library(dplyr)
+library(microbenchmark)
 
 # Get precipitation data from spam
 data(USprecip)
@@ -93,13 +94,36 @@ length(sn)
 ns <- diff(sn, diff=1)
 table(ns)
 
-obj <- LMMsolver:::ADcholNgPeyton(listP)
+obj0 <- LMMsolver:::ADchol(listP)
+obj1 <- LMMsolver:::ADcholNgPeyton(listP)
 
-det1 <- LMMsolver:::logdet(obj, lambda=theta)
-det2 <- as.numeric(determinant(C)$modulus)
+det0 <- LMMsolver:::logdet(obj0, lambda=theta)
+det1 <- LMMsolver:::logdetNgPeyton(obj1, lambda=theta)
+det2 <- 2.0*as.numeric(determinant(cholC)$modulus)
 
+det0
 det1
 det2
+
+det0-det1
+det0-det2
 det1-det2
+
+funOrg <- function(lambda) {LMMsolver:::logdet(obj0, lambda)}
+funNew <- function(lambda) {LMMsolver:::logdetNgPeyton(obj1, lambda)}
+funSpam <- function(lambda) {
+  C=lambda[1]*listP[[1]] + lambda[2]*listP[[2]] + lambda[3]*listP[[3]]
+  cholC <- update(cholC, C)
+  2.0*as.numeric(determinant(cholC)$modulus)
+}
+funED <- function(lambda)
+{
+  ED <- lambda * LMMsolver:::dlogdet(ADobj,lambda)
+  attr(ED,"logdet")
+}
+
+# compare computation time
+microbenchmark(funSpam(theta), funOrg(theta), funED(theta), funNew(theta), times=10L)
+
 
 
