@@ -101,6 +101,10 @@ det0 <- LMMsolver:::logdet(obj0, lambda=theta)
 det1 <- LMMsolver:::logdetNgPeyton(obj1, lambda=theta)
 det2 <- 2.0*as.numeric(determinant(cholC)$modulus)
 
+ED2 <- theta * LMMsolver:::dlogdetNgPeyton(obj1,theta)
+ED
+ED2
+
 det0
 det1
 det2
@@ -119,11 +123,18 @@ funSpam <- function(lambda) {
 funED <- function(lambda)
 {
   ED <- lambda * LMMsolver:::dlogdet(ADobj,lambda)
-  attr(ED,"logdet")
+  ED
+}
+
+funED2 <- function(lambda)
+{
+  ED <- lambda * LMMsolver:::dlogdetNgPeyton(obj1,lambda)
+  ED
 }
 
 # compare computation time
-microbenchmark(funSpam(theta), funOrg(theta), funED(theta), funNew(theta), times=10L)
+microbenchmark(funSpam(theta), funOrg(theta), funNew(theta), funED(theta),
+            funED2(theta), times=10L)
 
 
 

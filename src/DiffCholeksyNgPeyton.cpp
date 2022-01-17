@@ -139,7 +139,7 @@ void ADcmod1(NumericVector& F,
            const IntegerVector& colpointers)
 {
   //if (sj >= J) return 0;
-  Rcout << "    ADcmod1" << endl;
+  //Rcout << "    ADcmod1" << endl;
 
   int s = colpointers[j];
   int e = colpointers[j+1];
@@ -211,6 +211,52 @@ void cmod2(NumericVector& L, int j, int K,
   }
 }
 
+// Adjust column j for all columns in supernode K:
+void ADcmod2(NumericVector& F,
+            const NumericVector& L, int j, int K,
+           NumericVector& t,
+           const IntegerVector& indmap,
+           const IntegerVector& supernodes,
+           const IntegerVector& rowpointers,
+           const IntegerVector& colpointers,
+           const IntegerVector& rowindices)
+{
+  //Rcout << "    ADcmod2 supernode " << K << endl;
+
+  // get number of elements r >= j in supernode K:
+  int sz =0;
+
+  // t is dense version of L[j], updated values at end of function:
+  //const int N = colpointers.size() - 1;
+  for (int r = rowpointers[K+1] - 1;r>=rowpointers[K];r--)
+  {
+    int ndx = rowindices[r];
+    int pos = colpointers[j+1] - 1 - indmap[ndx];
+    t[sz] = F[pos];
+    sz++;
+    if (ndx==j)
+    {
+      break;
+    }
+  }
+
+  // for all columns k in supernode K:
+  for (int k=supernodes[K]; k<supernodes[K+1]; k++)
+  {
+    int jk = colpointers[k+1]-sz;
+    int ik = jk;
+    for (int i=sz-1;i>=0;i--)
+    {
+      double F_ij = t[i];
+      F[ik] = F[ik] - F_ij*L[jk];
+      F[jk] = F[jk] - F_ij*L[ik];
+      ik++;
+    }
+  }
+}
+
+
+
 void cdiv(NumericVector& L, int j, const IntegerVector& colpointers)
 {
   const int s = colpointers[j];
@@ -228,7 +274,7 @@ void cdiv(NumericVector& L, int j, const IntegerVector& colpointers)
 void ADcdiv(NumericVector& F,
             const NumericVector& L, int j, const IntegerVector& colpointers)
 {
-  Rcout << "    ADcdiv" << endl;
+  //Rcout << "    ADcdiv" << endl;
   const int s = colpointers[j];
   const int e = colpointers[j+1];
   // update AD for column j:
@@ -306,7 +352,7 @@ void ADcholesky(NumericVector& F,
               const IntegerVector& colpointers,
               const IntegerVector& rowindices)
 {
-  cout << "outline ADcholeksy" << endl;
+  //cout << "outline ADcholeksy" << endl;
   const int N = colpointers.size() - 1;
   const int Nsupernodes = supernodes.size()-1;
 
@@ -322,16 +368,17 @@ void ADcholesky(NumericVector& F,
   NumericVector t(N);
   for (int J=Nsupernodes-1; J>=0;J--)
   {
-    Rcout << " supernode " << J << endl;
+    //Rcout << " supernode " << J << endl;
     makeIndMap(indmap, J, rowpointers, rowindices);
     for (int j = supernodes[J+1]-1; j>=supernodes[J]; j--)
     {
-       Rcout << "  column " << j << endl;
+       //Rcout << "  column " << j << endl;
        ADcdiv(F, L, j, colpointers);
        ADcmod1(F, L, j, J, supernodes, colpointers);
        for (set<int>::const_iterator it=S[j].begin(); it!=S[j].end(); it++)
        {
-         Rcout << "    ADcmod2 supernode " << *it << endl;
+         int K = *it;
+         ADcmod2(F, L, j, K, t, indmap, supernodes, rowpointers,colpointers,rowindices);
        }
     }
   }
@@ -419,10 +466,8 @@ NumericVector dlogdetNgPeyton(SEXP arg, NumericVector lambda)
   }
   vector<set<int> > S = cholesky(L, supernodes, rowpointers, colpointers, rowindices);
   double logDet = logdet(L, colpointers);
-
   NumericVector F = initAD(L, colpointers);
   ADcholesky(F, L, S, supernodes, rowpointers, colpointers, rowindices);
-
 
   // calculate the partial derivatives:
   const int N = colpointers.size()-1;
