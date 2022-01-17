@@ -133,6 +133,30 @@ void cmod1(NumericVector& L, int j, int J, const IntegerVector& supernodes,
   }
 }
 
+// j is current column in Supernode J
+void ADcmod1(NumericVector& F,
+           const NumericVector& L, int j, int J, const IntegerVector& supernodes,
+           const IntegerVector& colpointers)
+{
+  //if (sj >= J) return 0;
+  Rcout << "    ADcmod1" << endl;
+
+  int s = colpointers[j];
+  int e = colpointers[j+1];
+  // for all columns in supernode J left to j:
+  for (int k=supernodes[J];k<j;k++)
+  {
+    int jk = colpointers[k] + (j-k);
+    int ik = jk;
+    for (int ij=s; ij<e; ij++)
+    {
+      F[ik] = F[ik] - F[ij]*L[jk];
+      F[jk] = F[jk] - F[ij]*L[ik];
+      ik++;
+    }
+  }
+}
+
 // Adjust column j for all columns in supernode K:
 void cmod2(NumericVector& L, int j, int K,
                     NumericVector& t,
@@ -304,7 +328,7 @@ void ADcholesky(NumericVector& F,
     {
        Rcout << "  column " << j << endl;
        ADcdiv(F, L, j, colpointers);
-       cout << "    ADcmod1" << endl;
+       ADcmod1(F, L, j, J, supernodes, colpointers);
        for (set<int>::const_iterator it=S[j].begin(); it!=S[j].end(); it++)
        {
          Rcout << "    ADcmod2 supernode " << *it << endl;
