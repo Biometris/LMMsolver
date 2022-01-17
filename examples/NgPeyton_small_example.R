@@ -50,3 +50,6 @@ det2
 det0-det2
 det1-det2
 
+# output outline new version:
+LMMsolver:::dlogdetNgPeyton(obj1,lambda=lambda)
+

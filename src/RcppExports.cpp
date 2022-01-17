@@ -70,6 +70,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// dlogdetNgPeyton
+NumericVector dlogdetNgPeyton(SEXP arg, NumericVector lambda);
+RcppExport SEXP _LMMsolver_dlogdetNgPeyton(SEXP argSEXP, SEXP lambdaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type arg(argSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type lambda(lambdaSEXP);
+    rcpp_result_gen = Rcpp::wrap(dlogdetNgPeyton(arg, lambda));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_LMMsolver_dlogdet", (DL_FUNC) &_LMMsolver_dlogdet, 2},
@@ -77,6 +89,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_LMMsolver_logdet", (DL_FUNC) &_LMMsolver_logdet, 2},
     {"_LMMsolver_construct_ADchol_Rcpp_NgPeyton", (DL_FUNC) &_LMMsolver_construct_ADchol_Rcpp_NgPeyton, 2},
     {"_LMMsolver_logdetNgPeyton", (DL_FUNC) &_LMMsolver_logdetNgPeyton, 2},
+    {"_LMMsolver_dlogdetNgPeyton", (DL_FUNC) &_LMMsolver_dlogdetNgPeyton, 2},
     {NULL, NULL, 0}
 };
 

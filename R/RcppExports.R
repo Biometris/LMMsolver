@@ -21,3 +21,7 @@ logdetNgPeyton <- function(arg, lambda) {
     .Call(`_LMMsolver_logdetNgPeyton`, arg, lambda)
 }
 
+dlogdetNgPeyton <- function(arg, lambda) {
+    .Call(`_LMMsolver_dlogdetNgPeyton`, arg, lambda)
+}
+

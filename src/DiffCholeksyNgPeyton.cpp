@@ -113,14 +113,14 @@ void makeIndMap(IntegerVector& indmap,
 }
 
 // j is current column in Supernode J
-void cmod1(NumericVector& L, int j, int J,int sJ,
+void cmod1(NumericVector& L, int j, int J, const IntegerVector& supernodes,
                    const IntegerVector& colpointers)
 {
   //if (sj >= J) return 0;
   int s = colpointers[j];
   int e = colpointers[j+1];
   // for all columns in supernode J left to j:
-  for (int k=sJ;k<j;k++)
+  for (int k=supernodes[J];k<j;k++)
   {
     int jk = colpointers[k] + (j-k);
     int ik = jk;
@@ -150,8 +150,8 @@ void cmod2(NumericVector& L, int j, int K,
   for (int r = rowpointers[K+1] - 1;r>=rowpointers[K];r--)
   {
     int ndx = rowindices[r];
-    int pos = colpointers[j+1] - 1 - indmap[ndx];
-    t[sz] = L[pos];
+    //int pos = colpointers[j+1] - 1 - indmap[ndx];
+    t[sz] = 0.0;
     sz++;
     if (ndx==j)
     {
@@ -167,7 +167,7 @@ void cmod2(NumericVector& L, int j, int K,
     double Ljk = L[jk];
     for (int i=sz-1;i>=0;i--)
     {
-      t[i] -= L[ik]*Ljk;
+      t[i] += L[ik]*Ljk;
       ik++;
     }
   }
@@ -178,7 +178,7 @@ void cmod2(NumericVector& L, int j, int K,
   {
     int ndx = rowindices[r];
     int pos = colpointers[j+1] - 1 - indmap[ndx];
-    L[pos] = t[sz];
+    L[pos] -= t[sz];
     sz++;
     if (ndx==j)
     {
@@ -200,7 +200,16 @@ void cdiv(NumericVector& L, int j, const IntegerVector& colpointers)
   }
 }
 
-void cholesky(NumericVector& L,
+// clear Set S for columns in supernode J:
+void clearSet(vector< set<int> >& S, int J, const IntegerVector& supernodes)
+{
+  for (int j=supernodes[J];j<supernodes[J+1];j++)
+  {
+    S[j].clear();
+  }
+}
+
+vector< set<int> > cholesky(NumericVector& L,
            const IntegerVector& supernodes,
            const IntegerVector& rowpointers,
            const IntegerVector& colpointers,
@@ -234,7 +243,7 @@ void cholesky(NumericVector& L,
           S[rNdx].insert(K);
         }
       }
-      cmod1(L, j, J, supernodes[J], colpointers);
+      cmod1(L, j, J, supernodes, colpointers);
       cdiv(L, j, colpointers);
     }
     colhead[J]++;
@@ -242,12 +251,52 @@ void cholesky(NumericVector& L,
       int rNdx = rowindices[colhead[J]];
       S[rNdx].insert(J);
     }
-    for (int j=supernodes[J];j<supernodes[J+1];j++)
+    //clearSet(S, J, supernodes);
+  }
+  return S;
+}
+
+
+void ADcholesky(NumericVector& F,
+              const NumericVector& L,
+              vector<set<int> >& S,
+              const IntegerVector& supernodes,
+              const IntegerVector& rowpointers,
+              const IntegerVector& colpointers,
+              const IntegerVector& rowindices)
+{
+  cout << "outline ADcholeksy" << endl;
+  const int N = colpointers.size() - 1;
+  const int Nsupernodes = supernodes.size()-1;
+
+  IntegerVector colhead = clone(rowpointers);
+  IntegerVector coltop = clone(rowpointers);
+  for (int J=0; J<Nsupernodes;J++)
+  {
+    int szNode = supernodes[J+1] - supernodes[J];
+    coltop[J] += szNode-1;
+    colhead[J] = rowpointers[J+1] - 1;
+  }
+  IntegerVector indmap(N,0);
+  NumericVector t(N);
+  for (int J=Nsupernodes-1; J>=0;J--)
+  {
+    cout << " supernode " << J << endl;
+    makeIndMap(indmap, J, rowpointers, rowindices);
+    for (int j = supernodes[J+1]-1; j>=supernodes[J]; j--)
     {
-      S[j].clear();
+       cout << "  column " << j << endl;
+       cout << "    ADcdiv; ADcmod1" << endl;
+       for (set<int>::const_iterator it=S[j].begin(); it!=S[j].end(); it++)
+       {
+         cout << "    ADcmod2 supernode " << *it << endl;
+       }
     }
   }
+  return;
 }
+
+
 
 double logdet(const NumericVector& L, const IntegerVector& colpointers)
 {
@@ -260,6 +309,20 @@ double logdet(const NumericVector& L, const IntegerVector& colpointers)
   }
   return sum;
 }
+
+NumericVector initAD(const NumericVector& L, const IntegerVector& colpointers)
+{
+  const int N = colpointers.size() - 1;
+  const int sz = L.size();
+  NumericVector F(sz, 0.0);
+  for (int k=0;k<N;k++)
+  {
+    int s = colpointers[k];
+    F[s] = 2.0/L[s];
+  }
+  return F;
+}
+
 
 // [[Rcpp::export]]
 double logdetNgPeyton(SEXP arg, NumericVector lambda)
@@ -284,8 +347,68 @@ double logdetNgPeyton(SEXP arg, NumericVector lambda)
       L[i] += alpha*Pk[i];
     }
   }
-  cholesky(L, supernodes, rowpointers, colpointers, rowindices);
+  vector<set<int> > S = cholesky(L, supernodes, rowpointers, colpointers, rowindices);
   return logdet(L, colpointers);
 }
+
+
+// [[Rcpp::export]]
+NumericVector dlogdetNgPeyton(SEXP arg, NumericVector lambda)
+{
+  Rcpp::S4 obj(arg);
+  IntegerVector supernodes = obj.slot("supernodes");
+  IntegerVector rowpointers = obj.slot("rowpointers");
+  IntegerVector colpointers = obj.slot("colpointers");
+  IntegerVector rowindices = obj.slot("rowindices");
+  NumericMatrix P = Rcpp::clone<Rcpp::NumericMatrix>(obj.slot("P"));
+
+  // define matrix L (lower triangle matrix values)
+  const int sz = P.nrow();
+  const int n_prec_mat = P.ncol();
+  NumericVector L(sz, 0.0);
+  for (int k=0;k<n_prec_mat;k++)
+  {
+    NumericVector Pk = P(_, k);
+    double alpha = lambda[k];
+    for (int i=0;i<sz;i++)
+    {
+      L[i] += alpha*Pk[i];
+    }
+  }
+  vector<set<int> > S = cholesky(L, supernodes, rowpointers, colpointers, rowindices);
+  double logDet = logdet(L, colpointers);
+
+  NumericVector F = initAD(L, colpointers);
+  ADcholesky(F, L, S, supernodes, rowpointers, colpointers, rowindices);
+
+
+  // calculate the partial derivatives:
+  const int N = colpointers.size()-1;
+  NumericVector gradient(n_prec_mat);
+  for (int i=0;i<F.size();i++)
+  {
+    for (int k=0;k<n_prec_mat;k++)
+      gradient[k] += F[i]*P(i,k);
+  }
+  double sum = 0.0;
+  for (int i=0;i<n_prec_mat;i++)
+  {
+    sum += lambda[i]*gradient[i];
+  }
+  // correction, to make inproduct
+  // between lambda and gradient equal to N:
+  for (int i=0;i<n_prec_mat;i++)
+  {
+    gradient[i] *= N/sum;
+  }
+
+  //NumericVector gradient(n_prec_mat,0.0);
+  gradient.attr("logdet") = logDet;
+
+  return gradient;
+}
+
+
+
 
 
