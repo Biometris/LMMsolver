@@ -96,61 +96,36 @@ List construct_ADchol_Rcpp_NgPeyton(SEXP U,
   return L;
 }
 
-vector< set<int> > makeSetS(const IntegerVector& supernodes,
-                          const IntegerVector& rowpointers,
-                         const IntegerVector& colpointers,
-                         const IntegerVector& rowindices)
-{
-  const int Nsupernodes = supernodes.size()-1;
-  const int N = colpointers.size()-1;
-  vector< set<int> > S(N);
-
-  // for each supernode:
-  for (int s=0; s<Nsupernodes;s++) {
-    // for column j:
-    int szNode = supernodes[s+1] - supernodes[s];
-    for (int j=supernodes[s];j<supernodes[s+1];j++)
-    {
-      for (int r = rowpointers[s]+szNode; r < rowpointers[s+1];r++)
-      {
-        int ndx = rowindices[r];
-        S[ndx].insert(s);
-      }
-    }
-  }
-  return S;
-}
-
-// make intmap for supernode J:
+// make indmap for supernode J:
 void makeIndMap(IntegerVector& indmap,
-                       int J, int N,
+                       int J,
                        const IntegerVector& rowpointers,
                        const IntegerVector& rowindices)
 {
   // make indmap for current supernode J:
   int s = rowpointers[J];
   int e  = rowpointers[J+1];
-  //vector<int> indmap(N,0);
   int l = 0;
   for (int i=e-1; i>=s;i--)
   {
     indmap[rowindices[i]] = l++;
   }
-  //return indmap;
 }
 
 // j is current column in Supernode J
-void cmod1(NumericVector& L, int j, int J,
-                   const IntegerVector& supernodes,
+void cmod1(NumericVector& L, int j, int J,int sJ,
                    const IntegerVector& colpointers)
 {
+  //if (sj >= J) return 0;
+  int s = colpointers[j];
+  int e = colpointers[j+1];
   // for all columns in supernode J left to j:
-  for (int k=supernodes[J];k<j;k++)
+  for (int k=sJ;k<j;k++)
   {
     int jk = colpointers[k] + (j-k);
     int ik = jk;
     double Ljk = L[jk];
-    for (int ij=colpointers[j]; ij<colpointers[j+1]; ij++)
+    for (int ij=s; ij<e; ij++)
     {
        L[ij] -= L[ik]*Ljk;
        ik++;
@@ -225,6 +200,55 @@ void cdiv(NumericVector& L, int j, const IntegerVector& colpointers)
   }
 }
 
+void cholesky(NumericVector& L,
+           const IntegerVector& supernodes,
+           const IntegerVector& rowpointers,
+           const IntegerVector& colpointers,
+           const IntegerVector& rowindices)
+{
+  const int N = colpointers.size() - 1;
+  const int Nsupernodes = supernodes.size()-1;
+
+  IntegerVector colhead = clone(rowpointers);
+  for (int J=0; J<Nsupernodes;J++)
+  {
+    int szNode = supernodes[J+1] - supernodes[J];
+    colhead[J] += szNode-1;
+  }
+
+  IntegerVector indmap(N,0);
+  NumericVector t(N);
+  vector< set<int> > S(N);
+  for (int J=0; J<Nsupernodes;J++) {
+    makeIndMap(indmap, J, rowpointers, rowindices);
+    for (int j=supernodes[J];j<supernodes[J+1];j++)
+    {
+      for (set<int>::const_iterator it=S[j].begin(); it!=S[j].end(); it++)
+      {
+        int K = *it;
+        cmod2(L, j, K, t, indmap, supernodes, rowpointers, colpointers, rowindices);
+
+        colhead[K]++;
+        if (colhead[K] < rowpointers[K+1]) {
+          int rNdx = rowindices[colhead[K]];
+          S[rNdx].insert(K);
+        }
+      }
+      cmod1(L, j, J, supernodes[J], colpointers);
+      cdiv(L, j, colpointers);
+    }
+    colhead[J]++;
+    if (colhead[J] < rowpointers[J+1]) {
+      int rNdx = rowindices[colhead[J]];
+      S[rNdx].insert(J);
+    }
+    for (int j=supernodes[J];j<supernodes[J+1];j++)
+    {
+      S[j].clear();
+    }
+  }
+}
+
 double logdet(const NumericVector& L, const IntegerVector& colpointers)
 {
   const int N = colpointers.size() - 1;
@@ -251,32 +275,16 @@ double logdetNgPeyton(SEXP arg, NumericVector lambda)
   const int sz = P.nrow();
   const int n_prec_mat = P.ncol();
   NumericVector L(sz, 0.0);
-  for (int i=0;i<sz;i++)
+  for (int k=0;k<n_prec_mat;k++)
   {
-    for (int k=0;k<n_prec_mat;k++)
+    NumericVector Pk = P(_, k);
+    double alpha = lambda[k];
+    for (int i=0;i<sz;i++)
     {
-      L[i] += lambda[k]*P(i,k);
+      L[i] += alpha*Pk[i];
     }
   }
-
-  // make set S_j for each column j, see Ng and Peyton:
-  vector<set<int> > S = makeSetS(supernodes, rowpointers, colpointers, rowindices);
-  const int N = colpointers.size() - 1;
-  const int Nsupernodes = supernodes.size()-1;
-  IntegerVector indmap(N,0);
-  NumericVector t(N);
-  for (int J=0; J<Nsupernodes;J++) {
-    makeIndMap(indmap, J, N, rowpointers, rowindices);
-    for (int j=supernodes[J];j<supernodes[J+1];j++)
-    {
-      for (set<int>::const_iterator it=S[j].begin(); it!=S[j].end(); it++)
-      {
-        cmod2(L, j, *it, t, indmap, supernodes, rowpointers, colpointers, rowindices);
-      }
-      cmod1(L, j, J, supernodes, colpointers);
-      cdiv(L, j, colpointers);
-    }
-  }
+  cholesky(L, supernodes, rowpointers, colpointers, rowindices);
   return logdet(L, colpointers);
 }
 

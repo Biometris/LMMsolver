@@ -14,14 +14,24 @@ B
 B = as.spam(B)
 U = chol(B)
 U@supernodes
+
 diff(U@supernodes)
 
 # use lower triangle:
 L <- t(U)
+colpointers <- U@rowpointers
+rowpointers <- U@colpointers
+rowindices <- U@colindices
+
+U@supernodes
+colpointers
+rowpointers
+rowindices
+
 display(L)
-abline(v=2.5, col='red')
-abline(v=4.5, col='red')
-abline(v=6.5, col='red')
+nNodes = length(U@supernodes)-2
+for (i in 1:nNodes)
+  abline(v=U@supernodes[i+1]-0.5, col='red')
 
 lP <- list()
 lP[[1]] <- B
