@@ -200,6 +200,23 @@ void cdiv(NumericVector& L, int j, const IntegerVector& colpointers)
   }
 }
 
+
+void ADcdiv(NumericVector& F,
+            const NumericVector& L, int j, const IntegerVector& colpointers)
+{
+  Rcout << "    ADcdiv" << endl;
+  const int s = colpointers[j];
+  const int e = colpointers[j+1];
+  // update AD for column j:
+  for (int i = s + 1; i < e; i++)
+  {
+    F[i] = F[i]/L[s];
+    F[s] = F[s] - L[i]*F[i];
+  }
+  F[s] = 0.5*F[s]/L[s];
+}
+
+
 // clear Set S for columns in supernode J:
 void clearSet(vector< set<int> >& S, int J, const IntegerVector& supernodes)
 {
@@ -281,15 +298,16 @@ void ADcholesky(NumericVector& F,
   NumericVector t(N);
   for (int J=Nsupernodes-1; J>=0;J--)
   {
-    cout << " supernode " << J << endl;
+    Rcout << " supernode " << J << endl;
     makeIndMap(indmap, J, rowpointers, rowindices);
     for (int j = supernodes[J+1]-1; j>=supernodes[J]; j--)
     {
-       cout << "  column " << j << endl;
-       cout << "    ADcdiv; ADcmod1" << endl;
+       Rcout << "  column " << j << endl;
+       ADcdiv(F, L, j, colpointers);
+       cout << "    ADcmod1" << endl;
        for (set<int>::const_iterator it=S[j].begin(); it!=S[j].end(); it++)
        {
-         cout << "    ADcmod2 supernode " << *it << endl;
+         Rcout << "    ADcmod2 supernode " << *it << endl;
        }
     }
   }
