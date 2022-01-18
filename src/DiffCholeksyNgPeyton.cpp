@@ -346,7 +346,6 @@ vector< set<int> > cholesky(NumericVector& L,
 
 void ADcholesky(NumericVector& F,
               const NumericVector& L,
-              vector<set<int> >& S,
               const IntegerVector& supernodes,
               const IntegerVector& rowpointers,
               const IntegerVector& colpointers,
@@ -355,29 +354,57 @@ void ADcholesky(NumericVector& F,
   //cout << "outline ADcholeksy" << endl;
   const int N = colpointers.size() - 1;
   const int Nsupernodes = supernodes.size()-1;
+  vector<set<int> > S(N);
 
   IntegerVector colhead = clone(rowpointers);
   IntegerVector coltop = clone(rowpointers);
+  //Rcout << "stil ok (1)" << endl;
   for (int J=0; J<Nsupernodes;J++)
   {
     int szNode = supernodes[J+1] - supernodes[J];
     coltop[J] += szNode-1;
-    colhead[J] = rowpointers[J+1] - 1;
+    colhead[J] = rowpointers[J+1]-1;
+    //Rcout << "supernode " << J << " " << coltop[J] << " " << colhead[J] << endl;
+    if (colhead[J] > coltop[J])
+    {
+      int rNdx = rowindices[colhead[J]];
+      S[rNdx].insert(J);
+      //Rcout << "Insert supernode " << J << "in row" << rNdx << endl;
+    }
   }
+  //Rcout << "stil ok (2)" << endl;
   IntegerVector indmap(N,0);
   NumericVector t(N);
   for (int J=Nsupernodes-1; J>=0;J--)
   {
+    //Rcout << "supernode " << J << endl;
+
+    colhead[J]--;
+    if (colhead[J] > coltop[J])
+    {
+      int rNdx = rowindices[colhead[J]];
+      S[rNdx].insert(J);
+      //Rcout << "Insert supernode " << J << "in row" << rNdx << endl;
+    }
     //Rcout << " supernode " << J << endl;
     makeIndMap(indmap, J, rowpointers, rowindices);
     for (int j = supernodes[J+1]-1; j>=supernodes[J]; j--)
     {
+      //Rcout << " column " << j << endl;
+
        //Rcout << "  column " << j << endl;
        ADcdiv(F, L, j, colpointers);
        ADcmod1(F, L, j, J, supernodes, colpointers);
        for (set<int>::const_iterator it=S[j].begin(); it!=S[j].end(); it++)
        {
          int K = *it;
+         colhead[K]--;
+         if (colhead[K] > coltop[K])
+         {
+           int rNdx = rowindices[colhead[K]];
+           S[rNdx].insert(K);
+           //Rcout << "Insert supernode " << K << "in row" << rNdx << endl;
+         }
          ADcmod2(F, L, j, K, t, indmap, supernodes, rowpointers,colpointers,rowindices);
        }
     }
@@ -467,7 +494,7 @@ NumericVector dlogdetNgPeyton(SEXP arg, NumericVector lambda)
   vector<set<int> > S = cholesky(L, supernodes, rowpointers, colpointers, rowindices);
   double logDet = logdet(L, colpointers);
   NumericVector F = initAD(L, colpointers);
-  ADcholesky(F, L, S, supernodes, rowpointers, colpointers, rowindices);
+  ADcholesky(F, L, supernodes, rowpointers, colpointers, rowindices);
 
   // calculate the partial derivatives:
   const int N = colpointers.size()-1;
