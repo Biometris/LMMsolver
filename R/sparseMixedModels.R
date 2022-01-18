@@ -51,18 +51,18 @@ calcEffDim <- function(ADcholGinv,
                        phi,
                        psi,
                        theta) {
-  dlogdetRinv <- dlogdet(ADcholRinv, phi)
+  dlogdetRinv <- dlogdetNgPeyton(ADcholRinv, phi)
   logdetR <- -attr(dlogdetRinv, which = "logdet")
 
   # Ginv, if exists:
   if (!is.null(ADcholGinv)) {
-    dlogdetGinv <- dlogdet(ADcholGinv, psi)
+    dlogdetGinv <- dlogdetNgPeyton(ADcholGinv, psi)
     logdetG <- -attr(dlogdetGinv, "logdet")
   } else {
     logdetG <- 0
   }
   # matrix C:
-  dlogdetC <- dlogdet(ADcholC, theta)
+  dlogdetC <- dlogdetNgPeyton(ADcholC, theta)
   logdetC <- attr(dlogdetC, which = "logdet")
   # calculate effective dimensions....
   EDmax_phi <- phi * dlogdetRinv
@@ -145,13 +145,16 @@ sparseMixedModels <- function(y,
                                  nnzcolindices = 4 * opt$nnz))
 
   ## Make ADchol for Rinv, Ginv and C:
-  ADcholRinv <- ADchol(lRinv)
+  #ADcholRinv <- ADchol(lRinv)
+  ADcholRinv <- ADcholNgPeyton(lRinv)
   if (Nvarcomp > 0) {
-    ADcholGinv <- ADchol(lGinv)
+    ##ADcholGinv <- ADchol(lGinv)
+    ADcholGinv <- ADcholNgPeyton(lGinv)
   } else {
     ADcholGinv <- NULL
   }
-  ADcholC <- ADchol(listC)
+  ##ADcholC <- ADchol(listC)
+  ADcholC <- ADcholNgPeyton(listC)
   ## Initialize values for loop.
   logLprev <- Inf
   ## Fix a penalty theta, if value becomes high.
