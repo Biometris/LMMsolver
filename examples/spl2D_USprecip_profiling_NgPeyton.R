@@ -25,7 +25,7 @@ x2 <- dat$lat
 #
 # set parameters:
 #
-innerKnots <- 20 # See SAP 2014 paper
+innerKnots <- 40 # See SAP 2014 paper
 knots <- nseg <- c(innerKnots+1, innerKnots+1)
 grid <- c(300,200)
 trace <- TRUE
@@ -112,6 +112,7 @@ det2
 det0-det1
 det0-det2
 det1-det2
+
 
 funOrg <- function(lambda) {LMMsolver:::logdet(obj0, lambda)}
 funNew <- function(lambda) {LMMsolver:::logdetNgPeyton(obj1, lambda)}
