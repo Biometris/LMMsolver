@@ -117,7 +117,7 @@ det1-det2
 funOrg <- function(lambda) {LMMsolver:::logdet(obj0, lambda)}
 funNew <- function(lambda) {LMMsolver:::logdetNgPeyton(obj1, lambda)}
 funSpam <- function(lambda) {
-  C=lambda[1]*listP[[1]] + lambda[2]*listP[[2]] + lambda[3]*listP[[3]]
+  C <- LMMsolver:::linearSum(lambda, listP)
   cholC <- update(cholC, C)
   2.0*as.numeric(determinant(cholC)$modulus)
 }
