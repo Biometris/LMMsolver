@@ -14,7 +14,7 @@
 #include <Rcpp.h>
 #include <set>
 #include <vector>
-#include "DiffCholeksyAuxFun.h"
+#include "AuxFun.h"
 #include "NodeList.h"
 
 using namespace Rcpp;
@@ -140,12 +140,14 @@ void ADcmod1(NumericVector& F,
   {
     int jk = colpointers[k] + (j-k);
     int ik = jk;
+    double& Fjk = F[jk];
+    const double& Ljk = L[jk];
     for (int ij=s; ij<e; ij++)
     {
       // F[ik] = F[ik] - F[ij]*L[jk];
       // F[jk] = F[jk] - F[ij]*L[ik];
-      F[ik] -= F[ij]*L[jk];
-      F[jk] -= F[ij]*L[ik];
+      F[ik] -= F[ij]*Ljk;
+      Fjk   -= F[ij]*L[ik];
       ik++;
     }
   }
@@ -237,13 +239,15 @@ void ADcmod2(NumericVector& F,
   {
     int jk = colpointers[k+1]-sz;
     int ik = jk;
+    const double& Ljk = L[jk];
+    double& Fjk = F[jk];
     for (int i=sz-1;i>=0;i--)
     {
+      // F[ik] = F[ik] - F_ij*L[jk];
+      // F[jk] = F[jk] - F_ij*L[ik];
       double F_ij = t[i];
-      //F[ik] = F[ik] - F_ij*L[jk];
-      //F[jk] = F[jk] - F_ij*L[ik];
-      F[ik] -= F_ij*L[jk];
-      F[jk] -= F_ij*L[ik];
+      F[ik] -= F_ij*Ljk;
+      Fjk   -= F_ij*L[ik];
       ik++;
     }
   }
@@ -256,9 +260,10 @@ void cdiv(NumericVector& L, int j, const IntegerVector& colpointers)
   // pivot:
   L[s] = sqrt(L[s]);
   // update column j:
+  double Ls = L[s];
   for (int i = s + 1; i < e; i++)
   {
-    L[i] /= L[s];
+    L[i] /= Ls;
   }
 }
 
@@ -268,12 +273,17 @@ void ADcdiv(NumericVector& F,
   const int s = colpointers[j];
   const int e = colpointers[j+1];
   // update AD for column j:
+  const double& Ls = L[s];
+  double& Fs = F[s];
   for (int i = s + 1; i < e; i++)
   {
-    F[i] = F[i]/L[s];
-    F[s] = F[s] - L[i]*F[i];
+    // F[i] = F[i]/L[s];
+    // F[s] = F[s] - L[i]*F[i];
+    F[i] /= Ls;
+    Fs -= L[i]*F[i];
   }
-  F[s] = 0.5*F[s]/L[s];
+  //F[s] = Fs;
+  F[s] = 0.5*F[s]/Ls;
 }
 
 void cholesky(NumericVector& L,
@@ -392,17 +402,14 @@ double logdet(const NumericVector& L, const IntegerVector& colpointers)
   return sum;
 }
 
-NumericVector initAD(const NumericVector& L, const IntegerVector& colpointers)
+void initAD(NumericVector& F, const NumericVector& L, const IntegerVector& colpointers)
 {
   const int N = colpointers.size() - 1;
-  const int sz = L.size();
-  NumericVector F(sz, 0.0);
   for (int k=0;k<N;k++)
   {
     int s = colpointers[k];
     F[s] = 2.0/L[s];
   }
-  return F;
 }
 
 // [[Rcpp::export]]
@@ -413,7 +420,8 @@ double logdet(SEXP arg, NumericVector lambda)
   IntegerVector rowpointers = obj.slot("rowpointers");
   IntegerVector colpointers = obj.slot("colpointers");
   IntegerVector rowindices = obj.slot("rowindices");
-  NumericMatrix P = Rcpp::clone<Rcpp::NumericMatrix>(obj.slot("P"));
+  NumericMatrix P = obj.slot("P");
+  //NumericMatrix P = Rcpp::clone<Rcpp::NumericMatrix>(obj.slot("P"));
 
   // define matrix L (lower triangle matrix values)
   const int sz = P.nrow();
@@ -421,7 +429,7 @@ double logdet(SEXP arg, NumericVector lambda)
   NumericVector L(sz, 0.0);
   for (int k=0;k<n_prec_mat;k++)
   {
-    NumericVector Pk = P(_, k);
+    NumericMatrix::Column Pk = P(_, k);
     double alpha = lambda[k];
     for (int i=0;i<sz;i++)
     {
@@ -440,7 +448,8 @@ NumericVector dlogdet(SEXP arg, NumericVector lambda)
   IntegerVector rowpointers = obj.slot("rowpointers");
   IntegerVector colpointers = obj.slot("colpointers");
   IntegerVector rowindices = obj.slot("rowindices");
-  NumericMatrix P = Rcpp::clone<Rcpp::NumericMatrix>(obj.slot("P"));
+  NumericMatrix P = obj.slot("P");
+  //NumericMatrix P = Rcpp::clone<Rcpp::NumericMatrix>(obj.slot("P"));
 
   // define matrix L (lower triangle matrix values)
   const int sz = P.nrow();
@@ -448,7 +457,7 @@ NumericVector dlogdet(SEXP arg, NumericVector lambda)
   NumericVector L(sz, 0.0);
   for (int k=0;k<n_prec_mat;k++)
   {
-    NumericVector Pk = P(_, k);
+    NumericMatrix::Column Pk = P(_, k);
     double alpha = lambda[k];
     for (int i=0;i<sz;i++)
     {
@@ -458,21 +467,21 @@ NumericVector dlogdet(SEXP arg, NumericVector lambda)
   cholesky(L, supernodes, rowpointers, colpointers, rowindices);
   double logDet = logdet(L, colpointers);
 
-  NumericVector F = initAD(L, colpointers);
+  NumericVector F(sz, 0.0);
+  initAD(F, L, colpointers);
   ADcholesky(F, L, supernodes, rowpointers, colpointers, rowindices);
 
-  // calculate the partial derivatives:
-  const int N = colpointers.size()-1;
   NumericVector gradient(n_prec_mat);
-  for (int i=0;i<F.size();i++)
+  for (int k=0;k<n_prec_mat;k++)
   {
-    for (int k=0;k<n_prec_mat;k++)
-      gradient[k] += F[i]*P(i,k);
+    NumericMatrix::Column Pk = P(_, k);
+    gradient[k] = std::inner_product(F.begin(), F.end(), Pk.begin(), 0.0);
   }
 
   // correction, to make sure inner product
   // between lambda and gradient equal to N:
   double sum = 0.0;
+  const int N = colpointers.size()-1;
   for (int i=0;i<n_prec_mat;i++)
   {
     sum += lambda[i]*gradient[i];

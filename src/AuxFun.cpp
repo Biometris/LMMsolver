@@ -1,6 +1,7 @@
 #include <Rcpp.h>
 #include <set>
 #include <vector>
+#include "AuxFun.h"
 
 using namespace Rcpp;
 using namespace std;
