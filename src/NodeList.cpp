@@ -1,7 +1,28 @@
-#include "TestList.h"
+#include "NodeList.h"
 #include <Rcpp.h>
 
 using namespace Rcpp;
+
+
+// concatenate two links
+Node * add(Node *ptr1, Node *ptr2)
+{
+  if (!ptr1) return ptr2;
+  if (!ptr2) return ptr1;
+  ptr1->next = ptr2;
+  return ptr1;
+}
+
+Node * removefirstnode(Node** source)
+{
+  Node* current = *source;
+  *source = current->next;
+  current->next = NULL;
+  return current;
+}
+
+
+/*
 
 // This function prints contents of linked list
 // starting from the given node
@@ -25,22 +46,7 @@ void DeleteList(Node* node)
   Rcout << endl;
 }
 
-// concatenate two links
-Node * add(Node *ptr1, Node *ptr2)
-{
-  if (ptr1==NULL) return ptr2;
-  if (ptr2==NULL) return ptr1;
-  ptr1->next = ptr2;
-  return ptr1;
-}
 
-Node * removefirstnode(Node** source)
-{
-  Node* current = *source;
-  *source = current->next;
-  current->next = NULL;
-  return current;
-}
 
 
 // [[Rcpp::export]]
@@ -103,4 +109,5 @@ int TestList()
 
   return 0;
 }
+*/
 

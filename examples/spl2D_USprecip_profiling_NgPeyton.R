@@ -95,27 +95,19 @@ ns <- diff(sn, diff=1)
 table(ns)
 
 obj0 <- LMMsolver:::ADchol(listP)
-obj1 <- LMMsolver:::ADcholNgPeyton(listP)
 
 det0 <- LMMsolver:::logdet(obj0, lambda=theta)
-det1 <- LMMsolver:::logdetNgPeyton(obj1, lambda=theta)
-det2 <- 2.0*as.numeric(determinant(cholC)$modulus)
+det1 <- 2.0*as.numeric(determinant(cholC)$modulus)
 
-ED2 <- theta * LMMsolver:::dlogdetNgPeyton(obj1,theta)
+ED <- theta * LMMsolver:::dlogdet(obj0,theta)
 ED
-ED2
 
 det0
 det1
-det2
 
 det0-det1
-det0-det2
-det1-det2
 
-
-funOrg <- function(lambda) {LMMsolver:::logdet(obj0, lambda)}
-funNew <- function(lambda) {LMMsolver:::logdetNgPeyton(obj1, lambda)}
+funlogdet <- function(lambda) {LMMsolver:::logdet(obj0, lambda)}
 funSpam <- function(lambda) {
   C <- LMMsolver:::linearSum(lambda, listP)
   cholC <- update(cholC, C)
@@ -127,15 +119,8 @@ funED <- function(lambda)
   ED
 }
 
-funED2 <- function(lambda)
-{
-  ED <- lambda * LMMsolver:::dlogdetNgPeyton(obj1,lambda)
-  ED
-}
-
 # compare computation time
-microbenchmark(funSpam(theta), funOrg(theta), funNew(theta), funED(theta),
-            funED2(theta), times=10L)
+microbenchmark(funSpam(theta), funlogdet(theta), funED(theta), times=10L)
 
 
 
