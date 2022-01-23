@@ -2,8 +2,8 @@ library(spam)
 library(LMMsolver)
 
 # nice small example with four supernodes:
-n1 = 2
-n2 = 5
+n1 = 3
+n2 = 6
 D1 = diff(diag(n1),diff=1)
 D2 = diff(diag(n2),diff=1)
 
