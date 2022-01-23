@@ -145,12 +145,15 @@ sparseMixedModels <- function(y,
                                  nnzcolindices = 4 * opt$nnz))
 
   ## Make ADchol for Rinv, Ginv and C:
+  #ADcholRinv <- ADchol(lRinv)
   ADcholRinv <- ADchol(lRinv)
   if (Nvarcomp > 0) {
+    ##ADcholGinv <- ADchol(lGinv)
     ADcholGinv <- ADchol(lGinv)
   } else {
     ADcholGinv <- NULL
   }
+  ##ADcholC <- ADchol(listC)
   ADcholC <- ADchol(listC)
   ## Initialize values for loop.
   logLprev <- Inf
