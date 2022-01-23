@@ -82,6 +82,16 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// TestList
+int TestList();
+RcppExport SEXP _LMMsolver_TestList() {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    rcpp_result_gen = Rcpp::wrap(TestList());
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_LMMsolver_dlogdet", (DL_FUNC) &_LMMsolver_dlogdet, 2},
@@ -90,6 +100,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_LMMsolver_construct_ADchol_Rcpp_NgPeyton", (DL_FUNC) &_LMMsolver_construct_ADchol_Rcpp_NgPeyton, 2},
     {"_LMMsolver_logdetNgPeyton", (DL_FUNC) &_LMMsolver_logdetNgPeyton, 2},
     {"_LMMsolver_dlogdetNgPeyton", (DL_FUNC) &_LMMsolver_dlogdetNgPeyton, 2},
+    {"_LMMsolver_TestList", (DL_FUNC) &_LMMsolver_TestList, 0},
     {NULL, NULL, 0}
 };
 

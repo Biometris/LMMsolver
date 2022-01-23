@@ -25,3 +25,7 @@ dlogdetNgPeyton <- function(arg, lambda) {
     .Call(`_LMMsolver_dlogdetNgPeyton`, arg, lambda)
 }
 
+TestList <- function() {
+    .Call(`_LMMsolver_TestList`)
+}
+

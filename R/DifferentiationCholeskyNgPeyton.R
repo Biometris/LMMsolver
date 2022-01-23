@@ -1,5 +1,5 @@
 #' @keywords internal
-setClass("ADcholnew",
+setClass("ADchol",
          slots = c(supernodes = "numeric",
                    rowpointers = "numeric",
                    colpointers = "numeric",
@@ -18,7 +18,7 @@ ADcholNgPeyton <- function(P_list) {
   cholC <- chol(C, memory = list(nnzR = 8 * opt$nnz,
                                  nnzcolindices = 4 * opt$nnz))
   L <- construct_ADchol_Rcpp_NgPeyton(cholC, P_list)
-  new("ADcholnew",
+  new("ADchol",
       supernodes = L$supernodes,
       rowpointers = L$rowpointers,
       colpointers = L$colpointers,

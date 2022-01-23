@@ -17,6 +17,7 @@
 #include <set>
 #include <vector>
 #include "DiffCholeksyAuxFun.h"
+#include "TestList.h"
 
 using namespace Rcpp;
 using namespace std;
@@ -282,43 +283,69 @@ void cholesky(NumericVector& L,
            const IntegerVector& colpointers,
            const IntegerVector& rowindices)
 {
+  //Rcout << "Choleksky" << endl;
   const int N = colpointers.size() - 1;
   const int Nsupernodes = supernodes.size()-1;
+  //vector< set<int> > S(N);
+  vector<Node *> S(N);
 
   IntegerVector colhead = clone(rowpointers);
   for (int J=0; J<Nsupernodes;J++)
   {
     int szNode = supernodes[J+1] - supernodes[J];
     colhead[J] += szNode-1;
+    if (colhead[J] < rowpointers[J+1]-1)
+    {
+      int rNdx = rowindices[colhead[J]+1];
+      //S[rNdx].insert(J);
+      //Rcout << "Init, Add node J=" << J << " to S_" << rNdx << endl;
+      Node *nodeJ = new Node(J);
+      S[rNdx] = add(nodeJ, S[rNdx]);
+    }
   }
+
+  //for (int i=0;i<N;i++)
+  //{
+  //  Rcout << " S[" << i << "] = { ";
+  //  printList(S[i]);
+  //  Rcout << " }" << endl;
+  //}
+
 
   IntegerVector indmap(N,0);
   NumericVector t(N);
-  vector< set<int> > S(N);
   for (int J=0; J<Nsupernodes;J++) {
     makeIndMap(indmap, J, rowpointers, rowindices);
     for (int j=supernodes[J];j<supernodes[J+1];j++)
     {
-      for (set<int>::const_iterator it=S[j].begin(); it!=S[j].end(); it++)
+      for (Node **ptr = &S[j]; *ptr;)
       {
-        int K = *it;
+        Node *f = removefirstnode(ptr);
+        int K = f->data;
         cmod2(L, j, K, t, indmap, supernodes, rowpointers, colpointers, rowindices);
 
         colhead[K]++;
         if (colhead[K] < rowpointers[K+1]) {
           int rNdx = rowindices[colhead[K]];
-          S[rNdx].insert(K);
+          //S[rNdx].insert(K);
+          S[rNdx] = add(f, S[rNdx]);
+          //Rcout << "Move from Set S_" << j << " supernode " << K << " to S_" << rNdx << endl;
+        } else {
+          //Rcout << "Delete supernode" << K << endl;
+          delete f;
         }
       }
       cmod1(L, j, J, supernodes, colpointers);
       cdiv(L, j, colpointers);
-      S[j].clear();
+      //DeleteList(S[j]);
+      //S[j].clear();
     }
     colhead[J]++;
-    if (colhead[J] < rowpointers[J+1]) {
-      int rNdx = rowindices[colhead[J]];
-      S[rNdx].insert(J);
-    }
+    //if (colhead[J] < rowpointers[J+1]) {
+    //  int rNdx = rowindices[colhead[J]];
+    //  S[rNdx].insert(J);
+    //  Rcout << "Add node J=" << J << " to S_" << rNdx << endl;
+    //}
   }
 }
 
@@ -330,9 +357,11 @@ void ADcholesky(NumericVector& F,
               const IntegerVector& colpointers,
               const IntegerVector& rowindices)
 {
+  //Rcout << "ADCholeksky" << endl;
+
   const int N = colpointers.size() - 1;
   const int Nsupernodes = supernodes.size()-1;
-  vector<set<int> > S(N);
+  vector<Node*> S(N);
 
   IntegerVector colhead = clone(rowpointers);
   IntegerVector coltop = clone(rowpointers);
@@ -344,36 +373,46 @@ void ADcholesky(NumericVector& F,
     if (colhead[J] > coltop[J])
     {
       int rNdx = rowindices[colhead[J]];
-      S[rNdx].insert(J);
+      Node *nodeJ = new Node(J);
+      S[rNdx] = add(nodeJ, S[rNdx]);
+      //S[rNdx].insert(J);
+      //Rcout << "Init, Add node J=" << J << " to S_" << rNdx << endl;
     }
   }
   IntegerVector indmap(N,0);
   NumericVector t(N);
   for (int J=Nsupernodes-1; J>=0;J--)
   {
-    colhead[J]--;
-    if (colhead[J] > coltop[J])
-    {
-      int rNdx = rowindices[colhead[J]];
-      S[rNdx].insert(J);
-    }
+    //colhead[J]--;
+    //if (colhead[J] > coltop[J])
+    //{
+    //  int rNdx = rowindices[colhead[J]];
+    //  S[rNdx].insert(J);
+    //  Rcout << "Add node J=" << J << " to S_" << rNdx << endl;
+    //}
     makeIndMap(indmap, J, rowpointers, rowindices);
     for (int j = supernodes[J+1]-1; j>=supernodes[J]; j--)
     {
        ADcdiv(F, L, j, colpointers);
        ADcmod1(F, L, j, J, supernodes, colpointers);
-       for (set<int>::const_iterator it=S[j].begin(); it!=S[j].end(); it++)
+       for (Node **ptr = &S[j]; *ptr;)
        {
-         int K = *it;
-         colhead[K]--;
-         if (colhead[K] > coltop[K])
-         {
-           int rNdx = rowindices[colhead[K]];
-           S[rNdx].insert(K);
-         }
+          Node *f = removefirstnode(ptr);
+          int K = f->data;
+          colhead[K]--;
+          if (colhead[K] > coltop[K])
+          {
+             int rNdx = rowindices[colhead[K]];
+             //S[rNdx].insert(K);
+             S[rNdx] = add(f, S[rNdx]);
+
+           //Rcout << "Move from Set S_" << j << " supernode " << K << " to S_" << rNdx << endl;
+          } else {
+            delete f;
+          }
          ADcmod2(F, L, j, K, t, indmap, supernodes, rowpointers,colpointers,rowindices);
        }
-       S[j].clear();
+       //S[j].clear();
     }
   }
   return;
