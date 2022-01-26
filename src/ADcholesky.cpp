@@ -33,6 +33,11 @@ List construct_ADchol_Rcpp(SEXP U,
   IntegerVector colindices = Rcpp::clone<Rcpp::IntegerVector>(obj_spam.slot("colindices"));
   IntegerVector pivot = Rcpp::clone<Rcpp::IntegerVector>(obj_spam.slot("pivot"));
   IntegerVector Dim = Rcpp::clone<Rcpp::IntegerVector>(obj_spam.slot("dimension"));
+
+  // copy not really needed or used ...
+  NumericVector entries = Rcpp::clone<Rcpp::NumericVector>(obj_spam.slot("entries"));
+  NumericVector ADentries = Rcpp::clone<Rcpp::NumericVector>(obj_spam.slot("entries"));
+
   transf2C(supernodes);
   transf2C(rowpointers);
   transf2C(colpointers);
@@ -87,6 +92,8 @@ List construct_ADchol_Rcpp(SEXP U,
   L["colpointers"] = rowpointers;
   L["rowpointers"] = colpointers;
   L["rowindices"] =  colindices;
+  L["entries"] = entries;
+  L["ADentries"] = ADentries;
   L["P"] = P_matrix;
   return L;
 }
@@ -420,13 +427,18 @@ double logdet(SEXP arg, NumericVector lambda)
   IntegerVector rowpointers = obj.slot("rowpointers");
   IntegerVector colpointers = obj.slot("colpointers");
   IntegerVector rowindices = obj.slot("rowindices");
+  NumericVector L = obj.slot("entries");
   NumericMatrix P = obj.slot("P");
   //NumericMatrix P = Rcpp::clone<Rcpp::NumericMatrix>(obj.slot("P"));
 
   // define matrix L (lower triangle matrix values)
   const int sz = P.nrow();
   const int n_prec_mat = P.ncol();
-  NumericVector L(sz, 0.0);
+  //NumericVector L(sz, 0.0);
+  for (int i=0;i<sz;i++)
+  {
+    L[i] = 0.0;
+  }
   for (int k=0;k<n_prec_mat;k++)
   {
     NumericMatrix::Column Pk = P(_, k);
@@ -448,13 +460,18 @@ NumericVector dlogdet(SEXP arg, NumericVector lambda)
   IntegerVector rowpointers = obj.slot("rowpointers");
   IntegerVector colpointers = obj.slot("colpointers");
   IntegerVector rowindices = obj.slot("rowindices");
+  NumericVector L = obj.slot("entries");
+  NumericVector F = obj.slot("ADentries");
   NumericMatrix P = obj.slot("P");
   //NumericMatrix P = Rcpp::clone<Rcpp::NumericMatrix>(obj.slot("P"));
 
   // define matrix L (lower triangle matrix values)
   const int sz = P.nrow();
   const int n_prec_mat = P.ncol();
-  NumericVector L(sz, 0.0);
+
+  std::fill(L.begin(), L.end(), 0.0);
+  std::fill(F.begin(), F.end(), 0.0);
+
   for (int k=0;k<n_prec_mat;k++)
   {
     NumericMatrix::Column Pk = P(_, k);
@@ -467,7 +484,7 @@ NumericVector dlogdet(SEXP arg, NumericVector lambda)
   cholesky(L, supernodes, rowpointers, colpointers, rowindices);
   double logDet = logdet(L, colpointers);
 
-  NumericVector F(sz, 0.0);
+  //NumericVector F(sz, 0.0);
   initAD(F, L, colpointers);
   ADcholesky(F, L, supernodes, rowpointers, colpointers, rowindices);
 
@@ -495,4 +512,5 @@ NumericVector dlogdet(SEXP arg, NumericVector lambda)
 
   return gradient;
 }
+
 

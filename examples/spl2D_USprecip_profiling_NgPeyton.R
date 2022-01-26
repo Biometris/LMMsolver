@@ -86,7 +86,7 @@ ED <- theta * LMMsolver:::dlogdet(ADobj,theta)
 # supernodes....
 displayMME(obj1, cholesky=TRUE)
 
-C <- theta[1]*listP[[1]] + theta[2]*listP[[2]] + theta[3]*listP[[3]]
+C <- LMMsolver:::linearSum(theta, listP)
 cholC <- chol(C)
 slotNames(cholC)
 sn <- cholC@supernodes
@@ -94,18 +94,30 @@ length(sn)
 ns <- diff(sn, diff=1)
 table(ns)
 
+
 obj0 <- LMMsolver:::ADchol(listP)
 
 det0 <- LMMsolver:::logdet(obj0, lambda=theta)
 det1 <- 2.0*as.numeric(determinant(cholC)$modulus)
 
-ED <- theta * LMMsolver:::dlogdet(obj0,theta)
-ED
-
 det0
 det1
 
 det0-det1
+
+ED <- theta * LMMsolver:::dlogdet(obj0,theta)
+ED
+
+# compare direct way using dlogdet, and second option
+dlogdet1 <- as.numeric(LMMsolver:::dlogdet(obj0,theta))
+A <- LMMsolver:::DerivCholesky(cholC, obj0);
+dlogdet2 <- sapply(listP, function(x) {sum(A * x)})
+
+dlogdet1
+dlogdet2
+dlogdet1-dlogdet2
+
+# compare computation times:
 
 funlogdet <- function(lambda) {LMMsolver:::logdet(obj0, lambda)}
 funSpam <- function(lambda) {
@@ -120,7 +132,7 @@ funED <- function(lambda)
 }
 
 # compare computation time
-microbenchmark(funSpam(theta), funlogdet(theta), funED(theta), times=10L)
+microbenchmark(funSpam(theta), funlogdet(theta), funED(theta), times=100L)
 
 
 
