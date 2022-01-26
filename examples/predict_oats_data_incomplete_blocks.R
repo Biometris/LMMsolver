@@ -60,6 +60,7 @@ sapply(P,FUN=dim)
 
 # recalculate u, should be saved in LMMsolve object:
 C <- obj2$C
+theta <- obj2$theta
 WtY <- theta[2] * t(W) %*% y
 u <- solve(C, WtY)
 
