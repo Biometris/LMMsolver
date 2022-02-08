@@ -2,25 +2,28 @@
 #'
 #' An object of class \code{LMMsolve} returned by the LMMsolve function,
 #' representing a fitted linear mixed model. Objects of this class have
-#' methods for the generic functions coef, .....
+#' methods for the generic functions coef, fitted, residuals, loglik and
+#' deviance.
 #'
 #' @return
 #' An object of class \code{LMMsolve} contains the following components:
 #' \item{logL}{The restricted log-likelihood at convergence}
-#' \item{dev}{The REML deviance at convergence (i.e., - 2 times the
-#' restricted log-likelihood \code{logL})}
 #' \item{sigma2e}{The residual error}
 #' \item{tau2e}{The estimated variance components}
-#' \item{ED}{The effective dimensions}
-#' \item{EDmax}{The maximal effective dimensions}
-#' \item{EDnames}{The names of the effective dimensions}
-#' \item{a}{The estimated effects from the mixed model equations}
+#' \item{EDdf}{The effective dimensions}
+#' \item{varPar}{The number of variance parameters for each variance component}
+#' \item{VarDf}{The table with variance components}
+#' \item{theta}{The precision parameters}
+#' \item{coefficients}{The estimated effects from the mixed model equations}
 #' \item{yhat}{The fitted values}
 #' \item{residuals}{The residuals}
+#' \item{nIter}{The number of iterations for the mixed model to converge}
+#' \item{C}{}
+#' \item{constantREML}{The \REML constant}
 #' \item{dim}{The dimensions for each of the fixed and random terms in the
 #' mixed model}
-#' \item{term.labels}{The Names of the fixed and random terms in the mixed
-#' model}
+#' \item{term.labels.f}{The names of the fixed terms in the mixed model}
+#' \item{term.labels.r}{The names of the random terms in the mixed model}
 #' \item{splRes}{An object with definition of spline argument}
 #'
 #' @usage NULL

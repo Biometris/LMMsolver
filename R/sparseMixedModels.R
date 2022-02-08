@@ -138,14 +138,11 @@ sparseMixedModels <- function(y,
     psi <- NULL
     phi <- theta
   }
-
   C <- linearSum(theta = theta, matrixList = listC)
   opt <- summary(C)
   cholC <- chol(C, memory = list(nnzR = 8 * opt$nnz,
                                  nnzcolindices = 4 * opt$nnz))
-
   ## Make ADchol for Rinv, Ginv and C:
-  #ADcholRinv <- ADchol(lRinv)
   ADcholRinv <- ADchol(lRinv)
   if (Nvarcomp > 0) {
     ##ADcholGinv <- ADchol(lGinv)
