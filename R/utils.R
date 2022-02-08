@@ -258,3 +258,64 @@ checkGroup <- function(random,
   return(list(random = random, group = group))
 }
 
+#' Helper function for naming coefficients.
+#'
+#' @keywords internal
+nameCoefs <- function(coefs,
+                      termLabels,
+                      s,
+                      e,
+                      data,
+                      group = NULL,
+                      type = "fixed") {
+  coefRes <- vector(mode = "list", length = length(termLabels))
+  for (i in seq_along(coefRes)) {
+    coefI <- coefs[s[i]:e[i]]
+    labI <- termLabels[i]
+    ## Split labI in interaction terms (if any).
+    labISplit <- strsplit(x = labI, split = ":")[[1]]
+    if (length(labISplit) == 1) {
+      ## No interactions.
+      if (labI == "(Intercept)") {
+        names(coefI) <- "(Intercept)"
+      } else if (startsWith(x = labI, prefix = "splF") ||
+                 startsWith(x = labI, prefix = "splR")) {
+        ## Spline terms are just named 1...n.
+        names(coefI) <- paste0(labI, "_", seq_along(coefI))
+      } else if (!is.null(group) && labI %in% names(group)) {
+        ## For group combine group name and column name.
+        names(coefI) <- paste(labI, colnames(data)[group[[labI]]], sep = "_")
+      } else if (is.factor(data[[labI]])) {
+        ## For fixed terms an extra 0 for the reference level has to be added.
+        if (type == "fixed") {
+          coefI <- c(0, coefI)
+        }
+        names(coefI) <- paste(labI, levels(data[[labI]]), sep = "_")
+      } else {
+        ## Numerical variable. Name equal to label.
+        names(coefI) <- labI
+      }
+    } else {
+      ## Interaction term.
+      if (all(sapply(X = labISplit, FUN = function(labTerm) {
+        is.factor(data[[labTerm]])
+      }))) {
+        namesTerm <- lapply(X = labISplit, FUN = function(labTerm) {
+          paste(labTerm, levels(data[[labTerm]]), sep = "_")
+        })
+        ## For fixed terms an extra 0 for the reference level has to be added.
+        if (type == "fixed") {
+          coefI <- c(0, coefI)
+        }
+        names(coefI) <- levels(interaction(namesTerm, sep = ":"))
+      } else {
+        ## Numerical variable. Name equal to label.
+        names(coefI) <- labI
+      }
+    }
+    coefRes[[i]] <- coefI
+  }
+  return(coefRes)
+}
+
+

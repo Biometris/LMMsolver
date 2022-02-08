@@ -162,7 +162,6 @@ LMMsolve <- function(fixed,
   checkFormVars(fixed, data)
   checkFormVars(random, data)
   checkFormVars(residual, data)
-
   ## Remove NA for response variable from data.
   respVar <- all.vars(fixed)[attr(terms(fixed), "response")]
   respVarNA <- is.na(data[[respVar]])
@@ -270,7 +269,7 @@ LMMsolve <- function(fixed,
     splResList <- list()
     for (i in 1:Nterms) {
       splRes <- eval(parse(text = terms[i]), envir = data, enclos = parent.frame())
-      # add list number to labels (probably better to use names instead):
+      ## Add list number to labels (probably better to use names instead).
       if (!is.null(splRes$term.labels.f)) {
         splRes$term.labels.f <- paste0(splRes$term.labels.f, i)
       }
@@ -298,11 +297,10 @@ LMMsolve <- function(fixed,
   if (attr(mt, "intercept") == 1) {
     term.labels.f <- c("(Intercept)", term.labels.f)
   }
-
   ## construct inverse of residual matrix R.
-  lRinv <- constructRinv(df = data, residual=residual, weights=weights)
-
+  lRinv <- constructRinv(df = data, residual = residual, weights = weights)
   y <- mf[, 1]
+  ## Fit models.
   obj <- sparseMixedModels(y = y, X = X, Z = Z, lGinv = lGinv, lRinv = lRinv,
                            tolerance = tolerance, trace = trace, maxit = maxit,
                            theta = theta)
@@ -310,51 +308,13 @@ LMMsolve <- function(fixed,
   ## Fixed terms.
   ef <- cumsum(dim.f)
   sf <- ef - dim.f + 1
-  coefF <- vector(mode = "list", length = length(dim.f))
-  for (i in seq_along(coefF)) {
-    coefFi <- obj$a[sf[i]:ef[i]]
-    labFi <- term.labels.f[i]
-    if (labFi == "(Intercept)") {
-      names(coefFi) <- "(Intercept)"
-      ## For fixed terms an extra 0 for the reference level has to be added.
-    } else if (startsWith(labFi, prefix = "splF")) {
-      ## Spline terms are just named 1...n.
-      names(coefFi) <- paste0(labFi, "_", seq_along(coefFi))
-    } else {
-      coefFi <- c(0, coefFi)
-      names(coefFi) <- paste(labFi, levels(data[[labFi]]) , sep = "_")
-    }
-    coefF[[i]] <- coefFi
-  }
-  ## Similar for random terms.
+  coefF <- nameCoefs(coefs = obj$a, termLabels = term.labels.f, s = sf, e = ef,
+                     data = data, type = "fixed")
+  ## Random terms.
   er <- sum(dim.f) + cumsum(dim.r)
   sr <- er - dim.r + 1
-  coefR <- vector(mode = "list", length = length(dim.r))
-  for (i in seq_along(coefR)) {
-    coefRi <- obj$a[sr[i]:er[i]]
-    labRi <- term.labels.r[i]
-    ## Split labRi in interaction terms (if any).
-    labRiSplit <- strsplit(x = labRi, split = ":")[[1]]
-    if (length(labRiSplit) == 1) {
-      ## No interactions.
-      if (startsWith(labRi,"splR")) {
-        ## Spline terms are just named 1...n.
-        names(coefRi) <- paste0(labRi, "_", seq_along(coefRi))
-      } else if (labRi %in% names(group)) {
-        ## For group combine group name and column name.
-        names(coefRi) <- paste(labRi, colnames(data)[group[[labRi]]], sep = "_")
-      } else {
-        names(coefRi) <- paste(labRi, levels(data[[labRi]]), sep = "_")
-      }
-    } else {
-      ## Interaction term.
-      namesTerm <- lapply(X = labRiSplit, FUN = function(labTerm) {
-        paste(labTerm, levels(data[[labTerm]]), sep = "_")
-      })
-      names(coefRi) <- levels(interaction(namesTerm, sep = ":"))
-    }
-    coefR[[i]] <- coefRi
-  }
+  coefR <- nameCoefs(coefs = obj$a, termLabels = term.labels.r, s = sr, e = er,
+                     data = data, group = group, type = "random")
   ## Combine result for fixed and random terms.
   coefTot <- c(coefF, coefR)
   names(coefTot) <- c(term.labels.f, term.labels.r)
