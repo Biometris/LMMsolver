@@ -333,14 +333,25 @@ LMMsolve <- function(fixed,
   for (i in seq_along(coefR)) {
     coefRi <- obj$a[sr[i]:er[i]]
     labRi <- term.labels.r[i]
-    if (startsWith(labRi,"splR")) {
-      ## Spline terms are just named 1...n.
-      names(coefRi) <- paste0(labRi, "_", seq_along(coefRi))
-    } else if (labRi %in% names(group)) {
-      ## For group combine group name and column name.
-      names(coefRi) <- paste(labRi, colnames(data)[group[[labRi]]], sep = "_")
+    ## Split labRi in interaction terms (if any).
+    labRiSplit <- strsplit(x = labRi, split = ":")[[1]]
+    if (length(labRiSplit) == 1) {
+      ## No interactions.
+      if (startsWith(labRi,"splR")) {
+        ## Spline terms are just named 1...n.
+        names(coefRi) <- paste0(labRi, "_", seq_along(coefRi))
+      } else if (labRi %in% names(group)) {
+        ## For group combine group name and column name.
+        names(coefRi) <- paste(labRi, colnames(data)[group[[labRi]]], sep = "_")
+      } else {
+        names(coefRi) <- paste(labRi, levels(data[[labRi]]), sep = "_")
+      }
     } else {
-      names(coefRi) <- paste(labRi, levels(data[[labRi]]), sep = "_")
+      ## Interaction term.
+      namesTerm <- lapply(X = labRiSplit, FUN = function(labTerm) {
+        paste(labTerm, levels(data[[labTerm]]), sep = "_")
+      })
+      names(coefRi) <- levels(interaction(namesTerm, sep = ":"))
     }
     coefR[[i]] <- coefRi
   }
