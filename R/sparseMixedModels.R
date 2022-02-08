@@ -61,10 +61,10 @@ calcEffDim <- function(ADcholGinv,
   } else {
     logdetG <- 0
   }
-  # matrix C:
+  ## matrix C.
   dlogdetC <- dlogdet(ADcholC, theta)
   logdetC <- attr(dlogdetC, which = "logdet")
-  # calculate effective dimensions....
+  ## calculate effective dimensions.
   EDmax_phi <- phi * dlogdetRinv
   if (!is.null(ADcholGinv)) {
     EDmax_psi <- psi * dlogdetGinv
@@ -86,7 +86,7 @@ REMLlogL <- function(ED,
   logdetC <- attr(ED, "logdetC")
   logdetG <- attr(ED, "logdetG")
   logdetR <- attr(ED, "logdetR")
-  # REML-loglikelihood (without constant), see e.g. Smith 1995:
+  # REML-loglikelihood (without constant), see e.g. Smith 1995.
   logL <- -0.5 * (logdetR + logdetG + logdetC + yPy)
   return(logL)
 }
@@ -109,25 +109,22 @@ sparseMixedModels <- function(y,
   Nvarcomp <- length(lGinv)
   NvarcompTot <- Nres + Nvarcomp
   dimMME <- p + q
-
   W <- spam::as.spam(cbind(X, Z))
-  Wt <- t(W)
-
-  lWtRinvW <- lapply(X = lRinv, FUN = function(x) { Wt %*% x %*% W})
-  lWtRinvY <- lapply(X = lRinv, FUN = function(x) { Wt %*% (x %*% y)})
-  # extend lGinv with extra zero's for fixed effect...
+  lWtRinvW <- lapply(X = lRinv, FUN = function(x) {
+    spam::crossprod.spam(W, x %*% W) })
+  lWtRinvY <- lapply(X = lRinv, FUN = function(x) {
+    spam::crossprod.spam(W, x %*% y) })
+  ## Extend lGinv with extra zeros for fixed effect.
   lQ <- lapply(X = lGinv, FUN = function(x) {
     zero <- spam::spam(0, ncol = p, nrow = p)
     return(spam::bdiag.spam(zero, x))
   })
   listC <- c(lQ, lWtRinvW)
-
-  # remove some extra zero's....
+  ## Remove some extra zeros.
   lWtRinvW <- lapply(X = lWtRinvW, FUN = spam::cleanup)
   lQ <- lapply(X = lQ, FUN = spam::cleanup)
   lGinv <- lapply(X = lGinv, FUN = spam::cleanup)
   listC <- lapply(X = listC, FUN = spam::cleanup)
-
   if (is.null(theta)) {
     theta <- rep(1, Nvarcomp + Nres)
   }
@@ -145,12 +142,10 @@ sparseMixedModels <- function(y,
   ## Make ADchol for Rinv, Ginv and C:
   ADcholRinv <- ADchol(lRinv)
   if (Nvarcomp > 0) {
-    ##ADcholGinv <- ADchol(lGinv)
     ADcholGinv <- ADchol(lGinv)
   } else {
     ADcholGinv <- NULL
   }
-  ##ADcholC <- ADchol(listC)
   ADcholC <- ADchol(listC)
   ## Initialize values for loop.
   logLprev <- Inf
@@ -174,7 +169,6 @@ sparseMixedModels <- function(y,
                   phi = phi, theta = theta)
     ## calculate the residuals.
     r <- y - W %*% a
-
     SS_all <- calcSumSquares(lRinv = lRinv, Q = lQ, r = r, a = a,
                              Nvarcomp = Nvarcomp)
     Rinv <- linearSum(phi, lRinv)
@@ -199,18 +193,12 @@ sparseMixedModels <- function(y,
   }
   C <- linearSum(theta = theta, matrixList = listC)
   cholC <- update(cholC, C)
-
   names(phi) <- names(lRinv)
   names(psi) <- names(lGinv)
   EDnames <- c(names(lGinv), names(lRinv))
-
   L <- list(logL = logL, sigma2e = 1 / phi, tau2e = 1 / psi, ED = ED,
             theta = theta, EDnames = EDnames, a = a, yhat = y - r,
             residuals = r, nIter = it, C = C)
   return(L)
 }
-
-
-
-
 

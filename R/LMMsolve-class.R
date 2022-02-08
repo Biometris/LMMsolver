@@ -19,7 +19,7 @@
 #' \item{residuals}{The residuals}
 #' \item{nIter}{The number of iterations for the mixed model to converge}
 #' \item{C}{}
-#' \item{constantREML}{The \REML constant}
+#' \item{constantREML}{The REML constant}
 #' \item{dim}{The dimensions for each of the fixed and random terms in the
 #' mixed model}
 #' \item{term.labels.f}{The names of the fixed terms in the mixed model}
