@@ -64,3 +64,29 @@ obj1$ED
 obj1$EDmax
 obj1$EDnominal
 
+summary(obj1.asr, coef=TRUE)
+
+theta <- obj1$theta
+listC <- list()
+X = model.matrix(~cross, data=df)
+Z = as.spam(as.matrix(df[,3:5]))
+U = as.spam(cbind(X,Z))
+Rinv <- LMMsolver:::constructRinv(df, residual=~cross,weights=1.0)
+Ut = t(U)
+Ginv = diag.spam(c(0,0,1,1,1))
+listC <-list()
+listC[[1]] = Ginv
+listC[[2]] = Ut %*% Rinv[[1]] %*% U
+listC[[3]] = Ut %*% Rinv[[2]] %*% U
+objAD <- LMMsolver:::ADchol(listC)
+
+ED <- theta * LMMsolver:::dlogdet(objAD, theta)
+c(3, 100, 80) - ED
+
+C <- LMMsolver:::linearSum(theta,listC)
+cholC <- chol(C)
+A <- LMMsolver:::DerivCholesky(cholC,objAD)
+A
+sqrt(diag(A))
+
+pred1 <- predict(obj1.asr, classify='grp(QTL)',sed=TRUE)
