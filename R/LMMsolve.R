@@ -30,8 +30,9 @@
 #' precision matrix of a corresponding random term in the model. The row and
 #' column order of the precision matrices should match the order of the
 #' levels of the corresponding factor in the data.
-#' @param weights an optional vector of prior weights to be used in the fitting
-#' process. Should be NULL (default) or a numeric vector.
+#' @param weights A character string identifying the column
+#' of data to use as relative weights in the fit. Default value NULL, weights are
+#' all equal to one.
 #' @param data A data.frame containing the modeling data.
 #' @param residual A formula for the residual part of the model. Should be of
 #' the form "~ pred".
@@ -136,12 +137,15 @@ LMMsolve <- function(fixed,
     stop("ginverse should be a named list of symmetric matrices.\n")
   }
   if (!is.null(weights)) {
-    if (!is.numeric(weights) || sum(is.na(weights)) != 0 || min(weights) <= 0) {
+    if (!(weights %in% colnames(data))) {
+      stop("weights not defined in dataframe data")
+    }
+    w = data[[weights]]
+    if (!is.numeric(w) || sum(is.na(w)) != 0 || min(w) <= 0) {
       stop("weights should be a numeric vector with positive values")
     }
-    if (length(weights) != nrow(data)) {
-      stop("length of weights should correspond with number of rows in data")
-    }
+  } else {
+    w = rep(1.0, nrow(data))
   }
   if (!is.null(residual) &&
       (!inherits(residual, "formula") || length(terms(residual)) != 2)) {
@@ -169,10 +173,8 @@ LMMsolve <- function(fixed,
     warning(sum(respVarNA), " observations removed with missing value for ",
             respVar, ".\n", call. = FALSE)
     data <- data[!respVarNA, ]
-    ## if weights defined, remove missing values
-    if (!is.null(weights)) {
-      weights <- weights[!respVarNA]
-    }
+    # remove missing values for weight (defualt w=1)
+    w <- w[!respVarNA]
   }
   ## Make random part.
   if (!is.null(random)) {
@@ -298,7 +300,7 @@ LMMsolve <- function(fixed,
     term.labels.f <- c("(Intercept)", term.labels.f)
   }
   ## construct inverse of residual matrix R.
-  lRinv <- constructRinv(df = data, residual = residual, weights = weights)
+  lRinv <- constructRinv(df = data, residual = residual, weights = w)
   y <- mf[, 1]
   ## Fit models.
   obj <- sparseMixedModels(y = y, X = X, Z = Z, lGinv = lGinv, lRinv = lRinv,

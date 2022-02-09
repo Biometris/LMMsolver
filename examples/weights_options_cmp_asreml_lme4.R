@@ -46,7 +46,7 @@ summary(obj1)$varcomp
 
 obj2 <- LMMsolve(fixed = y~block,
                 random=~trt,
-                weights = dat$w,
+                weights = "w",
                 data = dat,
                 trace = FALSE,
                 tolerance = 1.0e-10)
