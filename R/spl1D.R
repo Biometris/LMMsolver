@@ -89,38 +89,29 @@ spl1D <- function(x,
     stop("xlim should be a vector of length two with all values of ", xName,
          " between its lower and upper value.\n")
   }
-
   knots <- list()
   knots[[1]] <- PsplinesKnots(xlim[1], xlim[2], degree = degree, nseg = nseg)
-
   B <- Bsplines(knots[[1]], x)
   q <- ncol(B)
-
   DtD <- constructPenalty(q, pord)
-
   X <- constructX(B, x, scaleX, pord)
   CCt <- constructCCt(q, pord)
-
   ## nominal effective dimension.
   EDnom = ncol(B) - ncol(X)
-
   ## Remove intercept column to avoid singularity problems.
   X <- removeIntercept(X)
-
-  lGinv <- list()
-  lGinv[[1]] <- spam::as.spam(DtD + CCt)
+  ## Construct list of sparse precision matrices.
+  lGinv <- constructGinvSplines(q, pord)
   names(lGinv) <- paste0("s(", xName, ")")
-
   if (is.null(X)) {
     dim.f <- NULL
     term.labels.f <- NULL
   } else {
     dim.f <- ncol(X)
-    term.labels.f <- "splF"
+    term.labels.f <- paste0("lin(", xName, ")")
   }
   dim.r <- ncol(B)
-  term.labels.r <- "splR"
-
+  term.labels.r <- paste0("s(", xName, ")")
   xList <- setNames(list(x), xName)
   return(list(X = X, Z = B, lGinv = lGinv, knots = knots,
               dim.f = dim.f, dim.r = dim.r, term.labels.f = term.labels.f,

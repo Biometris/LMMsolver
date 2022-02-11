@@ -73,5 +73,3 @@ expect_equal(round(deviance(obj1), 2) , devJABES2020paper_LV)
 ## Check that full LMM solve object is correct.
 expect_equivalent_to_reference(obj1, "spl1DFull")
 
-
-

@@ -38,8 +38,9 @@ precision matrix of a corresponding random term in the model. The row and
 column order of the precision matrices should match the order of the
 levels of the corresponding factor in the data.}
 
-\item{weights}{an optional vector of prior weights to be used in the fitting
-process. Should be NULL (default) or a numeric vector.}
+\item{weights}{A character string identifying the column
+of data to use as relative weights in the fit. Default value NULL, weights are
+all equal to one.}
 
 \item{data}{A data.frame containing the modeling data.}
 

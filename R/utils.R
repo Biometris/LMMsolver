@@ -278,8 +278,8 @@ nameCoefs <- function(coefs,
       ## No interactions.
       if (labI == "(Intercept)") {
         names(coefI) <- "(Intercept)"
-      } else if (startsWith(x = labI, prefix = "splF") ||
-                 startsWith(x = labI, prefix = "splR")) {
+      } else if (startsWith(x = labI, prefix = "lin(") ||
+                 startsWith(x = labI, prefix = "s(")) {
         ## Spline terms are just named 1...n.
         names(coefI) <- paste0(labI, "_", seq_along(coefI))
       } else if (!is.null(group) && labI %in% names(group)) {

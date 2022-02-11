@@ -62,9 +62,8 @@ obtainSmoothTrend <- function(object,
   }
   ## Get dimension of fitted spline component.
   splRes <- object$splRes[[which]]
-  splF_name <- paste0('splF', which)
-  splR_name <- paste0('splR', which)
-
+  splF_name <- splRes$term.labels.f[which]
+  splR_name <- splRes$term.labels.r[which]
   ## Get content from splRes.
   x <- splRes$x
   knots <- splRes$knots

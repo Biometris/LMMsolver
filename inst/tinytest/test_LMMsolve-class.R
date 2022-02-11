@@ -35,7 +35,7 @@ expect_equal(deviance(mod, includeConstant = FALSE), -842.71199941116)
 ## Check coef function.
 coefMod <- coef(mod)
 expect_inherits(coefMod, "list")
-expect_equal(names(coefMod), c("(Intercept)", "splF1", "splR1"))
+expect_equal(names(coefMod), c("(Intercept)", "lin(x1, x2, x3)", "s(x1, x2, x3)"))
 
 expect_equal_to_reference(coefMod, "modCoefs", tolerance = 1e-6)
 

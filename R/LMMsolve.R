@@ -173,7 +173,7 @@ LMMsolve <- function(fixed,
     warning(sum(respVarNA), " observations removed with missing value for ",
             respVar, ".\n", call. = FALSE)
     data <- data[!respVarNA, ]
-    # remove missing values for weight (defualt w=1)
+    ## remove missing values for weight (default w=1).
     w <- w[!respVarNA]
   }
   ## Make random part.
@@ -260,7 +260,7 @@ LMMsolve <- function(fixed,
                                           FUN = contrasts, contrasts = TRUE))
   dim.f <- as.numeric(table(attr(X, "assign")))
   term.labels.f <- attr(mt, "term.labels")
-  # calculate NomEff dimension for non-spline part
+  ## calculate NomEff dimension for non-spline part.
   NomEffDimRan <- calcNomEffDim(X, Z, dim.r)
   ## Add spline part.
   splResList <- NULL
@@ -271,11 +271,6 @@ LMMsolve <- function(fixed,
     splResList <- list()
     for (i in 1:Nterms) {
       splRes <- eval(parse(text = terms[i]), envir = data, enclos = parent.frame())
-      ## Add list number to labels (probably better to use names instead).
-      if (!is.null(splRes$term.labels.f)) {
-        splRes$term.labels.f <- paste0(splRes$term.labels.f, i)
-      }
-      splRes$term.labels.r <- paste0(splRes$term.labels.r, i)
       splResList[[i]] <- splRes
       ## Add to design matrix fixed effect X.
       X <- cbind(X, splRes$X)
@@ -288,7 +283,7 @@ LMMsolve <- function(fixed,
       ## Add dims.
       dim.f <- c(dim.f, splRes$dim.f)
       dim.r <- c(dim.r, splRes$dim.r)
-      ## Add nominal ED
+      ## Add nominal ED.
       NomEffDimRan <- c(NomEffDimRan, splRes$EDnom)
       ## Add labels.
       term.labels.f <- c(term.labels.f, splRes$term.labels.f)

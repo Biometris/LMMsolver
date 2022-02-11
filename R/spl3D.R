@@ -50,48 +50,38 @@ spl3D <- function(x1,
     stop("x3lim should be a vector of length two with all values of ", x3Name,
          " between its lower and upper value.\n")
   }
-
-  knots <- list(1)
+  knots <- list()
   knots[[1]] <- PsplinesKnots(x1lim[1], x1lim[2], degree = degree, nseg = nseg[1])
   knots[[2]] <- PsplinesKnots(x2lim[1], x2lim[2], degree = degree, nseg = nseg[2])
   knots[[3]] <- PsplinesKnots(x3lim[1], x3lim[2], degree = degree, nseg = nseg[3])
-
   B1 <- Bsplines(knots[[1]], x1)
   B2 <- Bsplines(knots[[2]], x2)
   B3 <- Bsplines(knots[[3]], x3)
   q <- c(ncol(B1), ncol(B2), ncol(B3))
-
   B123 <- RowKronecker(RowKronecker(B1, B2), B3)
-
   X1 <- constructX(B1, x1, scaleX, pord)
   X2 <- constructX(B2, x2, scaleX, pord)
   X3 <- constructX(B3, x3, scaleX, pord)
-
   X <- RowKronecker(RowKronecker(X1, X2), X3)
-
-  # nominal effective dimension
+  ## nominal effective dimension.
   EDnom = rep(ncol(B123) - ncol(X), 3)
-
   ## Remove intercept column to avoid singularity problems.
-  X  <- removeIntercept(X)
-
+  X <- removeIntercept(X)
   # construct list of sparse precision matrices.
   lGinv <- constructGinvSplines(q, pord)
   names(lGinv) <- paste0("s(", xNames, ")")
-
   if (is.null(X)) {
     dim.f <- NULL
     term.labels.f <- NULL
   } else {
     dim.f <- ncol(X)
-    term.labels.f <- "splF"
+    term.labels.f <- paste0("lin(", paste(xNames, collapse = ", "), ")")
   }
   dim.r <- ncol(B123)
-  term.labels.r <- "splR"
-
+  term.labels.r <- paste0("s(", paste(xNames, collapse = ", "), ")")
   xList <- setNames(list(x1, x2, x3), xNames)
   return(list(X = X, Z = B123, lGinv = lGinv, knots = knots,
               dim.f = dim.f, dim.r = dim.r, term.labels.f = term.labels.f,
               term.labels.r = term.labels.r, x = xList,
-              pord = pord, degree = degree, scaleX = scaleX, EDnom=EDnom))
+              pord = pord, degree = degree, scaleX = scaleX, EDnom = EDnom))
 }
