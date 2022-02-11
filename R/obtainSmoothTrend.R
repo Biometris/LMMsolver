@@ -60,10 +60,14 @@ obtainSmoothTrend <- function(object,
   if (is.null(grid) && is.null(newdata)) {
     stop("Specify either grid or newdata.\n")
   }
+  if (!is.numeric(which) || which > length(object$splRes)) {
+    stop("which should be an integer with value at most the number of fitted",
+         "spline components.\n")
+  }
   ## Get dimension of fitted spline component.
   splRes <- object$splRes[[which]]
-  splF_name <- splRes$term.labels.f[which]
-  splR_name <- splRes$term.labels.r[which]
+  splF_name <- splRes$term.labels.f
+  splR_name <- splRes$term.labels.r
   ## Get content from splRes.
   x <- splRes$x
   knots <- splRes$knots
