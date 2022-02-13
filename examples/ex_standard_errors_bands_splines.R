@@ -71,15 +71,16 @@ sparseInverse2 <- LMMsolver:::DerivCholesky(chol(C), ADcholC)
 v4 <- diag(U0 %*% sparseInverse2 %*% t(U0))
 v5 <- rowSums((U0 %*% obj$sparseInverse) * U0)
 
+plotDat <- obtainSmoothTrend(obj, grid = 1000, includeIntercept = TRUE)
+head(plotDat)
+v6 <- (plotDat$se)^2
+
 range(v1-v2)
 range(v1-v3)
 range(v1-v4)
 range(v1-v5)
+range(v1-v6)
 
-plotDat <- obtainSmoothTrend(obj, grid = 1000, includeIntercept = TRUE)
-# add se:
-plotDat$se <- sqrt(v5)
-# add simulated data
 plotDat$ysim <- simFun(x0)
 
 ggplot(data = dat, aes(x = x, y = y)) +
