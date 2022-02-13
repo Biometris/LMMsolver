@@ -4,10 +4,12 @@
 \alias{constructGinvSplines}
 \title{Construct list of Ginv matrices of splines}
 \usage{
-constructGinvSplines(q, pord)
+constructGinvSplines(q, knots, pord)
 }
 \arguments{
 \item{q}{vector, with dimension of the B-spline basis used.}
+
+\item{knots}{list with knot positions for each dimension}
 
 \item{pord}{order of the penalty matrix (1 or 2).}
 }

@@ -4,10 +4,10 @@
 \alias{constructCCt}
 \title{Construct constraint matrix}
 \usage{
-constructCCt(q, pord)
+constructCCt(knots, pord)
 }
 \arguments{
-\item{q}{dimension of the B-spline basis used.}
+\item{knots}{knot positions of B-spline basis.}
 
 \item{pord}{order of the penalty matrix (pord=1 or 2).}
 }

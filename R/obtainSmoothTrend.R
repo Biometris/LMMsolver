@@ -108,7 +108,7 @@ obtainSmoothTrend <- function(object,
            "of the fitted spline: ", splDim,".\n")
     }
     ## Construct grid for each dimension.
-    xGrid <- lapply(X = seq_along(x), FUN = function(i) {
+    xGrid <- lapply(X = seq_len(splDim), FUN = function(i) {
       seq(attr(knots[[i]], which='xmin'), attr(knots[[i]], which='xmax'), length = grid[i])
     })
     ## Compute Bx per dimension.
@@ -152,6 +152,9 @@ obtainSmoothTrend <- function(object,
     colnames(outDat)[-ncol(outDat)] <- rev(names(x))
     outDat <- outDat[c(names(x), "ypred")]
   }
+  #outDat[["linear"]] <- bc
+  #outDat[["smooth"]] <- sc
+
   return(outDat)
 }
 
