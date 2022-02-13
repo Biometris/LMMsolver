@@ -95,13 +95,12 @@ spl1D <- function(x,
   q <- ncol(B)
   DtD <- constructPenalty(q, pord)
   X <- constructX(B, x, scaleX, pord)
-  CCt <- constructCCt(q, pord)
   ## nominal effective dimension.
   EDnom = ncol(B) - ncol(X)
   ## Remove intercept column to avoid singularity problems.
   X <- removeIntercept(X)
   ## Construct list of sparse precision matrices.
-  lGinv <- constructGinvSplines(q, pord)
+  lGinv <- constructGinvSplines(q, knots, pord)
   names(lGinv) <- paste0("s(", xName, ")")
   if (is.null(X)) {
     dim.f <- NULL

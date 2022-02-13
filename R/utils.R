@@ -90,33 +90,44 @@ constructX <- function(B,
 
 #' Construct constraint matrix
 #'
-#' @param q dimension of the B-spline basis used.
+#' @param knots knot positions of B-spline basis.
 #' @param pord order of the penalty matrix (pord=1 or 2).
 #'
 #' @return a q x q matrix of type spam
 #'
 #' @keywords internal
-constructCCt <- function(q,
-                         pord) {
-  C <- spam::spam(x = 0, nrow = q, ncol = pord)
-  C[1, 1] <- C[q, pord] <- 1
-  CCt <- C %*% t(C)
+constructCCt <- function(knots, pord) {
+  xmin <- attr(knots, which="xmin")
+  xmax <- attr(knots, which="xmax")
+  # if pord == 1 take point halfway, otherwise the
+  # begin and endpoint of B-spline basis:
+  if (pord == 1) {
+    x <- 0.5*(xmin+xmax)
+  }
+  else {
+    x <- c(xmin,xmax)
+  }
+  Bx <- Bsplines(knots, x)
+  CCt <- t(Bx) %*% Bx
   return(CCt)
 }
 
 #' Construct list of Ginv matrices of splines
 #'
 #' @param q vector, with dimension of the B-spline basis used.
+#' @param knots list with knot positions for each dimension
 #' @param pord order of the penalty matrix (1 or 2).
 #'
 #' @return a list of symmetric matrices of length of vector q.
 #'
 #' @keywords internal
 constructGinvSplines <- function(q,
+                                 knots,
                                  pord) {
   ## dimension
   d <- length(q)
-  lCCt <- lapply(X = q, FUN = constructCCt, pord = pord)
+  lCCt <- lapply(X = seq_len(d),
+              FUN = function(i) { constructCCt(knots[[i]], pord)})
   CCt <- Reduce("kronecker", lCCt)
   lGinv <- list()
   for (i in seq_len(d)) {
