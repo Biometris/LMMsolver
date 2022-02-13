@@ -71,7 +71,7 @@ sparseInverse2 <- LMMsolver:::DerivCholesky(chol(C), ADcholC)
 v4 <- diag(U0 %*% sparseInverse2 %*% t(U0))
 v5 <- rowSums((U0 %*% obj$sparseInverse) * U0)
 
-plotDat <- obtainSmoothTrend(obj, grid = 1000, includeIntercept = TRUE)
+plotDat <- obtainSmoothTrend(obj, grid = 1000, includeIntercept = TRUE, standardErrors=TRUE)
 head(plotDat)
 v6 <- (plotDat$se)^2
 

@@ -10,7 +10,8 @@ obtainSmoothTrend(
   newdata = NULL,
   deriv = 0,
   includeIntercept = FALSE,
-  which = 1
+  which = 1,
+  standardErrors = FALSE
 )
 }
 \arguments{
@@ -32,6 +33,8 @@ the computed smooth trend?}
 
 \item{which}{An integer, for if there are multiple splxD terms in the model.
 Default value is 1.}
+
+\item{standardErrors}{Boolean, default value FALSE.}
 }
 \value{
 A data.frame with predictions for the smooth trend on the specified

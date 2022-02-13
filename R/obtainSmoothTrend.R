@@ -15,6 +15,7 @@
 #' implemented for spl1D.
 #' @param which An integer, for if there are multiple splxD terms in the model.
 #' Default value is 1.
+#' @param standardErrors Boolean, default value FALSE.
 #'
 #' @return A data.frame with predictions for the smooth trend on the specified
 #' grid.
@@ -50,7 +51,8 @@ obtainSmoothTrend <- function(object,
                               newdata = NULL,
                               deriv = 0,
                               includeIntercept = FALSE,
-                              which = 1) {
+                              which = 1,
+                              standardErrors=FALSE) {
   if (!inherits(object, "LMMsolve")) {
     stop("object should be an object of class LMMsolve.\n")
   }
@@ -152,14 +154,16 @@ obtainSmoothTrend <- function(object,
     colnames(outDat)[-ncol(outDat)] <- rev(names(x))
     outDat <- outDat[c(names(x), "ypred")]
   }
-  # MB, 13 Feb 2022, first test..
-  # assume intercept fitted....
-  U <- spam::cbind.spam(1, XTot, BxTot)
+  if (standardErrors) {
+    # MB, 13 Feb 2022, first test..
+    # assume intercept fitted....
+    U <- spam::cbind.spam(1, XTot, BxTot)
 
-  # efficient way to calculate
-  # v <- diag(U %*% sparseInverse %*% t(U))
-  v <- spam::rowSums.spam((U %*% object$sparseInverse) * U)
-  outDat[["se"]] <- sqrt(v)
+    # efficient way to calculate
+    # v <- diag(U %*% sparseInverse %*% t(U))
+    v <- spam::rowSums.spam((U %*% object$sparseInverse) * U)
+    outDat[["se"]] <- sqrt(v)
+  }
 
   #outDat[["linear"]] <- bc
   #outDat[["smooth"]] <- sc
