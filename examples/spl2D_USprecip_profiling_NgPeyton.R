@@ -135,4 +135,29 @@ funED <- function(lambda)
 microbenchmark(funSpam(theta), funlogdet(theta), funED(theta), times=100L)
 
 
+grid <- c(300,200)
+
+data = data.frame(lon=rep(x1lim,each=2),lat=rep(x2lim,times=2))
+pred <- obtainSmoothTrend(obj1, newdata=data, includeIntercept = FALSE)
+pred
+
+pred <- obtainSmoothTrend(obj1, grid=grid, includeIntercept = TRUE)
+
+# make a plot
+plotDat <- pred
+
+usa = maps::map("usa", regions = "main", plot = FALSE)
+
+v <- sp::point.in.polygon(plotDat$lon, plotDat$lat, usa$x, usa$y)
+
+plotDat <- plotDat[v == 1, ]
+
+ggplot(plotDat, aes(x = lon, y = lat, fill = ypred)) +
+  geom_tile(show.legend = TRUE) +
+  scale_fill_gradientn(colours = topo.colors(100))+
+  labs(title = "Precipitation anomaly", x = "Longitude", y = "Latitude") +
+  coord_fixed() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
+
 
