@@ -3,6 +3,7 @@
 library(LMMsolver)
 library(asreml)
 library(dplyr)
+library(spam)
 
 data(multipop)
 
