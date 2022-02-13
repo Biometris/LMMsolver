@@ -152,10 +152,13 @@ obtainSmoothTrend <- function(object,
     colnames(outDat)[-ncol(outDat)] <- rev(names(x))
     outDat <- outDat[c(names(x), "ypred")]
   }
-  # MB, 13 Feb 2022:
+  # MB, 13 Feb 2022, first test..
   # assume intercept fitted....
-  U <- cbind.spam(1, XTot, BxTot)
-  v <- rowSums.spam((U %*% object$sparseInverse) * U)
+  U <- spam::cbind.spam(1, XTot, BxTot)
+
+  # efficient way to calculate
+  # v <- diag(U %*% sparseInverse %*% t(U))
+  v <- spam::rowSums.spam((U %*% object$sparseInverse) * U)
   outDat[["se"]] <- sqrt(v)
 
   #outDat[["linear"]] <- bc
