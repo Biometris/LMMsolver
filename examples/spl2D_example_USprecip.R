@@ -62,8 +62,15 @@ summary(obj1)
 obj0$edf
 obj1$ED
 
-pred <- obtainSmoothTrend(obj1, grid, includeIntercept = TRUE)
-Mfit1 <- matrix(data=pred$ypred, nrow=grid[1], ncol=grid[2], byrow=TRUE)
+# only use this in stead of grid to keep consistent with SAP
+grid1 <- seq(min(x1), max(x1),  length=grid[1])
+grid2 <- seq(min(x2), max(x2),  length=grid[2])
+newdata = expand.grid(grid1, grid2)
+head(newdata)
+colnames(newdata) = c('lon','lat')
+
+pred <- obtainSmoothTrend(obj1, newdata=newdata, includeIntercept = TRUE)
+Mfit1 <- matrix(data=pred$ypred, nrow=grid[1], ncol=grid[2], byrow=FALSE)
 
 # compare fit on grid:
 range(Mfit0 - Mfit1)
