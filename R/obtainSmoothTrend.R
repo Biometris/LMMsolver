@@ -109,7 +109,7 @@ obtainSmoothTrend <- function(object,
     }
     ## Construct grid for each dimension.
     xGrid <- lapply(X = seq_along(x), FUN = function(i) {
-      seq(min(x[[i]]), max(x[[i]]), length = grid[i])
+      seq(attr(knots[[i]], which='xmin'), attr(knots[[i]], which='xmax'), length = grid[i])
     })
     ## Compute Bx per dimension.
     Bx <- mapply(FUN = Bsplines, knots, xGrid, deriv)
