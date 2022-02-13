@@ -16,11 +16,10 @@ dat <- data.frame(x=x,y=y)
 nseg = 15
 
 # solve
-obj <-LMMsolve(y~1,spline=~spl1D(x,nseg=nseg, scaleX=FALSE, xlim=c(0,1)),data=dat)
+obj <-LMMsolve(y~1, spline=~spl1D(x,nseg=nseg, scaleX=FALSE, xlim=c(0,1)),data=dat)
 summary(obj)
 
-plotDat <- obtainSmoothTrend(obj, grid = 1000, includeIntercept = TRUE)
-
+# some calculations by foot, using the parameters theta obtained from LMMsolve
 knots <- LMMsolver:::PsplinesKnots(xmin=0,xmax=1,degree=3,nseg=nseg)
 B <- LMMsolver:::Bsplines(knots, x)
 q <- ncol(B)
@@ -41,19 +40,14 @@ ADcholC <- LMMsolver:::ADchol(lC)
 theta <- obj$theta[c(2,1)]
 
 ED <- theta * LMMsolver:::dlogdet(ADcholC, theta)
-
 sparseInverse <- LMMsolver:::DerivCholesky(chol(C), ADcholC)
 
 x0 <- seq(0,1,length=1000)
-
 Bx <- LMMsolver:::Bsplines(knots, x0)
 v1 <- sigma2e*(diag(Bx %*% solve(C) %*% t(Bx)))
 v2 <- diag(Bx %*% sparseInverse %*% t(Bx))
 
-v1
-v2
-range(v1-v2)
-
+# calculate mixed model matrix C for mixed model sparse formulation:
 X <- cbind(1,x)
 U <- cbind(X,B)
 UtU <- crossprod(U)
@@ -72,11 +66,9 @@ lC[[1]] <- UtU
 lC[[2]] <- bdiag.spam(diag(0,2), DtD + tcrossprod(constr) )
 ADcholC <- LMMsolver:::ADchol(lC)
 ED <- theta * LMMsolver:::dlogdet(ADcholC, theta)
-
 sparseInverse2 <- LMMsolver:::DerivCholesky(chol(C), ADcholC)
 
 v4 <- diag(U0 %*% sparseInverse2 %*% t(U0))
-
 v5 <- rowSums((U0 %*% obj$sparseInverse) * U0)
 
 range(v1-v2)
@@ -84,7 +76,10 @@ range(v1-v3)
 range(v1-v4)
 range(v1-v5)
 
+plotDat <- obtainSmoothTrend(obj, grid = 1000, includeIntercept = TRUE)
+# add se:
 plotDat$se <- sqrt(v5)
+# add simulated data
 plotDat$ysim <- simFun(x0)
 
 ggplot(data = dat, aes(x = x, y = y)) +
