@@ -1,6 +1,7 @@
 # Simulate data, using first example JOPS book:
 library(ggplot2)
 library(LMMsolver)
+library(spam)
 
 n = 150
 set.seed(2016)
@@ -75,11 +76,31 @@ plotDat <- obtainSmoothTrend(obj, grid = 1000, includeIntercept = TRUE, standard
 head(plotDat)
 v6 <- (plotDat$se)^2
 
+eig <- eigen(DtD)
+Usc <- eig$vectors[, -c(q-1,q)] %*% diag(eig$values[-c(q-1,q)]^(-1/2))
+Z <- B %*% Usc
+dat_ext <- cbind(dat, Z)
+
+L <- list(ndx = c(3:18))
+obj2 <- LMMsolve(y~x,random=~grp(ndx), group=L, data=dat_ext)
+
+obj$logL - obj2$logL
+
+U <- cbind(X, Z)
+UtU <- crossprod(U)
+C <- (UtU + lambda*bdiag.spam(diag(0,2), diag(1,q-2) ))/sigma2e
+
+X0 <- cbind(1, x0)
+U0 <- cbind(X0, Bx %*% Usc)
+
+v7 <- diag(U0 %*% solve(C) %*% t(U0))
+
 range(v1-v2)
 range(v1-v3)
 range(v1-v4)
 range(v1-v5)
 range(v1-v6)
+range(v1-v7)
 
 plotDat$ysim <- simFun(x0)
 
