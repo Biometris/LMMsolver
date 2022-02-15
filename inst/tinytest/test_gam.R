@@ -40,5 +40,5 @@ obj0 <- LMMsolve(fixed = yield ~ 1,
 #                  data = dat, trace = TRUE)
 
 ## Check that full LMM solve object is correct.
-expect_equivalent_to_reference(obj1, "gam1DFull")
+expect_equivalent_to_reference(obj0, "gam1DFull")
 
