@@ -93,7 +93,7 @@
 #' \code{\link{spl2D}}, \code{\link{spl3D}}
 #'
 #' @importFrom stats model.frame terms model.matrix contrasts as.formula
-#' terms.formula aggregate
+#' terms.formula aggregate model.response
 #'
 #' @export
 LMMsolve <- function(fixed,
@@ -120,12 +120,12 @@ LMMsolve <- function(fixed,
     stop("random should be a formula of the form \" ~ pred\".\n")
   }
   if (!is.null(spline) && (!inherits(spline, "formula") ||
-                             length(terms(spline)) != 2 ||
-    ## Spline formula should consist of splxD() terms and nothing else.
-    length(unlist(attr(terms(spline,
-                      specials = c("spl1D", "spl2D", "spl3D")),
-                        "specials"))) !=
-    length(attr(terms(spline),"term.labels")))) {
+                           length(terms(spline)) != 2 ||
+                           ## Spline formula should consist of splxD() terms and nothing else.
+                           length(unlist(attr(terms(spline,
+                                                    specials = c("spl1D", "spl2D", "spl3D")),
+                                              "specials"))) !=
+                           length(attr(terms(spline),"term.labels")))) {
     stop("spline should be a formula of form \"~ spl1D()\", \"~ spl2D()\" ",
          "or \"~spl3D()\".\n")
   }
@@ -255,10 +255,17 @@ LMMsolve <- function(fixed,
   mf <- model.frame(fixed, data, drop.unused.levels = TRUE)
   mt <- terms(mf)
   f.terms <- all.vars(mt)[attr(mt, "dataClasses") == "factor"]
-  X = model.matrix(mt, data = mf,
-                   contrasts.arg = lapply(X = mf[, f.terms, drop = FALSE],
-                                          FUN = contrasts, contrasts = TRUE))
-  dim.f <- as.numeric(table(attr(X, "assign")))
+  X <- model.matrix(mt, data = mf,
+                    contrasts.arg = lapply(X = mf[, f.terms, drop = FALSE],
+                                           FUN = contrasts, contrasts = TRUE))
+  q <- qr(X)
+  remCols <- q$pivot[-seq(q$rank)]
+  if (length(remCols) > 0) {
+    dim.f <- as.numeric(table(attr(X, "assign")[-remCols]))
+    X <- X[ , -remCols, drop = FALSE]
+  } else {
+    dim.f <- as.numeric(table(attr(X, "assign")))
+  }
   term.labels.f <- attr(mt, "term.labels")
   ## calculate NomEff dimension for non-spline part.
   NomEffDimRan <- calcNomEffDim(X, Z, dim.r)
@@ -305,8 +312,8 @@ LMMsolve <- function(fixed,
   ## Fixed terms.
   ef <- cumsum(dim.f)
   sf <- ef - dim.f + 1
-  coefF <- nameCoefs(coefs = obj$a, termLabels = term.labels.f, s = sf, e = ef,
-                     data = data, type = "fixed")
+  coefF <- nameCoefs(coefs = obj$a, desMat = X, termLabels = term.labels.f,
+                     s = sf, e = ef, data = data, type = "fixed")
   ## Random terms.
   er <- sum(dim.f) + cumsum(dim.r)
   sr <- er - dim.r + 1
