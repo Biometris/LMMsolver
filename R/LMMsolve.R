@@ -296,7 +296,7 @@ LMMsolve <- function(fixed,
   }
   ## construct inverse of residual matrix R.
   lRinv <- constructRinv(df = data, residual = residual, weights = w)
-  y <- mf[, 1]
+  y <- model.response(mf)
   ## Fit models.
   obj <- sparseMixedModels(y = y, X = X, Z = Z, lGinv = lGinv, lRinv = lRinv,
                            tolerance = tolerance, trace = trace, maxit = maxit,
