@@ -76,7 +76,7 @@ v5 <- rowSums((U0 %*% obj$sparseInverse) * U0)
 v7 <- sapply(1:nrow(U0), FUN= function(x) {sum(sparseInverse2 * crossprod(U0[x,]))})
 range(v4-v7)
 
-plotDat <- obtainSmoothTrend(obj, grid = 1000, includeIntercept = TRUE, standardErrors=TRUE)
+plotDat <- obtainSmoothTrend(obj, grid = 1000, includeIntercept = TRUE)
 head(plotDat)
 v6 <- (plotDat$se)^2
 
@@ -131,7 +131,7 @@ obj1 <- LMMsolve(fixed = yield~rep,
 summary(obj1)
 
 # obtain spatial trend with genotype fixed:
-plotDat <- obtainSmoothTrend(obj1, grid=100, standardErrors = TRUE)
+plotDat <- obtainSmoothTrend(obj1, grid=100)
 head(plotDat)
 
 head(plotDat)

@@ -142,7 +142,7 @@ microbenchmark(funSpam(theta), funlogdet(theta), funED(theta), times=100L)
 #                          standardErrors = TRUE)
 #pred
 
-pred <- obtainSmoothTrend(obj1, grid=grid, includeIntercept = TRUE, standardErrors=TRUE)
+pred <- obtainSmoothTrend(obj1, grid=grid, includeIntercept = TRUE)
 
 # make a plot
 plotDat <- pred
@@ -160,5 +160,14 @@ ggplot(plotDat, aes(x = lon, y = lat, fill = ypred)) +
   coord_fixed() +
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank())
+
+ggplot(plotDat, aes(x = lon, y = lat, fill = se)) +
+  geom_tile(show.legend = TRUE) +
+  scale_fill_gradientn(colours = topo.colors(100))+
+  labs(title = "Precipitation anomaly", x = "Longitude", y = "Latitude") +
+  coord_fixed() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
+
 
 

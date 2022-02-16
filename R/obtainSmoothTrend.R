@@ -15,10 +15,9 @@
 #' implemented for spl1D.
 #' @param which An integer, for if there are multiple splxD terms in the model.
 #' Default value is 1.
-#' @param standardErrors Boolean, default value FALSE.
 #'
 #' @return A data.frame with predictions for the smooth trend on the specified
-#' grid.
+#' grid. The standard errors are saved if `deriv` has default value 0.
 #'
 #' @examples
 #' ## Fit model on john.alpha data from agridat package.
@@ -51,8 +50,7 @@ obtainSmoothTrend <- function(object,
                               newdata = NULL,
                               deriv = 0,
                               includeIntercept = FALSE,
-                              which = 1,
-                              standardErrors=FALSE) {
+                              which = 1) {
   if (!inherits(object, "LMMsolve")) {
     stop("object should be an object of class LMMsolve.\n")
   }
@@ -154,9 +152,8 @@ obtainSmoothTrend <- function(object,
     colnames(outDat)[-ncol(outDat)] <- rev(names(x))
     outDat <- outDat[c(names(x), "ypred")]
   }
-  if (standardErrors) {
-    #e <- cumsum(object$dim)
-    #s <- e - object$dim + 1
+  # only add standard errors if deriv == 0
+  if (deriv == 0) {
     labels <- c(object$term.labels.f, object$term.labels.r)
     lU <- list()
     dim <- object$dim
@@ -164,7 +161,9 @@ obtainSmoothTrend <- function(object,
       lU[[i]] = spam::spam(x=0, nrow=nrow(BxTot), ncol = dim[i])
     }
     # assume for the moment intercept in, and deriv=0:
-    lU[[1]] = spam::spam(x=1, nrow=nrow(BxTot), ncol = 1)
+    if (includeIntercept) {
+      lU[[1]] = spam::spam(x=1, nrow=nrow(BxTot), ncol = 1)
+    }
     if (!is.null(splRes$term.labels.f))
     {
       ndx.f <- which(splRes$term.labels.f == labels)
@@ -172,11 +171,8 @@ obtainSmoothTrend <- function(object,
     }
     ndx.r <- which(splRes$term.labels.r == labels)
     lU[[ndx.r]] <- BxTot
+
     U <- Reduce(spam::cbind.spam, lU)
-    v <- sapply(1:nrow(U), FUN= function(x) {sum(object$sparseInverse * spam::crossprod.spam(U[x,]))})
-    #v <- spam::rowSums.spam((U %*% object$sparseInverse) * U)
-    #UtU <- crossprod.spam(U)
-    #v <- diag.spam(object$sparseInverse * UtU)
     v <- spam::rowSums.spam((U %*% object$sparseInverse) * U)
     # make sure v is positive
     v <- ifelse(v > 0, v, 0)

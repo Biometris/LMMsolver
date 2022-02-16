@@ -10,8 +10,7 @@ obtainSmoothTrend(
   newdata = NULL,
   deriv = 0,
   includeIntercept = FALSE,
-  which = 1,
-  standardErrors = FALSE
+  which = 1
 )
 }
 \arguments{
@@ -33,12 +32,10 @@ the computed smooth trend?}
 
 \item{which}{An integer, for if there are multiple splxD terms in the model.
 Default value is 1.}
-
-\item{standardErrors}{Boolean, default value FALSE.}
 }
 \value{
 A data.frame with predictions for the smooth trend on the specified
-grid.
+grid. The standard errors are saved if `deriv` has default value 0.
 }
 \description{
 Obtain the smooth trend for models fitted with a spline component.
