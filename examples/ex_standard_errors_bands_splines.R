@@ -2,6 +2,7 @@
 library(ggplot2)
 library(LMMsolver)
 library(spam)
+library(agridat)
 
 n = 150
 set.seed(2016)
@@ -72,6 +73,9 @@ sparseInverse2 <- LMMsolver:::DerivCholesky(chol(C), ADcholC)
 v4 <- diag(U0 %*% sparseInverse2 %*% t(U0))
 v5 <- rowSums((U0 %*% obj$sparseInverse) * U0)
 
+v7 <- sapply(1:nrow(U0), FUN= function(x) {sum(sparseInverse2 * crossprod(U0[x,]))})
+range(v4-v7)
+
 plotDat <- obtainSmoothTrend(obj, grid = 1000, includeIntercept = TRUE, standardErrors=TRUE)
 head(plotDat)
 v6 <- (plotDat$se)^2
@@ -111,3 +115,56 @@ ggplot(data = dat, aes(x = x, y = y)) +
   geom_line(data = plotDat, aes(y = ypred-2*se), col='blue', size=1) +
   geom_line(data = plotDat, aes(y = ypred+2*se), col='blue', size=1) +
   theme(panel.grid = element_blank())
+
+
+# other examples, with more fixed (or random terms) terms
+data(john.alpha)
+dat <- john.alpha
+
+# Here scaleX is FALSE in spl1D, to be consistent with model in JABES2020 paper.
+obj1 <- LMMsolve(fixed = yield~rep,
+                 random = ~gen,
+                 spline = ~spl1D(x = plot, nseg = nseg, scaleX=FALSE),
+                 data = dat,
+                 trace = FALSE,
+                 tolerance = 1.0e-10)
+summary(obj1)
+
+# obtain spatial trend with genotype fixed:
+plotDat <- obtainSmoothTrend(obj1, grid=100, standardErrors = TRUE)
+head(plotDat)
+
+head(plotDat)
+ggplot(plotDat, aes(x = plot, y = ypred)) +
+  geom_line() +
+  geom_line(data = plotDat, aes(y = ypred-2*se), col='blue', size=1) +
+  geom_line(data = plotDat, aes(y = ypred+2*se), col='blue', size=1) +
+  labs(title = "Spatial trend for the oats data", x = "plot", y = "plot effects") +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
+
+
+obj1$term.labels.f
+obj1$term.labels.r
+labels <- c(obj1$term.labels.f, obj1$term.labels.r)
+obj1$dim
+
+splRes <- obj1$splRes[[1]]
+
+e <- cumsum(obj1$dim)
+s <- e - obj1$dim + 1
+
+# if splRes$term != NULL, otherwise skip...
+ndx.f <- which(splRes$term.labels.f == labels)
+ndx.r <- which(splRes$term.labels.r == labels)
+
+# choose grid....
+x0 <- seq(1,72,by=3)
+Bx <- LMMsolver:::Bsplines(splRes$knots[[1]], x0)
+
+U <- spam(x=0, ncol=sum(obj1$dim),nrow=length(x0))
+U[,1] <- 1
+U[, c(s[ndx.f]:e[ndx.f])] <- x0
+U[, c(s[ndx.r]:e[ndx.r])] <- Bx
+display(U)
+

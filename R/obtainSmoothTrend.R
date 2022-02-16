@@ -155,18 +155,30 @@ obtainSmoothTrend <- function(object,
     outDat <- outDat[c(names(x), "ypred")]
   }
   if (standardErrors) {
-    # MB, 13 Feb 2022, first test..
-    # assume intercept fitted....
-    U <- spam::cbind.spam(1, XTot, BxTot)
-
-    # efficient way to calculate
-    # v <- diag(U %*% sparseInverse %*% t(U))
-    v <- spam::rowSums.spam((U %*% object$sparseInverse) * U)
+    #e <- cumsum(object$dim)
+    #s <- e - object$dim + 1
+    labels <- c(object$term.labels.f, object$term.labels.r)
+    lU <- list()
+    dim <- object$dim
+    for (i in seq_along(dim)) {
+      lU[[i]] = spam::spam(x=0, nrow=nrow(BxTot), ncol = dim[i])
+    }
+    # assume for the moment intercept in, and deriv=0:
+    lU[[1]] = spam::spam(x=1, nrow=nrow(BxTot), ncol = 1)
+    if (!is.null(splRes$term.labels.f))
+    {
+      ndx.f <- which(splRes$term.labels.f == labels)
+      lU[[ndx.f]] <- XTot
+    }
+    ndx.r <- which(splRes$term.labels.r == labels)
+    lU[[ndx.r]] <- BxTot
+    U <- Reduce(spam::cbind.spam, lU)
+    v <- sapply(1:nrow(U), FUN= function(x) {sum(object$sparseInverse * spam::crossprod.spam(U[x,]))})
+    #v <- spam::rowSums.spam((U %*% object$sparseInverse) * U)
+    #UtU <- crossprod.spam(U)
+    #v <- diag.spam(object$sparseInverse * UtU)
     outDat[["se"]] <- sqrt(v)
   }
-
-  #outDat[["linear"]] <- bc
-  #outDat[["smooth"]] <- sc
 
   return(outDat)
 }

@@ -27,7 +27,7 @@ x2 <- dat$lat
 #
 innerKnots <- 40 # See SAP 2014 paper
 knots <- nseg <- c(innerKnots+1, innerKnots+1)
-grid <- c(300,200)
+grid <- c(100,100)
 trace <- TRUE
 thr <- 1.0e-7  # convergence tolerance
 ######################
@@ -135,13 +135,14 @@ funED <- function(lambda)
 microbenchmark(funSpam(theta), funlogdet(theta), funED(theta), times=100L)
 
 
-grid <- c(300,200)
+#grid <- c(100,100)
 
-data = data.frame(lon=rep(x1lim,each=2),lat=rep(x2lim,times=2))
-pred <- obtainSmoothTrend(obj1, newdata=data, includeIntercept = FALSE)
-pred
+#data = data.frame(lon=rep(x1lim,each=2),lat=rep(x2lim,times=2))
+#pred <- obtainSmoothTrend(obj1, newdata=data, includeIntercept = TRUE,
+#                          standardErrors = TRUE)
+#pred
 
-pred <- obtainSmoothTrend(obj1, grid=grid, includeIntercept = TRUE)
+pred <- obtainSmoothTrend(obj1, grid=grid, includeIntercept = TRUE, standardErrors=TRUE)
 
 # make a plot
 plotDat <- pred
