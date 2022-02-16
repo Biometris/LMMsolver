@@ -93,7 +93,7 @@
 #' \code{\link{spl2D}}, \code{\link{spl3D}}
 #'
 #' @importFrom stats model.frame terms model.matrix contrasts as.formula
-#' terms.formula aggregate
+#' terms.formula aggregate model.response
 #'
 #' @export
 LMMsolve <- function(fixed,
@@ -119,15 +119,18 @@ LMMsolve <- function(fixed,
       (!inherits(random, "formula") || length(terms(random)) != 2)) {
     stop("random should be a formula of the form \" ~ pred\".\n")
   }
-  if (!is.null(spline) && (!inherits(spline, "formula") ||
-                             length(terms(spline)) != 2 ||
-    ## Spline formula should consist of splxD() terms and nothing else.
-    length(unlist(attr(terms(spline,
-                      specials = c("spl1D", "spl2D", "spl3D")),
-                        "specials"))) !=
-    length(attr(terms(spline),"term.labels")))) {
-    stop("spline should be a formula of form \"~ spl1D()\", \"~ spl2D()\" ",
-         "or \"~spl3D()\".\n")
+  splErr <- paste("spline should be a formula of form \"~ spl1D() + ... + ",
+                  "spl1D()\", \"~ spl2D()\" or \"~spl3D()\"\n")
+  if (!is.null(spline)) {
+    if (!inherits(spline, "formula")) stop(splErr)
+    splTrms <- terms(spline, specials = c("spl1D", "spl2D", "spl3D"))
+    splSpec <- attr(splTrms, "specials")
+    if (length(terms(splTrms)) != 2 ||
+        ## Spline formula should consist of splxD() terms and nothing else.
+        length(splSpec[!sapply(X = splSpec, FUN = is.null)]) > 1 ||
+        length(unlist(splSpec)) != length(labels(terms(spline)))) {
+      stop(splErr)
+    }
   }
   if (!is.null(ginverse) &&
       (!is.list(ginverse) ||
@@ -255,22 +258,33 @@ LMMsolve <- function(fixed,
   mf <- model.frame(fixed, data, drop.unused.levels = TRUE)
   mt <- terms(mf)
   f.terms <- all.vars(mt)[attr(mt, "dataClasses") == "factor"]
-  X = model.matrix(mt, data = mf,
-                   contrasts.arg = lapply(X = mf[, f.terms, drop = FALSE],
-                                          FUN = contrasts, contrasts = TRUE))
-  dim.f <- as.numeric(table(attr(X, "assign")))
+  X <- model.matrix(mt, data = mf,
+                    contrasts.arg = lapply(X = mf[, f.terms, drop = FALSE],
+                                           FUN = contrasts, contrasts = TRUE))
+  q <- qr(X)
+  remCols <- q$pivot[-seq(q$rank)]
+  if (length(remCols) > 0) {
+    dim.f <- as.numeric(table(attr(X, "assign")[-remCols]))
+    X <- X[ , -remCols, drop = FALSE]
+  } else {
+    dim.f <- as.numeric(table(attr(X, "assign")))
+  }
   term.labels.f <- attr(mt, "term.labels")
   ## calculate NomEff dimension for non-spline part.
   NomEffDimRan <- calcNomEffDim(X, Z, dim.r)
   ## Add spline part.
   splResList <- NULL
   if (!is.null(spline)) {
-    tf <- terms(spline, specials = c("spl1D", "spl2D", "spl3D"))
-    terms <- attr(tf, "term.labels")
-    Nterms <- length(terms)
+    splTerms <- labels(splTrms)
+    Nterms <- length(splTerms)
     splResList <- list()
     for (i in 1:Nterms) {
-      splRes <- eval(parse(text = terms[i]), envir = data, enclos = parent.frame())
+      splRes <- eval(parse(text = splTerms[i]), envir = data, enclos = parent.frame())
+      ## Multiple 1D gam models should have unique x variables.
+      if (!is.null(term.labels.f) && !is.null(splRes$term.labels.f) &&
+          splRes$term.labels.f %in% term.labels.f) {
+        stop("x variables in 1D splines should be unique.\n")
+      }
       splResList[[i]] <- splRes
       ## Add to design matrix fixed effect X.
       X <- cbind(X, splRes$X)
@@ -296,7 +310,7 @@ LMMsolve <- function(fixed,
   }
   ## construct inverse of residual matrix R.
   lRinv <- constructRinv(df = data, residual = residual, weights = w)
-  y <- mf[, 1]
+  y <- model.response(mf)
   ## Fit models.
   obj <- sparseMixedModels(y = y, X = X, Z = Z, lGinv = lGinv, lRinv = lRinv,
                            tolerance = tolerance, trace = trace, maxit = maxit,
@@ -305,8 +319,8 @@ LMMsolve <- function(fixed,
   ## Fixed terms.
   ef <- cumsum(dim.f)
   sf <- ef - dim.f + 1
-  coefF <- nameCoefs(coefs = obj$a, termLabels = term.labels.f, s = sf, e = ef,
-                     data = data, type = "fixed")
+  coefF <- nameCoefs(coefs = obj$a, desMat = X, termLabels = term.labels.f,
+                     s = sf, e = ef, data = data, type = "fixed")
   ## Random terms.
   er <- sum(dim.f) + cumsum(dim.r)
   sr <- er - dim.r + 1

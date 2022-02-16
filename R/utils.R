@@ -272,6 +272,7 @@ checkGroup <- function(random,
 #'
 #' @keywords internal
 nameCoefs <- function(coefs,
+                      desMat,
                       termLabels,
                       s,
                       e,
@@ -310,9 +311,6 @@ nameCoefs <- function(coefs,
       if (all(sapply(X = labISplit, FUN = function(labTerm) {
         is.factor(data[[labTerm]])
       }))) {
-        # namesTerm <- lapply(X = labISplit, FUN = function(labTerm) {
-        #   paste(labTerm, levels(data[[labTerm]]), sep = "_")
-        # })
         labDat <- unique(data[labISplit])
         labDat <- lapply(X = seq_along(labDat), FUN = function(i) {
           paste0(labISplit[i], "_", labDat[[i]])
@@ -320,6 +318,15 @@ nameCoefs <- function(coefs,
         ## For fixed terms an extra 0 for the reference level has to be added.
         if (type == "fixed") {
           coefI <- c(rep(0, times = length(unique(labDat[[1]]))), coefI)
+          labDatAlt <- lapply(X = labDat, FUN = function(i) {
+            gsub("_", "", i)
+          })
+          interAcLevsIAlt <- levels(interaction(labDatAlt, sep = ":",
+                                                drop = TRUE))
+          interAcLevsI <- levels(interaction(labDat, sep = ":", drop = TRUE))
+          names(coefI) <- c(interAcLevsI[!interAcLevsIAlt %in% colnames(desMat)],
+                            interAcLevsI[interAcLevsIAlt %in% colnames(desMat)])
+          coefI <- coefI[interAcLevsI]
         }
         names(coefI) <- levels(interaction(labDat, sep = ":", drop = TRUE))
       } else {
