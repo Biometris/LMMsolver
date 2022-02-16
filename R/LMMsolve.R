@@ -119,15 +119,18 @@ LMMsolve <- function(fixed,
       (!inherits(random, "formula") || length(terms(random)) != 2)) {
     stop("random should be a formula of the form \" ~ pred\".\n")
   }
-  if (!is.null(spline) && (!inherits(spline, "formula") ||
-                           length(terms(spline)) != 2 ||
-                           ## Spline formula should consist of splxD() terms and nothing else.
-                           length(unlist(attr(terms(spline,
-                                                    specials = c("spl1D", "spl2D", "spl3D")),
-                                              "specials"))) !=
-                           length(attr(terms(spline),"term.labels")))) {
-    stop("spline should be a formula of form \"~ spl1D()\", \"~ spl2D()\" ",
-         "or \"~spl3D()\".\n")
+  splErr <- paste("spline should be a formula of form \"~ spl1D() + ... + ",
+                  "spl1D()\", \"~ spl2D()\" or \"~spl3D()\"\n")
+  if (!is.null(spline)) {
+    if (!inherits(spline, "formula")) stop(splErr)
+    splTrms <- terms(spline, specials = c("spl1D", "spl2D", "spl3D"))
+    splSpec <- attr(splTrms, "specials")
+    if (length(terms(splTrms)) != 2 ||
+        ## Spline formula should consist of splxD() terms and nothing else.
+        length(splSpec[!sapply(X = splSpec, FUN = is.null)]) > 1 ||
+        length(unlist(splSpec)) != length(labels(terms(spline)))) {
+      stop(splErr)
+    }
   }
   if (!is.null(ginverse) &&
       (!is.list(ginverse) ||
@@ -272,12 +275,16 @@ LMMsolve <- function(fixed,
   ## Add spline part.
   splResList <- NULL
   if (!is.null(spline)) {
-    tf <- terms(spline, specials = c("spl1D", "spl2D", "spl3D"))
-    terms <- attr(tf, "term.labels")
-    Nterms <- length(terms)
+    splTerms <- labels(splTrms)
+    Nterms <- length(splTerms)
     splResList <- list()
     for (i in 1:Nterms) {
-      splRes <- eval(parse(text = terms[i]), envir = data, enclos = parent.frame())
+      splRes <- eval(parse(text = splTerms[i]), envir = data, enclos = parent.frame())
+      ## Multiple 1D gam models should have unique x variables.
+      if (!is.null(term.labels.f) && !is.null(splRes$term.labels.f) &&
+          splRes$term.labels.f %in% term.labels.f) {
+        stop("x variables in 1D splines should be unique.\n")
+      }
       splResList[[i]] <- splRes
       ## Add to design matrix fixed effect X.
       X <- cbind(X, splRes$X)
