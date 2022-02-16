@@ -177,6 +177,9 @@ obtainSmoothTrend <- function(object,
     #v <- spam::rowSums.spam((U %*% object$sparseInverse) * U)
     #UtU <- crossprod.spam(U)
     #v <- diag.spam(object$sparseInverse * UtU)
+    v <- spam::rowSums.spam((U %*% object$sparseInverse) * U)
+    # make sure v is positive
+    v <- ifelse(v > 0, v, 0)
     outDat[["se"]] <- sqrt(v)
   }
 
