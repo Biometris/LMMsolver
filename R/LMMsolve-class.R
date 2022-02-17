@@ -109,7 +109,6 @@ summary.LMMsolve <- function(object,
                              ...) {
   ## Checks.
   which <- match.arg(which)
-
   if (which == "dimensions") {
     tbl <- object$EDdf
   } else if (which == "variances") {
@@ -130,13 +129,17 @@ summary.LMMsolve <- function(object,
 print.summary.LMMsolve <- function(x,
                                    ...) {
   which <- attr(x, which = "which")
+  ## Compute sum of effective dimensions before rounding.
+  EDTot <- sum(x[["Effective"]])
+  ## Print max 2 decimals.
+  x[2:ncol(x)] <- round(x[2:ncol(x)], 2)
   if (which == "dimensions") {
     cat("Table with effective dimensions and penalties: \n\n")
-    print.data.frame(x)
-    cat("\n", "Total Effective Dimension:", sum(x[["Effective"]]), "\n")
+    print.data.frame(x, row.names = FALSE)
+    cat("\n", "Total Effective Dimension:", EDTot, "\n")
   } else if (which == "variances") {
     cat("Table with variances: \n\n")
-    print.data.frame(x)
+    print.data.frame(x, row.names = FALSE)
     cat("\n")
   }
 }
