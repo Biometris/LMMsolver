@@ -194,14 +194,12 @@ sparseMixedModels <- function(y,
   if (it == maxit) {
     warning("No convergence after ", maxit, " iterations \n", call. = FALSE)
   }
-  ## calculate the partial derivatives, needed for standard errors.
-  partialDerivChol <- LMMsolver:::DerivCholesky(cholC)
   names(phi) <- names(lRinv)
   names(psi) <- names(lGinv)
   EDnames <- c(names(lGinv), names(lRinv))
   L <- list(logL = logL, sigma2e = 1 / phi, tau2e = 1 / psi, ED = ED,
             theta = theta, EDnames = EDnames, a = a, yhat = y - r,
-            residuals = r, nIter = it, C = C, partialDerivChol = partialDerivChol)
+            residuals = r, nIter = it, C = C, cholC = cholC)
   return(L)
 }
 
