@@ -110,7 +110,7 @@ ED
 
 # compare direct way using dlogdet, and second option
 dlogdet1 <- as.numeric(LMMsolver:::dlogdet(obj0,theta))
-A <- LMMsolver:::DerivCholesky(cholC, obj0);
+A <- LMMsolver:::DerivCholesky(cholC);
 dlogdet2 <- sapply(listP, function(x) {sum(A * x)})
 
 dlogdet1
