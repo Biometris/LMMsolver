@@ -42,12 +42,12 @@ ADcholC <- LMMsolver:::ADchol(lC)
 theta <- obj$theta[c(2,1)]
 
 ED <- theta * LMMsolver:::dlogdet(ADcholC, theta)
-sparseInverse <- LMMsolver:::DerivCholesky(chol(C), ADcholC)
+partialDerivChol <- LMMsolver:::DerivCholesky(chol(C), ADcholC)
 
 x0 <- seq(0,1,length=1000)
 Bx <- LMMsolver:::Bsplines(knots, x0)
 v1 <- sigma2e*(diag(Bx %*% solve(C) %*% t(Bx)))
-v2 <- diag(Bx %*% sparseInverse %*% t(Bx))
+v2 <- diag(Bx %*% partialDerivChol %*% t(Bx))
 
 # calculate mixed model matrix C for mixed model sparse formulation:
 X <- cbind(1,x)
@@ -68,12 +68,12 @@ lC[[1]] <- UtU
 lC[[2]] <- bdiag.spam(diag(0,2), DtD + tcrossprod(constr) )
 ADcholC <- LMMsolver:::ADchol(lC)
 ED <- theta * LMMsolver:::dlogdet(ADcholC, theta)
-sparseInverse2 <- LMMsolver:::DerivCholesky(chol(C), ADcholC)
+partialDerivChol2 <- LMMsolver:::DerivCholesky(chol(C), ADcholC)
 
-v4 <- diag(U0 %*% sparseInverse2 %*% t(U0))
-v5 <- rowSums((U0 %*% obj$sparseInverse) * U0)
+v4 <- diag(U0 %*% partialDerivChol2 %*% t(U0))
+v5 <- rowSums((U0 %*% obj$partialDerivChol) * U0)
 
-v7 <- sapply(1:nrow(U0), FUN= function(x) {sum(sparseInverse2 * crossprod(U0[x,]))})
+v7 <- sapply(1:nrow(U0), FUN= function(x) {sum(partialDerivChol2 * crossprod(U0[x,]))})
 range(v4-v7)
 
 plotDat <- obtainSmoothTrend(obj, grid = 1000, includeIntercept = TRUE)

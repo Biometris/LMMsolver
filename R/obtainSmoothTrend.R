@@ -173,7 +173,7 @@ obtainSmoothTrend <- function(object,
     lU[[ndx.r]] <- BxTot
 
     U <- Reduce(spam::cbind.spam, lU)
-    v <- spam::rowSums.spam((U %*% object$sparseInverse) * U)
+    v <- spam::rowSums.spam((U %*% object$partialDerivChol) * U)
     # make sure v is positive
     v <- ifelse(v > 0, v, 0)
     outDat[["se"]] <- sqrt(v)
