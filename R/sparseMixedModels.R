@@ -37,8 +37,6 @@ solveMME <- function(cholC,
                      lWtRinvY,
                      phi,
                      theta) {
-  C <- linearSum(theta = theta, matrixList = listC)
-  cholC <- update(cholC, C)
   WtRinvy <- as.vector(linearSum(theta = phi, matrixList = lWtRinvY))
   a <- spam::backsolve.spam(cholC, spam::forwardsolve.spam(cholC, WtRinvy))
   return(a)
@@ -164,6 +162,11 @@ sparseMixedModels <- function(y,
     }
     ## calculate the effective dimension (plus logdet as attributes).
     ED <- calcEffDim(ADcholGinv, ADcholRinv, ADcholC, phi, psi, theta)
+
+    ## update the cholesky with new parameters theat
+    C <- linearSum(theta = theta, matrixList = listC)
+    cholC <- update(cholC, C)
+
     ## solve mixed model equations.
     a <- solveMME(cholC = cholC, listC = listC, lWtRinvY = lWtRinvY,
                   phi = phi, theta = theta)
@@ -191,10 +194,7 @@ sparseMixedModels <- function(y,
   if (it == maxit) {
     warning("No convergence after ", maxit, " iterations \n", call. = FALSE)
   }
-  # update C and ADcholC with theta
-  C <- linearSum(theta = theta, matrixList = listC)
-  cholC <- update(cholC, C)
-  #dlogdetC <- dlogdet(ADcholC, theta)
+  ## calculate the partial derivatives, needed for standard errors.
   partialDerivChol <- LMMsolver:::DerivCholesky(cholC)
   names(phi) <- names(lRinv)
   names(psi) <- names(lGinv)

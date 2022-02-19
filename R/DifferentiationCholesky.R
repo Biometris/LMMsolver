@@ -36,6 +36,7 @@ ADchol <- function(P_list) {
 DerivCholesky <- function(cholC) {
   cholC@entries <- partialDerivCholesky(cholC)
   A <- spam::as.spam(cholC)
+  ## reordering, can this be done in more efficient way?
   A <- A[cholC@invpivot, cholC@invpivot]
   return(A)
 }
