@@ -3,17 +3,12 @@
 \name{DerivCholesky}
 \alias{DerivCholesky}
 \title{This function saves result of partial derivatives of Cholesky to a
-a spam matrix. It is assumed that cholC and objAD have same values, i.e.:
-- cholC has been updated with:
-    C <- LMMsolver:::linearSum(theta, listP)
-    cholC <- update(cholC, C)
-- objAD has been calculated with:
-    objAD <- LMMsolver:::ADchol(listP)
-    x <- LMMsolver:::dlogdet(objAD, theta)}
+a spam matrix, and is used to calculate standard errors and for predictions.}
 \usage{
 DerivCholesky(cholC, objAD)
 }
 \description{
-this function can be useful for example for calculating standard errors.
+This function saves result of partial derivatives of Cholesky to a
+a spam matrix, and is used to calculate standard errors and for predictions.
 }
 \keyword{internal}

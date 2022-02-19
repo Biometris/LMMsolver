@@ -13,3 +13,7 @@ dlogdet <- function(arg, lambda) {
     .Call(`_LMMsolver_dlogdet`, arg, lambda)
 }
 
+partialDerivCholesky <- function(cholC, arg) {
+    .Call(`_LMMsolver_partialDerivCholesky`, cholC, arg)
+}
+

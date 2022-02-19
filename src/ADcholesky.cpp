@@ -514,3 +514,24 @@ NumericVector dlogdet(SEXP arg, NumericVector lambda)
 }
 
 
+// [[Rcpp::export]]
+NumericVector partialDerivCholesky(SEXP cholC, SEXP arg)
+{
+  Rcpp::S4 obj(arg);
+  Rcpp::S4 obj2(cholC);
+
+  IntegerVector supernodes = obj.slot("supernodes");
+  IntegerVector rowpointers = obj.slot("rowpointers");
+  IntegerVector colpointers = obj.slot("colpointers");
+  IntegerVector rowindices = obj.slot("rowindices");
+
+  NumericVector L = obj2.slot("entries");
+  const int sz = L.size();
+  NumericVector F(sz, 0.0);
+  initAD(F, L, colpointers);
+  ADcholesky(F, L, supernodes, rowpointers, colpointers, rowindices);
+  return F;
+}
+
+
+
