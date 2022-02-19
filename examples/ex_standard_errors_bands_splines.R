@@ -69,7 +69,7 @@ lC[[2]] <- bdiag.spam(diag(0,2), DtD + tcrossprod(constr) )
 partialDerivChol2 <- LMMsolver:::DerivCholesky(chol(C))
 
 v4 <- diag(U0 %*% partialDerivChol2 %*% t(U0))
-v5 <- rowSums((U0 %*% obj$partialDerivChol) * U0)
+v5 <- rowSums((U0 %*% partialDerivChol2) * U0)
 
 v7 <- sapply(1:nrow(U0), FUN= function(x) {sum(partialDerivChol2 * crossprod(U0[x,]))})
 range(v4-v7)
@@ -83,7 +83,7 @@ Usc <- eig$vectors[, -c(q-1,q)] %*% diag(eig$values[-c(q-1,q)]^(-1/2))
 Z <- B %*% Usc
 dat_ext <- cbind(dat, Z)
 
-L <- list(ndx = c(3:18))
+L <- list(ndx = c(3:q))
 obj2 <- LMMsolve(y~x,random=~grp(ndx), group=L, data=dat_ext)
 
 obj$logL - obj2$logL
