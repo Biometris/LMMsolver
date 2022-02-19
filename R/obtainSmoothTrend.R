@@ -154,6 +154,9 @@ obtainSmoothTrend <- function(object,
   }
   # only add standard errors if deriv == 0
   if (deriv == 0) {
+    ## calculate the partial derivatives, needed for standard errors.
+    partialDerivChol <- LMMsolver:::DerivCholesky(object$cholC)
+
     labels <- c(object$term.labels.f, object$term.labels.r)
     lU <- list()
     dim <- object$dim
@@ -173,7 +176,7 @@ obtainSmoothTrend <- function(object,
     lU[[ndx.r]] <- BxTot
 
     U <- Reduce(spam::cbind.spam, lU)
-    v <- spam::rowSums.spam((U %*% object$partialDerivChol) * U)
+    v <- spam::rowSums.spam((U %*% partialDerivChol) * U)
     # make sure v is positive
     v <- ifelse(v > 0, v, 0)
     outDat[["se"]] <- sqrt(v)
