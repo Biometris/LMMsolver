@@ -195,7 +195,7 @@ sparseMixedModels <- function(y,
   C <- linearSum(theta = theta, matrixList = listC)
   cholC <- update(cholC, C)
   #dlogdetC <- dlogdet(ADcholC, theta)
-  partialDerivChol <- LMMsolver:::DerivCholesky(cholC, ADcholC)
+  partialDerivChol <- LMMsolver:::DerivCholesky(cholC)
   names(phi) <- names(lRinv)
   names(psi) <- names(lGinv)
   EDnames <- c(names(lGinv), names(lRinv))

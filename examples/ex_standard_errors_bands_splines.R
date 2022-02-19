@@ -42,7 +42,7 @@ ADcholC <- LMMsolver:::ADchol(lC)
 theta <- obj$theta[c(2,1)]
 
 C2 <- LMMsolver:::linearSum(theta = theta, matrixList = lC)
-partialDerivChol <- LMMsolver:::DerivCholesky(chol(C2), ADcholC)
+partialDerivChol <- LMMsolver:::DerivCholesky(chol(C2))
 
 x0 <- seq(0, 1, length=1000)
 Bx <- LMMsolver:::Bsplines(knots, x0)
@@ -66,9 +66,7 @@ v3 <- diag(U0 %*% solve(C) %*% t(U0))
 lC <- list()
 lC[[1]] <- UtU
 lC[[2]] <- bdiag.spam(diag(0,2), DtD + tcrossprod(constr) )
-ADcholC <- LMMsolver:::ADchol(lC)
-ED <- theta * LMMsolver:::dlogdet(ADcholC, theta)
-partialDerivChol2 <- LMMsolver:::DerivCholesky(chol(C), ADcholC)
+partialDerivChol2 <- LMMsolver:::DerivCholesky(chol(C))
 
 v4 <- diag(U0 %*% partialDerivChol2 %*% t(U0))
 v5 <- rowSums((U0 %*% obj$partialDerivChol) * U0)

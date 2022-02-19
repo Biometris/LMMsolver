@@ -47,14 +47,13 @@ BEGIN_RCPP
 END_RCPP
 }
 // partialDerivCholesky
-NumericVector partialDerivCholesky(SEXP cholC, SEXP arg);
-RcppExport SEXP _LMMsolver_partialDerivCholesky(SEXP cholCSEXP, SEXP argSEXP) {
+NumericVector partialDerivCholesky(SEXP cholC);
+RcppExport SEXP _LMMsolver_partialDerivCholesky(SEXP cholCSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< SEXP >::type cholC(cholCSEXP);
-    Rcpp::traits::input_parameter< SEXP >::type arg(argSEXP);
-    rcpp_result_gen = Rcpp::wrap(partialDerivCholesky(cholC, arg));
+    rcpp_result_gen = Rcpp::wrap(partialDerivCholesky(cholC));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -63,7 +62,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_LMMsolver_construct_ADchol_Rcpp", (DL_FUNC) &_LMMsolver_construct_ADchol_Rcpp, 2},
     {"_LMMsolver_logdet", (DL_FUNC) &_LMMsolver_logdet, 2},
     {"_LMMsolver_dlogdet", (DL_FUNC) &_LMMsolver_dlogdet, 2},
-    {"_LMMsolver_partialDerivCholesky", (DL_FUNC) &_LMMsolver_partialDerivCholesky, 2},
+    {"_LMMsolver_partialDerivCholesky", (DL_FUNC) &_LMMsolver_partialDerivCholesky, 1},
     {NULL, NULL, 0}
 };
 

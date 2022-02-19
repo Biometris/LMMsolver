@@ -5,7 +5,7 @@
 \title{This function saves result of partial derivatives of Cholesky to a
 a spam matrix, and is used to calculate standard errors and for predictions.}
 \usage{
-DerivCholesky(cholC, objAD)
+DerivCholesky(cholC)
 }
 \description{
 This function saves result of partial derivatives of Cholesky to a

@@ -515,17 +515,23 @@ NumericVector dlogdet(SEXP arg, NumericVector lambda)
 
 
 // [[Rcpp::export]]
-NumericVector partialDerivCholesky(SEXP cholC, SEXP arg)
+NumericVector partialDerivCholesky(SEXP cholC)
 {
-  Rcpp::S4 obj(arg);
-  Rcpp::S4 obj2(cholC);
+  Rcpp::S4 obj(cholC);
 
-  IntegerVector supernodes = obj.slot("supernodes");
-  IntegerVector rowpointers = obj.slot("rowpointers");
-  IntegerVector colpointers = obj.slot("colpointers");
-  IntegerVector rowindices = obj.slot("rowindices");
+  // We use transpose for calculating Automated Differentiation.
+  IntegerVector supernodes = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("supernodes"));
+  IntegerVector colpointers = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("rowpointers"));
+  IntegerVector rowpointers = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("colpointers"));
+  IntegerVector rowindices = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("colindices"));
+  NumericVector L = Rcpp::clone<Rcpp::NumericVector>(obj.slot("entries"));
 
-  NumericVector L = obj2.slot("entries");
+  // C using indices starting at 0:
+  transf2C(supernodes);
+  transf2C(colpointers);
+  transf2C(rowpointers);
+  transf2C(rowindices);
+
   const int sz = L.size();
   NumericVector F(sz, 0.0);
   initAD(F, L, colpointers);
