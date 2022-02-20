@@ -21,7 +21,9 @@ obj <-LMMsolve(y~1, spline=~spl1D(x,nseg=nseg, scaleX=FALSE, xlim=c(0,1),
                                   pord=2),data=dat)
 summary(obj)
 
-plotDat <- obtainSmoothTrend(obj, grid=1000, includeIntercept = TRUE)
+nGrid <- 1000
+plotDat <- obtainSmoothTrend(obj, grid=nGrid, includeIntercept = TRUE)
+x0 <- seq(0, 1, length = nGrid)
 plotDat$ysim <- simFun(x0)
 
 ggplot(data = dat, aes(x = x, y = y)) +
