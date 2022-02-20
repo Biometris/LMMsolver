@@ -175,6 +175,8 @@ obtainSmoothTrend <- function(object,
     lU[[ndx.r]] <- BxTot
 
     U <- Reduce(spam::cbind.spam, lU)
+    ## the following two expression are equivalent, second one faster
+    ## v <- spam::diag.spam(U %*% Cinv %*% t(U))
     v <- spam::rowSums.spam((U %*% Cinv) * U)
     outDat[["se"]] <- sqrt(v)
   }
