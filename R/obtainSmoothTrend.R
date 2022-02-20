@@ -154,8 +154,8 @@ obtainSmoothTrend <- function(object,
   }
   # only add standard errors if deriv == 0
   if (deriv == 0) {
-    ## calculate the partial derivatives, needed for standard errors.
-    partialDerivChol <- LMMsolver:::DerivCholesky(object$cholC)
+    ## calculate the inverse of C, needed for standard errors.
+    Cinv <- spam::solve.spam(object$C)
 
     labels <- c(object$term.labels.f, object$term.labels.r)
     lU <- list()
@@ -163,7 +163,6 @@ obtainSmoothTrend <- function(object,
     for (i in seq_along(dim)) {
       lU[[i]] = spam::spam(x=0, nrow=nrow(BxTot), ncol = dim[i])
     }
-    # assume for the moment intercept in, and deriv=0:
     if (includeIntercept) {
       lU[[1]] = spam::spam(x=1, nrow=nrow(BxTot), ncol = 1)
     }
@@ -176,9 +175,7 @@ obtainSmoothTrend <- function(object,
     lU[[ndx.r]] <- BxTot
 
     U <- Reduce(spam::cbind.spam, lU)
-    v <- spam::rowSums.spam((U %*% partialDerivChol) * U)
-    # make sure v is positive
-    v <- ifelse(v > 0, v, 0)
+    v <- spam::rowSums.spam((U %*% Cinv) * U)
     outDat[["se"]] <- sqrt(v)
   }
 
