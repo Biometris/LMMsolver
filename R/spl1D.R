@@ -93,7 +93,6 @@ spl1D <- function(x,
   knots[[1]] <- PsplinesKnots(xlim[1], xlim[2], degree = degree, nseg = nseg)
   B <- Bsplines(knots[[1]], x)
   q <- ncol(B)
-  DtD <- constructPenalty(q, pord)
   X <- constructX(B, x, scaleX, pord)
   ## nominal effective dimension.
   EDnom = ncol(B) - ncol(X)
