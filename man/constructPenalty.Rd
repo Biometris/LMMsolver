@@ -4,12 +4,14 @@
 \alias{constructPenalty}
 \title{Construct P-splines penalty matrix D'D}
 \usage{
-constructPenalty(q, pord)
+constructPenalty(q, pord, dx)
 }
 \arguments{
 \item{q}{integer with dimensions.}
 
 \item{pord}{order of the penalty.}
+
+\item{dx}{distance between the knots.}
 }
 \value{
 qxq matrix D'D of class spam

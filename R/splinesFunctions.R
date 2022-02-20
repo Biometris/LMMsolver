@@ -37,6 +37,7 @@ PsplinesKnots <- function(xmin,
   attr(knots, "degree") <- degree
   attr(knots, "xmin") <- xmin
   attr(knots, "xmax") <- xmax
+  attr(knots, "dx") <- (xmax-xmin)/nseg
 
   return(knots)
 }

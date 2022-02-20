@@ -46,15 +46,17 @@ expandGinv <- function(lGinv1, lGinv2) {
 #'
 #' @param q integer with dimensions.
 #' @param pord order of the penalty.
+#' @param dx distance between the knots.
 #'
 #' @return qxq matrix D'D of class spam
 #'
 #' @keywords internal
 constructPenalty <-function(q,
-                            pord) {
+                            pord,
+                            dx) {
   D <- spam::diff.spam(spam::diag.spam(q), diff = pord)
-  DtD <- spam::crossprod.spam(D)
-  return(DtD)
+  DtDsc <- spam::crossprod.spam(D)*(1/dx)^(2*pord-1)
+  return(DtDsc)
 }
 
 #' Construct fixed part of the spline model
@@ -134,7 +136,8 @@ constructGinvSplines <- function(q,
     L <- list()
     for (j in seq_len(d)) {
       if (i == j) {
-        L[[j]] <- constructPenalty(q[j], pord = pord)
+        dx <- attr(knots[[j]], which="dx")
+        L[[j]] <- constructPenalty(q[j], pord = pord, dx = dx)
       } else {
         L[[j]] <- spam::diag.spam(q[j])
       }
