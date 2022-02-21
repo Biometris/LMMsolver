@@ -178,6 +178,8 @@ obtainSmoothTrend <- function(object,
     ## the following two expression are equivalent, second one faster
     ## v <- spam::diag.spam(U %*% Cinv %*% t(U))
     v <- spam::rowSums.spam((U %*% Cinv) * U)
+    ## !!! NOT CHANGE THIS LINE !!!
+    C = object$C + 0 * spam::crossprod.spam(U)
     outDat[["se"]] <- sqrt(v)
   }
 
