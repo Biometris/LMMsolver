@@ -154,9 +154,6 @@ obtainSmoothTrend <- function(object,
   }
   # only add standard errors if deriv == 0
   if (deriv == 0) {
-    ## calculate the inverse of C, needed for standard errors.
-    Cinv <- spam::solve.spam(object$C)
-
     labels <- c(object$term.labels.f, object$term.labels.r)
     lU <- list()
     dim <- object$dim
@@ -175,11 +172,16 @@ obtainSmoothTrend <- function(object,
     lU[[ndx.r]] <- BxTot
 
     U <- Reduce(spam::cbind.spam, lU)
-    ## the following two expression are equivalent, second one faster
-    ## v <- spam::diag.spam(U %*% Cinv %*% t(U))
-    v <- spam::rowSums.spam((U %*% Cinv) * U)
+
     ## !!! NOT CHANGE THIS LINE !!!
     C = object$C + 0 * spam::crossprod.spam(U)
+
+    cholC <- chol(C)
+    A <- LMMsolver:::DerivCholesky(cholC)
+
+    ## Equivalent to v <- diag(U %*% A %*% t(U))
+    v <- spam::rowSums.spam((U %*% A) * U)
+
     outDat[["se"]] <- sqrt(v)
   }
 
