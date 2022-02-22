@@ -1,29 +1,40 @@
-# Simulate data, using first example JOPS book:
+# Simulated data use Jullion and Lambert 2007:
+
 library(ggplot2)
 library(LMMsolver)
 library(spam)
-library(agridat)
 
-n = 150
-set.seed(2016)
-x = seq(0, 1, length = n)
-sigma2e = 0.15^2
-simFun <- function(x) {0.3 + sin(1.2 * x + 0.3) }
+set.seed(12345)
 
-y =  simFun(x) + rnorm(n) * sqrt(sigma2e)
+n <- 250
+xmin <- -2
+xmax <-  2
+x <- seq(xmin, xmax, length = n)
+
+# see Jullion and Lambert 2007:
+simFun <- function(x) {
+  (1+exp(-4*(x-0.3)))^(-1) +
+  (1+exp( 3*(x-0.2)))^(-1) +
+  (1+exp(-4*(x-0.7)))^(-1) +
+  (1+exp( 5*(x-0.8)))^(-1)
+}
+
+sigma2e <- 0.0169
+
+y <-  simFun(x) + rnorm(n, sd = sqrt(sigma2e))
 dat <- data.frame(x=x,y=y)
 
 # Make a matrix containing the B-spline basis
-nseg = 15
+nseg <- 1000
 
 # solve
-obj <-LMMsolve(y~1, spline=~spl1D(x,nseg=nseg, scaleX=FALSE, xlim=c(0,1),
-                                  pord=2),data=dat)
+obj <-LMMsolve(y~1, spline=~spl1D(x,nseg=nseg, scaleX=FALSE, xlim=c(xmin,xmax),
+                                  pord=2),data=dat, trace=TRUE)
 summary(obj)
 
 nGrid <- 1000
 plotDat <- obtainSmoothTrend(obj, grid=nGrid, includeIntercept = TRUE)
-x0 <- seq(0, 1, length = nGrid)
+x0 <- seq(xmin, xmax, length = nGrid)
 plotDat$ysim <- simFun(x0)
 
 ggplot(data = dat, aes(x = x, y = y)) +
@@ -35,7 +46,7 @@ ggplot(data = dat, aes(x = x, y = y)) +
   theme(panel.grid = element_blank())
 
 # use eigendecomposition
-knots <- LMMsolver:::PsplinesKnots(xmin=0,xmax=1,degree=3,nseg=nseg)
+knots <- LMMsolver:::PsplinesKnots(xmin=xmin,xmax=xmax,degree=3,nseg=nseg)
 B <- LMMsolver:::Bsplines(knots, x)
 q <- ncol(B)
 dx <- attr(knots,which='dx')
