@@ -129,7 +129,7 @@ constructGinvSplines <- function(q,
   ## dimension
   d <- length(q)
   lCCt <- lapply(X = seq_len(d),
-              FUN = function(i) { constructCCt(knots[[i]], pord)})
+                 FUN = function(i) { constructCCt(knots[[i]], pord)})
   CCt <- Reduce("kronecker", lCCt)
   lGinv <- list()
   for (i in seq_len(d)) {
@@ -197,7 +197,8 @@ calcNomEffDim <- function(X,
 
 #' Check variables in formula
 #'
-#' Check that all variables in a formula are present in the data.
+#' Check that all variables in a formula are present in the data. The variables
+#' are converted to a factor in the data.frame as well.
 #'
 #' @importFrom utils hasName
 #'
@@ -215,7 +216,13 @@ checkFormVars <- function(formula,
            "are not in the data:\n", paste0(missVars, collapse = ", "), "\n",
            call. = FALSE)
     }
+    for (formVar in formVars) {
+      if (is.character(data[[formVar]])) {
+        data[[formVar]] <- factor(data[[formVar]])
+      }
+    }
   }
+  return(data)
 }
 
 #' @noRd

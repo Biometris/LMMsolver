@@ -143,12 +143,12 @@ LMMsolve <- function(fixed,
     if (!(weights %in% colnames(data))) {
       stop("weights not defined in dataframe data")
     }
-    w = data[[weights]]
+    w <- data[[weights]]
     if (!is.numeric(w) || sum(is.na(w)) != 0 || min(w) <= 0) {
       stop("weights should be a numeric vector with positive values")
     }
   } else {
-    w = rep(1.0, nrow(data))
+    w <- rep(1.0, nrow(data))
   }
   if (!is.null(residual) &&
       (!inherits(residual, "formula") || length(terms(residual)) != 2)) {
@@ -166,9 +166,9 @@ LMMsolve <- function(fixed,
   chkGroup <- checkGroup(random, group)
   random <- chkGroup$random
   group <- chkGroup$group
-  checkFormVars(fixed, data)
-  checkFormVars(random, data)
-  checkFormVars(residual, data)
+  data <- checkFormVars(fixed, data)
+  data <- checkFormVars(random, data)
+  data <- checkFormVars(residual, data)
   ## Remove NA for response variable from data.
   respVar <- all.vars(fixed)[attr(terms(fixed), "response")]
   respVarNA <- is.na(data[[respVar]])

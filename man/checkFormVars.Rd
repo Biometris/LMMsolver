@@ -7,6 +7,7 @@
 checkFormVars(formula, data)
 }
 \description{
-Check that all variables in a formula are present in the data.
+Check that all variables in a formula are present in the data. The variables
+are converted to a factor in the data.frame as well.
 }
 \keyword{internal}
