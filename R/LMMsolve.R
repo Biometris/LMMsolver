@@ -175,7 +175,7 @@ LMMsolve <- function(fixed,
   if (sum(respVarNA) > 0) {
     warning(sum(respVarNA), " observations removed with missing value for ",
             respVar, ".\n", call. = FALSE)
-    data <- data[!respVarNA, ]
+    data <- droplevels(data[!respVarNA, ])
     ## remove missing values for weight (default w=1).
     w <- w[!respVarNA]
   }
