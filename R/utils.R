@@ -216,20 +216,22 @@ checkFormVars <- function(formula,
            "are not in the data:\n", paste0(missVars, collapse = ", "), "\n",
            call. = FALSE)
     }
-    ## Check that variables have at least some non NA values.
-    naVars <- formVars[sapply(X = formVars, FUN = function(formVar) {
-      all(is.na(data[[formVar]]))
-    })]
-    if (length(naVars) > 0) {
-      ## Get the name of formula as passed to the function.
-      formName <- deparse(substitute(formula))
-      stop("The following variables in the ", formName, " part of the model ",
-           "only have missing values:\n",
-           paste0(naVars, collapse = ", "), "\n", call. = FALSE)
-    }
-    for (formVar in formVars) {
-      if (is.character(data[[formVar]])) {
-        data[[formVar]] <- factor(data[[formVar]])
+    if (length(formVars) > 0) {
+      ## Check that variables have at least some non NA values.
+      naVars <- formVars[sapply(X = formVars, FUN = function(formVar) {
+        all(is.na(data[[formVar]]))
+      })]
+      if (length(naVars) > 0) {
+        ## Get the name of formula as passed to the function.
+        formName <- deparse(substitute(formula))
+        stop("The following variables in the ", formName, " part of the model ",
+             "only have missing values:\n",
+             paste0(naVars, collapse = ", "), "\n", call. = FALSE)
+      }
+      for (formVar in formVars) {
+        if (is.character(data[[formVar]])) {
+          data[[formVar]] <- factor(data[[formVar]])
+        }
       }
     }
   }
