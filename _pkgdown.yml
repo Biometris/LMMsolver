@@ -1,6 +1,11 @@
 home:
   title: An R package for providing an efficient and flexible system to solve sparse mixed model equations
 
+template:
+  opengraph:
+    image:
+      src: man/figures/README-Plot_USprecip-1.png
+
 navbar:
   title: "LMMsolver"
   left:
@@ -28,6 +33,8 @@ navbar:
           href: https://biometris.github.io/statgenHTP
         - text: "statgenIBD"
           href: https://biometris.github.io/statgenIBD
+        - text: "statgenMPP"
+          href: https://biometris.github.io/statgenMPP
     - icon: fa-github fa-lg fab
       text: "github"
       href: https://github.com/Biometris/LMMsolver
