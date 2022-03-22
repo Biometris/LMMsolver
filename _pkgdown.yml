@@ -1,3 +1,7 @@
+url: ~
+template:
+  bootstrap: 5
+
 home:
   title: An R package for providing an efficient and flexible system to solve sparse mixed model equations
 
