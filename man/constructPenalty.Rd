@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{constructPenalty}
 \alias{constructPenalty}
-\title{Construct P-splines penalty matrix D'D}
+\title{Construct the penalty matrix}
 \usage{
 constructPenalty(q, pord, dx)
 }
@@ -14,9 +14,14 @@ constructPenalty(q, pord, dx)
 \item{dx}{distance between the knots.}
 }
 \value{
-qxq matrix D'D of class spam
+qxq penalty matrix of class spam
 }
 \description{
-Construct P-splines penalty matrix D'D
+Construct a scaled version of the P-splines penalty matrix, see details.
+}
+\details{
+The P-spline penalty matrix has the form \eqn{D'D}, where \eqn{D} is the `pord` order
+difference matrix. To make the penalty matrix more stable if there are many knots,
+a scaled version is used, \eqn{(1/dx)^(2pord-1) D'D}.
 }
 \keyword{internal}

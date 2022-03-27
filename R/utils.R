@@ -42,13 +42,19 @@ expandGinv <- function(lGinv1, lGinv2) {
   return(lGinv)
 }
 
-#' Construct P-splines penalty matrix D'D
+#' Construct the penalty matrix
+#'
+#' Construct a scaled version of the P-splines penalty matrix, see details.
+#'
+#' The P-spline penalty matrix has the form \eqn{D'D}, where \eqn{D} is the `pord` order
+#' difference matrix. To make the penalty matrix more stable if there are many knots,
+#' a scaled version is used, \eqn{(1/dx)^(2pord-1) D'D}.
 #'
 #' @param q integer with dimensions.
 #' @param pord order of the penalty.
 #' @param dx distance between the knots.
 #'
-#' @return qxq matrix D'D of class spam
+#' @return qxq penalty matrix of class spam
 #'
 #' @keywords internal
 constructPenalty <-function(q,
