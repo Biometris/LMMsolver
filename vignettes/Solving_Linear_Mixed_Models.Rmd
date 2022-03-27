@@ -170,7 +170,7 @@ The effective dimensions are:
 summary(obj2)
 ```
 
-The fitted smooth trend can be obtained as explained before:
+The fitted smooth trend can be obtained as explained before, with standard error bands in blue:
 
 ```{r APSIMplot}
 plotDat2 <- obtainSmoothTrend(obj2, grid = 1000, includeIntercept = TRUE)
@@ -178,6 +178,8 @@ plotDat2 <- obtainSmoothTrend(obj2, grid = 1000, includeIntercept = TRUE)
 ggplot(data = APSIMdat, aes(x = das, y = biomass)) +
   geom_point(size = 1.2) +
   geom_line(data = plotDat2, aes(y = ypred), color = "red", size = 1) +
+  geom_line(data = plotDat2, aes(y = ypred-2*se), col='blue', size=1) +
+  geom_line(data = plotDat2, aes(y = ypred+2*se), col='blue', size=1) +
   labs(title = "APSIM biomass as function of time", 
        x = "days after sowing", y = "biomass (kg)") +
   theme(panel.grid = element_blank())
