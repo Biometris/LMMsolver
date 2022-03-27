@@ -311,6 +311,22 @@ LMMsolve <- function(fixed,
   ## construct inverse of residual matrix R.
   lRinv <- constructRinv(df = data, residual = residual, weights = w)
   y <- model.response(mf)
+
+  ## check whether the variance for response is not zero:
+  if (is.null(residual)){
+    if (var(y) < 1.0e-15)
+      stop("variance response variable < 1.0e-15")
+  } else {
+    column <- all.vars(residual)
+    varGrp <- tapply(y, data[[column]], FUN = var)
+    ndxVar <- which(varGrp < 1.0e-15)
+    if (length(ndxVar) > 0) {
+      levels_f <- levels(data[[column]])
+      levelsNoVar <- paste(levels_f[ndxVar], collapse = " ")
+      stop("response variable variance < 1.0e-15 for levels:",
+           levelsNoVar, "\n")
+    }
+  }
   ## Fit models.
   obj <- sparseMixedModels(y = y, X = X, Z = Z, lGinv = lGinv, lRinv = lRinv,
                            tolerance = tolerance, trace = trace, maxit = maxit,
