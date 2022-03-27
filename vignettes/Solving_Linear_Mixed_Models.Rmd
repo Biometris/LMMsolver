@@ -94,7 +94,7 @@ head(genEff, 4)
 
 The first genotype (G01) is the reference, as genotypes were modelled as fixed effect in the model.
 
-The smooth trend along the field on a dense grid of 1000 points can be obtained as follows:
+The smooth trend with the standard errors along the field on a dense grid of 1000 points can be obtained as follows:
 
 ```{r ObtainSmoothTrend1}
 ## Extract smooth trend from mixed model.
