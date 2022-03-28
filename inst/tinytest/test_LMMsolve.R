@@ -113,3 +113,19 @@ modChar <-  LMMsolve(fixed = pheno ~ cross, residual = ~cross,
 ## Checking equality gives a warning since spam doesn't check attributes.
 expect_equivalent(modChar, mod1)
 
+## Test that interaction terms are labeled correctly.
+testDatInt <- testDat
+testDatInt[["rep"]] <- factor(c(rep(c("r1", "r2"), each = 50),
+                                rep(c("r1", "r2"), each = 40)))
+
+modInt <- LMMsolve(fixed = pheno ~ rep:cross, data = testDatInt)
+coefsInt <- coef(modInt)$`rep:cross`
+expect_equal(names(coefsInt),
+             c("rep_r1:cross_AxB", "rep_r2:cross_AxB", "rep_r1:cross_AxC",
+               "rep_r2:cross_AxC"))
+expect_equivalent(coefsInt,
+                  c(-0.438185444999992, -0.158384204999993, 0.394857450000009, 0))
+
+expect_silent(LMMsolve(fixed = pheno ~ rep + rep:cross, data = testDatInt))
+expect_silent(LMMsolve(fixed = pheno ~ rep*cross, data = testDatInt))
+
