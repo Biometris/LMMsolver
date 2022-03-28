@@ -86,3 +86,15 @@ expect_stdout(LMMsolve(fixed = pheno ~ cross, data = testDat, trace = TRUE),
 expect_stdout(LMMsolve(fixed = pheno ~ cross, data = testDat, trace = TRUE),
               "2 -207.1218")
 
+## Test that zero-variance in response in caught.
+testDatZv1 <- testDatZv2 <- testDat
+testDatZv1[["pheno"]] <- 1
+testDatZv2[testDatZv2[["cross"]] == "AxB", "pheno"] <- 1
+
+expect_error(LMMsolve(fixed = pheno ~ cross, data = testDatZv1),
+             "Variance response variable < 1.0e-15")
+expect_error(LMMsolve(fixed = pheno ~ cross, residual = ~cross,
+                      data = testDatZv2),
+             "Variance response variable < 1.0e-15 for levels")
+
+

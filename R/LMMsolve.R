@@ -311,19 +311,19 @@ LMMsolve <- function(fixed,
   ## construct inverse of residual matrix R.
   lRinv <- constructRinv(df = data, residual = residual, weights = w)
   y <- model.response(mf)
-
-  ## check whether the variance for response is not zero:
-  if (is.null(residual)){
-    if (var(y) < 1.0e-15)
-      stop("variance response variable < 1.0e-15")
+  ## check whether the variance for response is not zero.
+  if (is.null(residual)) {
+    if (var(y) < 1.0e-15) {
+      stop("Variance response variable < 1.0e-15.\n")
+    }
   } else {
-    column <- all.vars(residual)
-    varGrp <- tapply(y, data[[column]], FUN = var)
+    resVar <- all.vars(residual)
+    varGrp <- tapply(X = y, INDEX = data[[resVar]], FUN = var)
     ndxVar <- which(varGrp < 1.0e-15)
     if (length(ndxVar) > 0) {
-      levels_f <- levels(data[[column]])
-      levelsNoVar <- paste(levels_f[ndxVar], collapse = " ")
-      stop("response variable variance < 1.0e-15 for levels:",
+      levels_f <- levels(data[[resVar]])
+      levelsNoVar <- paste(levels_f[ndxVar], collapse = ", ")
+      stop("Variance response variable < 1.0e-15 for levels:\n",
            levelsNoVar, "\n")
     }
   }
