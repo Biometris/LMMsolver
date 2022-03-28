@@ -344,17 +344,21 @@ nameCoefs <- function(coefs,
         labDat <- lapply(X = seq_along(labDat), FUN = function(i) {
           paste0(labISplit[i], "_", labDat[[i]])
         })
-        ## For fixed terms an extra 0 for the reference level has to be added.
         if (type == "fixed") {
-          coefI <- c(rep(0, times = length(unique(labDat[[1]]))), coefI)
           labDatAlt <- lapply(X = labDat, FUN = function(i) {
             gsub("_", "", i)
           })
           interAcLevsIAlt <- levels(interaction(labDatAlt, sep = ":",
                                                 drop = TRUE))
           interAcLevsI <- levels(interaction(labDat, sep = ":", drop = TRUE))
+          ## For fixed terms an extra 0 for the reference levels have to be added.
+          coefI <- c(rep(0, times = length(interAcLevsIAlt) - length(coefI)),
+                     coefI)
+          ## Zeros correspond to missing colums from design matrix.
+          ## Non-zeros to columns that are present in design matrix.
           names(coefI) <- c(interAcLevsI[!interAcLevsIAlt %in% colnames(desMat)],
                             interAcLevsI[interAcLevsIAlt %in% colnames(desMat)])
+          ## Reorder.
           coefI <- coefI[interAcLevsI]
         }
         names(coefI) <- levels(interaction(labDat, sep = ":", drop = TRUE))
