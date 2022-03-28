@@ -313,17 +313,17 @@ LMMsolve <- function(fixed,
   y <- model.response(mf)
   ## check whether the variance for response is not zero.
   if (is.null(residual)) {
-    if (var(y) < 1.0e-15) {
-      stop("Variance response variable < 1.0e-15.\n")
+    if (var(y) < .Machine$double.eps / 2) {
+      stop("Variance response variable zero or almost zero.\n")
     }
   } else {
     resVar <- all.vars(residual)
     varGrp <- tapply(X = y, INDEX = data[[resVar]], FUN = var)
-    ndxVar <- which(varGrp < 1.0e-15)
+    ndxVar <- which(varGrp < .Machine$double.eps / 2)
     if (length(ndxVar) > 0) {
       levels_f <- levels(data[[resVar]])
       levelsNoVar <- paste(levels_f[ndxVar], collapse = ", ")
-      stop("Variance response variable < 1.0e-15 for levels:\n",
+      stop("Variance response variable zero or almost zero for levels:\n",
            levelsNoVar, "\n")
     }
   }

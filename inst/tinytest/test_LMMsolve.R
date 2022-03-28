@@ -92,10 +92,10 @@ testDatZv1[["pheno"]] <- 1
 testDatZv2[testDatZv2[["cross"]] == "AxB", "pheno"] <- 1
 
 expect_error(LMMsolve(fixed = pheno ~ cross, data = testDatZv1),
-             "Variance response variable < 1.0e-15")
+             "Variance response variable zero or almost zero")
 expect_error(LMMsolve(fixed = pheno ~ cross, residual = ~cross,
                       data = testDatZv2),
-             "Variance response variable < 1.0e-15 for levels")
+             "Variance response variable zero or almost zero for levels")
 
 ## Test that variables with only NA are caught.
 testDatNA <- testDat
