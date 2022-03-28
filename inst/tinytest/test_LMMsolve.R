@@ -103,3 +103,13 @@ testDatNA[["cross"]] <- NA
 expect_error(LMMsolve(fixed = pheno ~ cross, data = testDatNA),
              "in the fixed part of the model only have missing values")
 
+## Test that result for character variables is identical to that of factors.
+testDatChar <- testDat
+testDatChar[["cross"]] <- as.character(testDatChar[["cross"]])
+
+modChar <-  LMMsolve(fixed = pheno ~ cross, residual = ~cross,
+                     data = testDatChar)
+
+## Checking equality gives a warning since spam doesn't check attributes.
+expect_equivalent(modChar, mod1)
+
