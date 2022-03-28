@@ -97,4 +97,9 @@ expect_error(LMMsolve(fixed = pheno ~ cross, residual = ~cross,
                       data = testDatZv2),
              "Variance response variable < 1.0e-15 for levels")
 
+## Test that variables with only NA are caught.
+testDatNA <- testDat
+testDatNA[["cross"]] <- NA
+expect_error(LMMsolve(fixed = pheno ~ cross, data = testDatNA),
+             "in the fixed part of the model only have missing values")
 
