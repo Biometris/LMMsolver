@@ -22,19 +22,14 @@ probabilities (Li et al. 2021).
 
 ## Installation
 
-  - Install from CRAN:
-
-<!-- end list -->
+-   Install from CRAN:
 
 ``` r
 install.packages("LMMsolver")
 ```
 
-  - Install latest development version from GitHub (requires
-    [remotes](https://github.com/r-lib/remotes)
-package):
-
-<!-- end list -->
+-   Install latest development version from GitHub (requires
+    [remotes](https://github.com/r-lib/remotes) package):
 
 ``` r
 remotes::install_github("Biometris/LMMsolver", ref = "develop", dependencies = TRUE)
@@ -76,19 +71,18 @@ penalty parameters:
 summary(obj1)
 #> Table with effective dimensions and penalties: 
 #> 
-#>          Term Effective Model Nominal     Ratio     Penalty
-#> 1 (Intercept)    1.0000     1       1 1.0000000  0.00000000
-#> 2        splF    3.0000     3       3 1.0000000  0.00000000
-#> 3      s(lon)  302.6004  1936    1932 0.1566255  0.09679905
-#> 4      s(lat)  409.0868  1936    1932 0.2117426  0.36223681
-#> 5    residual 5190.3128  5906    5902 0.8794159 13.52577271
+#>           Term Effective Model Nominal Ratio Penalty
+#>    (Intercept)      1.00     1       1  1.00    0.00
+#>  lin(lon, lat)      3.00     3       3  1.00    0.00
+#>         s(lon)    302.60  1936    1932  0.16    0.26
+#>         s(lat)    409.09  1936    1932  0.21    0.08
+#>       residual   5190.31  5906    5902  0.88   13.53
 #> 
 #>  Total Effective Dimension: 5906
 ```
 
 The spatial trend for the precipitation can now be plotted on the map of
-the
-USA.
+the USA.
 
 ``` r
 plotDat <- obtainSmoothTrend(obj1, grid = c(200, 300), includeIntercept = TRUE)
@@ -114,67 +108,71 @@ vignette("Solving_Linear_Mixed_Models")
 
 # References
 
-<div id="refs" class="references">
+<div id="refs" class="references csl-bib-body hanging-indent">
 
-<div id="ref-Boer2020">
+<div id="ref-Boer2020" class="csl-entry">
 
-Boer, Martin P., Hans Peter Piepho, and Emlyn R. Williams. 2020. “Linear
-Variance, P-splines and Neighbour Differences for Spatial Adjustment in
-Field Trials: How are they Related?” *J. Agric. Biol. Environ. Stat.* 25
-(4). Springer: 676–98. <https://doi.org/10.1007/S13253-020-00412-4>.
+Boer, Martin P., Hans Peter Piepho, and Emlyn R. Williams. 2020. “<span
+class="nocase">Linear Variance, P-splines and Neighbour Differences for
+Spatial Adjustment in Field Trials: How are they Related?</span>” *J.
+Agric. Biol. Environ. Stat.* 25 (4): 676–98.
+<https://doi.org/10.1007/S13253-020-00412-4>.
 
 </div>
 
-<div id="ref-Bustos-Korts2019">
+<div id="ref-Bustos-Korts2019" class="csl-entry">
 
 Bustos-Korts, Daniela, Martin P. Boer, Marcos Malosetti, Scott Chapman,
-Karine Chenu, Bangyou Zheng, and Fred A. van Eeuwijk. 2019. “Combining
-Crop Growth Modeling and Statistical Genetic Modeling to Evaluate
-Phenotyping Strategies.” *Front. Plant Sci.* 10 (November). Frontiers
-Media S.A. <https://doi.org/10.3389/fpls.2019.01491>.
+Karine Chenu, Bangyou Zheng, and Fred A. van Eeuwijk. 2019. “<span
+class="nocase">Combining Crop Growth Modeling and Statistical Genetic
+Modeling to Evaluate Phenotyping Strategies</span>.” *Front. Plant Sci.*
+10 (November). <https://doi.org/10.3389/fpls.2019.01491>.
 
 </div>
 
-<div id="ref-Furrer2010">
+<div id="ref-Furrer2010" class="csl-entry">
 
-Furrer, R, and SR Sain. 2010. “spam: A sparse matrix R package with
-emphasis on MCMC methods for Gaussian Markov random fields.” *J. Stat.
-Softw.* <https://core.ac.uk/download/pdf/6340272.pdf>.
+Furrer, R, and SR Sain. 2010. “<span class="nocase">spam: A sparse
+matrix R package with emphasis on MCMC methods for Gaussian Markov
+random fields</span>.” *J. Stat. Softw.*
+<https://core.ac.uk/download/pdf/6340272.pdf>.
 
 </div>
 
-<div id="ref-Li2021">
+<div id="ref-Li2021" class="csl-entry">
 
 Li, Wenhao, Martin P. Boer, Chaozhi Zheng, Ronny V. L. Joosen, and Fred
-A. van Eeuwijk. 2021. “An IBD-based mixed model approach for QTL mapping
-in multiparental populations.” *Theor. Appl. Genet. 2021* 1 (August).
-Springer: 1–18. <https://doi.org/10.1007/S00122-021-03919-7>.
+A. van Eeuwijk. 2021. “<span class="nocase">An IBD-based mixed model
+approach for QTL mapping in multiparental populations</span>.” *Theor.
+Appl. Genet. 2021* 1 (August): 1–18.
+<https://doi.org/10.1007/S00122-021-03919-7>.
 
 </div>
 
-<div id="ref-Patterson1971">
+<div id="ref-Patterson1971" class="csl-entry">
 
-Patterson, HD, and R Thompson. 1971. “Recovery of inter-block
-information when block sizes are unequal.” *Biometrika*.
-<https://doi.org/10.1093/biomet/58.3.545>.
+Patterson, HD, and R Thompson. 1971. “<span class="nocase">Recovery of
+inter-block information when block sizes are unequal</span>.”
+*Biometrika*. <https://doi.org/10.1093/biomet/58.3.545>.
 
 </div>
 
-<div id="ref-Rodriguez-Alvarez2018">
+<div id="ref-Rodriguez-Alvarez2018" class="csl-entry">
 
 Rodríguez-Álvarez, María Xosé, Martin P. Boer, Fred A. van Eeuwijk, and
-Paul H.C. Eilers. 2018. “Correcting for spatial heterogeneity in plant
-breeding experiments with P-splines.” *Spat. Stat.* 23 (March).
-Elsevier: 52–71. <https://doi.org/10.1016/J.SPASTA.2017.10.003>.
+Paul H. C. Eilers. 2018. “<span class="nocase">Correcting for spatial
+heterogeneity in plant breeding experiments with P-splines</span>.”
+*Spat. Stat.* 23 (March): 52–71.
+<https://doi.org/10.1016/J.SPASTA.2017.10.003>.
 
 </div>
 
-<div id="ref-Rodriguez-Alvarez2015">
+<div id="ref-Rodriguez-Alvarez2015" class="csl-entry">
 
 Rodríguez-Álvarez, María Xosé, Dae Jin Lee, Thomas Kneib, María Durbán,
-and Paul Eilers. 2015. “Fast smoothing parameter separation in
-multidimensional generalized P-splines: the SAP algorithm.” *Stat.
-Comput.* 25 (5). Kluwer Academic Publishers: 941–57.
+and Paul Eilers. 2015. “<span class="nocase">Fast smoothing parameter
+separation in multidimensional generalized P-splines: the SAP
+algorithm</span>.” *Stat. Comput.* 25 (5): 941–57.
 <https://doi.org/10.1007/S11222-014-9464-2>.
 
 </div>
