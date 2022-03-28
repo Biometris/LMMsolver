@@ -1,14 +1,12 @@
 url: ~
 template:
   bootstrap: 5
-
-home:
-  title: An R package for providing an efficient and flexible system to solve sparse mixed model equations
-
-template:
   opengraph:
     image:
       src: man/figures/README-Plot_USprecip-1.png
+
+home:
+  title: An R package for providing an efficient and flexible system to solve sparse mixed model equations
 
 navbar:
   title: "LMMsolver"
