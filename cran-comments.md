@@ -1,14 +1,16 @@
 ## New release
 
-- Initial CRAN release
-- After earlier release fixed links in vignette and README
+- Extended functionality
+- Improved efficiency in most calculations
+- Fixed bugs discovered after initial release
 
 ----
 
 ## Test environments
 
-* local Windows 10 install, R 4.1.1
-* winbuilder (release)
+* local Windows 10 install, R 4.1.3
+* winbuilder (develop)
+* macbuilder (release)
 * Ubuntu (on github actions, devel and release)
 * macOS (on github actions, release)
 * R-hub (devel and release)
@@ -23,14 +25,6 @@ There was 1 NOTE
 
 * checking CRAN incoming feasibility ... NOTE
 Maintainer: 'Bart-Jan van Rossum <bart-jan.vanrossum@wur.nl>'
-
-New submission
-
-Possibly misspelled words in DESCRIPTION:
-  IBD (9:54)
-  multiparental (8:5)
-  
-These are spelled correctly.   
 
 Found the following (possibly) invalid URLs:
   URL: https://doi.org/10.2307/1390762
