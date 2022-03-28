@@ -16,7 +16,8 @@ An object of class \code{LMMsolve} contains the following components:
 \item{yhat}{The fitted values}
 \item{residuals}{The residuals}
 \item{nIter}{The number of iterations for the mixed model to converge}
-\item{C}{}
+\item{C}{The mixed model coefficient matrix after last iteration}
+\item{cholC}{The cholesky decomposition of coefficient matrix C}
 \item{constantREML}{The REML constant}
 \item{dim}{The dimensions for each of the fixed and random terms in the
 mixed model}

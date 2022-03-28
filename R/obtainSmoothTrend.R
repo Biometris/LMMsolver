@@ -158,13 +158,12 @@ obtainSmoothTrend <- function(object,
     lU <- list()
     dim <- object$dim
     for (i in seq_along(dim)) {
-      lU[[i]] = spam::spam(x=0, nrow=nrow(BxTot), ncol = dim[i])
+      lU[[i]] = spam::spam(x = 0, nrow = nrow(BxTot), ncol = dim[i])
     }
     if (includeIntercept) {
-      lU[[1]] = spam::spam(x=1, nrow=nrow(BxTot), ncol = 1)
+      lU[[1]] = spam::spam(x = 1, nrow = nrow(BxTot), ncol = 1)
     }
-    if (!is.null(splRes$term.labels.f))
-    {
+    if (!is.null(splRes$term.labels.f)) {
       ndx.f <- which(splRes$term.labels.f == labels)
       lU[[ndx.f]] <- XTot
     }
@@ -177,14 +176,13 @@ obtainSmoothTrend <- function(object,
     C = object$C + 0 * spam::crossprod.spam(U)
 
     cholC <- chol(C)
-    A <- LMMsolver:::DerivCholesky(cholC)
+    A <- DerivCholesky(cholC)
 
     ## Equivalent to v <- diag(U %*% A %*% t(U))
     v <- spam::rowSums.spam((U %*% A) * U)
 
     outDat[["se"]] <- sqrt(v)
   }
-
   return(outDat)
 }
 

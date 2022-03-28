@@ -93,7 +93,7 @@
 #' \code{\link{spl2D}}, \code{\link{spl3D}}
 #'
 #' @importFrom stats model.frame terms model.matrix contrasts as.formula
-#' terms.formula aggregate model.response
+#' terms.formula aggregate model.response var
 #'
 #' @export
 LMMsolve <- function(fixed,
