@@ -172,9 +172,13 @@ obtainSmoothTrend <- function(object,
 
     U <- Reduce(spam::cbind.spam, lU)
 
-    ## !!! NOT CHANGE THIS LINE !!!
+    ## !!! NOT CHANGE THE LINE OF CODE BELOW !!!
+    ## It adds extra zeros ("fill-ins") to matrix C, needed
+    ## to calculate the Partial Derivatives of Cholesky, not equal to zero.
     C = object$C + 0 * spam::crossprod.spam(U)
 
+    ## The Cholesky Decompositon and the partial derivatives
+    ## are calculated.
     cholC <- chol(C)
     A <- DerivCholesky(cholC)
 
