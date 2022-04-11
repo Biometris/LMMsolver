@@ -73,3 +73,8 @@ expect_equal(round(deviance(obj1), 2) , devJABES2020paper_LV)
 ## Check that full LMM solve object is correct.
 expect_equivalent_to_reference(obj1, "spl1DFull")
 
+## Test that LMMsolver:: can be used inside spline part.
+expect_silent(LMMsolve(fixed = yield ~ rep + gen,
+                       spline = ~LMMsolver::spl1D(x = plot, nseg = N - 1),
+                       data = john.alpha))
+
