@@ -10,7 +10,7 @@
 #' trend should be computed. Column names should include the names used when
 #' fitting the spline model.
 #' @param includeIntercept Should the value of the intercept be included in
-#' the computed smooth trend?
+#' the computed smooth trend? Ignored if deriv > 0.
 #' @param deriv Derivative of B-splines, default 0. At the moment only
 #' implemented for spl1D.
 #' @param which An integer, for if there are multiple splxD terms in the model.
@@ -82,6 +82,9 @@ obtainSmoothTrend <- function(object,
     deriv <- 0
     warning("deriv is ignored for ", splDim, "-dimensional splines.\n",
             call. = FALSE)
+  }
+  if (deriv == 0) {
+    includeIntercept <- FALSE
   }
   if (!is.null(newdata)) {
     if (!inherits(newdata, "data.frame")) {
