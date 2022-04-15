@@ -83,7 +83,7 @@ obtainSmoothTrend <- function(object,
     warning("deriv is ignored for ", splDim, "-dimensional splines.\n",
             call. = FALSE)
   }
-  if (deriv == 0) {
+  if (deriv > 0) {
     includeIntercept <- FALSE
   }
   if (!is.null(newdata)) {
