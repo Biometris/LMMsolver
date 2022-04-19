@@ -140,7 +140,18 @@ obtainSmoothTrend <- function(object,
   if (is.null(XTot)) {
     coefFix <- 0
   } else {
-    coefFix <- as.vector(XTot %*% coef(object)[[splF_name]])
+    if (deriv == 0) {
+      coefFix <- as.vector(XTot %*% coef(object)[[splF_name]])
+    } else {
+      ## only for spl1D, deriv option ignored for splDim > 1
+      if (deriv == 1) {
+        ## fixed part is the slope
+        coefFix <- coef(object)[[splF_name]]
+      } else {
+        ## second derivative equal to zero
+        coefFix <- 0
+      }
+    }
   }
   coefRan <- as.vector(BxTot %*% coef(object)[[splR_name]])
   ## Compute fitted values.
