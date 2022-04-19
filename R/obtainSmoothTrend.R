@@ -138,14 +138,13 @@ obtainSmoothTrend <- function(object,
     mu <- 0
   }
   if (is.null(XTot)) {
-    bc <- 0
+    coefFix <- 0
   } else {
-    ## Remove leading zero, added for reference level.
-    bc <- as.vector(XTot %*% coef(object)[[splF_name]])
+    coefFix <- as.vector(XTot %*% coef(object)[[splF_name]])
   }
-  sc <- as.vector(BxTot %*% coef(object)[[splR_name]])
+  coefRan <- as.vector(BxTot %*% coef(object)[[splR_name]])
   ## Compute fitted values.
-  fit <- mu + bc + sc
+  fit <- mu + coefFix + coefRan
   ## Construct output data.frame.
   if (!is.null(newdata)) {
     outDat <- newdata

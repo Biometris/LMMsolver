@@ -28,7 +28,7 @@ fitting the spline model.}
 implemented for spl1D.}
 
 \item{includeIntercept}{Should the value of the intercept be included in
-the computed smooth trend?}
+the computed smooth trend? Ignored if deriv > 0.}
 
 \item{which}{An integer, for if there are multiple splxD terms in the model.
 Default value is 1.}
