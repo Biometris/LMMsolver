@@ -13,7 +13,7 @@ tr <- function(M) { sum(diag(M)) }
 data(john.alpha)
 dat <- john.alpha
 # remove one observation
-# dat <- dat[-20,]
+dat <- dat[-20,]
 
 obj1 <- asreml(fixed = yield~rep+gen,
                  random=~rep:block,
@@ -38,7 +38,7 @@ obj2$logL
 
 # predictions using asreml
 pred1 <- predict(obj1, classify='gen',sed=TRUE)
-head(pred1$pvals[1:4,])
+#head(pred1$pvals[1:4,])
 pred1$sed[1:3,1:3]
 
 #
@@ -141,4 +141,33 @@ A2[1,2] <- A2[2,1] <- sqrt(dlogdet1[2])
 A2[1,3] <- A2[3,1] <- sqrt(dlogdet1[3])
 A2[2,3] <- A2[3,2] <- sqrt(dlogdet1[4])
 all.equal(A, A2)
+
+# calculate se using DerivCholesky() function:
+
+cholC <- obj2$cholC
+dC <- LMMsolver:::DerivCholesky(cholC)
+Dg <- rbind(Dg1,Dg2,Dg3)
+sqrt(diag(Dg %*% dC %*% t(Dg)))
+sqrt(rowSums((Dg %*% dC) * Dg))
+c(se1, se2, se3)
+
+Dg12 <- as.spam(Dg1-Dg2)
+Dg13 <- as.spam(Dg1-Dg3)
+Dg23 <- as.spam(Dg2-Dg3)
+
+# sed, add "fill-in" zero's !!
+C <- obj2$C + 0*crossprod.spam(Dg12) + 0*crossprod.spam(Dg13) + 0*crossprod.spam(Dg23)
+cholC <- chol(C)
+dC <- LMMsolver:::DerivCholesky(cholC)
+
+res12 <- sqrt(rowSums((Dg12 %*% dC) * Dg12))
+res13 <- sqrt(rowSums((Dg13 %*% dC) * Dg13))
+res23 <- sqrt(rowSums((Dg23 %*% dC) * Dg23))
+
+A3 <- matrix(data=NA,ncol=3,nrow=3)
+A3[1,2] <- A3[2,1] <- res12
+A3[1,3] <- A3[3,1] <- res13
+A3[2,3] <- A3[3,2] <- res23
+all.equal(A, A3)
+
 
