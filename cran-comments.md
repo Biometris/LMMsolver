@@ -1,8 +1,7 @@
-## New release
+## Patch release
 
-- Extended functionality
-- Improved efficiency in most calculations
-- Fixed bugs discovered after initial release
+- Fixed check issues on macM1
+- Minor improvements ready for release
 
 ----
 
@@ -11,6 +10,7 @@
 * local Windows 10 install, R 4.1.3
 * winbuilder (develop)
 * macbuilder (release)
+* macM1 builder
 * Ubuntu (on github actions, devel and release)
 * macOS (on github actions, release)
 * R-hub (devel and release)
