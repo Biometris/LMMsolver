@@ -36,8 +36,8 @@ expect_error(LMMsolve(fixed = yield ~ 1,
 
 ## 1D splines for rows and columns.
 obj0 <- LMMsolve(fixed = yield ~ 1,
-                 spline = ~spl1D(x = row, nseg = 36) +
-                   spl1D(x = col, nseg = 30),
+                 spline = ~spl1D(x = row, nseg = 4) +
+                   spl1D(x = col, nseg = 3),
                  data = dat)
 
 ## Check that full LMM solve object is correct.
