@@ -1,3 +1,9 @@
+# LMMsolver 1.0.2
+
+-   First and second order derivatives are now calculated correctly.
+-   Several small bugs fixed.
+-   Updated tests to pass checks on macM1.
+
 # LMMsolver 1.0.1
 
 -   `weights` argument in LMMsolve function added
