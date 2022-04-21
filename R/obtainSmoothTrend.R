@@ -83,9 +83,9 @@ obtainSmoothTrend <- function(object,
     warning("deriv is ignored for ", splDim, "-dimensional splines.\n",
             call. = FALSE)
   }
-  if (splDim == 1 && deriv > 1) {
-    stop(deriv, "-order derivatives can only be computed for splines of ",
-         "lower order.\n")
+  if (splDim == 1 && deriv == 2) {
+    stop("Second order derivatives cannot be computed for splines of ",
+         "order 1.\n")
   }
   if (deriv > 0) {
     includeIntercept <- FALSE
