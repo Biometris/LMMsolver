@@ -37,7 +37,7 @@ calcStandardErrors <- function(C, D)
   A <- A[cholC@invpivot, cholC@invpivot]
 
   ## Equivalent to v <- diag(U %*% A %*% t(U))
-  x <- spam::rowSums.spam((U %*% A) * U)
+  x <- spam::rowSums.spam((C %*% A) * C)
   se <- sqrt(x)
   return(se)
 }
