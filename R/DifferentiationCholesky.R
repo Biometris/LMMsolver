@@ -30,14 +30,4 @@ ADchol <- function(P_list) {
       P = L$P)
 }
 
-#' This function saves result of partial derivatives of Cholesky to a
-#' a spam matrix, and is used to calculate standard errors and for predictions.
-#' @keywords internal
-DerivCholesky <- function(cholC) {
-  cholC@entries <- partialDerivCholesky(cholC)
-  A <- spam::as.spam(cholC)
-  ## reordering, can this be done in more efficient way?
-  A <- A[cholC@invpivot, cholC@invpivot]
-  return(A)
-}
 
