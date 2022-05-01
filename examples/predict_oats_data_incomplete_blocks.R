@@ -44,27 +44,32 @@ pred1$sed[1:3,1:3]
 Nrep <- nlevels(dat$rep)
 Ngen <- nlevels(dat$gen)
 Nblk <- nlevels(dat$block)*Nrep
-Dg1 <- matrix(c(1, rep(1/Nrep, Nrep-1), 0, 0, rep(0, Ngen-3), rep(0, Nblk)), nrow=1)
-Dg2 <- matrix(c(1, rep(1/Nrep, Nrep-1), 1, 0, rep(0, Ngen-3), rep(0, Nblk)), nrow=1)
-Dg3 <- matrix(c(1, rep(1/Nrep, Nrep-1), 0, 1, rep(0, Ngen-3), rep(0, Nblk)), nrow=1)
 
-Dg <- rbind.spam(Dg1, Dg2, Dg3)
+# matrix for geno fixed, column 1 is reference:
+Mgen <- diag(Ngen)[,-1]
+Mmu  <- matrix(data=1, nrow=Ngen, ncol=1)
+# averaging over fixed effect replicate:
+Mrep <- matrix(data=rep(1/Nrep, Nrep-1), nrow=Ngen, ncol=Nrep-1, byrow=TRUE)
+# ignoring random effect rep:block
+Mblk <- matrix(data=0, nrow=Ngen, ncol=Nblk)
+# make the matrix for predictions genotype
+Dg <- cbind.spam(Mmu, Mrep, Mgen, Mblk)
+
+pred1se <- pred1$pvals$std.error
 pred2se <- LMMsolver:::calcStandardErrors(obj2$C, Dg)
-pred1se <- pred1$pvals$std.error[1:3]
 range(pred1se - pred2se)
 
-# sed
-Dg12 <- Dg1-Dg2
-Dg13 <- Dg1-Dg3
-Dg23 <- Dg2-Dg3
-Dg2 <- rbind.spam(Dg12, Dg13, Dg23)
-pred2sed <- LMMsolver:::calcStandardErrors(obj2$C, Dg2)
-
-A <- matrix(data=NA,ncol=3,nrow=3)
-A[1,2] <- A[2,1] <- pred2sed[1]
-A[1,3] <- A[3,1] <- pred2sed[2]
-A[2,3] <- A[3,2] <- pred2sed[3]
-A
-
-range(A - pred1$sed[1:3,1:3], na.rm=TRUE)
+# Not  efficient way to calculate SEDs, just to compare results
+# with asreml
+A <- matrix(data=NA, nrow=Ngen, ncol=Ngen)
+for (i in 1:Ngen) {
+  for (j in 1:Ngen) {
+    if (i!=j) {
+      DgSED <- Dg[i,] - Dg[j, ]
+      pred2sed <- LMMsolver:::calcStandardErrors(obj2$C, DgSED)
+      A[i,j] <- pred2sed[1]
+    }
+  }
+}
+range(A - pred1$sed, na.rm = TRUE)
 
