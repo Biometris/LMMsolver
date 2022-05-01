@@ -12,24 +12,26 @@ calcStandardErrors(C, D)
 \item{D}{a matrix of class spam}
 }
 \value{
-a vector with standard errors for \eqn{D \hat{u}}.
+a vector with standard errors for predictions \eqn{D \hat{u}}.
 }
 \description{
-Calculates the standard errors for predictions \eqn{D \hat{u}}, see Welham et al. 2004 for
-details.
+Calculates the standard errors for predictions \eqn{D \hat{u}},
+see Welham et al. 2004 and Gilmour et al. 2004 for details.
 }
 \details{
-The prediction error variance is given by \eqn{\sigma^2 D C^{-1} D'},
-where \eqn{C} is the mixed model coefficient matrix, and \eqn{D} defines linear combinations of fixed
-and random effects, see Welham et al. 2004 for details. The standard errors are given by the the square root of
+The prediction error variance is given by \eqn{D C^{-1} D'},
+where \eqn{C} is the mixed model coefficient matrix, and \eqn{D} defines
+linear combinations of fixed and random effects.
+The standard errors are given by the the square root of
 the diagonal. To calculate the standard errors in an efficient way we use that
 
 \deqn{\frac{\partial log|C + \xi_i d_i d_i'|}{\partial \xi_i} |_{\xi_i=0}
  = trace(C^{-1} d_i d_i') =
 trace(d_i' C^{-1} d_i) = d_i' C^{-1} d_i, }
-where \eqn{d_i} is column \eqn{i} of matrix \eqn{D}. The values of \eqn{d_i' C^{-1} d_i} can
-be calculated more efficient. not calculating the inverse of \eqn{C}, by using Automated Differentiation of the Choleksy algorithm,
-see section 2.3 in Smith (1995) for details.
+where \eqn{d_i} is row \eqn{i} of matrix \eqn{D}. The values of
+\eqn{d_i' C^{-1} d_i} can be calculated more efficient, avoiding the
+calculation of the inverse of \eqn{C}, by using Automated Differentiation
+of the Choleksy algorithm, see section 2.3 in Smith (1995) for details.
 }
 \references{
 Welham, S., Cullis, B., Gogel, B., Gilmour, A., & Thompson, R. (2004).
@@ -38,5 +40,9 @@ Australian & New Zealand Journal of Statistics, 46(3), 325-347.
 
 Smith, S. P. (1995). Differentiation of the Cholesky algorithm.
 Journal of Computational and Graphical Statistics, 4(2), 134-147.
+
+Gilmour, A., Cullis, B., Welham, S., Gogel, B., & Thompson, R. (2004).
+An efficient computing strategy for prediction in mixed linear models.
+Computational statistics & data analysis, 44(4), 571-586.
 }
 \keyword{internal}
