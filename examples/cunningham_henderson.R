@@ -21,12 +21,14 @@ dat %>% group_by(treatment, block) %>% tally()
 # asreml for comparison with LMMsolver
 obj1 <- asreml(y~treatment, random = ~block, data=dat)
 obj1$loglik
+summary(obj1)$varcomp
 
 coef(obj1, list=TRUE)
 
 # LMMsolver:
 obj2 <- LMMsolve(y~treatment, random=~block, data=dat)
 obj2$logL
+summary(obj2, which = "variances")
 
 # effective dimension:
 obj2$ED
@@ -44,10 +46,11 @@ summary(obj4)
 # Compare the logL for the four models (asreml, LMMsolver, nlme, mgcv) used,
 # should be all equal:
 #
-p <- nlevels(dat$treatment)
-N <- nrow(dat)
+# direct comparison between asreml and LMMsolver, asreml doesn't include constant:
+obj1$loglik
+logLik(obj2, includeConstant = FALSE)
 
-Constant_logL <- -0.5*log(2*pi)*(N-p)
+Constant_logL <- obj2$constantREML
 
 round(obj1$loglik + Constant_logL,3)
 round(obj2$logL + Constant_logL, 3)
