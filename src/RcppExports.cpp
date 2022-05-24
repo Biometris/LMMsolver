@@ -35,14 +35,14 @@ BEGIN_RCPP
 END_RCPP
 }
 // dlogdet
-NumericVector dlogdet(SEXP arg, NumericVector lambda);
-RcppExport SEXP _LMMsolver_dlogdet(SEXP argSEXP, SEXP lambdaSEXP) {
+NumericVector dlogdet(SEXP arg, NumericVector theta);
+RcppExport SEXP _LMMsolver_dlogdet(SEXP argSEXP, SEXP thetaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< SEXP >::type arg(argSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type lambda(lambdaSEXP);
-    rcpp_result_gen = Rcpp::wrap(dlogdet(arg, lambda));
+    Rcpp::traits::input_parameter< NumericVector >::type theta(thetaSEXP);
+    rcpp_result_gen = Rcpp::wrap(dlogdet(arg, theta));
     return rcpp_result_gen;
 END_RCPP
 }

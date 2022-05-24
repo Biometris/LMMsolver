@@ -2,13 +2,23 @@
 % Please edit documentation in R/DifferentiationCholesky.R
 \name{ADchol}
 \alias{ADchol}
-\title{Automatic differentiation Cholesky, ZtZ and P spam matrices,
-with C = lambda[1]*P1 + lambda[2]*P2 + .....}
+\title{construct object for Automated Differentiation Cholesky decomposition}
 \usage{
 ADchol(P_list)
 }
+\arguments{
+\item{P_list}{a list of symmetric matrices of class spam, each of dimension \eqn{q \times q},
+and with sum of the matrices assumed to be positive definite.}
+}
+\value{
+An object of class `ADchol`.
+}
 \description{
-Automatic differentiation Cholesky, ZtZ and P spam matrices,
-with C = lambda[1]*P1 + lambda[2]*P2 + .....
+Construct object for reverse Automated Differentiation of Cholesky decomposition,
+with as input a list of semi-positive symmetric sparse matrices \eqn{P_i}, each of
+dimension \eqn{q \times q}. The function `ADchol` calculates the matrix \eqn{C}, the sum
+the precision matrices \eqn{P_i}: \eqn{C = \sum_{i}  P_i}. Next, it calculates the Cholesky
+Decomposition using the multiple minimum degree (MMD) algorithm
+of the `spam` package.
 }
 \keyword{internal}

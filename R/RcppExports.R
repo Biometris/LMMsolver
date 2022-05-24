@@ -9,8 +9,31 @@ logdet <- function(arg, lambda) {
     .Call(`_LMMsolver_logdet`, arg, lambda)
 }
 
-dlogdet <- function(arg, lambda) {
-    .Call(`_LMMsolver_dlogdet`, arg, lambda)
+#' Calculate the partial derivatives of log-determinant.
+#'
+#' This function calculates the partial derivatives of the the log-determinant in an
+#' efficient way, by using reverse Automated Differentiation of the Cholesky Algorithm,
+#' see Smith (1995) for details. Let
+#'  \deqn{C = \sum_{i} \theta_i P_i}
+#' where the matrices \eqn{P_i} are stored in the `ADchol` object. The partial derivatives
+#' of matrix \eqn{C} are defined by:
+#' \deqn{\frac{\partial C}{\partial \theta_i} = \text{trace} [C^{-1} P_i]},
+#' but are calculated more efficient using backwards Automated Differentiation.
+#'
+#' @param arg argument of class ADchol.
+#' @param theta a vector with precision parameters
+#'
+#' @return The gradient with partial derivatives of \eqn{log|C|} with respect to
+#' parameters \eqn{\theta_i}. As attribute `logdet` \eqn{log|C|} is returned.
+#'
+#' @references
+#' Smith, S. P. (1995). Differentiation of the Cholesky algorithm.
+#' Journal of Computational and Graphical Statistics, 4(2), 134-147.
+#'
+#' @keywords internal
+#'
+dlogdet <- function(arg, theta) {
+    .Call(`_LMMsolver_dlogdet`, arg, theta)
 }
 
 partialDerivCholesky <- function(cholC) {
