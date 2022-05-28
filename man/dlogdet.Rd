@@ -4,16 +4,16 @@
 \alias{dlogdet}
 \title{Calculate the partial derivatives of log-determinant.}
 \usage{
-dlogdet(arg, theta)
+dlogdet(ADobj, theta)
 }
 \arguments{
-\item{arg}{argument of class ADchol.}
+\item{ADobj}{object of class ADchol.}
 
-\item{theta}{a vector with precision parameters}
+\item{theta}{a vector with precision or penalty parameters}
 }
 \value{
 The gradient with partial derivatives of \eqn{log|C|} with respect to
-parameters \eqn{\theta_i}. As attribute `logdet` \eqn{log|C|} is returned.
+parameters \eqn{\theta_i}. As attribute \code{logdet}, \eqn{log|C|} is returned.
 }
 \description{
 This function calculates the partial derivatives of the the log-determinant in an
@@ -23,7 +23,7 @@ see Smith (1995) for details. Let
 where the matrices \eqn{P_i} are stored in the `ADchol` object. The partial derivatives
 of matrix \eqn{C} are defined by:
 \deqn{\frac{\partial C}{\partial \theta_i} = \text{trace} [C^{-1} P_i]},
-but are calculated more efficient using backwards Automated Differentiation.
+but are calculated in a more efficient way using backwards Automated Differentiation.
 }
 \references{
 Smith, S. P. (1995). Differentiation of the Cholesky algorithm.

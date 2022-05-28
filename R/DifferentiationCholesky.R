@@ -13,24 +13,32 @@ setClass("ADchol",
 #'
 #' Construct object for reverse Automated Differentiation of Cholesky decomposition,
 #' with as input a list of semi-positive symmetric sparse matrices \eqn{P_i}, each of
-#' dimension \eqn{q \times q}. The function `ADchol` calculates the matrix \eqn{C}, the sum
+#' dimension \eqn{q \times q}. The function \code{ADchol} calculates the matrix \eqn{C}, the sum
 #' the precision matrices \eqn{P_i}: \eqn{C = \sum_{i}  P_i}. Next, it calculates the Cholesky
 #' Decomposition using the multiple minimum degree (MMD) algorithm
-#' of the `spam` package.
+#' of the \code{spam} package.
 #'
-#' @param P_list a list of symmetric matrices of class spam, each of dimension \eqn{q \times q},
+#' @param lP a list of symmetric matrices of class spam, each of dimension \eqn{q \times q},
 #' and with sum of the matrices assumed to be positive definite.
 #
-#' @return An object of class `ADchol`.
+#' @return An object of class \code{ADchol}. This object is used to calculate the partial
+#' partial derivatives of \eqn{log|C|} in an efficient way.
+#'
+#' @seealso \code{\link{dlogdet}}
+#'
+#' @references
+#' Furrer, R., & Sain, S. R. (2010). spam: A sparse matrix R package with emphasis
+#' on MCMC methods for Gaussian Markov random fields.
+#' Journal of Statistical Software, 36, 1-25.
 #'
 #' @importFrom methods new
 #' @keywords internal
-ADchol <- function(P_list) {
-  C <- Reduce(`+`, P_list)
+ADchol <- function(lP) {
+  C <- Reduce(`+`, lP)
   opt <- summary(C)
   cholC <- chol(C, memory = list(nnzR = 8 * opt$nnz,
                                  nnzcolindices = 4 * opt$nnz))
-  L <- construct_ADchol_Rcpp(cholC, P_list)
+  L <- construct_ADchol_Rcpp(cholC, lP)
   new("ADchol",
       supernodes = L$supernodes,
       rowpointers = L$rowpointers,

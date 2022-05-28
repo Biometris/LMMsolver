@@ -18,13 +18,13 @@ logdet <- function(arg, lambda) {
 #' where the matrices \eqn{P_i} are stored in the `ADchol` object. The partial derivatives
 #' of matrix \eqn{C} are defined by:
 #' \deqn{\frac{\partial C}{\partial \theta_i} = \text{trace} [C^{-1} P_i]},
-#' but are calculated more efficient using backwards Automated Differentiation.
+#' but are calculated in a more efficient way using backwards Automated Differentiation.
 #'
-#' @param arg argument of class ADchol.
-#' @param theta a vector with precision parameters
+#' @param ADobj object of class ADchol.
+#' @param theta a vector with precision or penalty parameters
 #'
 #' @return The gradient with partial derivatives of \eqn{log|C|} with respect to
-#' parameters \eqn{\theta_i}. As attribute `logdet` \eqn{log|C|} is returned.
+#' parameters \eqn{\theta_i}. As attribute \code{logdet}, \eqn{log|C|} is returned.
 #'
 #' @references
 #' Smith, S. P. (1995). Differentiation of the Cholesky algorithm.
@@ -32,8 +32,8 @@ logdet <- function(arg, lambda) {
 #'
 #' @keywords internal
 #'
-dlogdet <- function(arg, theta) {
-    .Call(`_LMMsolver_dlogdet`, arg, theta)
+dlogdet <- function(ADobj, theta) {
+    .Call(`_LMMsolver_dlogdet`, ADobj, theta)
 }
 
 partialDerivCholesky <- function(cholC) {
