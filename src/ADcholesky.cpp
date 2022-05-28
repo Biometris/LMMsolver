@@ -491,7 +491,12 @@ NumericVector dlogdet(SEXP ADobj, NumericVector theta)
 
   // define matrix L (lower triangle matrix values)
   const int sz = P.nrow();
+
   const int n_prec_mat = P.ncol();
+
+  if (n_prec_mat != theta.size()) {
+    stop("wrong length vector theta ");
+  }
 
   std::fill(L.begin(), L.end(), 0.0);
   std::fill(F.begin(), F.end(), 0.0);
