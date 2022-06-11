@@ -5,7 +5,7 @@ linearSum  <- function(theta,
   return(C)
 }
 
-# calculate quadratic form xAx (efficient):
+# calculate quadratic form x'Ay (efficient):
 quadForm <- function(x,
                      A,
                      y = x) {
@@ -33,10 +33,8 @@ calcSumSquares <- function(lRinv,
 
 #' @importFrom stats update
 solveMME <- function(cholC,
-                     listC,
                      lWtRinvY,
-                     phi,
-                     theta) {
+                     phi) {
   WtRinvy <- as.vector(linearSum(theta = phi, matrixList = lWtRinvY))
   a <- spam::backsolve.spam(cholC, spam::forwardsolve.spam(cholC, WtRinvy))
   return(a)
@@ -55,7 +53,7 @@ calcEffDim <- function(ADcholGinv,
   # Ginv, if exists:
   if (!is.null(ADcholGinv)) {
     dlogdetGinv <- dlogdet(ADcholGinv, psi)
-    logdetG <- -attr(dlogdetGinv, "logdet")
+    logdetG <- -attr(dlogdetGinv, which = "logdet")
   } else {
     logdetG <- 0
   }
@@ -117,12 +115,12 @@ sparseMixedModels <- function(y,
     zero <- spam::spam(0, ncol = p, nrow = p)
     return(spam::bdiag.spam(zero, x))
   })
-  listC <- c(lQ, lWtRinvW)
+  lC <- c(lQ, lWtRinvW)
   ## Remove some extra zeros.
   lWtRinvW <- lapply(X = lWtRinvW, FUN = spam::cleanup)
   lQ <- lapply(X = lQ, FUN = spam::cleanup)
   lGinv <- lapply(X = lGinv, FUN = spam::cleanup)
-  listC <- lapply(X = listC, FUN = spam::cleanup)
+  lC <- lapply(X = lC, FUN = spam::cleanup)
   if (is.null(theta)) {
     theta <- rep(1, Nvarcomp + Nres)
   }
@@ -133,7 +131,7 @@ sparseMixedModels <- function(y,
     psi <- NULL
     phi <- theta
   }
-  C <- linearSum(theta = theta, matrixList = listC)
+  C <- linearSum(theta = theta, matrixList = lC)
   opt <- summary(C)
   cholC <- chol(C, memory = list(nnzR = 8 * opt$nnz,
                                  nnzcolindices = 4 * opt$nnz))
@@ -144,7 +142,7 @@ sparseMixedModels <- function(y,
   } else {
     ADcholGinv <- NULL
   }
-  ADcholC <- ADchol(listC)
+  ADcholC <- ADchol(lC)
   ## Initialize values for loop.
   logLprev <- Inf
   ## Fix a penalty theta, if value becomes high.
@@ -163,15 +161,15 @@ sparseMixedModels <- function(y,
     ## calculate the effective dimension (plus logdet as attributes).
     ED <- calcEffDim(ADcholGinv, ADcholRinv, ADcholC, phi, psi, theta)
 
-    ## update the cholesky with new parameters theat
-    C <- linearSum(theta = theta, matrixList = listC)
+    ## update the cholesky with new parameters theta
+    C <- linearSum(theta = theta, matrixList = lC)
     cholC <- update(cholC, C)
 
     ## solve mixed model equations.
-    a <- solveMME(cholC = cholC, listC = listC, lWtRinvY = lWtRinvY,
-                  phi = phi, theta = theta)
-    ## calculate the residuals.
-    r <- y - W %*% a
+    a <- solveMME(cholC = cholC, lWtRinvY = lWtRinvY, phi = phi)
+    ## calculate yhat and residuals
+    yhat <- W %*% a
+    r <- y - yhat
     SS_all <- calcSumSquares(lRinv = lRinv, Q = lQ, r = r, a = a,
                              Nvarcomp = Nvarcomp)
     Rinv <- linearSum(phi, lRinv)
@@ -198,7 +196,7 @@ sparseMixedModels <- function(y,
   names(psi) <- names(lGinv)
   EDnames <- c(names(lGinv), names(lRinv))
   L <- list(logL = logL, sigma2e = 1 / phi, tau2e = 1 / psi, ED = ED,
-            theta = theta, EDnames = EDnames, a = a, yhat = y - r,
+            theta = theta, EDnames = EDnames, a = a, yhat = yhat,
             residuals = r, nIter = it, C = C, cholC = cholC)
   return(L)
 }
