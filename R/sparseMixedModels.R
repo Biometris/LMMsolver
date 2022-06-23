@@ -12,16 +12,20 @@ quadForm <- function(x,
   sum(x * (A %*% y))
 }
 
-calcSumSquares <- function(lRinv,
-                           Q,
-                           r,
+calcSumSquares <- function(lYtRinvY,
+                           lWtRinvY,
+                           lWtRinvW,
+                           lQ,
                            a,
                            Nvarcomp) {
-  SSr <- sapply(X = lRinv, FUN= function(X) {
-    quadForm(r, X)
-  })
+  SSr1 <- unlist(lYtRinvY)
+  SSr2 <- sapply(X=lWtRinvY, FUN = function(X) {
+    sum(a*X) })
+  SSr3 <- sapply(X=lWtRinvW, FUN = function(X) {
+    quadForm(a, X)})
+  SSr <- SSr1 - 2*SSr2 + SSr3
   if (Nvarcomp > 0) {
-    SSa <- sapply(X = Q, FUN = function(X) {
+    SSa <- sapply(X = lQ, FUN = function(X) {
       quadForm(a, X)
     })
     SS_all <- c(SSa, SSr)
@@ -162,24 +166,10 @@ sparseMixedModels <- function(y,
     ## update the expressions including Rinv
     YtRinvY <- sum(phi * unlist(lYtRinvY))
     WtRinvY <- as.vector(linearSum(theta = phi, matrixList = lWtRinvY))
-    #WtRinvW <- linearSum(theta = phi, matrix = lWtRinvW)
     a <- spam::backsolve.spam(cholC, spam::forwardsolve.spam(cholC, WtRinvY))
 
     ## calculate Sum of Squares
-    SSr1 <- unlist(lYtRinvY)
-    SSr2 <- sapply(X=lWtRinvY, FUN = function(X) {
-      sum(a*X) })
-    SSr3 <- sapply(X=lWtRinvW, FUN = function(X) {
-      quadForm(a, X)})
-    SSr <- SSr1 - 2*SSr2 + SSr3
-    if (Nvarcomp > 0) {
-      SSa <- sapply(X = lQ, FUN = function(X) {
-        quadForm(a, X)
-      })
-      SS_all <- c(SSa, SSr)
-    } else {
-      SS_all <- SSr
-    }
+    SS_all <- calcSumSquares(lYtRinvY, lWtRinvY, lWtRinvW, lQ, a, Nvarcomp)
 
     ## Johnson and Thompson 1995, see below eq [A5]: Py = R^{-1} r
     yPy <- YtRinvY - sum(a*WtRinvY)
