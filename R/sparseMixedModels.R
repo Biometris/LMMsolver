@@ -31,15 +31,6 @@ calcSumSquares <- function(lRinv,
   return(SS_all)
 }
 
-#' @importFrom stats update
-solveMME <- function(cholC,
-                     lWtRinvY,
-                     phi) {
-  WtRinvy <- as.vector(linearSum(theta = phi, matrixList = lWtRinvY))
-  a <- spam::backsolve.spam(cholC, spam::forwardsolve.spam(cholC, WtRinvy))
-  return(a)
-}
-
 #' @keywords internal
 calcEffDim <- function(ADcholGinv,
                        ADcholRinv,
@@ -110,6 +101,9 @@ sparseMixedModels <- function(y,
     spam::crossprod.spam(W, x %*% W) })
   lWtRinvY <- lapply(X = lRinv, FUN = function(x) {
     spam::crossprod.spam(W, x %*% y) })
+  lYtRinvY <- lapply(X =lRinv, FUN= function(x) {
+    LMMsolver:::quadForm(y,x) })
+
   ## Extend lGinv with extra zeros for fixed effect.
   lQ <- lapply(X = lGinv, FUN = function(x) {
     zero <- spam::spam(0, ncol = p, nrow = p)
@@ -165,16 +159,31 @@ sparseMixedModels <- function(y,
     C <- linearSum(theta = theta, matrixList = lC)
     cholC <- update(cholC, C)
 
-    ## solve mixed model equations.
-    a <- solveMME(cholC = cholC, lWtRinvY = lWtRinvY, phi = phi)
-    ## calculate yhat and residuals
-    yhat <- W %*% a
-    r <- y - yhat
-    SS_all <- calcSumSquares(lRinv = lRinv, Q = lQ, r = r, a = a,
-                             Nvarcomp = Nvarcomp)
-    Rinv <- linearSum(phi, lRinv)
+    ## update the expressions including Rinv
+    YtRinvY <- sum(phi * unlist(lYtRinvY))
+    WtRinvY <- as.vector(linearSum(theta = phi, matrixList = lWtRinvY))
+    #WtRinvW <- linearSum(theta = phi, matrix = lWtRinvW)
+    a <- spam::backsolve.spam(cholC, spam::forwardsolve.spam(cholC, WtRinvY))
+
+    ## calculate Sum of Squares
+    SSr1 <- unlist(lYtRinvY)
+    SSr2 <- sapply(X=lWtRinvY, FUN = function(X) {
+      sum(a*X) })
+    SSr3 <- sapply(X=lWtRinvW, FUN = function(X) {
+      quadForm(a, X)})
+    SSr <- SSr1 - 2*SSr2 + SSr3
+    if (Nvarcomp > 0) {
+      SSa <- sapply(X = lQ, FUN = function(X) {
+        quadForm(a, X)
+      })
+      SS_all <- c(SSa, SSr)
+    } else {
+      SS_all <- SSr
+    }
+
     ## Johnson and Thompson 1995, see below eq [A5]: Py = R^{-1} r
-    yPy <- quadForm(x = y, A = Rinv, y = r)
+    yPy <- YtRinvY - sum(a*WtRinvY)
+
     ## calculate REMLlogL, ED has logdet as attributes:
     logL <- REMLlogL(ED, yPy)
     if (trace) {
@@ -192,6 +201,10 @@ sparseMixedModels <- function(y,
   if (it == maxit) {
     warning("No convergence after ", maxit, " iterations \n", call. = FALSE)
   }
+  ## calculate yhat and residuals
+  yhat <- W %*% a
+  r <- y - yhat
+
   names(phi) <- names(lRinv)
   names(psi) <- names(lGinv)
   EDnames <- c(names(lGinv), names(lRinv))
