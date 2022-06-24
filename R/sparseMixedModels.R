@@ -130,18 +130,22 @@ sparseMixedModels <- function(y,
   opt <- summary(C)
   cholC <- chol(C, memory = list(nnzR = 8 * opt$nnz,
                                  nnzcolindices = 4 * opt$nnz))
-  ## Make ADchol for Rinv, Ginv and C:
 
-  M <- sapply(lRinv,FUN=function(x) { as.integer(abs(diag.spam(x))>getOption("spam.eps"))})
+  ## Check the stucture of Rinv, don't allow for overlapping
+  ## penalties
+  M <- sapply(lRinv,FUN=function(x) {
+    as.integer(abs(spam::diag.spam(x))>getOption("spam.eps"))})
   rSums <- rowSums(M)
   if (!isTRUE(all.equal(rSums, rep(1, nrow(M))))) {
     stop("overlapping penalties for residual part") }
+
+  # calculate number of elements per group for residuals
   nR <- colSums(M)
   EDmax_phi <- nR
   Rinv <- Reduce("+",lRinv)
   logdetRinvConstant <- as.numeric(spam::determinant.spam(Rinv)$modulus)
 
-  ADcholRinv <- ADchol(lRinv)
+  ## Make ADchol for Ginv and C:
   if (Nvarcomp > 0) {
     ADcholGinv <- ADchol(lGinv)
   } else {
@@ -164,25 +168,22 @@ sparseMixedModels <- function(y,
       phi <- theta
     }
 
-    ## calculate the effective dimensions
-    dlogdetRinv <- dlogdet(ADcholRinv, phi)
-    logdetR <- -attr(dlogdetRinv, which = "logdet")
-    logdetRinv <- sum(nR*log(phi)) + logdetRinvConstant
-    logdetR_new <- - logdetRinv
-    #cat("iter", it, "  ", logdetR,"  ", logdetR_new, "  ",logdetR-logdetR_new, "\n")
-    logdetR <- logdetR_new
-    # Ginv, if exists:
+    ## calculate logdet for Rinv
+    logdetR <- -sum(nR*log(phi)) - logdetRinvConstant
+
+    ## calculated logdet and dlogdet for Ginv and C
+    ## Ginv, if exists
     if (!is.null(ADcholGinv)) {
       dlogdetGinv <- dlogdet(ADcholGinv, psi)
       logdetG <- -attr(dlogdetGinv, which = "logdet")
     } else {
       logdetG <- 0
     }
-    ## matrix C.
+    ## matrix C
     dlogdetC <- dlogdet(ADcholC, theta)
     logdetC <- attr(dlogdetC, which = "logdet")
+
     ## calculate effective dimensions.
-    # EDmax_phi <- phi * dlogdetRinv
     if (!is.null(ADcholGinv)) {
       EDmax_psi <- psi * dlogdetGinv
     } else {
