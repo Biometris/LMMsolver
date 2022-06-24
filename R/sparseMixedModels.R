@@ -19,10 +19,8 @@ calcSumSquares <- function(lYtRinvY,
                            a,
                            Nvarcomp) {
   SSr1 <- unlist(lYtRinvY)
-  SSr2 <- sapply(X=lWtRinvY, FUN = function(X) {
-    sum(a*X) })
-  SSr3 <- sapply(X=lWtRinvW, FUN = function(X) {
-    quadForm(a, X)})
+  SSr2 <- sapply(X=lWtRinvY, FUN = function(X) { sum(a*X) })
+  SSr3 <- sapply(X=lWtRinvW, FUN = function(X) { quadForm(a, X)})
   SSr <- SSr1 - 2*SSr2 + SSr3
   if (Nvarcomp > 0) {
     SSa <- sapply(X = lQ, FUN = function(X) {
@@ -82,7 +80,6 @@ REMLlogL <- function(ED,
   return(logL)
 }
 
-
 #' @keywords internal
 sparseMixedModels <- function(y,
                               X,
@@ -134,6 +131,16 @@ sparseMixedModels <- function(y,
   cholC <- chol(C, memory = list(nnzR = 8 * opt$nnz,
                                  nnzcolindices = 4 * opt$nnz))
   ## Make ADchol for Rinv, Ginv and C:
+
+  M <- sapply(lRinv,FUN=function(x) { as.integer(abs(diag.spam(x))>getOption("spam.eps"))})
+  rSums <- rowSums(M)
+  if (!isTRUE(all.equal(rSums, rep(1, nrow(M))))) {
+    stop("overlapping penalties for residual part") }
+  nR <- colSums(M)
+  EDmax_phi <- nR
+  Rinv <- Reduce("+",lRinv)
+  logdetRinvConstant <- as.numeric(spam::determinant.spam(Rinv)$modulus)
+
   ADcholRinv <- ADchol(lRinv)
   if (Nvarcomp > 0) {
     ADcholGinv <- ADchol(lGinv)
@@ -156,8 +163,33 @@ sparseMixedModels <- function(y,
       psi <- NULL
       phi <- theta
     }
-    ## calculate the effective dimension (plus logdet as attributes).
-    ED <- calcEffDim(ADcholGinv, ADcholRinv, ADcholC, phi, psi, theta)
+
+    ## calculate the effective dimensions
+    dlogdetRinv <- dlogdet(ADcholRinv, phi)
+    logdetR <- -attr(dlogdetRinv, which = "logdet")
+    logdetRinv <- sum(nR*log(phi)) + logdetRinvConstant
+    logdetR_new <- - logdetRinv
+    #cat("iter", it, "  ", logdetR,"  ", logdetR_new, "  ",logdetR-logdetR_new, "\n")
+    logdetR <- logdetR_new
+    # Ginv, if exists:
+    if (!is.null(ADcholGinv)) {
+      dlogdetGinv <- dlogdet(ADcholGinv, psi)
+      logdetG <- -attr(dlogdetGinv, which = "logdet")
+    } else {
+      logdetG <- 0
+    }
+    ## matrix C.
+    dlogdetC <- dlogdet(ADcholC, theta)
+    logdetC <- attr(dlogdetC, which = "logdet")
+    ## calculate effective dimensions.
+    # EDmax_phi <- phi * dlogdetRinv
+    if (!is.null(ADcholGinv)) {
+      EDmax_psi <- psi * dlogdetGinv
+    } else {
+      EDmax_psi <- NULL
+    }
+    EDmax <- c(EDmax_psi, EDmax_phi)
+    ED <- EDmax - theta * dlogdetC
 
     ## update the cholesky with new parameters theta
     C <- linearSum(theta = theta, matrixList = lC)
@@ -174,8 +206,9 @@ sparseMixedModels <- function(y,
     ## Johnson and Thompson 1995, see below eq [A5]: Py = R^{-1} r
     yPy <- YtRinvY - sum(a*WtRinvY)
 
-    ## calculate REMLlogL, ED has logdet as attributes:
-    logL <- REMLlogL(ED, yPy)
+    ## calculate REMLlogL
+    logL <- -0.5 * (logdetR + logdetG + logdetC + yPy)
+
     if (trace) {
       cat(sprintf("%4d %8.4f\n", it, logL))
     }
@@ -194,7 +227,6 @@ sparseMixedModels <- function(y,
   ## calculate yhat and residuals
   yhat <- W %*% a
   r <- y - yhat
-
   names(phi) <- names(lRinv)
   names(psi) <- names(lGinv)
   EDnames <- c(names(lGinv), names(lRinv))
