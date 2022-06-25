@@ -34,53 +34,6 @@ calcSumSquares <- function(lYtRinvY,
 }
 
 #' @keywords internal
-calcEffDim <- function(ADcholGinv,
-                       ADcholRinv,
-                       ADcholC,
-                       phi,
-                       psi,
-                       theta) {
-  dlogdetRinv <- dlogdet(ADcholRinv, phi)
-  logdetR <- -attr(dlogdetRinv, which = "logdet")
-
-  # Ginv, if exists:
-  if (!is.null(ADcholGinv)) {
-    dlogdetGinv <- dlogdet(ADcholGinv, psi)
-    logdetG <- -attr(dlogdetGinv, which = "logdet")
-  } else {
-    logdetG <- 0
-  }
-  ## matrix C.
-  dlogdetC <- dlogdet(ADcholC, theta)
-  logdetC <- attr(dlogdetC, which = "logdet")
-  ## calculate effective dimensions.
-  EDmax_phi <- phi * dlogdetRinv
-  if (!is.null(ADcholGinv)) {
-    EDmax_psi <- psi * dlogdetGinv
-  } else {
-    EDmax_psi <- NULL
-  }
-  EDmax <- c(EDmax_psi, EDmax_phi)
-  ED <- EDmax - theta * dlogdetC
-  attributes(ED) <- NULL
-  attr(ED, "logdetG") <- logdetG
-  attr(ED, "logdetC") <- logdetC
-  attr(ED, "logdetR") <- logdetR
-  return(ED)
-}
-
-#' @keywords internal
-REMLlogL <- function(ED,
-                     yPy) {
-  logdetC <- attr(ED, "logdetC")
-  logdetG <- attr(ED, "logdetG")
-  logdetR <- attr(ED, "logdetR")
-  # REML-loglikelihood (without constant), see e.g. Smith 1995.
-  logL <- -0.5 * (logdetR + logdetG + logdetC + yPy)
-  return(logL)
-}
-
-#' @keywords internal
 sparseMixedModels <- function(y,
                               X,
                               Z,
@@ -207,7 +160,7 @@ sparseMixedModels <- function(y,
     ## Johnson and Thompson 1995, see below eq [A5]: Py = R^{-1} r
     yPy <- YtRinvY - sum(a*WtRinvY)
 
-    ## calculate REMLlogL
+    ## calculate REMLlogL, see e.g. Smith 1995
     logL <- -0.5 * (logdetR + logdetG + logdetC + yPy)
 
     if (trace) {
