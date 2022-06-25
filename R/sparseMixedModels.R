@@ -50,7 +50,7 @@ sparseMixedModels <- function(y,
   Nvarcomp <- length(lGinv)
   NvarcompTot <- Nres + Nvarcomp
   dimMME <- p + q
-  W <- spam::as.spam(cbind(X, Z))
+  W <- spam::cbind.spam(X, Z)
   lWtRinvW <- lapply(X = lRinv, FUN = function(x) {
     spam::crossprod.spam(W, x %*% W) })
   lWtRinvY <- lapply(X = lRinv, FUN = function(x) {

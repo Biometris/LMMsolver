@@ -330,8 +330,16 @@ LMMsolve <- function(fixed,
            levelsNoVar, "\n")
     }
   }
-  ## Fit models.
-  obj <- sparseMixedModels(y = y, X = X, Z = Z, lGinv = lGinv, lRinv = lRinv,
+  ## Make the sparse matrices
+  Xs <- spam::as.spam(X)
+  if (!is.null(Z)) {
+    Zs <- spam::as.spam(Z)
+  }
+  else {
+    Zs = NULL
+  }
+  ## Fit the model
+  obj <- sparseMixedModels(y = y, X = Xs, Z = Zs, lGinv = lGinv, lRinv = lRinv,
                            tolerance = tolerance, trace = trace, maxit = maxit,
                            theta = theta)
   ## Add names to coefficients.
