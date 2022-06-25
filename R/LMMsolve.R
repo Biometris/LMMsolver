@@ -187,7 +187,7 @@ LMMsolve <- function(fixed,
     mf <- model.frame(random, data, drop.unused.levels = TRUE, na.action = NULL)
     mt <- terms(mf)
     f.terms <- all.vars(mt)[attr(mt, "dataClasses") == "factor"]
-    Z1 <- model.matrix(mt, data = mf,
+    Z1 <- Matrix::sparse.model.matrix(mt, data = mf,
                        contrasts.arg = lapply(X = mf[, f.terms, drop = FALSE],
                                               FUN = contrasts,
                                               contrasts = FALSE))
@@ -195,7 +195,13 @@ LMMsolve <- function(fixed,
     term1.labels.r <- attr(mt, "term.labels")
     ## Number of variance parameters (see Gilmour 1995) for each variance component
     varPar1 <- rep(1, length(dim1.r))
-    Z1 <- Z1[, -1]
+    if (ncol(Z1) > 1) {
+      Z1 <- Z1[, -1]
+      Z1 <- spam::as.spam.dgCMatrix(Z1)
+    }
+    else {
+      Z1 <- NULL
+    }
   } else {
     dim1.r <- NULL
     term1.labels.r <- NULL
@@ -207,7 +213,7 @@ LMMsolve <- function(fixed,
     dim2.r <- sapply(X = group, FUN = length)
     term2.labels.r <- names(group)
     varPar2 <- rep(1, length(dim2.r))
-    Z2 <- as.matrix(data[, ndx])
+    Z2 <- spam::as.spam(as.matrix(data[, ndx]))
   } else {
     dim2.r <- NULL
     term2.labels.r <- NULL
@@ -215,7 +221,7 @@ LMMsolve <- function(fixed,
     varPar2 <- NULL
   }
   if (!(is.null(random) & is.null(group))) {
-    Z <- cbind(Z1, Z2)
+    Z <- spam::cbind.spam(Z1, Z2)
     dim.r <- c(dim1.r, dim2.r)
     term.labels.r <- c(term1.labels.r, term2.labels.r)
     varPar <- c(varPar1, varPar2)
@@ -273,8 +279,10 @@ LMMsolve <- function(fixed,
     dim.f <- as.numeric(table(attr(X, "assign")))
   }
   term.labels.f <- attr(mt, "term.labels")
-  ## calculate NomEff dimension for non-spline part.
-  NomEffDimRan <- calcNomEffDim(X, Z, dim.r)
+
+  ## calculate NomEff dimension for non-spline part
+  Xs <- spam::as.spam(X)
+  NomEffDimRan <- calcNomEffDim(Xs, Z, dim.r)
   ## Add spline part.
   splResList <- NULL
   if (!is.null(spline)) {
@@ -292,7 +300,7 @@ LMMsolve <- function(fixed,
       ## Add to design matrix fixed effect X.
       X <- cbind(X, splRes$X)
       ## Add to design matrix random effect Z.
-      Z <- cbind(Z, splRes$Z)
+      Z <- spam::cbind.spam(Z, splRes$Z)
       ## Expand matrices Ginv to the updated Z.
       lGinv <- expandGinv(lGinv, splRes$lGinv)
       ## A splxD model has x parameters.
@@ -330,16 +338,10 @@ LMMsolve <- function(fixed,
            levelsNoVar, "\n")
     }
   }
-  ## Make the sparse matrices
+  ## Make X sparse
   Xs <- spam::as.spam(X)
-  if (!is.null(Z)) {
-    Zs <- spam::as.spam(Z)
-  }
-  else {
-    Zs = NULL
-  }
   ## Fit the model
-  obj <- sparseMixedModels(y = y, X = Xs, Z = Zs, lGinv = lGinv, lRinv = lRinv,
+  obj <- sparseMixedModels(y = y, X = Xs, Z = Z, lGinv = lGinv, lRinv = lRinv,
                            tolerance = tolerance, trace = trace, maxit = maxit,
                            theta = theta)
   ## Add names to coefficients.
