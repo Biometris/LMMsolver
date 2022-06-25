@@ -1,5 +1,5 @@
 rm(list=ls())
-library(SAP)
+#library(SAP)
 library(LMMsolver)
 library(spam)
 library(fields)
@@ -112,13 +112,13 @@ ED <- theta * LMMsolver:::dlogdet(obj0,theta)
 ED
 
 # compare direct way using dlogdet, and second option
-dlogdet1 <- as.numeric(LMMsolver:::dlogdet(obj0,theta))
-A <- LMMsolver:::DerivCholesky(cholC);
-dlogdet2 <- sapply(listP, function(x) {sum(A * x)})
+#dlogdet1 <- as.numeric(LMMsolver:::dlogdet(obj0,theta))
+#A <- LMMsolver:::DerivCholesky(cholC);
+#dlogdet2 <- sapply(listP, function(x) {sum(A * x)})
 
-dlogdet1
-dlogdet2
-dlogdet1-dlogdet2
+#dlogdet1
+#dlogdet2
+#dlogdet1-dlogdet2
 
 # compare computation times:
 
