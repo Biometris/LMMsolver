@@ -187,7 +187,7 @@ calcNomEffDim <- function(X,
     Zi <- Z[, ndx]
     # if number of columns is high, use upper bound:
     if (dim.r[i] > 100 | nrow(X) > 10000) {
-      rowSum <- rowSums(Zi)
+      rowSum <- spam::rowSums.spam(Zi)
       if (all(rowSum==rowSum[1]))
         EDnom[i] <- dim.r[i] - 1
       else
