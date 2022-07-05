@@ -59,9 +59,12 @@ expandGinv <- function(lGinv1, lGinv2) {
 #' @keywords internal
 constructPenalty <-function(q,
                             pord,
-                            dx) {
+                            dx,
+                            xmin,
+                            xmax) {
   D <- spam::diff.spam(spam::diag.spam(q), diff = pord)
-  DtDsc <- spam::crossprod.spam(D)*(1/dx)^(2*pord-1)
+  h <- (xmax-xmin)/dx
+  DtDsc <- spam::crossprod.spam(D)*h^(2*pord-1)
   return(DtDsc)
 }
 
@@ -143,7 +146,10 @@ constructGinvSplines <- function(q,
     for (j in seq_len(d)) {
       if (i == j) {
         dx <- attr(knots[[j]], which="dx")
-        L[[j]] <- constructPenalty(q[j], pord = pord, dx = dx)
+        xmin <- attr(knots[[j]], which="xmin")
+        xmax <- attr(knots[[j]], which="xmax")
+
+        L[[j]] <- constructPenalty(q[j], pord = pord, dx = dx, xmin = xmin, xmax = xmax)
       } else {
         L[[j]] <- spam::diag.spam(q[j])
       }

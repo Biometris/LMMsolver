@@ -4,7 +4,7 @@
 \alias{constructPenalty}
 \title{Construct the penalty matrix}
 \usage{
-constructPenalty(q, pord, dx)
+constructPenalty(q, pord, dx, xmin, xmax)
 }
 \arguments{
 \item{q}{integer with dimensions.}
