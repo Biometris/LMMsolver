@@ -50,7 +50,7 @@ knots <- LMMsolver:::PsplinesKnots(xmin=xmin,xmax=xmax,degree=3,nseg=nseg)
 B <- LMMsolver:::Bsplines(knots, x)
 q <- ncol(B)
 dx <- attr(knots,which='dx')
-DtDsc <- LMMsolver:::constructPenalty(q, pord=2, dx)
+DtDsc <- LMMsolver:::constructPenalty(q, pord=2, dx,xmin,xmax)
 eig <- eigen(DtDsc)
 Usc <- eig$vectors[, -c(q-1,q)] %*% diag(eig$values[-c(q-1,q)]^(-1/2))
 Z <- B %*% Usc
