@@ -63,7 +63,8 @@ constructPenalty <-function(q,
                             xmin,
                             xmax) {
   D <- spam::diff.spam(spam::diag.spam(q), diff = pord)
-  h <- (xmax-xmin)/dx
+  # h <- (xmax-xmin)/dx
+  h <- 1/dx
   DtDsc <- spam::crossprod.spam(D)*h^(2*pord-1)
   return(DtDsc)
 }
