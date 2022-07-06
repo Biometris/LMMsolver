@@ -149,8 +149,25 @@ obtainSmoothTrend <- function(object,
     } else {
       ## only for spl1D, deriv option ignored for splDim > 1
       if (deriv == 1) {
-        ## fixed part is the slope
-        coefFix <- coef(object)[[splF_name]]
+        ## calculate the scaling factor, to obtain the derivative
+        ## on the original scale.
+        if (scaleX) {
+          X_no_sc <- mapply(FUN = function(x, y) {
+            constructX(B = x, x = y, scaleX = FALSE, pord = pord)
+          }, Bx, xGrid, SIMPLIFY = FALSE)
+          ## Compute X over all dimensions.
+          if (!is.null(newdata)) {
+            XTot_no_sc <- Reduce(RowKronecker, X_no_sc)
+          } else {
+            XTot_no_sc <- Reduce(`%x%`, X_no_sc)
+          }
+          XTot_no_sc <- removeIntercept(XTot_no_sc)
+          scalingFactor <- XTot[1,1]/XTot_no_sc[1,1]
+        } else {
+          scalingFactor <- 1
+        }
+        ## fixed part is the slope, multiplied with scalingFactor
+        coefFix <- coef(object)[[splF_name]]*scalingFactor
       } else {
         ## second derivative equal to zero
         coefFix <- 0
