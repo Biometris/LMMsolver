@@ -186,8 +186,8 @@ obtainSmoothTrend <- function(object,
     colnames(outDat)[-ncol(outDat)] <- rev(names(x))
     outDat <- outDat[c(names(x), "ypred")]
   }
-  # only add standard errors if deriv == 0
-  if (deriv == 0) {
+  ## only add standard errors if deriv == 0 and includeIntercept
+  if (deriv == 0 & includeIntercept) {
     labels <- c(object$term.labels.f, object$term.labels.r)
     lU <- list()
     dim <- object$dim
