@@ -28,7 +28,7 @@ expect_error(obtainSmoothTrend(obj1),
 expect_error(obtainSmoothTrend(obj1, grid = 72, deriv = -1),
              "deriv should be an integer greater than or equal to zero")
 expect_error(obtainSmoothTrend(obj1, grid = 72, deriv = 2),
-             "Second order derivatives cannot be computed for splines of")
+             "2-order derivatives cannot be computed for B-splines of")
 
 ## Trend using grid.
 

@@ -73,6 +73,7 @@ obtainSmoothTrend <- function(object,
   knots <- splRes$knots
   scaleX <- splRes$scaleX
   pord <- splRes$pord
+  degree <- splRes$degree
   splDim <- length(x)
   if (splDim == 1 && (!is.numeric(deriv) || length(deriv) > 1 || deriv < 0 ||
       deriv != round(deriv))) {
@@ -83,9 +84,10 @@ obtainSmoothTrend <- function(object,
     warning("deriv is ignored for ", splDim, "-dimensional splines.\n",
             call. = FALSE)
   }
-  if (splDim == 1 && deriv == 2) {
-    stop("Second order derivatives cannot be computed for splines of ",
-         "order 1.\n")
+  if (deriv > degree) {
+    stop(deriv,
+         "-order derivatives cannot be computed for B-splines of degree ",
+         degree)
   }
   if (deriv > 0) {
     includeIntercept <- FALSE
@@ -162,12 +164,12 @@ obtainSmoothTrend <- function(object,
             XTot_no_sc <- Reduce(`%x%`, X_no_sc)
           }
           XTot_no_sc <- removeIntercept(XTot_no_sc)
-          scalingFactor <- XTot[1,1]/XTot_no_sc[1,1]
+          scalingFactor <- XTot[1, 1] / XTot_no_sc[1, 1]
         } else {
           scalingFactor <- 1
         }
         ## fixed part is the slope, multiplied with scalingFactor
-        coefFix <- coef(object)[[splF_name]]*scalingFactor
+        coefFix <- coef(object)[[splF_name]] * scalingFactor
       } else {
         ## second derivative equal to zero
         coefFix <- 0
