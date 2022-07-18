@@ -150,26 +150,20 @@ obtainSmoothTrend <- function(object,
       coefFix <- as.vector(XTot %*% coef(object)[[splF_name]])
     } else {
       ## only for spl1D, deriv option ignored for splDim > 1
-      if (deriv == 1) {
-        ## calculate the scaling factor, to obtain the derivative
-        ## on the original scale.
+      if (deriv == 1 & pord==2) {
+        ## first calculate scaling factor alpha
+        Bx0 <- Bsplines(knots[[1]], xGrid[[1]], deriv=0)
+        U_null <- scale(seq_len(ncol(Bx0)))
+        U_null <- U_null/normVec(U_null)
+        x_sc <- Bx0 %*% U_null
+        x_org <- xGrid[[1]]
+        n <- length(x_sc)
         if (scaleX) {
-          X_no_sc <- mapply(FUN = function(x, y) {
-            constructX(B = x, x = y, scaleX = FALSE, pord = pord)
-          }, Bx, xGrid, SIMPLIFY = FALSE)
-          ## Compute X over all dimensions.
-          if (!is.null(newdata)) {
-            XTot_no_sc <- Reduce(RowKronecker, X_no_sc)
-          } else {
-            XTot_no_sc <- Reduce(`%x%`, X_no_sc)
-          }
-          XTot_no_sc <- removeIntercept(XTot_no_sc)
-          scalingFactor <- XTot[1, 1] / XTot_no_sc[1, 1]
+          scaleFactor <- (x_sc[n]-x_sc[1])/(x_org[n]-x_org[1])
         } else {
-          scalingFactor <- 1
+          scaleFactor <- 1.0
         }
-        ## fixed part is the slope, multiplied with scalingFactor
-        coefFix <- coef(object)[[splF_name]] * scalingFactor
+        coefFix <- coef(object)[[splF_name]]*scaleFactor
       } else {
         ## second derivative equal to zero
         coefFix <- 0
