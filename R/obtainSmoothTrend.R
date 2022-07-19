@@ -151,15 +151,14 @@ obtainSmoothTrend <- function(object,
     } else {
       ## only for spl1D, deriv option ignored for splDim > 1
       if (deriv == 1 & pord==2) {
-        ## first calculate scaling factor alpha
-        Bx0 <- Bsplines(knots[[1]], xGrid[[1]], deriv=0)
-        U_null <- scale(seq_len(ncol(Bx0)))
-        U_null <- U_null/normVec(U_null)
-        x_sc <- Bx0 %*% U_null
-        x_org <- xGrid[[1]]
-        n <- length(x_sc)
+        ## calculate scaling factor alpha
         if (scaleX) {
-          scaleFactor <- (x_sc[n]-x_sc[1])/(x_org[n]-x_org[1])
+          range_org <- c(attr(knots[[1]],"xmin"), attr(knots[[1]], "xmax"))
+          Bx0 <- Bsplines(knots[[1]], range_org, deriv=0)
+          U_null <- scale(seq_len(ncol(Bx0)))
+          U_null <- U_null/normVec(U_null)
+          range_sc <- Bx0 %*% U_null
+          scaleFactor <- (range_sc[2]-range_sc[1])/(range_org[2]-range_org[1])
         } else {
           scaleFactor <- 1.0
         }
