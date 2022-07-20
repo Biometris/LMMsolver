@@ -56,7 +56,7 @@ sparseMixedModels <- function(y,
   lWtRinvY <- lapply(X = lRinv, FUN = function(x) {
     spam::crossprod.spam(W, x %*% y) })
   lYtRinvY <- lapply(X =lRinv, FUN= function(x) {
-    LMMsolver:::quadForm(y,x) })
+    quadForm(y,x) })
 
   ## Extend lGinv with extra zeros for fixed effect.
   lQ <- lapply(X = lGinv, FUN = function(x) {
