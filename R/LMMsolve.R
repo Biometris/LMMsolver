@@ -328,6 +328,8 @@ LMMsolve <- function(fixed,
   }
   ## construct inverse of residual matrix R.
   lRinv <- constructRinv(df = data, residual = residual, weights = w)
+  nRes <- length(lRinv)
+  scFactor <- c(scFactor, rep(1, nRes))
   y <- model.response(mf)
   ## check whether the variance for response is not zero.
   if (is.null(residual)) {
@@ -354,11 +356,10 @@ LMMsolve <- function(fixed,
     if (length(theta) != length(scFactor)) {
       stop("Argument theta has wrong length \n")
     }
-    #theta <- scFactor*theta
+    theta <- theta/scFactor
   } else {
-    #theta <- scFactor
+    theta <- 1/scFactor
   }
-
   obj <- sparseMixedModels(y = y, X = Xs, Z = Z, lGinv = lGinv, lRinv = lRinv,
                            tolerance = tolerance, trace = trace, maxit = maxit,
                            theta = theta)

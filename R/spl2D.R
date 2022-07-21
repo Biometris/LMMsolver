@@ -73,7 +73,7 @@ spl2D <- function(x1,
   return(list(X = X, Z = B12, lGinv = lGinv, knots = knots,
               dim.f = dim.f, dim.r = dim.r, term.labels.f = term.labels.f,
               term.labels.r = term.labels.r, x = xList, pord = pord,
-              degree = degree, scaleX = scaleX, EDnom = EDnom, scaleFactor))
+              degree = degree, scaleX = scaleX, EDnom = EDnom, scaleFactor=scaleFactor))
 
 }
 
