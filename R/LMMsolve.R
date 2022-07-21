@@ -193,6 +193,7 @@ LMMsolve <- function(fixed,
                                               contrasts = FALSE))
     dim1.r <- table(attr(Z1, "assign"))[-1]
     term1.labels.r <- attr(mt, "term.labels")
+    scFactor1 <- rep(1, length(dim1.r))
     ## Number of variance parameters (see Gilmour 1995) for each variance component
     varPar1 <- rep(1, length(dim1.r))
     if (ncol(Z1) > 1) {
@@ -203,6 +204,7 @@ LMMsolve <- function(fixed,
       Z1 <- NULL
     }
   } else {
+    scFactor1 <- NULL
     dim1.r <- NULL
     term1.labels.r <- NULL
     Z1 <- NULL
@@ -212,11 +214,13 @@ LMMsolve <- function(fixed,
     ndx <- unlist(group)
     dim2.r <- sapply(X = group, FUN = length)
     term2.labels.r <- names(group)
+    scFactor2 <- rep(1, length(dim2.r))
     varPar2 <- rep(1, length(dim2.r))
     Z2 <- spam::as.spam(as.matrix(data[, ndx]))
   } else {
     dim2.r <- NULL
     term2.labels.r <- NULL
+    scFactor2 <- NULL
     Z2 <- NULL
     varPar2 <- NULL
   }
@@ -224,6 +228,7 @@ LMMsolve <- function(fixed,
     Z <- spam::cbind.spam(Z1, Z2)
     dim.r <- c(dim1.r, dim2.r)
     term.labels.r <- c(term1.labels.r, term2.labels.r)
+    scFactor <- c(scFactor1, scFactor2)
     varPar <- c(varPar1, varPar2)
     e <- cumsum(dim.r)
     s <- e - dim.r + 1
@@ -239,6 +244,7 @@ LMMsolve <- function(fixed,
     lGinv <- NULL
     dim.r <- NULL
     term.labels.r <- NULL
+    scFactor <- NULL
     varPar <- NULL
   }
   ## Replace identity matrix with ginverse for random terms.
@@ -313,6 +319,7 @@ LMMsolve <- function(fixed,
       ## Add labels.
       term.labels.f <- c(term.labels.f, splRes$term.labels.f)
       term.labels.r <- c(term.labels.r, splRes$term.labels.r)
+      scFactor <- c(scFactor, splRes$scaleFactor)
     }
   }
   ## Add intercept.
@@ -341,6 +348,17 @@ LMMsolve <- function(fixed,
   ## Make X sparse
   Xs <- spam::as.spam(X)
   ## Fit the model
+
+  if (!is.null(theta))
+  {
+    if (length(theta) != length(scFactor)) {
+      stop("Argument theta has wrong length \n")
+    }
+    #theta <- scFactor*theta
+  } else {
+    #theta <- scFactor
+  }
+
   obj <- sparseMixedModels(y = y, X = Xs, Z = Z, lGinv = lGinv, lRinv = lRinv,
                            tolerance = tolerance, trace = trace, maxit = maxit,
                            theta = theta)
