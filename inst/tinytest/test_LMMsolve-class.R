@@ -25,12 +25,12 @@ expect_stdout(print(summary(mod, which = "variances")),
               "Table with variances")
 
 ## Check logLik function.
-expect_equal(logLik(mod), 198.972846359608)
-expect_equal(logLik(mod, includeConstant = FALSE), 421.355971395139)
+expect_equal(logLik(mod), 198.972874670165)
+expect_equal(logLik(mod, includeConstant = FALSE), 421.355999705696)
 
 ## Check deviance function.
-expect_equal(deviance(mod), -397.945692719217)
-expect_equal(deviance(mod, includeConstant = FALSE), -842.711942790278)
+expect_equal(deviance(mod), -397.945749340331)
+expect_equal(deviance(mod, includeConstant = FALSE), -842.711999411393)
 
 ## Check coef function.
 coefMod <- coef(mod)
