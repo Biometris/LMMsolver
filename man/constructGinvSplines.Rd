@@ -4,7 +4,7 @@
 \alias{constructGinvSplines}
 \title{Construct list of Ginv matrices of splines}
 \usage{
-constructGinvSplines(q, knots, pord)
+constructGinvSplines(q, knots, pord, scaleFactor)
 }
 \arguments{
 \item{q}{vector, with dimension of the B-spline basis used.}

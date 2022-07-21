@@ -4,7 +4,7 @@
 \alias{constructPenalty}
 \title{Construct the penalty matrix}
 \usage{
-constructPenalty(q, pord, dx, xmin, xmax)
+constructPenalty(q, pord)
 }
 \arguments{
 \item{q}{integer with dimensions.}
@@ -21,7 +21,6 @@ Construct a scaled version of the P-splines penalty matrix, see details.
 }
 \details{
 The P-spline penalty matrix has the form \eqn{D'D}, where \eqn{D} is the `pord` order
-difference matrix. To make the penalty matrix more stable if there are many knots,
-a scaled version is used, \eqn{(1/dx)^(2pord-1) D'D}.
+difference matrix.
 }
 \keyword{internal}

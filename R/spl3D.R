@@ -67,8 +67,9 @@ spl3D <- function(x1,
   EDnom = rep(ncol(B123) - ncol(X), 3)
   ## Remove intercept column to avoid singularity problems.
   X <- removeIntercept(X)
-  # construct list of sparse precision matrices.
-  lGinv <- constructGinvSplines(q, knots, pord)
+  ## Construct list of sparse precision matrices.
+  scaleFactor <- calcScaleFactor(knots, pord)
+  lGinv <- constructGinvSplines(q, knots, pord, scaleFactor)
   names(lGinv) <- paste0("s(", xNames, ")")
   if (is.null(X)) {
     dim.f <- NULL

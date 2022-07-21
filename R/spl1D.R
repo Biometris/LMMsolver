@@ -99,7 +99,8 @@ spl1D <- function(x,
   ## Remove intercept column to avoid singularity problems.
   X <- removeIntercept(X)
   ## Construct list of sparse precision matrices.
-  lGinv <- constructGinvSplines(q, knots, pord)
+  scaleFactor <- calcScaleFactor(knots, pord)
+  lGinv <- constructGinvSplines(q, knots, pord, scaleFactor)
   names(lGinv) <- paste0("s(", xName, ")")
   if (is.null(X)) {
     dim.f <- NULL

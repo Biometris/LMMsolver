@@ -42,13 +42,22 @@ expandGinv <- function(lGinv1, lGinv2) {
   return(lGinv)
 }
 
+# calculate scale factor for precision matrices.
+# To make the penalty matrix more stable if there are many knots,
+# a scaled version is used, \eqn{(1/dx)^(2pord-1) D'D}.
+calcScaleFactor <- function(knots, pord)
+{
+  dx <- sapply(knots, function(x) { attr(x, "dx")})
+  sc <- (1/dx)^(2*pord-1)
+  return(sc)
+}
+
 #' Construct the penalty matrix
 #'
 #' Construct a scaled version of the P-splines penalty matrix, see details.
 #'
 #' The P-spline penalty matrix has the form \eqn{D'D}, where \eqn{D} is the `pord` order
-#' difference matrix. To make the penalty matrix more stable if there are many knots,
-#' a scaled version is used, \eqn{(1/dx)^(2pord-1) D'D}.
+#' difference matrix.
 #'
 #' @param q integer with dimensions.
 #' @param pord order of the penalty.
@@ -58,15 +67,10 @@ expandGinv <- function(lGinv1, lGinv2) {
 #'
 #' @keywords internal
 constructPenalty <-function(q,
-                            pord,
-                            dx,
-                            xmin,
-                            xmax) {
+                            pord) {
   D <- spam::diff.spam(spam::diag.spam(q), diff = pord)
-  # h <- (xmax-xmin)/dx
-  h <- 1/dx
-  DtDsc <- spam::crossprod.spam(D)*h^(2*pord-1)
-  return(DtDsc)
+  DtD <- spam::crossprod.spam(D)
+  return(DtD)
 }
 
 #' Construct fixed part of the spline model
@@ -135,7 +139,8 @@ constructCCt <- function(knots, pord) {
 #' @keywords internal
 constructGinvSplines <- function(q,
                                  knots,
-                                 pord) {
+                                 pord,
+                                 scaleFactor) {
   ## dimension
   d <- length(q)
   lCCt <- lapply(X = seq_len(d),
@@ -146,11 +151,7 @@ constructGinvSplines <- function(q,
     L <- list()
     for (j in seq_len(d)) {
       if (i == j) {
-        dx <- attr(knots[[j]], which="dx")
-        xmin <- attr(knots[[j]], which="xmin")
-        xmax <- attr(knots[[j]], which="xmax")
-
-        L[[j]] <- constructPenalty(q[j], pord = pord, dx = dx, xmin = xmin, xmax = xmax)
+        L[[j]] <- scaleFactor[j]*constructPenalty(q[j], pord = pord)
       } else {
         L[[j]] <- spam::diag.spam(q[j])
       }
