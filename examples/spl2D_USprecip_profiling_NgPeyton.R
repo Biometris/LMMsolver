@@ -69,8 +69,8 @@ B <- LMMsolver:::RowKronecker(B1, B2)
 dx1 <- attr(knots[[1]], which = 'dx')
 dx2 <- attr(knots[[2]], which = 'dx')
 
-P1 <- LMMsolver:::constructPenalty(q[1],2, dx1) %x% diag(1,q[2])
-P2 <- diag(1,q[1]) %x% LMMsolver:::constructPenalty(q[2],2, dx2)
+P1 <- LMMsolver:::constructPenalty(q[1],2) %x% diag(1,q[2])
+P2 <- diag(1,q[1]) %x% LMMsolver:::constructPenalty(q[2],2)
 
 theta <- EDtbl$Penalty[c(5,3,4)]
 listP <- list()
