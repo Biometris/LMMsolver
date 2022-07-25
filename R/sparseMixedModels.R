@@ -30,6 +30,8 @@ calcSumSquares <- function(lYtRinvY,
   } else {
     SS_all <- SSr
   }
+  # make sure sum of squares are all positive.
+  SS_all <- sapply(SS_all, FUN=function(x) {max(1.0e-12, x)})
   return(SS_all)
 }
 
