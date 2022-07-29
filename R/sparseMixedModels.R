@@ -35,7 +35,7 @@ calcSumSquares <- function(lYtRinvY,
   return(SS_all)
 }
 
-#' importFrom stats update
+#' @importFrom stats update
 #' @keywords internal
 sparseMixedModels <- function(y,
                               X,
