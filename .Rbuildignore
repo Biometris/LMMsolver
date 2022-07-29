@@ -12,3 +12,4 @@ data_raw
 public
 ^cran-comments\.md$
 ^CRAN-RELEASE$
+^CRAN-SUBMISSION$

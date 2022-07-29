@@ -5,3 +5,7 @@
 src/*.o
 src/*.so
 src/*.dll
+inst/doc
+public
+examples/deployment.R
+docs

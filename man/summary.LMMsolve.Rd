@@ -30,11 +30,11 @@ Summary method for class "LMMsolve". Creates either a table of effective
 dimensions (which = "dimensions") or a table of variances (which =
 "variances").
 }
-\section{Functions}{
+\section{Methods (by generic)}{
 \itemize{
-\item \code{print.summary.LMMsolve}: print summary
-}}
+\item \code{print(summary.LMMsolve)}: print summary
 
+}}
 \examples{
 ## Fit model on john.alpha data from agridat package.
 data(john.alpha, package = "agridat")
