@@ -1,3 +1,10 @@
+# LMMsolver 1.0.3
+
+-   Improved computation time and memory allocation, especially important for big data with many observations (the number of rows in the data frame).
+-   Replaced the default `model.matrix` function by `Matrix::sparse.model.matrix` to generate sparse design matrices.
+-   In function `obtainSmoothTrend` the standard errors are only calculated if `includeIntercept=TRUE`. 
+-   Several small bugs fixed.
+
 # LMMsolver 1.0.2
 
 -   First and second order derivatives are now calculated correctly.
