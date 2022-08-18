@@ -28,9 +28,6 @@
     <loc>/reference/Bsplines.html</loc>
   </url>
   <url>
-    <loc>/reference/DerivCholesky.html</loc>
-  </url>
-  <url>
     <loc>/reference/LMMsolve.html</loc>
   </url>
   <url>
@@ -47,6 +44,9 @@
   </url>
   <url>
     <loc>/reference/calcNomEffDim.html</loc>
+  </url>
+  <url>
+    <loc>/reference/calcStandardErrors.html</loc>
   </url>
   <url>
     <loc>/reference/checkFormVars.html</loc>
@@ -80,6 +80,9 @@
   </url>
   <url>
     <loc>/reference/displayMME.html</loc>
+  </url>
+  <url>
+    <loc>/reference/dlogdet.html</loc>
   </url>
   <url>
     <loc>/reference/expandGinv.html</loc>
