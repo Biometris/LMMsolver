@@ -7,8 +7,8 @@ Description: An efficient and flexible system to solve sparse mixed model
     trends. Another application area is mixed model QTL analysis for 
     multiparental populations, allowing for heterogeneous residual variance and
     random design matrices with Identity-By-Descent (IBD) probabilities.
-Version: 1.0.2.9000
-Date: 2022-04-21
+Version: 1.0.3
+Date: 2022-08-18
 Authors@R: c(person(given = "Martin", 
                     family = "Boer", 
                     email = "martin.boer@wur.nl", 
