@@ -1,7 +1,6 @@
-## Patch release
+## Minor release
 
-- Fixed check issues on macM1
-- Minor improvements ready for release
+Computation time and memory allocation are improved and several small bugs fixed.
 
 ----
 

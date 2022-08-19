@@ -63,8 +63,7 @@ N <- nrow(john.alpha)
 obj1 <- LMMsolve(fixed = yield ~ rep + gen,
                  spline = ~spl1D(x = plot, nseg = N - 1, degree = 1, pord = 1,
                                  scaleX = FALSE),
-                 data = john.alpha,
-                 tolerance = 1.0e-10)
+                 data = john.alpha, tolerance = 1e-5)
 
 ## Compare deviance with JABES2020 paper LV model, table 1.
 devJABES2020paper_LV <- 54.49

@@ -24,8 +24,6 @@ setClass("ADchol",
 #' @return An object of class \code{ADchol}. This object is used to calculate the partial
 #' partial derivatives of \eqn{log|C|} in an efficient way.
 #'
-#' @seealso \code{\link{dlogdet}}
-#'
 #' @references
 #' Furrer, R., & Sain, S. R. (2010). spam: A sparse matrix R package with emphasis
 #' on MCMC methods for Gaussian Markov random fields.

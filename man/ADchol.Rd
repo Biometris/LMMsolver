@@ -27,7 +27,4 @@ Furrer, R., & Sain, S. R. (2010). spam: A sparse matrix R package with emphasis
 on MCMC methods for Gaussian Markov random fields.
 Journal of Statistical Software, 36, 1-25.
 }
-\seealso{
-\code{\link{dlogdet}}
-}
 \keyword{internal}

@@ -474,6 +474,7 @@ double logdet(SEXP arg, NumericVector lambda)
 //' Smith, S. P. (1995). Differentiation of the Cholesky algorithm.
 //' Journal of Computational and Graphical Statistics, 4(2), 134-147.
 //'
+//' @noRd
 //' @keywords internal
 //'
 // [[Rcpp::export]]
