@@ -363,14 +363,16 @@ nameCoefs <- function(coefs,
           ## For fixed terms an extra 0 for the reference levels have to be added.
           coefI <- c(rep(0, times = length(interAcLevsIAlt) - length(coefI)),
                      coefI)
-          ## Zeros correspond to missing colums from design matrix.
+          ## Zeros correspond to missing columns from design matrix.
           ## Non-zeros to columns that are present in design matrix.
           names(coefI) <- c(interAcLevsI[!interAcLevsIAlt %in% colnames(desMat)],
                             interAcLevsI[interAcLevsIAlt %in% colnames(desMat)])
           ## Reorder.
           coefI <- coefI[interAcLevsI]
+          names(coefI) <- levels(interaction(labDat, sep = ":", drop = TRUE))
+        } else {
+          names(coefI) <- levels(interaction(labDat, sep = ":", drop = FALSE))
         }
-        names(coefI) <- levels(interaction(labDat, sep = ":", drop = TRUE))
       } else {
         ## Numerical variable. Name equal to label.
         names(coefI) <- labI
