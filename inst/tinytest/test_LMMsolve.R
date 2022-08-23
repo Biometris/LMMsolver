@@ -129,3 +129,29 @@ expect_equivalent(coefsInt,
 expect_silent(LMMsolve(fixed = pheno ~ rep + rep:cross, data = testDatInt))
 expect_silent(LMMsolve(fixed = pheno ~ rep*cross, data = testDatInt))
 
+## Test that interaction terms are labeled correctly when level missing.
+testDatInt2 <- testDat
+testDatInt2[["rep"]] <- factor(c(rep(c("r1", "r2"), each = 50),
+                                 rep("r1", times = 80)))
+
+# Interaction in fixed part.
+modIntMiss <- LMMsolve(fixed = pheno ~ rep:cross, data = testDatInt2)
+coefsIntMiss <- coef(modIntMiss)$`rep:cross`
+expect_equal(names(coefsIntMiss),
+             c("rep_r1:cross_AxB", "rep_r2:cross_AxB", "rep_r1:cross_AxC"))
+expect_equivalent(coefsIntMiss,
+                  c(-0.63561417, -0.355812930000001, 0))
+
+# Interaction in random part.
+
+modIntMissR <- LMMsolve(fixed = pheno ~ 1, random = ~rep:cross,
+                        data = testDatInt2)
+coefsIntRMiss <- coef(modIntMissR)$`rep:cross`
+expect_equal(names(coefsIntRMiss),
+             c("rep_r1:cross_AxB", "rep_r2:cross_AxB", "rep_r1:cross_AxC",
+               "rep_r2:cross_AxC"))
+expect_equivalent(coefsIntRMiss,
+                  c(-0.136895043027739, -0.0221165394103219,
+                    0.159011582438064, 0))
+
+
