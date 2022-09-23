@@ -57,12 +57,67 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// prod
+NumericVector prod(SEXP C, NumericVector y);
+RcppExport SEXP _LMMsolver_prod(SEXP CSEXP, SEXP ySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type C(CSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    rcpp_result_gen = Rcpp::wrap(prod(C, y));
+    return rcpp_result_gen;
+END_RCPP
+}
+// prod2
+NumericVector prod2(SEXP C1, SEXP C2, NumericVector y);
+RcppExport SEXP _LMMsolver_prod2(SEXP C1SEXP, SEXP C2SEXP, SEXP ySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type C1(C1SEXP);
+    Rcpp::traits::input_parameter< SEXP >::type C2(C2SEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    rcpp_result_gen = Rcpp::wrap(prod2(C1, C2, y));
+    return rcpp_result_gen;
+END_RCPP
+}
+// prod3
+NumericVector prod3(SEXP C1, SEXP C2, SEXP C3, NumericVector y);
+RcppExport SEXP _LMMsolver_prod3(SEXP C1SEXP, SEXP C2SEXP, SEXP C3SEXP, SEXP ySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type C1(C1SEXP);
+    Rcpp::traits::input_parameter< SEXP >::type C2(C2SEXP);
+    Rcpp::traits::input_parameter< SEXP >::type C3(C3SEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    rcpp_result_gen = Rcpp::wrap(prod3(C1, C2, C3, y));
+    return rcpp_result_gen;
+END_RCPP
+}
+// prodList
+NumericVector prodList(List L, NumericVector y);
+RcppExport SEXP _LMMsolver_prodList(SEXP LSEXP, SEXP ySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< List >::type L(LSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    rcpp_result_gen = Rcpp::wrap(prodList(L, y));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_LMMsolver_construct_ADchol_Rcpp", (DL_FUNC) &_LMMsolver_construct_ADchol_Rcpp, 2},
     {"_LMMsolver_logdet", (DL_FUNC) &_LMMsolver_logdet, 2},
     {"_LMMsolver_dlogdet", (DL_FUNC) &_LMMsolver_dlogdet, 2},
     {"_LMMsolver_partialDerivCholesky", (DL_FUNC) &_LMMsolver_partialDerivCholesky, 1},
+    {"_LMMsolver_prod", (DL_FUNC) &_LMMsolver_prod, 2},
+    {"_LMMsolver_prod2", (DL_FUNC) &_LMMsolver_prod2, 3},
+    {"_LMMsolver_prod3", (DL_FUNC) &_LMMsolver_prod3, 4},
+    {"_LMMsolver_prodList", (DL_FUNC) &_LMMsolver_prodList, 2},
     {NULL, NULL, 0}
 };
 
