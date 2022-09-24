@@ -17,11 +17,12 @@ SparseMatrix::SparseMatrix(Rcpp::S4 obj)
   colindices = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("colindices"));
   rowpointers = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("rowpointers"));
   dim = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("dimension"));
+  // in C/C++ indices start from zero, in R from one:
   for (int i=0;i<colindices.size();i++) {
-    colindices[i] -= 1;
+    colindices[i]--;
   }
   for (int i=0;i<rowpointers.size();i++) {
-    rowpointers[i] -= 1;
+    rowpointers[i]--;
   }
 }
 
@@ -41,14 +42,6 @@ NumericVector prod(const SparseMatrix& M, const NumericVector& y, int start_y)
     }
     result[r] = z;
   }
-  return result;
-}
-
-// [[Rcpp::export]]
-NumericVector prod(SEXP C, NumericVector y)
-{
-  SparseMatrix M(C);
-  NumericVector result = prod(M, y, 0);
   return result;
 }
 
@@ -72,7 +65,7 @@ NumericVector prodAux(const SparseMatrix& B, int nBlk, NumericVector x)
 }
 
 // [[Rcpp::export]]
-NumericVector prod2(SEXP C1, SEXP C2, NumericVector y)
+NumericVector KronProd2(SEXP C1, SEXP C2, const NumericVector& y)
 {
   SparseMatrix B1(C1);
   SparseMatrix B2(C2);
@@ -85,7 +78,7 @@ NumericVector prod2(SEXP C1, SEXP C2, NumericVector y)
 }
 
 // [[Rcpp::export]]
-NumericVector prod3(SEXP C1, SEXP C2, SEXP C3, NumericVector y)
+NumericVector KronProd(SEXP C1, SEXP C2, SEXP C3, const NumericVector& y)
 {
   SparseMatrix B1(C1);
   SparseMatrix B2(C2);
@@ -103,20 +96,20 @@ NumericVector prod3(SEXP C1, SEXP C2, SEXP C3, NumericVector y)
 
 
 // [[Rcpp::export]]
-NumericVector prodList(List L, NumericVector y)
+NumericVector KronProdList(List L, const NumericVector& y)
 {
-  int d = L.size();
+  int sz = L.size();
   vector<SparseMatrix> B;
-  for (int i=0;i<d;i++)
+  for (int i=0;i<sz;i++)
   {
     Rcpp::S4 obj = L[i];
     B.push_back(obj);
   }
   NumericVector z = y;
-  for (int i=d-1;i>=0;i--)
+  for (int i=sz-1;i>=0;i--)
   {
     int nBlk = 1;
-    for (int k=0;k<d;k++)
+    for (int k=0;k<sz;k++)
     {
       if (k < i) nBlk *= B[k].dim[1];
       if (k > i) nBlk *= B[k].dim[0];

@@ -41,19 +41,15 @@ partialDerivCholesky <- function(cholC) {
     .Call(`_LMMsolver_partialDerivCholesky`, cholC)
 }
 
-prod <- function(C, y) {
-    .Call(`_LMMsolver_prod`, C, y)
+KronProd2 <- function(C1, C2, y) {
+    .Call(`_LMMsolver_KronProd2`, C1, C2, y)
 }
 
-prod2 <- function(C1, C2, y) {
-    .Call(`_LMMsolver_prod2`, C1, C2, y)
+KronProd <- function(C1, C2, C3, y) {
+    .Call(`_LMMsolver_KronProd`, C1, C2, C3, y)
 }
 
-prod3 <- function(C1, C2, C3, y) {
-    .Call(`_LMMsolver_prod3`, C1, C2, C3, y)
-}
-
-prodList <- function(L, y) {
-    .Call(`_LMMsolver_prodList`, L, y)
+KronProdList <- function(L, y) {
+    .Call(`_LMMsolver_KronProdList`, L, y)
 }
 
