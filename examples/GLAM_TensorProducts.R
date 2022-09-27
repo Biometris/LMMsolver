@@ -73,4 +73,24 @@ B_ext <- LMMsolver:::RowKronecker(tmp, Bxx3)
 all.equal(B, B_ext)
 
 
+#' Test of ordering data, idea for LMMsolver
+#' ==================
 
+df1 <- data.frame(x1=xx1, x2=xx2, x3=xx3)
+
+set.seed(1234)
+
+random_order <- sample(1:n, n)
+df2 <- df1[random_order, ]
+head(df2)
+
+ord <- order(df2$x1, df2$x2, df2$x3)
+df3 <- df2[ord, ]
+
+all.equal(df1, df3)
+
+# This could be check for grid in LMMsolver,
+# after ordering.
+all.equal(df3$x1, as.vector(xx1))
+all.equal(df3$x2, as.vector(xx2))
+all.equal(df3$x3, as.vector(xx3))
