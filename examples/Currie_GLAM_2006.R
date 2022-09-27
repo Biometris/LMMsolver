@@ -134,46 +134,51 @@ z[ndx]
 #' Sparse solution
 #' ==================
 
-s1 <- which(diff(tG1@rowpointers) != 0)
-s2 <- which(diff(tG2@rowpointers) != 0)
-dim2 <- length(s2)
+ReArrange <- function(A, q1, q2, s1, s2, z) {
+  q <- q1*q2
+  x <- rep(NA, length=length(A@entries))
+  dim2 <- length(s2)
+  for (i in 1:q) {
+    s <- A@rowpointers[i]
+    e <- A@rowpointers[i+1]-1
+    col <- A@colindices[s:e]
+    range <- c(s:e)
 
-tG1_nozeros <- tG1[s1, ]
-tG2_nozeros <- tG2[s2, ]
-z <- LMMsolver:::KronProd2(tG1_nozeros, tG2_nozeros, w)
+    i1 <- (i-1) %/% q2 + 1
+    i2 <- (i-1) %% q2 + 1
 
-df <- data.frame(k=c(1:(q1*q2)), k1=rep(1:q1, each=q2), k2=rep(1:q2, times=q1))
+    for (m in 1:length(col)) {
+      j <- col[m]
+      j1 <- (j-1) %/% q2 + 1
+      j2 <- (j-1) %% q2 + 1
 
-# init A for structure of sparse matrix, with w=1.0
-A <- crossprod(B1x) %x% crossprod(B2x)
-A@entries <- rep(0, length(A@entries))
-q <- q1*q2
-
-# get element of BtW[i, j]
-for (i in 1:q) {
-  s <- A@rowpointers[i]
-  e <- A@rowpointers[i+1]-1
-  col <- A@colindices[s:e]
-  range <- c(s:e)
-
-  tmp <- df[which(df$k==i), ]
-  i1 <- tmp$k1
-  i2 <- tmp$k2
-
-  for (m in 1:length(col)) {
-    j <- col[m]
-
-    tmp <- df[which(df$k==j), ]
-    j1 <- tmp$k1
-    j2 <- tmp$k2
-
-    ndx1 <- (j1-1)*q1 + i1
-    ndx2 <- (j2-1)*q2 + i2
-    k1 <- which(s1 == ndx1)
-    k2 <- which(s2 == ndx2)
-    k <- (k1-1)*dim2 + k2
-    A@entries[range[m]] <- z[k]
+      ndx1 <- (j1-1)*q1 + i1
+      ndx2 <- (j2-1)*q2 + i2
+      k1 <- which(s1 == ndx1)
+      k2 <- which(s2 == ndx2)
+      k <- (k1-1)*dim2 + k2
+      x[range[m]] <- z[k]
+    }
   }
+  x
 }
 
+# input B1x, B2x
+q1 <- ncol(B1x)
+q2 <- ncol(B2x)
+G1 <- LMMsolver:::RowKronecker(B1x, B1x)
+G2 <- LMMsolver:::RowKronecker(B2x, B2x)
+tG1 <- t(G1)
+tG2 <- t(G2)
+s1 <- which(diff(tG1@rowpointers) != 0)
+s2 <- which(diff(tG2@rowpointers) != 0)
+tG1_nozeros <- tG1[s1, ]
+tG2_nozeros <- tG2[s2, ]
+A <- crossprod(B1x) %x% crossprod(B2x)
+
+# update for new values of w:
+z <- LMMsolver:::KronProd2(tG1_nozeros, tG2_nozeros, w)
+A@entries <- ReArrange(A, q1, q2, s1, s2, z)
+
 all.equal(BtWB, A)
+
