@@ -53,3 +53,7 @@ KronProdList <- function(L, y) {
     .Call(`_LMMsolver_KronProdList`, L, y)
 }
 
+ReArrange <- function(A, q1, q2, s1, s2, z) {
+    .Call(`_LMMsolver_ReArrange`, A, q1, q2, s1, s2, z)
+}
+

@@ -118,3 +118,49 @@ NumericVector KronProdList(List L, const NumericVector& y)
   }
   return z;
 }
+
+//ReArrange <- function(A, q1, q2, s1, s2, z) {
+
+// [[Rcpp::export]]
+NumericVector ReArrange(SEXP A, int q1, int q2,
+                        const IntegerVector& s1,
+                        const IntegerVector& s2,
+                        const NumericVector& z)
+{
+  SparseMatrix M(A);
+  NumericVector x(z.size());
+  int dim2 = s2.size();
+
+  map<int,int> Key1, Key2;
+  for (int i=0;i<s1.size();i++) {
+    Key1[s1[i]-1] = i;
+  }
+  for (int i=0;i<s2.size();i++) {
+    Key2[s2[i]-1] = i;
+  }
+
+  for (int i=0;i<M.dim[0];i++)
+  {
+    int s = M.rowpointers[i];
+    int e = M.rowpointers[i+1];
+
+    int i1 = i / q2;
+    int i2 = i % q2;
+
+    for (int k=s;k<e;k++)
+    {
+      int j = M.colindices[k];
+      int j1 = j / q2;
+      int j2 = j % q2;
+
+      int ndx1 = j1*q1 + i1;
+      int ndx2 = j2*q2 + i2;
+      int k1 = Key1[ndx1];
+      int k2 = Key2[ndx2];
+      x[k] = z[k1*dim2 + k2];
+    }
+  }
+  return x;
+}
+
+

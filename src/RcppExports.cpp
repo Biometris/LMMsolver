@@ -96,6 +96,22 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// ReArrange
+NumericVector ReArrange(SEXP A, int q1, int q2, const IntegerVector& s1, const IntegerVector& s2, const NumericVector& z);
+RcppExport SEXP _LMMsolver_ReArrange(SEXP ASEXP, SEXP q1SEXP, SEXP q2SEXP, SEXP s1SEXP, SEXP s2SEXP, SEXP zSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type A(ASEXP);
+    Rcpp::traits::input_parameter< int >::type q1(q1SEXP);
+    Rcpp::traits::input_parameter< int >::type q2(q2SEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type s1(s1SEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type s2(s2SEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type z(zSEXP);
+    rcpp_result_gen = Rcpp::wrap(ReArrange(A, q1, q2, s1, s2, z));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_LMMsolver_construct_ADchol_Rcpp", (DL_FUNC) &_LMMsolver_construct_ADchol_Rcpp, 2},
@@ -105,6 +121,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_LMMsolver_KronProd2", (DL_FUNC) &_LMMsolver_KronProd2, 3},
     {"_LMMsolver_KronProd", (DL_FUNC) &_LMMsolver_KronProd, 4},
     {"_LMMsolver_KronProdList", (DL_FUNC) &_LMMsolver_KronProdList, 2},
+    {"_LMMsolver_ReArrange", (DL_FUNC) &_LMMsolver_ReArrange, 6},
     {NULL, NULL, 0}
 };
 
