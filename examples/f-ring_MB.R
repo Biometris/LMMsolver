@@ -1,3 +1,6 @@
+# Martin Boer, Biometris, WUR, Wageningen.
+# comparison of original code with LMMsolver using sparse GLAM.
+
 # Smoothing ring image with array regression (Simulated data)
 # A graph in the book 'Practical Smoothing. The Joys of P-splines'
 # Paul Eilers and Brian Marx, 2019
@@ -9,8 +12,8 @@ library(LMMsolver)
 library(spam)
 
 # Simulate the rings
-nx = 1000
-ny = 1000
+nx = 500
+ny = 500
 x = seq(-1, 1, length = nx)
 y = seq(-1, 1, length = ny)
 ex = rep(1, nx)
@@ -31,7 +34,7 @@ Z = pmax(pmax(pmax(Z1, Z2), Z3), Z4)
 set.seed(2019)
 Z = Z + matrix(rnorm(nx * ny), nx, ny)
 
-nseg <- c(80, 70)
+nseg <- c(40, 40)
 
 s1 <- proc.time()[3]
 
@@ -66,39 +69,38 @@ Zhat = Bx %*% A %*% t(By)
 
 e1 <- proc.time()[3]
 
+#
+# part 2, using LMMsolver functions
+#
 s2 <- proc.time()[3]
 
 z <- as.vector(Z)
 w <- as.vector(W)
-knots1 <- LMMsolver:::PsplinesKnots(min(x),max(x),degree = 3, nseg = nseg[1])
-Bx1 <- LMMsolver:::Bsplines(knots1, x)
-knots2 <- LMMsolver:::PsplinesKnots(min(y),max(y),degree = 3, nseg = nseg[2])
-Bx2 <- LMMsolver:::Bsplines(knots2, y)
 
-sparseGLAM <- LMMsolver:::SparseGLAM(Bx2, Bx1)
+# make the B-splines and penalty matrix sparse:
+Bx <- as.spam(Bx)
+By <- as.spam(By)
+P <- as.spam(P)
+
+sparseGLAM <- LMMsolver:::SparseGLAM(By, Bx)
 BtWB <- LMMsolver:::calcBtWB(sparseGLAM, w)
-
-lambdax <- lambday <- 1
-Dx <- diff(diag.spam(nbx), diff = 2)
-Dy <- diff(diag.spam(nby), diff = 2)
-
-Px <- lambdax * t(Dx) %*% Dx
-Py <- lambday * t(Dy) %*% Dy
-P <- Py %x% diag.spam(nbx) + diag.spam(nby) %x% Px
-#BtB <- crossprod(Bx2) %x% crossprod(Bx1)
-C <- BtWB + P
-BtZ <- LMMsolver:::KronProd2(t(Bx2), t(Bx1), w*z)
-a <- solve(C, BtZ)
-zhat <- LMMsolver:::KronProd2(Bx2, Bx1, a)
-
-Zhat2 <- matrix(data=zhat, nx, ny)
-
-range(Zhat-Zhat2)
+BtZ <- LMMsolver:::KronProd2(t(By), t(Bx), w*z)
+a <- solve(BtWB + P, BtZ)
+zhat <- LMMsolver:::KronProd2(By, Bx, a)
 
 e2 <- proc.time()[3]
 
-cat("book:       ", e1-s1, " seconds\n")
-cat("LMMsolver:  ", e2-s2, " seconds\n")
+# compare original code with LMMsolver.
+Zhat2 <- matrix(data=zhat, nx, ny)
+all.equal(Zhat, Zhat2)
+#range(Zhat - Zhat2)
+
+t1 <- e1-s1
+t2 <- e2-s2
+
+cat("book:       ", t1, " seconds\n")
+cat("LMMsolver:  ", t2, " seconds\n")
+cat("Factor:     ", round(t1/t2,2), "times faster\n")
 
 
 
