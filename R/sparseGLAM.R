@@ -12,7 +12,8 @@ SparseGLAM <- function(B1x, B2x)
   tG1_nozeros <- tG1[s1, ]
   tG2_nozeros <- tG2[s2, ]
   A <- spam::crossprod.spam(B1x) %x% spam::crossprod.spam(B2x)
-  obj <- list(tG1=tG1_nozeros, tG2=tG2_nozeros, q1=q1, q2=q2, s1=s1, s2=s2, A=A)
+  obj <- list(B1x=B1x, B2x=B2x,
+              tG1=tG1_nozeros, tG2=tG2_nozeros, q1=q1, q2=q2, s1=s1, s2=s2, A=A)
   class(obj) <- "SparseGLAM"
   obj
 }
@@ -23,4 +24,16 @@ calcBtWB <- function(obj, w) {
   A@entries <- LMMsolver:::ReArrange(A, obj$q1, obj$q2, obj$s1, obj$s2, z)
   A
 }
+
+calcBtY <- function(obj, y) {
+  z <- LMMsolver:::KronProd2(t(obj$B1x), t(obj$B2x), y)
+  z
+}
+
+calcBa <- function(obj, a) {
+  z <- LMMsolver:::KronProd2(obj$B1x, obj$B2x, a)
+  z
+}
+
+
 

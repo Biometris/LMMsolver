@@ -87,9 +87,9 @@ s2 <- proc.time()[3]
 
 sGLAMobj <- LMMsolver:::SparseGLAM(By, Bx)
 BtWB <- LMMsolver:::calcBtWB(sGLAMobj, w)
-BtZ <- LMMsolver:::KronProd2(t(By), t(Bx), w*z)
+BtZ <- LMMsolver:::calcBtY(sGLAMobj, w*z)
 a <- solve(BtWB + P, BtZ)
-zhat <- LMMsolver:::KronProd2(By, Bx, a)
+zhat <- LMMsolver:::calcBa(sGLAMobj, a)
 
 e2 <- proc.time()[3]
 
