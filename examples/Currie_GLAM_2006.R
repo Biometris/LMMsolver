@@ -152,30 +152,24 @@ z[ndx]
 
 # make the SparseGLAM object:
 W <- diag(w)
-BtWB <- t(B) %*% W %*% B
+
+# Prpare the penalty matrices
+Dx1 = diff(diag(q1), diff = 2)
+Dx2 = diff(diag(q2), diff = 2)
+lambdax = lambday = 1
+Px1 = lambdax * t(Dx1) %*% Dx1
+Px2 = lambday * t(Dx2) %*% Dx2
+P = kronecker(Px2, diag(q1)) + kronecker(diag(q2), Px1)
+P <- as.spam(P)
+
+C <- t(B) %*% W %*% B + P
 obj <- LMMsolver:::sparseGLAM(B1x, B2x)
 # calculate BtWB using weight w:
 M <- LMMsolver:::calcBtWB(obj, w)
 all.equal(BtWB, M)
 
-cholC <- chol(BtWB)
-## calculate the partial derivatives of Cholesky
-cholC@entries <- LMMsolver:::partialDerivCholesky(cholC)
-
-A <- spam::as.spam(cholC)
-A <- A[cholC@invpivot, cholC@invpivot]
-A <- as.matrix(A)
-dim(A) <- c(q2, q1, q2, q1)
-A <- aperm(A, c(1, 3, 2, 4))
-dim(A) <- c(q2 * q2, q1 * q1)
-a <- as.vector(A)
-
-G1 <- LMMsolver:::RowKronecker(B1x, B1x)
-G2 <- LMMsolver:::RowKronecker(B2x, B2x)
-G <- G1 %x% G2
-
-Cinv <- solve(BtWB)
+Cinv <- solve(C)
 ## Equivalent to diag(B %*% Cinv %*% t(B))
 dg1 <- spam::rowSums.spam((B %*% Cinv) * B)
-dg2 <- LMMsolver:::KronProd2(G1, G2, a)
+dg2 <- LMMsolver:::calcB_Cinv_Bt(obj, C)
 all.equal(dg1, dg2)

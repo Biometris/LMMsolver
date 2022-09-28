@@ -14,7 +14,7 @@ sparseGLAM <- function(B1x, B2x)
   A <- spam::crossprod.spam(B1x) %x% spam::crossprod.spam(B2x)
   ord <- LMMsolver:::getOrder(A, q1, q2, s1, s2)
 
-  obj <- list(B1x=B1x, B2x=B2x,
+  obj <- list(B1x=B1x, B2x=B2x,G1=G1, G2=G2,
               tG1=tG1_nozeros, tG2=tG2_nozeros,
               q1=q1, q2=q2, s1=s1, s2=s2, A=A,ord=ord)
   class(obj) <- "sparseGLAM"
@@ -36,6 +36,26 @@ calcBtY <- function(obj, y) {
 calcBa <- function(obj, a) {
   z <- LMMsolver:::KronProd2(obj$B1x, obj$B2x, a)
   z
+}
+
+calcB_Cinv_Bt <- function(obj, C, w=1) {
+  cholC <- chol(C)
+  q1 <- obj$q1
+  q2 <- obj$q2
+
+  ## calculate the partial derivatives of Cholesky
+  cholC@entries <- LMMsolver:::partialDerivCholesky(cholC)
+
+  A <- spam::as.spam(cholC)
+  A <- A[cholC@invpivot, cholC@invpivot]
+  A <- as.matrix(A)
+  dim(A) <- c(q2, q1, q2, q1)
+  A <- aperm(A, c(1, 3, 2, 4))
+  dim(A) <- c(q2 * q2, q1 * q1)
+  a <- as.vector(A)
+
+  x <- LMMsolver:::KronProd2(obj$G1, obj$G2, a)*w
+  x
 }
 
 
