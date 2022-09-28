@@ -51,6 +51,22 @@ BtWB2 <- crossprod(B)
 BtWB2@entries <- as.vector(tG2 %*% w)
 all.equal(BtWB, BtWB2)
 
+Cinv <- solve(BtWB)
+
+# calculate the diagonal elements B (BtWB)^{-1} B'
+cholC <- chol(BtWB)
+## calculate the partial derivatives of Cholesky
+cholC@entries <- LMMsolver:::partialDerivCholesky(cholC)
+A <- spam::as.spam(cholC)
+A <- A[cholC@invpivot, cholC@invpivot]
+a <- as.vector(as.matrix(A))
+
+dg1 <- diag(B %*% Cinv %*% t(B))
+dg2 <- as.vector(G %*% as.vector(Cinv))
+dg3 <- as.vector(G %*% a)
+all.equal(dg1, dg2)
+all.equal(dg1, dg3)
+
 #' Two dimensions, see section 2.1 Currie 2006
 #' ==================
 
