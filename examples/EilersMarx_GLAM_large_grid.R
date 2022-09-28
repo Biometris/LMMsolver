@@ -1,5 +1,6 @@
-# Martin Boer, Biometris, WUR, Wageningen.
+#
 # comparison of original code with LMMsolver using sparse GLAM.
+# Martin Boer, Biometris, WUR, Wageningen.
 
 # Smoothing ring image with array regression (Simulated data)
 # A graph in the book 'Practical Smoothing. The Joys of P-splines'
@@ -8,8 +9,6 @@
 library(ggplot2)
 library(JOPS)
 library(fields)
-library(LMMsolver)
-library(spam)
 
 # Simulate the rings
 nx = 500
@@ -34,9 +33,7 @@ Z = pmax(pmax(pmax(Z1, Z2), Z3), Z4)
 set.seed(2019)
 Z = Z + matrix(rnorm(nx * ny), nx, ny)
 
-nseg <- c(40, 40)
-
-s1 <- proc.time()[3]
+nseg <- c(20, 20)
 
 # Prepare bases
 Bx = bbase(x, nseg = nseg[1])
@@ -52,9 +49,12 @@ Px = lambdax * t(Dx) %*% Dx
 Py = lambday * t(Dy) %*% Dy
 P = kronecker(Py, diag(nbx)) + kronecker(diag(nby), Px)
 
-# Do the smoothing, using the array algorithm
 W = matrix(runif(nx*ny), nx, ny)
 #W = 0 * Z + 1
+
+s1 <- proc.time()[3]
+
+# Do the smoothing, using the array algorithm
 Tx = rowtens(Bx)
 Ty = rowtens(By)
 Q = t(Tx) %*% W %*% Ty
@@ -72,18 +72,21 @@ e1 <- proc.time()[3]
 #
 # part 2, using LMMsolver functions
 #
-s2 <- proc.time()[3]
 
-z <- as.vector(Z)
-w <- as.vector(W)
+library(LMMsolver)
+library(spam)
 
-# make the B-splines and penalty matrix sparse:
+# Make the B-splines and penalty matrix sparse, Z and W as vectors
 Bx <- as.spam(Bx)
 By <- as.spam(By)
 P <- as.spam(P)
+z <- as.vector(Z)
+w <- as.vector(W)
 
-sparseGLAM <- LMMsolver:::SparseGLAM(By, Bx)
-BtWB <- LMMsolver:::calcBtWB(sparseGLAM, w)
+s2 <- proc.time()[3]
+
+sGLAMobj <- LMMsolver:::SparseGLAM(By, Bx)
+BtWB <- LMMsolver:::calcBtWB(sGLAMobj, w)
 BtZ <- LMMsolver:::KronProd2(t(By), t(Bx), w*z)
 a <- solve(BtWB + P, BtZ)
 zhat <- LMMsolver:::KronProd2(By, Bx, a)
@@ -93,14 +96,13 @@ e2 <- proc.time()[3]
 # compare original code with LMMsolver.
 Zhat2 <- matrix(data=zhat, nx, ny)
 all.equal(Zhat, Zhat2)
-#range(Zhat - Zhat2)
 
 t1 <- e1-s1
 t2 <- e2-s2
 
 cat("book:       ", t1, " seconds\n")
 cat("LMMsolver:  ", t2, " seconds\n")
-cat("Factor:     ", round(t1/t2,2), "times faster\n")
+cat("Factor:     ", round(t1/t2, 2), "times faster\n")
 
 
 
