@@ -85,7 +85,7 @@ w <- as.vector(W)
 
 s2 <- proc.time()[3]
 
-sGLAMobj <- LMMsolver:::SparseGLAM(By, Bx)
+sGLAMobj <- LMMsolver:::sparseGLAM(By, Bx)
 BtWB <- LMMsolver:::calcBtWB(sGLAMobj, w)
 BtZ <- LMMsolver:::calcBtY(sGLAMobj, w*z)
 a <- solve(BtWB + P, BtZ)
