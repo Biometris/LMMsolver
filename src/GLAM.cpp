@@ -2,14 +2,7 @@
 using namespace Rcpp;
 using namespace std;
 
-class SparseMatrix {
-public:
-  SparseMatrix(Rcpp::S4 obj);
-  NumericVector entries;
-  IntegerVector colindices;
-  IntegerVector rowpointers;
-  IntegerVector dim;
-};
+#include "SparseMatrix.h"
 
 SparseMatrix::SparseMatrix(Rcpp::S4 obj)
 {
