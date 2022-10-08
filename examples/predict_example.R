@@ -86,7 +86,7 @@ for (i in 1:q) {
 s
 
 diag(D %*% Cinv %*% t(D))
-LMMsolver:::partialDerivCholesky2(cholC, as.matrix(Dp))
+LMMsolver:::diagXCinvXt(cholC, tDp)
 
 
 

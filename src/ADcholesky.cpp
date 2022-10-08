@@ -570,29 +570,55 @@ NumericVector partialDerivCholesky(SEXP cholC)
   return F;
 }
 
-void updateH(NumericVector& H, const NumericVector& Di,
-                               const NumericVector& Dj,
-                               double alpha)
+map<int, double> makeMap(const NumericVector& entries,
+                         const IntegerVector& colindices, int s, int e)
 {
-  const int d = H.size();
-  NumericVector x(d);
-  // calculate the products:
-  for (int m=0; m<d; m++) {
-    x[m] = Di(m)*Dj(m);
+  map<int, double> x;
+  for (int i=s; i<e; i++) {
+    x[colindices[i]] = entries[i];
   }
-  // scale x and add to H:
-  for (int m=0; m<d; m++) {
-    H[m] += alpha*x[m];
+  return x;
+}
+
+void updateH(NumericVector& H, const SparseMatrix& tD, int i, int j,
+             double alpha)
+{
+  //const int d = H.size();
+  //NumericVector x(d, 0.0);
+
+  int s1 = tD.rowpointers[i];
+  int e1 = tD.rowpointers[i+1];
+  if (s1==e1) return;
+
+  int s2 = tD.rowpointers[j];
+  int e2 = tD.rowpointers[j+1];
+  if (s2==e2) return;
+
+  map<int, double> M1 = makeMap(tD.entries, tD.colindices, s1, e1);
+  map<int, double> M2 = makeMap(tD.entries, tD.colindices, s2, e2);
+
+  // to find intersection can be in separate function:
+  set<int> S1, S2;
+  for (int i=s1;i<e1;i++)
+    S1.insert(tD.colindices[i]);
+  for (int i=s2;i<e2;i++)
+    S2.insert(tD.colindices[i]);
+
+  vector<int> S3;
+  set_intersection(S1.begin(), S1.end(), S2.begin(), S2.end(),
+                   std::inserter(S3, S3.begin()));
+  for (vector<int>::iterator it=S3.begin();it!=S3.end();++it)
+  {
+    H[*it] += M1[*it]*M2[*it]*alpha;
   }
 }
 
 // [[Rcpp::export]]
-NumericVector partialDerivCholesky2(SEXP cholC, NumericMatrix D)
+NumericVector diagXCinvXt(SEXP cholC, SEXP transposeD)
 {
   Rcpp::S4 obj(cholC);
-  //SparseMatrix tD(mD);
-  //int d = tD.dim[0];
-  //int p = D.dim[1];
+  SparseMatrix tD(transposeD);
+  const int d = tD.dim[1];
 
   // We use transpose for calculating Automated Differentiation.
   IntegerVector supernodes = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("supernodes"));
@@ -613,7 +639,6 @@ NumericVector partialDerivCholesky2(SEXP cholC, NumericMatrix D)
   ADcholesky(F, L, supernodes, rowpointers, colpointers, rowindices);
 
   // Function here to calculate elements of H:
-  const int d = D.nrow();
   NumericVector H(d, 0.0);
 
   const int Nsupernodes = supernodes.size()-1;
@@ -627,8 +652,8 @@ NumericVector partialDerivCholesky2(SEXP cholC, NumericMatrix D)
       for (int ndx = colpointers[j]; ndx < colpointers[j+1]; ndx++)
       {
         int i = rowindices[k++];
-        double val = L[ndx];
-        updateH(H, D( _ , i), D(_ ,j), val);
+        double alpha = L[ndx];
+        updateH(H, tD, i, j, alpha);
       }
       s++;
     }
