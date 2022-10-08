@@ -15,6 +15,7 @@
 #' implemented for spl1D.
 #' @param which An integer, for if there are multiple splxD terms in the model.
 #' Default value is 1.
+#' @param NewMethod Temp arg: Use new method to calculate standard errors.
 #'
 #' @return A data.frame with predictions for the smooth trend on the specified
 #' grid. The standard errors are saved if `deriv` has default value 0.
