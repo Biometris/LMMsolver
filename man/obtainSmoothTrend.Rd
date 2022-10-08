@@ -10,7 +10,8 @@ obtainSmoothTrend(
   newdata = NULL,
   deriv = 0,
   includeIntercept = FALSE,
-  which = 1
+  which = 1,
+  NewMethod = FALSE
 )
 }
 \arguments{

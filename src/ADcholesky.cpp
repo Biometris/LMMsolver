@@ -652,7 +652,7 @@ NumericVector diagXCinvXt(SEXP cholC, SEXP transposeD)
       for (int ndx = colpointers[j]; ndx < colpointers[j+1]; ndx++)
       {
         int i = rowindices[k++];
-        double alpha = L[ndx];
+        double alpha = F[ndx];
         updateH(H, tD, i, j, alpha);
       }
       s++;

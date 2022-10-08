@@ -86,7 +86,11 @@ for (i in 1:q) {
 s
 
 diag(D %*% Cinv %*% t(D))
-LMMsolver:::diagXCinvXt(cholC, tDp)
+LMMsolver:::diagXCinvXt(chol(C), tDp)
 
+se1 <- LMMsolver:::calcStandardErrors(C, D, NewMethod=FALSE)
+se2 <- LMMsolver:::calcStandardErrors(C, D, NewMethod=TRUE)
+se1^2
+se2^2
 
 

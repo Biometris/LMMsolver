@@ -50,7 +50,7 @@ obtainSmoothTrend <- function(object,
                               newdata = NULL,
                               deriv = 0,
                               includeIntercept = FALSE,
-                              which = 1) {
+                              which = 1, NewMethod=FALSE) {
   if (!inherits(object, "LMMsolve")) {
     stop("object should be an object of class LMMsolve.\n")
   }
@@ -200,7 +200,7 @@ obtainSmoothTrend <- function(object,
     lU[[ndx.r]] <- BxTot
 
     U <- Reduce(spam::cbind.spam, lU)
-    outDat[["se"]] <- calcStandardErrors(object$C, U)
+    outDat[["se"]] <- calcStandardErrors(object$C, U, NewMethod)
   }
   return(outDat)
 }

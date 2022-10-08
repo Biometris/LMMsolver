@@ -4,7 +4,7 @@
 \alias{calcStandardErrors}
 \title{Standard errors for predictions}
 \usage{
-calcStandardErrors(C, D)
+calcStandardErrors(C, D, NewMethod)
 }
 \arguments{
 \item{C}{a symmetric matrix of class spam}
