@@ -40,6 +40,7 @@ D <- rbind(D1, D2, D3, D4, D5)
 
 updateH <- function(tDp, i, j)
 {
+  d <- ncol(tDp)
   z <- rep(0,d)
   s <- tDp@rowpointers[i]
   e <- tDp@rowpointers[i+1] - 1
@@ -59,38 +60,39 @@ updateH <- function(tDp, i, j)
   z
 }
 
-# important to add D!!
-C = BtWB + 0 * crossprod(D)
+# make predictions on a grid:
+x0 <- seq(xmin,xmax,length=20)
+Bx0 <- LMMsolver:::Bsplines(knots, x0)
+
+# important to add Bx0!!
+C = BtWB + 0 * crossprod(Bx0)
 cholC <- chol(C)
 cholC@entries <- LMMsolver:::partialDerivCholesky(cholC)
 A <- spam::as.spam(cholC)
 
-# rorder D
+# rorder B
 p <- cholC@pivot
-Dp <- D[, p]
-d <- nrow(D)
-Dp
-
+Bp <- Bx0[, p]
+display(Bp)
+d <- nrow(Bx0)
 # by foot
-tDp <- t(Dp)
-tDp
+tBp <- t(Bp)
 s <- rep(0, d)
 q <- ncol(BtWB)
 for (i in 1:q) {
   for (j in 1:q) {
     alpha <- A[i,j]
-    z <- updateH(tDp, i, j)
+    z <- updateH(tBp, i, j)
     s <- s + alpha*z
   }
 }
 s
 
-diag(D %*% Cinv %*% t(D))
-LMMsolver:::diagXCinvXt(chol(C), tDp)
+s2 <- diag(Bx0 %*% Cinv %*% t(Bx0))
+s3 <- LMMsolver:::diagXCinvXt(chol(C), tBp)
+range(s-s2)
+range(s-s3)
 
-se1 <- LMMsolver:::calcStandardErrors(C, D, NewMethod=FALSE)
-se2 <- LMMsolver:::calcStandardErrors(C, D, NewMethod=TRUE)
-se1^2
-se2^2
-
+se1 <- LMMsolver:::calcStandardErrors(C, Bx0, NewMethod=FALSE)
+se2 <- LMMsolver:::calcStandardErrors(C, Bx0, NewMethod=TRUE)
 
