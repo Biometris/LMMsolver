@@ -15,7 +15,6 @@
 #' implemented for spl1D.
 #' @param which An integer, for if there are multiple splxD terms in the model.
 #' Default value is 1.
-#' @param NewMethod Temp arg: Use new method to calculate standard errors.
 #'
 #' @return A data.frame with predictions for the smooth trend on the specified
 #' grid. The standard errors are saved if `deriv` has default value 0.
@@ -51,7 +50,7 @@ obtainSmoothTrend <- function(object,
                               newdata = NULL,
                               deriv = 0,
                               includeIntercept = FALSE,
-                              which = 1, NewMethod=TRUE) {
+                              which = 1) {
   if (!inherits(object, "LMMsolve")) {
     stop("object should be an object of class LMMsolve.\n")
   }
@@ -201,7 +200,7 @@ obtainSmoothTrend <- function(object,
     lU[[ndx.r]] <- BxTot
 
     U <- Reduce(spam::cbind.spam, lU)
-    outDat[["se"]] <- calcStandardErrors(object$C, U, NewMethod)
+    outDat[["se"]] <- calcStandardErrors(object$C, U)
   }
   return(outDat)
 }

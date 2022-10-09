@@ -37,7 +37,7 @@
 #' Computational statistics & data analysis, 44(4), 571-586.
 #'
 #' @keywords internal
-calcStandardErrors <- function(C, D, NewMethod)
+calcStandardErrors <- function(C, D)
 {
   ## !!! NOT CHANGE THE LINE OF CODE BELOW !!!
   ## It adds extra zeros ("fill-ins") to matrix C, needed
@@ -45,23 +45,10 @@ calcStandardErrors <- function(C, D, NewMethod)
   C = C + 0 * spam::crossprod.spam(D)
   cholC <- chol(C)
 
-  if (NewMethod) {
-    p <- cholC@pivot
-    tD <- t(D)
-    tDp <- tD[p, ]
-    x <- diagXCinvXt(cholC, tDp)
-    se <- sqrt(x)
-    return(se)
-  }
-  ## calculate the partial derivatives of Cholesky
-  cholC@entries <- partialDerivCholesky(cholC)
-
-  ## convert to spam object and put in original order
-  A <- spam::as.spam(cholC)
-  A <- A[cholC@invpivot, cholC@invpivot]
-
-  ## Equivalent to v <- diag(D %*% A %*% t(D))
-  x <- spam::rowSums.spam((D %*% A) * D)
+  p <- cholC@pivot
+  tD <- t(D)
+  tDp <- tD[p, ]
+  x <- diagXCinvXt(cholC, tDp)
   se <- sqrt(x)
   return(se)
 }
