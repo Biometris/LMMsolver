@@ -61,39 +61,39 @@ updateH <- function(tDp, i, j)
 }
 
 # make predictions on a grid:
-x0 <- seq(xmin,xmax,length=20)
-Bx0 <- LMMsolver:::Bsplines(knots, x0)
+#x0 <- seq(xmin,xmax,length=20)
+#Bx0 <- LMMsolver:::Bsplines(knots, x0)
 
 # important to add Bx0!!
-C = BtWB + 0 * crossprod(Bx0)
+C = BtWB + 0 * crossprod(D)
 cholC <- chol(C)
 cholC@entries <- LMMsolver:::partialDerivCholesky(cholC)
 A <- spam::as.spam(cholC)
 
-# rorder B
+# rorder D
 p <- cholC@pivot
-Bp <- Bx0[, p]
-display(Bp)
-d <- nrow(Bx0)
+Dp <- D[, p]
+d <- nrow(D)
 # by foot
-tBp <- t(Bp)
+tDp <- t(Dp)
+display(tDp)
 s <- rep(0, d)
 q <- ncol(BtWB)
 for (i in 1:q) {
   for (j in 1:q) {
     alpha <- A[i,j]
-    z <- updateH(tBp, i, j)
+    z <- updateH(tDp, i, j)
     s <- s + alpha*z
   }
 }
 s
 
-s2 <- diag(Bx0 %*% Cinv %*% t(Bx0))
-s3 <- LMMsolver:::diagXCinvXt(chol(C), tBp)
+s2 <- diag(D %*% Cinv %*% t(D))
+s3 <- LMMsolver:::diagXCinvXt(chol(C), tDp)
 range(s-s2)
 range(s-s3)
 
-se1 <- LMMsolver:::calcStandardErrors(C, Bx0, NewMethod=FALSE)
-se2 <- LMMsolver:::calcStandardErrors(C, Bx0, NewMethod=TRUE)
+se1 <- LMMsolver:::calcStandardErrors(C, D, NewMethod=FALSE)
+se2 <- LMMsolver:::calcStandardErrors(C, D, NewMethod=TRUE)
 range(s-se1^2)
 range(s-se2^2)

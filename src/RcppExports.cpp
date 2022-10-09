@@ -58,14 +58,14 @@ BEGIN_RCPP
 END_RCPP
 }
 // diagXCinvXt
-NumericVector diagXCinvXt(SEXP cholC, SEXP transposeD);
-RcppExport SEXP _LMMsolver_diagXCinvXt(SEXP cholCSEXP, SEXP transposeDSEXP) {
+NumericVector diagXCinvXt(SEXP cholC, SEXP transposeX);
+RcppExport SEXP _LMMsolver_diagXCinvXt(SEXP cholCSEXP, SEXP transposeXSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< SEXP >::type cholC(cholCSEXP);
-    Rcpp::traits::input_parameter< SEXP >::type transposeD(transposeDSEXP);
-    rcpp_result_gen = Rcpp::wrap(diagXCinvXt(cholC, transposeD));
+    Rcpp::traits::input_parameter< SEXP >::type transposeX(transposeXSEXP);
+    rcpp_result_gen = Rcpp::wrap(diagXCinvXt(cholC, transposeX));
     return rcpp_result_gen;
 END_RCPP
 }

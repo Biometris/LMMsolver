@@ -570,47 +570,33 @@ NumericVector partialDerivCholesky(SEXP cholC)
   return F;
 }
 
-map<int, double> makeMap(const NumericVector& entries,
-                         const IntegerVector& colindices, int s, int e)
+void updateH(NumericVector& H, const SparseMatrix& tX, int i, int j, double alpha)
 {
-  map<int, double> x;
-  for (int i=s; i<e; i++) {
-    x[colindices[i]] = entries[i];
-  }
-  return x;
-}
+  int s1 = tX.rowpointers[i];
+  int e1 = tX.rowpointers[i+1];
 
-void updateH(NumericVector& H, const SparseMatrix& tD, int i, int j,
-             double alpha)
-{
-  int s1 = tD.rowpointers[i];
-  int e1 = tD.rowpointers[i+1];
-  if (s1==e1) return;
-
-  int s2 = tD.rowpointers[j];
-  int e2 = tD.rowpointers[j+1];
-  if (s2==e2) return;
+  int s2 = tX.rowpointers[j];
+  int e2 = tX.rowpointers[j+1];
 
   while (s1 != e1 && s2 != e2)
   {
-    if (tD.colindices[s1] < tD.colindices[s2]) ++s1;
-    else if (tD.colindices[s1] > tD.colindices[s2]) ++s2;
+    if (tX.colindices[s1] < tX.colindices[s2]) ++s1;
+    else if (tX.colindices[s1] > tX.colindices[s2]) ++s2;
     else {
-      int ndx = tD.colindices[s1]; // = tD.colindices[2]
-      H[ndx] += tD.entries[s1]*tD.entries[s2]*alpha;
+      int ndx = tX.colindices[s1]; // = tD.colindices[2]
+      H[ndx] += tX.entries[s1]*tX.entries[s2]*alpha;
       ++s1;
       ++s2;
     }
   }
 }
 
-
 // [[Rcpp::export]]
-NumericVector diagXCinvXt(SEXP cholC, SEXP transposeD)
+NumericVector diagXCinvXt(SEXP cholC, SEXP transposeX)
 {
   Rcpp::S4 obj(cholC);
-  SparseMatrix tD(transposeD);
-  const int d = tD.dim[1];
+  SparseMatrix tX(transposeX);
+  const int nPred = tX.dim[1];
 
   // We use transpose for calculating Automated Differentiation.
   IntegerVector supernodes = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("supernodes"));
@@ -630,8 +616,7 @@ NumericVector diagXCinvXt(SEXP cholC, SEXP transposeD)
   initAD(F, L, colpointers);
   ADcholesky(F, L, supernodes, rowpointers, colpointers, rowindices);
 
-  // Function here to calculate elements of H:
-  NumericVector H(d, 0.0);
+  NumericVector H(nPred, 0.0);
 
   const int Nsupernodes = supernodes.size()-1;
   const int N = colpointers.size() - 1;
@@ -645,7 +630,7 @@ NumericVector diagXCinvXt(SEXP cholC, SEXP transposeD)
       {
         int i = rowindices[k++];
         double alpha = F[ndx];
-        updateH(H, tD, i, j, alpha);
+        updateH(H, tX, i, j, alpha);
       }
       s++;
     }
