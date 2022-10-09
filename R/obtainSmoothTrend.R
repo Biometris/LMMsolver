@@ -51,7 +51,7 @@ obtainSmoothTrend <- function(object,
                               newdata = NULL,
                               deriv = 0,
                               includeIntercept = FALSE,
-                              which = 1, NewMethod=FALSE) {
+                              which = 1, NewMethod=TRUE) {
   if (!inherits(object, "LMMsolve")) {
     stop("object should be an object of class LMMsolve.\n")
   }

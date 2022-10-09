@@ -89,10 +89,11 @@ for (i in 1:q) {
 s
 
 s2 <- diag(Bx0 %*% Cinv %*% t(Bx0))
-s3 <- LMMsolver:::diagXCinvXt(chol(C), tBp)
+s3 <- LMMsolver:::diagXCinvXt(chol(C), Bx0)
 range(s-s2)
 range(s-s3)
 
 se1 <- LMMsolver:::calcStandardErrors(C, Bx0, NewMethod=FALSE)
 se2 <- LMMsolver:::calcStandardErrors(C, Bx0, NewMethod=TRUE)
-
+range(s-se1^2)
+range(s-se2^2)

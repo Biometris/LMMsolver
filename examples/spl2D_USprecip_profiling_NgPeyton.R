@@ -137,7 +137,18 @@ funED <- function(lambda)
 # compare computation time
 microbenchmark(funSpam(theta), funlogdet(theta), funED(theta), times=100L)
 
-pred <- obtainSmoothTrend(obj1, grid=grid, includeIntercept = TRUE)
+s1 <- proc.time()[3]
+pred <- obtainSmoothTrend(obj1, grid=grid, includeIntercept = TRUE, NewMethod = FALSE)
+e1 <- proc.time()[3]
+
+s2 <- proc.time()[3]
+pred2 <- obtainSmoothTrend(obj1, grid=grid, includeIntercept = TRUE)
+e2 <- proc.time()[3]
+
+cat("Time old: ", e1-s1, " seconds\n")
+cat("Time new: ", e2-s2, " seconds\n")
+
+all.equal(pred, pred2)
 
 # make a plot
 plotDat <- pred

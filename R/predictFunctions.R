@@ -46,10 +46,7 @@ calcStandardErrors <- function(C, D, NewMethod)
   cholC <- chol(C)
 
   if (NewMethod) {
-    p <- cholC@pivot
-    Dp <- D[, p]
-    tDp <- t(Dp)
-    x <- diagXCinvXt(cholC, tDp)
+    x <- diagXCinvXt(cholC, D)
     se <- sqrt(x)
     return(se)
   }

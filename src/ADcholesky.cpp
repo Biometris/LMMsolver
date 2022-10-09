@@ -614,17 +614,18 @@ void updateH(NumericVector& H, const SparseMatrix& tD, int i, int j,
 }
 
 // [[Rcpp::export]]
-NumericVector diagXCinvXt(SEXP cholC, SEXP transposeD)
+NumericVector diagXCinvXt(SEXP cholC, SEXP sX)
 {
   Rcpp::S4 obj(cholC);
-  SparseMatrix tD(transposeD);
-  const int d = tD.dim[1];
+  SparseMatrix X(sX);
+  const int d = X.dim[0];
 
   // We use transpose for calculating Automated Differentiation.
   IntegerVector supernodes = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("supernodes"));
   IntegerVector colpointers = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("rowpointers"));
   IntegerVector rowpointers = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("colpointers"));
   IntegerVector rowindices = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("colindices"));
+  IntegerVector invpivot = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("invpivot"));
   NumericVector L = Rcpp::clone<Rcpp::NumericVector>(obj.slot("entries"));
 
   // C using indices starting at 0:
@@ -632,6 +633,7 @@ NumericVector diagXCinvXt(SEXP cholC, SEXP transposeD)
   transf2C(colpointers);
   transf2C(rowpointers);
   transf2C(rowindices);
+  transf2C(invpivot);
 
   const int sz = L.size();
   NumericVector F(sz, 0.0);
@@ -640,23 +642,40 @@ NumericVector diagXCinvXt(SEXP cholC, SEXP transposeD)
 
   // Function here to calculate elements of H:
   NumericVector H(d, 0.0);
+  for (int h=0;h<d;h++) {
+    int s_row = X.rowpointers[h];
+    int e_row = X.rowpointers[h+1];
+    double sum = 0.0;
 
-  const int Nsupernodes = supernodes.size()-1;
-  const int N = colpointers.size() - 1;
-  for (int J=0; J<Nsupernodes;J++)
-  {
-    int s = rowpointers[J];
-    for (int j=supernodes[J]; j<supernodes[J+1]; j++)
-    {
-      int k = s;
-      for (int ndx = colpointers[j]; ndx < colpointers[j+1]; ndx++)
-      {
-        int i = rowindices[k++];
-        double alpha = F[ndx];
-        updateH(H, tD, i, j, alpha);
-      }
-      s++;
+    map<int, double> M;
+    for (int i=s_row; i<e_row; i++) {
+      int ndx = X.colindices[i];
+      M[invpivot[ndx]] = X.entries[i];
     }
+
+    const int Nsupernodes = supernodes.size()-1;
+    for (int J=0; J<Nsupernodes;J++)
+    {
+      int s = rowpointers[J];
+      for (int j=supernodes[J]; j<supernodes[J+1]; j++)
+      {
+        std::map<int,double>::iterator it1 = M.find(j);
+        if (it1 != M.end()) {
+          int k = s;
+          for (int ndx = colpointers[j]; ndx < colpointers[j+1]; ndx++)
+          {
+            int i = rowindices[k++];
+            std::map<int,double>::iterator it2 = M.find(i);
+            if (it2 != M.end()) {
+              double alpha = F[ndx];
+              sum += alpha*it1->second*it2->second;
+            }
+          }
+        }
+        s++;
+      }
+    }
+    H[h] = sum;
   }
   return H;
 }
