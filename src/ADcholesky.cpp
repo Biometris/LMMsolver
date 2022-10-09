@@ -583,9 +583,6 @@ map<int, double> makeMap(const NumericVector& entries,
 void updateH(NumericVector& H, const SparseMatrix& tD, int i, int j,
              double alpha)
 {
-  //const int d = H.size();
-  //NumericVector x(d, 0.0);
-
   int s1 = tD.rowpointers[i];
   int e1 = tD.rowpointers[i+1];
   if (s1==e1) return;
@@ -594,6 +591,17 @@ void updateH(NumericVector& H, const SparseMatrix& tD, int i, int j,
   int e2 = tD.rowpointers[j+1];
   if (s2==e2) return;
 
+  while (s1 != e1 && s2 != e2)
+  {
+    if (tD.colindices[s1] < tD.colindices[s2]) ++s1;
+    else if (tD.colindices[s1] > tD.colindices[s2]) ++s2;
+    else {
+      int ndx = tD.colindices[s1]; // = tD.colindices[2]
+      H[ndx] += tD.entries[s1]*tD.entries[s2]*alpha;
+    }
+  }
+
+  /*
   map<int, double> M1 = makeMap(tD.entries, tD.colindices, s1, e1);
   map<int, double> M2 = makeMap(tD.entries, tD.colindices, s2, e2);
 
@@ -611,7 +619,9 @@ void updateH(NumericVector& H, const SparseMatrix& tD, int i, int j,
   {
     H[*it] += M1[*it]*M2[*it]*alpha;
   }
+  */
 }
+
 
 // [[Rcpp::export]]
 NumericVector diagXCinvXt(SEXP cholC, SEXP sX)
@@ -653,6 +663,7 @@ NumericVector diagXCinvXt(SEXP cholC, SEXP sX)
   // Function here to calculate elements of H:
   NumericVector H(d, 0.0);
   for (int h=0;h<d;h++) {
+    //Rcout << "h = " << h << endl;
     int s_row = X.rowpointers[h];
     int e_row = X.rowpointers[h+1];
     double sum = 0.0;
@@ -663,32 +674,32 @@ NumericVector diagXCinvXt(SEXP cholC, SEXP sX)
       M[invpivot[ndx]] = X.entries[i];
     }
 
-    set<int> S;
+    map<int, int> S;
     for (map<int,double>::iterator it=M.begin();it!=M.end();it++)
     {
-      S.insert(ndxSuperNodes[it->first]);
+      S[it->first] = ndxSuperNodes[it->first];
+      //Rcout << "  " << setw(3) << it->first << setw(8) << setprecision(2) << it->second
+      //      << " J = " << ndxSuperNodes[it->first] << endl;
     }
-    for (set<int>::iterator itS=S.begin();itS!=S.end();itS++)
+    for (map<int,int>::iterator itS=S.begin();itS!=S.end();itS++)
     {
-      int J = *itS;
-      int s = rowpointers[J];
+      int j = itS->first;
+      int J = itS->second;
+      //int s = rowpointers[J];
 
-      for (int j=supernodes[J]; j<supernodes[J+1]; j++)
+      //for (int j=supernodes[J]; j<supernodes[J+1]; j++)
+      //{
+      std::map<int,double>::iterator it1 = M.find(j);
+      //if (it1 != M.end()) {
+      int k = rowpointers[J] + j - supernodes[J];
+      for (int ndx = colpointers[j]; ndx < colpointers[j+1]; ndx++)
       {
-        std::map<int,double>::iterator it1 = M.find(j);
-        if (it1 != M.end()) {
-          int k = s;
-          for (int ndx = colpointers[j]; ndx < colpointers[j+1]; ndx++)
-          {
-            int i = rowindices[k++];
-            std::map<int,double>::iterator it2 = M.find(i);
-            if (it2 != M.end()) {
-              double alpha = F[ndx];
-              sum += alpha*it1->second*it2->second;
-            }
-          }
+        int i = rowindices[k++];
+        std::map<int,double>::iterator it2 = M.find(i);
+        if (it2 != M.end()) {
+          double alpha = F[ndx];
+          sum += alpha*it1->second*it2->second;
         }
-        s++;
       }
     }
     H[h] = sum;
