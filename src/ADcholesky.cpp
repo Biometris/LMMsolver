@@ -640,6 +640,16 @@ NumericVector diagXCinvXt(SEXP cholC, SEXP sX)
   initAD(F, L, colpointers);
   ADcholesky(F, L, supernodes, rowpointers, colpointers, rowindices);
 
+  const int Ncol = colpointers.size()-1;
+  IntegerVector ndxSuperNodes(Ncol);
+  const int Nsupernodes = supernodes.size()-1;
+  for (int J=0; J<Nsupernodes;J++)
+  {
+    for (int j=supernodes[J]; j<supernodes[J+1]; j++)
+    {
+      ndxSuperNodes[j] = J;
+    }
+  }
   // Function here to calculate elements of H:
   NumericVector H(d, 0.0);
   for (int h=0;h<d;h++) {
@@ -653,10 +663,16 @@ NumericVector diagXCinvXt(SEXP cholC, SEXP sX)
       M[invpivot[ndx]] = X.entries[i];
     }
 
-    const int Nsupernodes = supernodes.size()-1;
-    for (int J=0; J<Nsupernodes;J++)
+    set<int> S;
+    for (map<int,double>::iterator it=M.begin();it!=M.end();it++)
     {
+      S.insert(ndxSuperNodes[it->first]);
+    }
+    for (set<int>::iterator itS=S.begin();itS!=S.end();itS++)
+    {
+      int J = *itS;
       int s = rowpointers[J];
+
       for (int j=supernodes[J]; j<supernodes[J+1]; j++)
       {
         std::map<int,double>::iterator it1 = M.find(j);
