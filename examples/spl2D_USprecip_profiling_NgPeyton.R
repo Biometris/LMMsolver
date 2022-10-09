@@ -149,6 +149,7 @@ funPredNew <- function(obj) {
 microbenchmark(funPredOrg(obj1), funPredNew(obj1), times=10L)
 
 
+s1 <- proc.time()[3]
 pred <- obtainSmoothTrend(obj1, grid=grid, includeIntercept = TRUE, NewMethod = FALSE)
 e1 <- proc.time()[3]
 
