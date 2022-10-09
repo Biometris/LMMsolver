@@ -41,8 +41,8 @@ partialDerivCholesky <- function(cholC) {
     .Call(`_LMMsolver_partialDerivCholesky`, cholC)
 }
 
-diagXCinvXt <- function(cholC, sX) {
-    .Call(`_LMMsolver_diagXCinvXt`, cholC, sX)
+diagXCinvXt <- function(cholC, transposeD) {
+    .Call(`_LMMsolver_diagXCinvXt`, cholC, transposeD)
 }
 
 PrintCholesky <- function(cholC) {

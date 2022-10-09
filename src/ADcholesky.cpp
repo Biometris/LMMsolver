@@ -598,44 +598,25 @@ void updateH(NumericVector& H, const SparseMatrix& tD, int i, int j,
     else {
       int ndx = tD.colindices[s1]; // = tD.colindices[2]
       H[ndx] += tD.entries[s1]*tD.entries[s2]*alpha;
+      ++s1;
+      ++s2;
     }
   }
-
-  /*
-  map<int, double> M1 = makeMap(tD.entries, tD.colindices, s1, e1);
-  map<int, double> M2 = makeMap(tD.entries, tD.colindices, s2, e2);
-
-  // to find intersection can be in separate function:
-  set<int> S1, S2;
-  for (int i=s1;i<e1;i++)
-    S1.insert(tD.colindices[i]);
-  for (int i=s2;i<e2;i++)
-    S2.insert(tD.colindices[i]);
-
-  vector<int> S3;
-  set_intersection(S1.begin(), S1.end(), S2.begin(), S2.end(),
-                   std::inserter(S3, S3.begin()));
-  for (vector<int>::iterator it=S3.begin();it!=S3.end();++it)
-  {
-    H[*it] += M1[*it]*M2[*it]*alpha;
-  }
-  */
 }
 
 
 // [[Rcpp::export]]
-NumericVector diagXCinvXt(SEXP cholC, SEXP sX)
+NumericVector diagXCinvXt(SEXP cholC, SEXP transposeD)
 {
   Rcpp::S4 obj(cholC);
-  SparseMatrix X(sX);
-  const int d = X.dim[0];
+  SparseMatrix tD(transposeD);
+  const int d = tD.dim[1];
 
   // We use transpose for calculating Automated Differentiation.
   IntegerVector supernodes = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("supernodes"));
   IntegerVector colpointers = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("rowpointers"));
   IntegerVector rowpointers = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("colpointers"));
   IntegerVector rowindices = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("colindices"));
-  IntegerVector invpivot = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("invpivot"));
   NumericVector L = Rcpp::clone<Rcpp::NumericVector>(obj.slot("entries"));
 
   // C using indices starting at 0:
@@ -643,69 +624,35 @@ NumericVector diagXCinvXt(SEXP cholC, SEXP sX)
   transf2C(colpointers);
   transf2C(rowpointers);
   transf2C(rowindices);
-  transf2C(invpivot);
 
   const int sz = L.size();
   NumericVector F(sz, 0.0);
   initAD(F, L, colpointers);
   ADcholesky(F, L, supernodes, rowpointers, colpointers, rowindices);
 
-  const int Ncol = colpointers.size()-1;
-  IntegerVector ndxSuperNodes(Ncol);
-  const int Nsupernodes = supernodes.size()-1;
-  for (int J=0; J<Nsupernodes;J++)
-  {
-    for (int j=supernodes[J]; j<supernodes[J+1]; j++)
-    {
-      ndxSuperNodes[j] = J;
-    }
-  }
   // Function here to calculate elements of H:
   NumericVector H(d, 0.0);
-  for (int h=0;h<d;h++) {
-    //Rcout << "h = " << h << endl;
-    int s_row = X.rowpointers[h];
-    int e_row = X.rowpointers[h+1];
-    double sum = 0.0;
 
-    map<int, double> M;
-    for (int i=s_row; i<e_row; i++) {
-      int ndx = X.colindices[i];
-      M[invpivot[ndx]] = X.entries[i];
-    }
-
-    map<int, int> S;
-    for (map<int,double>::iterator it=M.begin();it!=M.end();it++)
+  const int Nsupernodes = supernodes.size()-1;
+  const int N = colpointers.size() - 1;
+  for (int J=0; J<Nsupernodes;J++)
+  {
+    int s = rowpointers[J];
+    for (int j=supernodes[J]; j<supernodes[J+1]; j++)
     {
-      S[it->first] = ndxSuperNodes[it->first];
-      //Rcout << "  " << setw(3) << it->first << setw(8) << setprecision(2) << it->second
-      //      << " J = " << ndxSuperNodes[it->first] << endl;
-    }
-    for (map<int,int>::iterator itS=S.begin();itS!=S.end();itS++)
-    {
-      int j = itS->first;
-      int J = itS->second;
-      //int s = rowpointers[J];
-
-      //for (int j=supernodes[J]; j<supernodes[J+1]; j++)
-      //{
-      std::map<int,double>::iterator it1 = M.find(j);
-      //if (it1 != M.end()) {
-      int k = rowpointers[J] + j - supernodes[J];
+      int k = s;
       for (int ndx = colpointers[j]; ndx < colpointers[j+1]; ndx++)
       {
         int i = rowindices[k++];
-        std::map<int,double>::iterator it2 = M.find(i);
-        if (it2 != M.end()) {
-          double alpha = F[ndx];
-          sum += alpha*it1->second*it2->second;
-        }
+        double alpha = F[ndx];
+        updateH(H, tD, i, j, alpha);
       }
+      s++;
     }
-    H[h] = sum;
   }
   return H;
 }
+
 
 
 // [[Rcpp::export]]
