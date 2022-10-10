@@ -59,15 +59,29 @@ pred1se <- pred1$pvals$std.error
 pred2se <- LMMsolver:::calcStandardErrors(obj2$C, Dg)
 range(pred1se - pred2se)
 
-# Not  efficient way to calculate SEDs, just to compare results
-# with asreml
-A <- matrix(data=NA, nrow=Ngen, ncol=Ngen)
-for (i in 1:Ngen) {
-  for (j in 1:Ngen) {
+# make the predictors for sed's:
+DgSED_all <- NULL
+for (i in 2:Ngen) {
+  for (j in 1:i) {
     if (i!=j) {
-      DgSED <- Dg[i,] - Dg[j, ]
-      pred2sed <- LMMsolver:::calcStandardErrors(obj2$C, DgSED)
-      A[i,j] <- pred2sed[1]
+      DgSED <- Dg[i, ] - Dg[j, ]
+      DgSED_all <- rbind.spam(DgSED_all, DgSED)
+    }
+  }
+}
+
+# just to see the structure of VCOV:
+tmp <- obj2$C + 0 * crossprod(DgSED_all)
+display(tmp)
+
+pred2sed <- LMMsolver:::calcStandardErrors(obj2$C, DgSED_all)
+A <- matrix(data=NA, nrow=Ngen, ncol=Ngen)
+k = 1
+for (i in 2:Ngen) {
+  for (j in 1:i) {
+    if (i!=j) {
+      A[i,j] <- pred2sed[k]
+      k <- k+1
     }
   }
 }
