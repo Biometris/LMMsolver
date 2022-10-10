@@ -1,3 +1,6 @@
+# LMMsolver 1.0.3.9000
+-   Improved computation time for calculation of standard errors. Implementation in C++ and using the 'sparse inverse'. 
+
 # LMMsolver 1.0.3
 
 -   Improved computation time and memory allocation, especially important for big data with many observations (the number of rows in the data frame).

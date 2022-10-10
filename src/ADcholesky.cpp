@@ -619,7 +619,6 @@ NumericVector diagXCinvXt(SEXP cholC, SEXP transposeX)
   NumericVector H(nPred, 0.0);
 
   const int Nsupernodes = supernodes.size()-1;
-  const int N = colpointers.size() - 1;
   for (int J=0; J<Nsupernodes;J++)
   {
     int s = rowpointers[J];
