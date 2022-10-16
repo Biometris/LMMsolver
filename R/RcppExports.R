@@ -49,6 +49,10 @@ PrintCholesky <- function(cholC) {
     .Call(`_LMMsolver_PrintCholesky`, cholC)
 }
 
+RowKron <- function(sX1, sX2) {
+    .Call(`_LMMsolver_RowKron`, sX1, sX2)
+}
+
 KronProd2 <- function(C1, C2, y) {
     .Call(`_LMMsolver_KronProd2`, C1, C2, y)
 }

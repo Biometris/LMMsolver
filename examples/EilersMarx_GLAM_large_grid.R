@@ -104,5 +104,23 @@ cat("book:       ", t1, " seconds\n")
 cat("LMMsolver:  ", t2, " seconds\n")
 cat("Factor:     ", round(t1/t2, 2), "times faster\n")
 
+dat <- data.frame(x=rep(x,times=ny),y=rep(y,each=nx),z=z)
+
+s <- proc.time()[3]
+obj1 <- LMMsolve(fixed=z~1,spline=~spl2D(x1=x,x2=y,nseg=nseg),data=dat,trace=TRUE)
+e <- proc.time()[3]
+
+cat("time: ", e-s, " seconds\n")
+
+obj1$logL
+
+h1 <- (max(dat$x) - min(dat$x)) / nseg[1]
+h2 <- (max(dat$y) - min(dat$y)) / nseg[2]
+lambda1 <- as.numeric(obj1$sigma2e / obj1$tau2e[1]/ h1 ^ 3)
+lambda2 <- as.numeric(obj1$sigma2e / obj1$tau2e[2]/ h2 ^ 3)
+lambda1
+lambda2
+
+
 
 

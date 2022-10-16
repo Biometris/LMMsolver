@@ -80,6 +80,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// RowKron
+List RowKron(SEXP sX1, SEXP sX2);
+RcppExport SEXP _LMMsolver_RowKron(SEXP sX1SEXP, SEXP sX2SEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type sX1(sX1SEXP);
+    Rcpp::traits::input_parameter< SEXP >::type sX2(sX2SEXP);
+    rcpp_result_gen = Rcpp::wrap(RowKron(sX1, sX2));
+    return rcpp_result_gen;
+END_RCPP
+}
 // KronProd2
 NumericVector KronProd2(SEXP C1, SEXP C2, const NumericVector& y);
 RcppExport SEXP _LMMsolver_KronProd2(SEXP C1SEXP, SEXP C2SEXP, SEXP ySEXP) {
@@ -142,6 +154,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_LMMsolver_partialDerivCholesky", (DL_FUNC) &_LMMsolver_partialDerivCholesky, 1},
     {"_LMMsolver_diagXCinvXt", (DL_FUNC) &_LMMsolver_diagXCinvXt, 2},
     {"_LMMsolver_PrintCholesky", (DL_FUNC) &_LMMsolver_PrintCholesky, 1},
+    {"_LMMsolver_RowKron", (DL_FUNC) &_LMMsolver_RowKron, 2},
     {"_LMMsolver_KronProd2", (DL_FUNC) &_LMMsolver_KronProd2, 3},
     {"_LMMsolver_KronProd", (DL_FUNC) &_LMMsolver_KronProd, 4},
     {"_LMMsolver_KronProdList", (DL_FUNC) &_LMMsolver_KronProdList, 2},
