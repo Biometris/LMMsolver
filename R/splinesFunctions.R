@@ -12,7 +12,7 @@ RowKronecker <- function(X1,
                          X2) {
   if (isTRUE(class(X1) == 'spam') & isTRUE(class(X2) == 'spam')) {
     L <- RowKron(X1, X2)
-    rowKron <- spam(x=0, nrow=0,ncol=0)
+    rowKron <- spam::spam(x=0, nrow=0,ncol=0)
     rowKron@entries <- L$entries
     rowKron@colindices <- L$colindices
     rowKron@rowpointers <- L$rowpointers
