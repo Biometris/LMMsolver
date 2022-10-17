@@ -168,5 +168,14 @@ ggplot(plotDat, aes(x = lon, y = lat, fill = se)) +
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank())
 
+h1 <- (max(dat$lon) - min(dat$lon)) / nseg[1]
+h2 <- (max(dat$lat) - min(dat$lat)) / nseg[2]
+lambda1 <- as.numeric(obj1$sigma2e / obj1$tau2e[1]/ h1 ^ 3)
+lambda2 <- as.numeric(obj1$sigma2e / obj1$tau2e[2]/ h2 ^ 3)
+lambda1
+lambda2
+
+
+
 
 

@@ -9,6 +9,8 @@
 library(ggplot2)
 library(JOPS)
 library(fields)
+library(LMMsolver)
+library(spam)
 
 # Simulate the rings
 nx = 500
@@ -28,6 +30,7 @@ Z2 = exp(-50 * (R2 - 0.6)^2)
 Z3 = exp(-50 * (R3 - 0.2)^2)
 Z4 = exp(-50 * (R4 - 0.2)^2)
 Z = pmax(pmax(pmax(Z1, Z2), Z3), Z4)
+Z0 = Z
 
 # Add noise
 set.seed(2019)
@@ -49,8 +52,8 @@ Px = lambdax * t(Dx) %*% Dx
 Py = lambday * t(Dy) %*% Dy
 P = kronecker(Py, diag(nbx)) + kronecker(diag(nby), Px)
 
-W = matrix(runif(nx*ny), nx, ny)
-#W = 0 * Z + 1
+#W = matrix(runif(nx*ny), nx, ny)
+W = 0 * Z + 1
 
 s1 <- proc.time()[3]
 
@@ -72,9 +75,6 @@ e1 <- proc.time()[3]
 #
 # part 2, using LMMsolver functions
 #
-
-library(LMMsolver)
-library(spam)
 
 # Make the B-splines and penalty matrix sparse, Z and W as vectors
 Bx <- as.spam(Bx)
@@ -114,13 +114,33 @@ cat("time: ", e-s, " seconds\n")
 
 obj1$logL
 
+# make predictions
+pred <- obtainSmoothTrend(obj1, grid=c(nx, ny), includeIntercept = TRUE)
+
 h1 <- (max(dat$x) - min(dat$x)) / nseg[1]
 h2 <- (max(dat$y) - min(dat$y)) / nseg[2]
 lambda1 <- as.numeric(obj1$sigma2e / obj1$tau2e[1]/ h1 ^ 3)
 lambda2 <- as.numeric(obj1$sigma2e / obj1$tau2e[2]/ h2 ^ 3)
 lambda1
 lambda2
+lambda2/lambda1
+alpha <- lambda1/(lambda1+lambda2)
+alpha
 
+cols = gray(seq(0, 1, by = 0.01))
+par(mfrow = c(1, 2), mar = c(1, 1, 2, 1))
 
+image(x, y, Z * W, col = cols, xlab = "", ylab = "", xaxt = "n", yaxt = "n")
+title("Data", cex.main = 1.5)
+
+Zhat <- matrix(data=pred$ypred, nrow=nx,ncol=ny, byrow=TRUE)
+image(x, y, Zhat, col = cols, xlab = "", ylab = "", xaxt = "n", yaxt = "n")
+title("Smoothed", cex.main = 1.5)
+
+#Zhat <- matrix(data=pred$ypred, nrow=nx,ncol=ny, byrow=TRUE)
+#image(x, y, Zhat-Z0, col = cols, xlab = "", ylab = "", xaxt = "n", yaxt = "n")
+#title("Difference", cex.main = 1.5)
+
+summary(obj1, which='variances')
 
 
