@@ -35,6 +35,7 @@ Z0 = Z
 # Add noise
 set.seed(2019)
 Z = Z + matrix(rnorm(nx * ny), nx, ny)
+z <- as.vector(Z)
 
 nseg <- c(20, 20)
 
