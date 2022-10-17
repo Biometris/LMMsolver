@@ -2,6 +2,7 @@
 using namespace Rcpp;
 using namespace std;
 
+#include "AuxFun.h"
 #include "SparseMatrix.h"
 
 SparseMatrix::SparseMatrix(Rcpp::S4 obj)
@@ -11,13 +12,67 @@ SparseMatrix::SparseMatrix(Rcpp::S4 obj)
   rowpointers = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("rowpointers"));
   dim = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("dimension"));
   // in C/C++ indices start from zero, in R from one:
-  for (int i=0;i<colindices.size();i++) {
-    colindices[i]--;
-  }
-  for (int i=0;i<rowpointers.size();i++) {
-    rowpointers[i]--;
-  }
+  transf2C(colindices);
+  transf2C(rowpointers);
 }
+
+// [[Rcpp::export]]
+List RowKron(SEXP sX1, SEXP sX2)
+{
+  SparseMatrix X1(sX1);
+  SparseMatrix X2(sX2);
+  const int n = X1.dim[0];
+  const int q1 = X1.dim[1];
+  const int q2 = X2.dim[1];
+  const int q = q1*q2;
+  IntegerVector dimension(2);
+  IntegerVector rowpointers(n+1);
+  dimension[0] = n;
+  dimension[1] = q;
+  int N = 0;
+  for (int r=0;r<n;r++) {
+    rowpointers[r] = N+1;
+    int n1 = X1.rowpointers[r+1]-X1.rowpointers[r];
+    int n2 = X2.rowpointers[r+1]-X2.rowpointers[r];
+    N += n1*n2;
+  }
+  rowpointers[n] = N+1;
+
+  //IntegerVector row(N);
+  IntegerVector colindices(N);
+  NumericVector entries(N);
+
+  int k = 0;
+  for (int r=0;r<n;r++) {
+    //Rcout << "row " << r << endl;
+    int s1 = X1.rowpointers[r];
+    int e1 = X1.rowpointers[r+1];
+
+    int s2 = X2.rowpointers[r];
+    int e2 = X2.rowpointers[r+1];
+    for (int j1=s1;j1<e1;j1++) {
+      for (int j2=s2;j2<e2;j2++) {
+        int ndx1 = X1.colindices[j1];
+        int ndx2 = X2.colindices[j2];
+        //Rcout << "ndx " << ndx2 + q2*ndx1 << " val "
+        //      << X1.entries[j1]*X2.entries[j2] << endl;
+        //row[k] = r+1;
+        colindices[k] = ndx2 + q2*ndx1+1;
+        entries[k] = X1.entries[j1]*X2.entries[j2];
+        k++;
+      }
+    }
+  }
+  List L = List::create(Named("entries") = entries,
+                        Named("colindices") = colindices,
+                        Named("rowpointers") = rowpointers,
+                        Named("dimension") = dimension);
+  return L;
+}
+
+/*
+
+Not used at the moment: functions to calculate GLAM:
 
 NumericVector prod(const SparseMatrix& M, const NumericVector& y, int start_y)
 {
@@ -156,5 +211,5 @@ IntegerVector getOrder(SEXP A, int q1, int q2,
   return x;
 }
 
-
+*/
 

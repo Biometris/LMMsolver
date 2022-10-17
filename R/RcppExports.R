@@ -45,27 +45,7 @@ diagXCinvXt <- function(cholC, transposeX) {
     .Call(`_LMMsolver_diagXCinvXt`, cholC, transposeX)
 }
 
-PrintCholesky <- function(cholC) {
-    .Call(`_LMMsolver_PrintCholesky`, cholC)
-}
-
 RowKron <- function(sX1, sX2) {
     .Call(`_LMMsolver_RowKron`, sX1, sX2)
-}
-
-KronProd2 <- function(C1, C2, y) {
-    .Call(`_LMMsolver_KronProd2`, C1, C2, y)
-}
-
-KronProd <- function(C1, C2, C3, y) {
-    .Call(`_LMMsolver_KronProd`, C1, C2, C3, y)
-}
-
-KronProdList <- function(L, y) {
-    .Call(`_LMMsolver_KronProdList`, L, y)
-}
-
-getOrder <- function(A, q1, q2, s1, s2) {
-    .Call(`_LMMsolver_getOrder`, A, q1, q2, s1, s2)
 }
 

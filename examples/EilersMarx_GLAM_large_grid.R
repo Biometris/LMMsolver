@@ -51,58 +51,7 @@ lambdax = lambday = 1
 Px = lambdax * t(Dx) %*% Dx
 Py = lambday * t(Dy) %*% Dy
 P = kronecker(Py, diag(nbx)) + kronecker(diag(nby), Px)
-
-#W = matrix(runif(nx*ny), nx, ny)
 W = 0 * Z + 1
-
-s1 <- proc.time()[3]
-
-# Do the smoothing, using the array algorithm
-Tx = rowtens(Bx)
-Ty = rowtens(By)
-Q = t(Tx) %*% W %*% Ty
-dim(Q) = c(nbx, nbx, nby, nby)
-Q = aperm(Q, c(1, 3, 2, 4))
-dim(Q) = c(nbx * nby, nbx * nby)
-r = t(Bx) %*% (Z * W) %*% By
-dim(r) = c(nbx * nby, 1)
-A = solve(Q + P, r)
-dim(A) = c(nbx, nby)
-Zhat = Bx %*% A %*% t(By)
-
-e1 <- proc.time()[3]
-
-#
-# part 2, using LMMsolver functions
-#
-
-# Make the B-splines and penalty matrix sparse, Z and W as vectors
-Bx <- as.spam(Bx)
-By <- as.spam(By)
-P <- as.spam(P)
-z <- as.vector(Z)
-w <- as.vector(W)
-
-s2 <- proc.time()[3]
-
-sGLAMobj <- LMMsolver:::sparseGLAM(By, Bx)
-BtWB <- LMMsolver:::calcBtWB(sGLAMobj, w)
-BtZ <- LMMsolver:::calcBtY(sGLAMobj, w*z)
-a <- solve(BtWB + P, BtZ)
-zhat <- LMMsolver:::calcBa(sGLAMobj, a)
-
-e2 <- proc.time()[3]
-
-# compare original code with LMMsolver.
-Zhat2 <- matrix(data=zhat, nx, ny)
-all.equal(Zhat, Zhat2)
-
-t1 <- e1-s1
-t2 <- e2-s2
-
-cat("book:       ", t1, " seconds\n")
-cat("LMMsolver:  ", t2, " seconds\n")
-cat("Factor:     ", round(t1/t2, 2), "times faster\n")
 
 dat <- data.frame(x=rep(x,times=ny),y=rep(y,each=nx),z=z)
 
