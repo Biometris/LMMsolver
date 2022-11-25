@@ -13,8 +13,8 @@ library(LMMsolver)
 library(spam)
 
 # Simulate the rings
-nx = 500
-ny = 500
+nx = 1000
+ny = 1000
 x = seq(-1, 1, length = nx)
 y = seq(-1, 1, length = ny)
 ex = rep(1, nx)
@@ -37,22 +37,7 @@ set.seed(2019)
 Z = Z + matrix(rnorm(nx * ny), nx, ny)
 z <- as.vector(Z)
 
-nseg <- c(20, 20)
-
-# Prepare bases
-Bx = bbase(x, nseg = nseg[1])
-By = bbase(y, nseg = nseg[2])
-nbx = ncol(Bx)
-nby = ncol(By)
-
-# Prpare the penalty matrices
-Dx = diff(diag(nbx), diff = 2)
-Dy = diff(diag(nby), diff = 2)
-lambdax = lambday = 1
-Px = lambdax * t(Dx) %*% Dx
-Py = lambday * t(Dy) %*% Dy
-P = kronecker(Py, diag(nbx)) + kronecker(diag(nby), Px)
-W = 0 * Z + 1
+nseg <- c(100, 100)
 
 dat <- data.frame(x=rep(x,times=ny),y=rep(y,each=nx),z=z)
 
@@ -80,7 +65,7 @@ alpha
 cols = gray(seq(0, 1, by = 0.01))
 par(mfrow = c(1, 2), mar = c(1, 1, 2, 1))
 
-image(x, y, Z * W, col = cols, xlab = "", ylab = "", xaxt = "n", yaxt = "n")
+image(x, y, Z, col = cols, xlab = "", ylab = "", xaxt = "n", yaxt = "n")
 title("Data", cex.main = 1.5)
 
 Zhat <- matrix(data=pred$ypred, nrow=nx,ncol=ny, byrow=TRUE)
