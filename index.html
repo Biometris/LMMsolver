@@ -37,7 +37,7 @@
     
     <a class="navbar-brand me-2" href="index.html">LMMsolver</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.3.9000</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -112,10 +112,14 @@
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<ul><li>Install from CRAN:</li></ul>
+<ul>
+<li>Install from CRAN:</li>
+</ul>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"LMMsolver"</span><span class="op">)</span></span></code></pre></div>
-<ul><li>Install latest development version from GitHub (requires <a href="https://github.com/r-lib/remotes" class="external-link">remotes</a> package):</li></ul>
+<ul>
+<li>Install latest development version from GitHub (requires <a href="https://github.com/r-lib/remotes" class="external-link">remotes</a> package):</li>
+</ul>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"Biometris/LMMsolver"</span>, ref <span class="op">=</span> <span class="st">"develop"</span>, dependencies <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -174,13 +178,27 @@
 <h1 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h1>
 <div id="refs" class="references csl-bib-body hanging-indent">
-<div id="ref-Boer2020" class="csl-entry"><p>Boer, Martin P., Hans Peter Piepho, and Emlyn R. Williams. 2020. “<span class="nocase">Linear Variance, P-splines and Neighbour Differences for Spatial Adjustment in Field Trials: How are they Related?</span>” <em>J. Agric. Biol. Environ. Stat.</em> 25 (4): 676–98. <a href="https://doi.org/10.1007/S13253-020-00412-4" class="external-link uri">https://doi.org/10.1007/S13253-020-00412-4</a>.</p></div>
-<div id="ref-Bustos-Korts2019" class="csl-entry"><p>Bustos-Korts, Daniela, Martin P. Boer, Marcos Malosetti, Scott Chapman, Karine Chenu, Bangyou Zheng, and Fred A. van Eeuwijk. 2019. “<span class="nocase">Combining Crop Growth Modeling and Statistical Genetic Modeling to Evaluate Phenotyping Strategies</span>.” <em>Front. Plant Sci.</em> 10 (November). <a href="https://doi.org/10.3389/fpls.2019.01491" class="external-link uri">https://doi.org/10.3389/fpls.2019.01491</a>.</p></div>
-<div id="ref-Furrer2010" class="csl-entry"><p>Furrer, R, and SR Sain. 2010. “<span class="nocase">spam: A sparse matrix R package with emphasis on MCMC methods for Gaussian Markov random fields</span>.” <em>J. Stat. Softw.</em> <a href="https://core.ac.uk/download/pdf/6340272.pdf" class="external-link uri">https://core.ac.uk/download/pdf/6340272.pdf</a>.</p></div>
-<div id="ref-Li2021" class="csl-entry"><p>Li, Wenhao, Martin P. Boer, Chaozhi Zheng, Ronny V. L. Joosen, and Fred A. van Eeuwijk. 2021. “<span class="nocase">An IBD-based mixed model approach for QTL mapping in multiparental populations</span>.” <em>Theor. Appl. Genet. 2021</em> 1 (August): 1–18. <a href="https://doi.org/10.1007/S00122-021-03919-7" class="external-link uri">https://doi.org/10.1007/S00122-021-03919-7</a>.</p></div>
-<div id="ref-Patterson1971" class="csl-entry"><p>Patterson, HD, and R Thompson. 1971. “<span class="nocase">Recovery of inter-block information when block sizes are unequal</span>.” <em>Biometrika</em>. <a href="https://doi.org/10.1093/biomet/58.3.545" class="external-link uri">https://doi.org/10.1093/biomet/58.3.545</a>.</p></div>
-<div id="ref-Rodriguez-Alvarez2018" class="csl-entry"><p>Rodríguez-Álvarez, María Xosé, Martin P. Boer, Fred A. van Eeuwijk, and Paul H. C. Eilers. 2018. “<span class="nocase">Correcting for spatial heterogeneity in plant breeding experiments with P-splines</span>.” <em>Spat. Stat.</em> 23 (March): 52–71. <a href="https://doi.org/10.1016/J.SPASTA.2017.10.003" class="external-link uri">https://doi.org/10.1016/J.SPASTA.2017.10.003</a>.</p></div>
-<div id="ref-Rodriguez-Alvarez2015" class="csl-entry"><p>Rodríguez-Álvarez, María Xosé, Dae Jin Lee, Thomas Kneib, María Durbán, and Paul Eilers. 2015. “<span class="nocase">Fast smoothing parameter separation in multidimensional generalized P-splines: the SAP algorithm</span>.” <em>Stat. Comput.</em> 25 (5): 941–57. <a href="https://doi.org/10.1007/S11222-014-9464-2" class="external-link uri">https://doi.org/10.1007/S11222-014-9464-2</a>.</p></div>
+<div id="ref-Boer2020" class="csl-entry">
+Boer, Martin P., Hans Peter Piepho, and Emlyn R. Williams. 2020. “<span class="nocase">Linear Variance, P-splines and Neighbour Differences for Spatial Adjustment in Field Trials: How are they Related?</span>” <em>J. Agric. Biol. Environ. Stat.</em> 25 (4): 676–98. <a href="https://doi.org/10.1007/S13253-020-00412-4" class="external-link uri">https://doi.org/10.1007/S13253-020-00412-4</a>.
+</div>
+<div id="ref-Bustos-Korts2019" class="csl-entry">
+Bustos-Korts, Daniela, Martin P. Boer, Marcos Malosetti, Scott Chapman, Karine Chenu, Bangyou Zheng, and Fred A. van Eeuwijk. 2019. “<span class="nocase">Combining Crop Growth Modeling and Statistical Genetic Modeling to Evaluate Phenotyping Strategies</span>.” <em>Front. Plant Sci.</em> 10 (November). <a href="https://doi.org/10.3389/fpls.2019.01491" class="external-link uri">https://doi.org/10.3389/fpls.2019.01491</a>.
+</div>
+<div id="ref-Furrer2010" class="csl-entry">
+Furrer, R, and SR Sain. 2010. “<span class="nocase">spam: A sparse matrix R package with emphasis on MCMC methods for Gaussian Markov random fields</span>.” <em>J. Stat. Softw.</em> <a href="https://core.ac.uk/download/pdf/6340272.pdf" class="external-link uri">https://core.ac.uk/download/pdf/6340272.pdf</a>.
+</div>
+<div id="ref-Li2021" class="csl-entry">
+Li, Wenhao, Martin P. Boer, Chaozhi Zheng, Ronny V. L. Joosen, and Fred A. van Eeuwijk. 2021. “<span class="nocase">An IBD-based mixed model approach for QTL mapping in multiparental populations</span>.” <em>Theor. Appl. Genet. 2021</em> 1 (August): 1–18. <a href="https://doi.org/10.1007/S00122-021-03919-7" class="external-link uri">https://doi.org/10.1007/S00122-021-03919-7</a>.
+</div>
+<div id="ref-Patterson1971" class="csl-entry">
+Patterson, HD, and R Thompson. 1971. “<span class="nocase">Recovery of inter-block information when block sizes are unequal</span>.” <em>Biometrika</em>. <a href="https://doi.org/10.1093/biomet/58.3.545" class="external-link uri">https://doi.org/10.1093/biomet/58.3.545</a>.
+</div>
+<div id="ref-Rodriguez-Alvarez2018" class="csl-entry">
+Rodríguez-Álvarez, María Xosé, Martin P. Boer, Fred A. van Eeuwijk, and Paul H. C. Eilers. 2018. “<span class="nocase">Correcting for spatial heterogeneity in plant breeding experiments with P-splines</span>.” <em>Spat. Stat.</em> 23 (March): 52–71. <a href="https://doi.org/10.1016/J.SPASTA.2017.10.003" class="external-link uri">https://doi.org/10.1016/J.SPASTA.2017.10.003</a>.
+</div>
+<div id="ref-Rodriguez-Alvarez2015" class="csl-entry">
+Rodríguez-Álvarez, María Xosé, Dae Jin Lee, Thomas Kneib, María Durbán, and Paul Eilers. 2015. “<span class="nocase">Fast smoothing parameter separation in multidimensional generalized P-splines: the SAP algorithm</span>.” <em>Stat. Comput.</em> 25 (5): 941–57. <a href="https://doi.org/10.1007/S11222-014-9464-2" class="external-link uri">https://doi.org/10.1007/S11222-014-9464-2</a>.
+</div>
 </div>
 </div>
 
