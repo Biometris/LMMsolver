@@ -71,11 +71,11 @@ Fit multi dimensional P-splines using sparse implementation.
 }
 \section{Functions}{
 \itemize{
-\item \code{spl2D}: 2-dimensional splines
+\item \code{spl2D()}: 2-dimensional splines
 
-\item \code{spl3D}: 3-dimensional splines
+\item \code{spl3D()}: 3-dimensional splines
+
 }}
-
 \examples{
 ## Fit model on john.alpha data from agridat package.
 data(john.alpha, package = "agridat")
