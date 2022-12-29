@@ -2,7 +2,7 @@
 
 # Two-dimensional anisotropic density estimation (Old Faithful data)
 # A graph from the book 'Practical Smoothing. The Joys of P-splines'
-#Paul Eilers and Brian Marx, 2019
+# Paul Eilers and Brian Marx, 2019
 
 library(reshape2)
 library(ucminf)
@@ -34,8 +34,6 @@ obj1 <- LMMsolve(fixed = z~1,
 summary(obj1)
 
 pred <- obtainSmoothTrend(obj1, includeIntercept = TRUE, grid=nbins)
-
-family <- poisson()
 densLMMsolver <- data.frame(x=pred$x,y=pred$y,z=sqrt(pred$ypred))
 
 # Smooth histogram and return AIC
@@ -64,7 +62,11 @@ x <- rep(h$xgrid, each=nbins[2])
 y <- rep(h$ygrid, times=nbins[1])
 dens <- data.frame(x=x,y=y,z=sqrt(z))
 
-# Plot density with contours
+# compare LMMsolver with code in JOPS book
+plot(x=dens$z,y=densLMMsolver$z, main="compare methods",
+     xlab="z (JOPS)",ylab='z (LMMsolver)')
+
+# Plot density with contours using LMMsolver results:
 plt = ggplot(densLMMsolver, aes(x, y, fill = z)) +
   geom_raster(show.legend = F) +
   scale_fill_gradient(high = 'darkgreen', low = 'white') +
@@ -77,5 +79,3 @@ plt = ggplot(densLMMsolver, aes(x, y, fill = z)) +
 # Make and save plot
 plot(plt)
 
-plot(x=dens$z,y=densLMMsolver$z, main="compare methods",
-     xlab="z (JOPS)",ylab='z (LMMsolver)')
