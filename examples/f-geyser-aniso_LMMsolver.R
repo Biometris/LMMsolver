@@ -27,10 +27,9 @@ dat <- data.frame(x, y, z)
 
 nseg <- c(10, 10)
 obj1 <- LMMsolve(fixed = z~1,
-                 spline = ~spl2D(x1 = x, x2=y, nseg = nseg, degree = 3, pord=2),
+                 spline = ~spl2D(x1 = x, x2=y, nseg = nseg),
                  data = dat,
-                 family = poisson(),
-                 trace = FALSE)
+                 family = poisson())
 summary(obj1)
 
 pred <- obtainSmoothTrend(obj1, includeIntercept = TRUE, grid=nbins)
