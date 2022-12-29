@@ -36,6 +36,10 @@
 #' @param data A data.frame containing the modeling data.
 #' @param residual A formula for the residual part of the model. Should be of
 #' the form "~ pred".
+#' @param family An object of class family specifying the distribution
+#' and link function.
+#' @param offset An optional numerical vector containing an a priori
+#' known component to be included in the linear predictor during fitting.
 #' @param tolerance A numerical value. The convergence tolerance for the
 #' modified Henderson algorithm to estimate the variance components.
 #' @param trace Should the progress of the algorithm be printed? Default
@@ -104,6 +108,8 @@ LMMsolve <- function(fixed,
                      weights = NULL,
                      data,
                      residual = NULL,
+                     family = gaussian(),
+                     offset = 0,
                      tolerance = 1.0e-6,
                      trace = FALSE,
                      maxit = 250,
@@ -331,6 +337,7 @@ LMMsolve <- function(fixed,
   nRes <- length(lRinv)
   scFactor <- c(scFactor, rep(1, nRes))
   y <- model.response(mf)
+
   ## check whether the variance for response is not zero.
   if (is.null(residual)) {
     if (var(y) < .Machine$double.eps / 2) {
@@ -360,9 +367,15 @@ LMMsolve <- function(fixed,
   } else {
     theta <- 1/scFactor
   }
-  obj <- sparseMixedModels(y = y, X = Xs, Z = Z, lGinv = lGinv, lRinv = lRinv,
-                           tolerance = tolerance, trace = trace, maxit = maxit,
-                           theta = theta)
+  if (family$family == "gaussian") {
+    obj <- sparseMixedModels(y = y, X = Xs, Z = Z, lGinv = lGinv, lRinv = lRinv,
+                             tolerance = tolerance, trace = trace, maxit = maxit,
+                             theta = theta)
+  } else {
+    error <- paste("family", family$family, "not implemented yet")
+    stop(error)
+  }
+
   ## Add names to coefficients.
   ## Fixed terms.
   ef <- cumsum(dim.f)
