@@ -45,7 +45,8 @@ sparseMixedModels <- function(y,
                               maxit = 100,
                               tolerance = 1.0e-6,
                               trace = FALSE,
-                              theta = NULL) {
+                              theta = NULL,
+                              fixedTheta = NULL) {
   Ntot <- length(y)
   p <- ncol(X)
   q <- ncol(Z)
@@ -84,6 +85,10 @@ sparseMixedModels <- function(y,
   if (is.null(theta)) {
     theta <- rep(1, Nvarcomp + Nres)
   }
+  if (is.null(fixedTheta)) {
+    ## Fix a penalty theta, if value becomes high.
+    fixedTheta <- rep(FALSE, length = NvarcompTot)
+  }
   if (Nvarcomp > 0) {
     psi <- theta[1:Nvarcomp]
     phi <- theta[-(1:Nvarcomp)]
@@ -101,7 +106,8 @@ sparseMixedModels <- function(y,
   M <- sapply(lRinv,FUN=function(x) {
     as.integer(abs(spam::diag.spam(x))>getOption("spam.eps"))})
   rSums <- rowSums(M)
-  if (!isTRUE(all.equal(rSums, rep(1, nrow(M))))) {
+  #if (!isTRUE(all.equal(rSums, rep(1, nrow(M))))) {
+  if (max(rSums) > 1) {
     stop("overlapping penalties for residual part") }
 
   # calculate number of elements per group for residuals
@@ -119,8 +125,6 @@ sparseMixedModels <- function(y,
   ADcholC <- ADchol(lC)
   ## Initialize values for loop.
   logLprev <- Inf
-  ## Fix a penalty theta, if value becomes high.
-  fixedTheta <- rep(FALSE, length = NvarcompTot)
   if (trace) {
     cat("iter logLik\n")
   }

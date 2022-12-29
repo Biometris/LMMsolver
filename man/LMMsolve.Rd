@@ -13,6 +13,8 @@ LMMsolve(
   weights = NULL,
   data,
   residual = NULL,
+  family = gaussian(),
+  offset = 0,
   tolerance = 1e-06,
   trace = FALSE,
   maxit = 250,
@@ -46,6 +48,12 @@ all equal to one.}
 
 \item{residual}{A formula for the residual part of the model. Should be of
 the form "~ pred".}
+
+\item{family}{An object of class family specifying the distribution
+and link function.}
+
+\item{offset}{An optional numerical vector containing an a priori
+known component to be included in the linear predictor during fitting.}
 
 \item{tolerance}{A numerical value. The convergence tolerance for the
 modified Henderson algorithm to estimate the variance components.}

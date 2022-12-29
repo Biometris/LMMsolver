@@ -372,8 +372,35 @@ LMMsolve <- function(fixed,
                              tolerance = tolerance, trace = trace, maxit = maxit,
                              theta = theta)
   } else {
-    error <- paste("family", family$family, "not implemented yet")
-    stop(error)
+    nobs <- length(y)
+    mustart <- etastart <- NULL
+    eval(family$initialize)
+    mu <- mustart
+    eta <- family$linkfun(mustart)
+
+    nNonRes <- length(theta) - nRes
+    fixedTheta <- c(rep(FALSE,nNonRes), rep(TRUE,nRes))
+    theta[(nNonRes+1):(nNonRes+nRes)] <- 1.0
+
+    for (i in 1:maxit) {
+      deriv <- family$mu.eta(eta)
+      z <- (eta - offset) + (y - mu)/deriv
+      wGLM <- as.vector(deriv^2/family$variance(mu))
+      wGLM <- wGLM*w
+      lRinv <- constructRinv(df = data, residual = residual, weights = wGLM)
+      obj <- sparseMixedModels(y = z, X = Xs, Z = Z, lGinv = lGinv, lRinv = lRinv,
+                               tolerance = tolerance, trace = trace, maxit = maxit,
+                               theta = theta, fixedTheta = fixedTheta)
+      eta.old <- eta
+      eta <- obj$yhat + offset
+      mu <- family$linkinv(eta)
+      theta <- obj$theta
+      tol <- sum((eta - eta.old)^2)/sum(eta^2)
+      if (trace) {
+        cat("Generalized Linear Mixed Model iteration", i, ", tol=", tol, "\n")
+      }
+      if (tol < tolerance) break;
+    }
   }
 
   ## Add names to coefficients.
