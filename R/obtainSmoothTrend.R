@@ -169,6 +169,7 @@ obtainSmoothTrend <- function(object,
       }
     }
   }
+  family = object$family
   coefRan <- as.vector(BxTot %*% coef(object)[[splR_name]])
   ## Compute fitted values.
   fit <- mu + coefFix + coefRan
