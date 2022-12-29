@@ -471,5 +471,6 @@ LMMsolve <- function(fixed,
                         Nres = length(lRinv),
                         term.labels.f = term.labels.f,
                         term.labels.r = term.labels.r,
-                        splRes = splResList))
+                        splRes = splResList,
+                        family = family))
 }

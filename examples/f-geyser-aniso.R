@@ -39,7 +39,7 @@ summary(obj1)
 pred <- obtainSmoothTrend(obj1, includeIntercept = TRUE, grid=c(100,100))
 
 family <- poisson()
-dense2 <- data.frame(x=pred$x,y=pred$y,z=sqrt(family$linkinv(pred$ypred)))
+dense2 <- data.frame(x=pred$x,y=pred$y,z=sqrt(pred$ypred))
 
 # Smooth histogram and return AIC
 aicfun = function(lla) {

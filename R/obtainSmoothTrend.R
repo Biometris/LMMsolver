@@ -172,17 +172,18 @@ obtainSmoothTrend <- function(object,
   coefRan <- as.vector(BxTot %*% coef(object)[[splR_name]])
   ## Compute fitted values.
   fit <- mu + coefFix + coefRan
+  familyFit <- family$linkinv(fit)
   ## Construct output data.frame.
   if (!is.null(newdata)) {
     outDat <- newdata
-    outDat[["ypred"]] <- fit
+    outDat[["ypred"]] <- familyFit
   } else {
-    outDat <- data.frame(expand.grid(rev(xGrid)), ypred = fit)
+    outDat <- data.frame(expand.grid(rev(xGrid)), ypred = familyFit)
     colnames(outDat)[-ncol(outDat)] <- rev(names(x))
     outDat <- outDat[c(names(x), "ypred")]
   }
-  ## only add standard errors if deriv == 0 and includeIntercept
-  if (deriv == 0 & includeIntercept) {
+  ## only add standard errors if:
+  if (deriv == 0 & includeIntercept & family$family == "gaussian") {
     labels <- c(object$term.labels.f, object$term.labels.r)
     lU <- list()
     dim <- object$dim

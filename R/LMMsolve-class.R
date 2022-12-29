@@ -26,6 +26,7 @@
 #' \item{term.labels.f}{The names of the fixed terms in the mixed model}
 #' \item{term.labels.r}{The names of the random terms in the mixed model}
 #' \item{splRes}{An object with definition of spline argument}
+#' \item{family}{An object of class family specifying the distribution and link function}.
 #'
 #' @usage NULL
 #'
@@ -49,7 +50,8 @@ LMMsolveObject <- function(logL,
                            Nres,
                            term.labels.f,
                            term.labels.r,
-                           splRes) {
+                           splRes,
+                           family) {
   structure(list(logL = logL,
                  sigma2e = sigma2e,
                  tau2e = tau2e,
@@ -68,7 +70,8 @@ LMMsolveObject <- function(logL,
                  Nres = Nres,
                  term.labels.f = term.labels.f,
                  term.labels.r = term.labels.r,
-                 splRes = splRes),
+                 splRes = splRes,
+                 family = family),
             class = c("LMMsolve", "list"))
 }
 

@@ -31,7 +31,7 @@ summary(obj1)
 pred <- obtainSmoothTrend(obj1, includeIntercept = TRUE, grid=100)
 
 family <- poisson()
-Fit2 <- data.frame(x=pred$x,y=family$linkinv(pred$ypred))
+Fit2 <- data.frame(x=pred$x,y=pred$ypred)
 
 # Poisson smoothing
 lambdas = 10^seq(-3, -0, by = 0.1)
@@ -81,7 +81,7 @@ obj2 <- LMMsolve(fixed = y~1,
 summary(obj2)
 
 pred2 <- obtainSmoothTrend(obj2, includeIntercept = TRUE, grid=100)
-Fit3 <- data.frame(x=pred$x,y=family$linkinv(pred2$ypred))
+Fit3 <- data.frame(x=pred$x,y=pred2$ypred)
 
 # lambdas = 10 ^ seq(-4, -0, by = 0.1)
 aics = NULL
