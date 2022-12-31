@@ -1,6 +1,6 @@
 rm(list=ls())
 library(mvtnorm)
-library(SAP)
+library(SOP)
 library(LMMsolver)
 
 set.seed(1234)
@@ -21,17 +21,11 @@ eps <- rnorm(N,sd=0.1)
 y = Wood3D(x1, x2, x3) + eps
 
 # set parameters:
-knots <- c(4, 4, 4)
+nseg <- rep(4, 3)
 grid <- c(30,40,50)
 trace <- TRUE
-thr <- 1.0e-8  # convergence tolerance
+thr <- 1.0e-6  # convergence tolerance
 ######################
-
-# original sap package:
-obj0 <- SAP::sap3D(y, x1, x2, x3, knots=knots, trace=trace, thr=thr)
-obj0$edf
-
-fit0 <- predict(obj0, grid=grid)$eta
 
 # extra space, to be consistent with knot positions in SAP package:
 x1lim <- c(min(x1)-0.01, max(x1)+0.01)
@@ -39,24 +33,41 @@ x2lim <- c(min(x2)-0.01, max(x2)+0.01)
 x3lim <- c(min(x3)-0.01, max(x3)+0.01)
 
 df <- data.frame(y=y,x1=x1,x2=x2,x3=x3)
-s <- proc.time()[3]
 
+s1 <- proc.time()[3]
+# original sap package: f(x1=x1, x2=x2, x3=x3, nseg = nseg), data = dat,
+#obj0 <- SAP::sap3D(y, x1, x2, x3, knots=knots, trace=trace, thr=thr)
+#obj0$edf
+obj0 <- sop(formula = y ~ f(x1=x1, x2=x2, x3=x3,nseg=nseg), data = df,
+            control = list(trace = TRUE, epsilon=thr))
+e1 <- proc.time()[3]
+
+obj0$deviance
+
+#fit0 <- predict(obj0, newdata=newdat)
+
+#fit0 <- predict(obj0, grid=grid)$eta
+
+s2 <- proc.time()[3]
 obj1 <- LMMsolve(fixed = y~1,
-                 spline = ~spl3D(x1, x2, x3, nseg=knots,
-                              x1lim = x1lim, x2lim = x2lim, x3lim = x3lim),
+                 spline = ~spl3D(x1, x2, x3, nseg=nseg),
                  data = df,
                  trace = trace,
                  tolerance = thr)
-e <- proc.time()[3]
-cat("Time LMMsolve ", e-s, " seconds\n")
+e2 <- proc.time()[3]
 
 summary(obj1)
 
 # compare effective dimensions:
-obj0$edf  # SAP package
-obj1$ED   # LMMsolve with spatial argument
+obj0$out$edf
+obj1$ED[3:5,2]
+
+cat("Time sop", e1-s1, " seconds\n")
+cat("Time LMMsolve ", e2-s2, " seconds\n")
+as.numeric((e1-s1)/(e2-s2))
 
 # compare smooth trends
-fit1 <- obtainSmoothTrend(obj1, grid=grid, includeIntercept = TRUE)
-range(fit0 - fit1$ypred)
+#fit1 <- obtainSmoothTrend(obj1, grid=grid, includeIntercept = TRUE)
+#range(fit0 - fit1$ypred)
+diagnosticsMME(obj1)
 
