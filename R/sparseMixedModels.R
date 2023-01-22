@@ -188,7 +188,7 @@ sparseMixedModels <- function(y,
     ## Update the penalties theta that are not fixed.
     theta <- ifelse(fixedTheta, theta, ED / SS_all)
     ## Set elements of theta fixed if penalty > 1.0e6.
-    fixedTheta <- theta > 1.0e6
+    fixedTheta <- (theta > 1.0e6) | (fixedTheta == TRUE)
     logLprev <- logL
   }
   if (it == maxit) {
