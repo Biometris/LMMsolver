@@ -97,7 +97,7 @@
 #' \code{\link{spl2D}}, \code{\link{spl3D}}
 #'
 #' @importFrom stats model.frame terms model.matrix contrasts as.formula
-#' terms.formula aggregate model.response var formula
+#' terms.formula aggregate model.response var formula gaussian
 #'
 #' @export
 LMMsolve <- function(fixed,
@@ -282,15 +282,25 @@ LMMsolve <- function(fixed,
   X <- model.matrix(mt, data = mf,
                     contrasts.arg = lapply(X = mf[, f.terms, drop = FALSE],
                                            FUN = contrasts, contrasts = TRUE))
+  term.labels.f <- attr(mt, "term.labels")
+
   q <- qr(X)
   remCols <- q$pivot[-seq(q$rank)]
   if (length(remCols) > 0) {
-    dim.f <- as.numeric(table(attr(X, "assign")[-remCols]))
+    ## Compare terms before and after removing extra columns.
+    ## If a complete term is removed, it also has to be removed from the labels.
+    f.terms.orig <- as.numeric(names(table(attr(X, "assign"))))
+
+    dim.f.tab <- table(attr(X, "assign")[-remCols])
+    dim.f <- as.numeric(dim.f.tab)
     X <- X[ , -remCols, drop = FALSE]
+    f.terms.new <- as.numeric(names(dim.f.tab))
+    if (!setequal(f.terms.orig, f.terms.new)) {
+      term.labels.f <- term.labels.f[-setdiff(f.terms.orig, f.terms.new)]
+    }
   } else {
     dim.f <- as.numeric(table(attr(X, "assign")))
   }
-  term.labels.f <- attr(mt, "term.labels")
 
   ## calculate NomEff dimension for non-spline part
   Xs <- spam::as.spam(X)
@@ -354,18 +364,17 @@ LMMsolve <- function(fixed,
            levelsNoVar, "\n")
     }
   }
-  ## Make X sparse
+  ## Make X sparse.
   Xs <- spam::as.spam(X)
-  ## Fit the model
 
-  if (!is.null(theta))
-  {
+  ## Fit the model.
+  if (!is.null(theta)) {
     if (length(theta) != length(scFactor)) {
       stop("Argument theta has wrong length \n")
     }
-    theta <- theta/scFactor
+    theta <- theta / scFactor
   } else {
-    theta <- 1/scFactor
+    theta <- 1 / scFactor
   }
   if (family$family == "gaussian") {
     obj <- sparseMixedModels(y = y, X = Xs, Z = Z, lGinv = lGinv, lRinv = lRinv,
