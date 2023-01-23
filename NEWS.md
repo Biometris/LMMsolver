@@ -1,3 +1,7 @@
+# LMMsolver 1.0.4.9000
+
+-   Small bugs in assignment of names to fixed model coefficients when columns were dropped from the model are fixed.  
+
 # LMMsolver 1.0.4
 
 -   Improved computation time for calculation of standard errors. Implementation in C++ and using the 'sparse inverse'. 
@@ -7,7 +11,7 @@
 
 -   Improved computation time and memory allocation, especially important for big data with many observations (the number of rows in the data frame).
 -   Replaced the default `model.matrix` function by `Matrix::sparse.model.matrix` to generate sparse design matrices.
--   In function `obtainSmoothTrend` the standard errors are only calculated if `includeIntercept=TRUE`. 
+-   In function `obtainSmoothTrend` the standard errors are only calculated if `includeIntercept = TRUE`. 
 -   Several small bugs fixed.
 
 # LMMsolver 1.0.2
