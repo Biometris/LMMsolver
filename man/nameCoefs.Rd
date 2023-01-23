@@ -4,7 +4,16 @@
 \alias{nameCoefs}
 \title{Helper function for naming coefficients.}
 \usage{
-nameCoefs(coefs, desMat, termLabels, s, e, data, group = NULL, type = "fixed")
+nameCoefs(
+  coefs,
+  desMat = NULL,
+  termLabels,
+  s,
+  e,
+  data,
+  group = NULL,
+  type = "fixed"
+)
 }
 \description{
 Helper function for naming coefficients.

@@ -310,7 +310,7 @@ checkGroup <- function(random,
 #'
 #' @keywords internal
 nameCoefs <- function(coefs,
-                      desMat,
+                      desMat = NULL,
                       termLabels,
                       s,
                       e,
@@ -339,7 +339,15 @@ nameCoefs <- function(coefs,
         if (type == "fixed") {
           coefI <- c(0, coefI)
         }
-        names(coefI) <- paste(labI, levels(data[[labI]]), sep = "_")
+        coefINames <- paste(labI, levels(data[[labI]]), sep = "_")
+        ## Restrict to names in design matrix.
+        if (!is.null(desMat)) {
+          coefINames <-
+            c(coefINames[1],
+              coefINames[paste0(labI,
+                                levels(data[[labI]])) %in% colnames(desMat)])
+        }
+        names(coefI) <- coefINames
       } else {
         ## Numerical variable. Name equal to label.
         names(coefI) <- labI
