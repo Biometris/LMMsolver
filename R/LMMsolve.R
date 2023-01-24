@@ -381,6 +381,9 @@ LMMsolve <- function(fixed,
                              tolerance = tolerance, trace = trace, maxit = maxit,
                              theta = theta)
   } else {
+    ## MB, 23 jan 2023
+    ## binomial needs global weights
+    weights <- w
     nobs <- length(y)
     mustart <- etastart <- NULL
     eval(family$initialize)
