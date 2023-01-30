@@ -56,7 +56,7 @@ calcScaleFactor <- function(knots,
                             pord) {
   dx <- sapply(X = knots, FUN = attr, which = "dx")
   sc <- (1 / dx)^(2 * pord - 1)
-  sc <- ifelse(sc < 10.e-10, 1.0e-10, sc)
+  sc <- ifelse(sc < 1e-10, 1e-10, sc)
   return(sc)
 }
 
