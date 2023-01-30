@@ -172,7 +172,7 @@ LMMsolve <- function(fixed,
   ## Drop unused factor levels from data.
   data <- droplevels(data)
   ## Check that all variables used in formulas are in data.
-  chkGroup <- checkGroup(random, group)
+  chkGroup <- checkGroup(random, group, data)
   random <- chkGroup$random
   group <- chkGroup$group
   data <- checkFormVars(fixed, data)

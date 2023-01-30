@@ -4,6 +4,7 @@
 #'
 #' @return norm of vector x
 #'
+#' @noRd
 #' @keywords internal
 normVec <- function(x) {
   return(sqrt(sum(x ^ 2)))
@@ -21,8 +22,10 @@ normVec <- function(x) {
 #' @param lGinv1 a list of sparse matrices.
 #' @param lGinv2 a list of sparse matrices.
 #'
+#' @noRd
 #' @keywords internal
-expandGinv <- function(lGinv1, lGinv2) {
+expandGinv <- function(lGinv1,
+                       lGinv2) {
   if (is.null(lGinv1)) return(lGinv2)
   if (is.null(lGinv2)) return(lGinv1)
 
@@ -42,13 +45,17 @@ expandGinv <- function(lGinv1, lGinv2) {
   return(lGinv)
 }
 
-# calculate scale factor for precision matrices.
-# To make the penalty matrix more stable if there are many knots,
-# a scaled version is used, \eqn{(1/dx)^(2pord-1) D'D}.
-calcScaleFactor <- function(knots, pord)
-{
-  dx <- sapply(knots, function(x) { attr(x, "dx")})
-  sc <- (1/dx)^(2*pord-1)
+#' Calculate scale factor for precision matrices.
+#'
+#' To make the penalty matrix more stable if there are many knots,
+#' a scaled version is used, \eqn{(1/dx)^(2pord-1) D'D}.
+#'
+#' @noRd
+#' @keywords internal
+calcScaleFactor <- function(knots,
+                            pord) {
+  dx <- sapply(X = knots, FUN = attr, which = "dx")
+  sc <- (1 / dx)^(2 * pord - 1)
   sc <- ifelse(sc < 10.e-10, 1.0e-10, sc)
   return(sc)
 }
@@ -57,8 +64,8 @@ calcScaleFactor <- function(knots, pord)
 #'
 #' Construct a scaled version of the P-splines penalty matrix, see details.
 #'
-#' The P-spline penalty matrix has the form \eqn{D'D}, where \eqn{D} is the `pord` order
-#' difference matrix.
+#' The P-spline penalty matrix has the form \eqn{D'D}, where \eqn{D} is the
+#' `pord` order difference matrix.
 #'
 #' @param q integer with dimensions.
 #' @param pord order of the penalty.
@@ -66,6 +73,7 @@ calcScaleFactor <- function(knots, pord)
 #'
 #' @return qxq penalty matrix of class spam
 #'
+#' @noRd
 #' @keywords internal
 constructPenalty <-function(q,
                             pord) {
@@ -85,6 +93,7 @@ constructPenalty <-function(q,
 #'
 #' @return a matrix X
 #'
+#' @noRd
 #' @keywords internal
 constructX <- function(B,
                        x,
@@ -112,20 +121,21 @@ constructX <- function(B,
 #'
 #' @return a q x q matrix of type spam
 #'
+#' @noRd
 #' @keywords internal
-constructCCt <- function(knots, pord) {
-  xmin <- attr(knots, which="xmin")
-  xmax <- attr(knots, which="xmax")
+constructCCt <- function(knots,
+                         pord) {
+  xmin <- attr(knots, which = "xmin")
+  xmax <- attr(knots, which = "xmax")
   # if pord == 1 take point halfway, otherwise the
   # begin and endpoint of B-spline basis:
   if (pord == 1) {
-    x <- 0.5*(xmin+xmax)
-  }
-  else {
-    x <- c(xmin,xmax)
+    x <- 0.5 * (xmin + xmax)
+  } else {
+    x <- c(xmin, xmax)
   }
   Bx <- Bsplines(knots, x)
-  CCt <- t(Bx) %*% Bx
+  CCt <- spam::crossprod.spam(Bx)
   return(CCt)
 }
 
@@ -137,6 +147,7 @@ constructCCt <- function(knots, pord) {
 #'
 #' @return a list of symmetric matrices of length of vector q.
 #'
+#' @noRd
 #' @keywords internal
 constructGinvSplines <- function(q,
                                  knots,
@@ -169,6 +180,7 @@ constructGinvSplines <- function(q,
 #'
 #' @return a matrix if \code{X} has more than one column, otherwise return NULL
 #'
+#' @noRd
 #' @keywords internal
 removeIntercept <- function(X) {
   if (ncol(X) == 1) {
@@ -181,6 +193,7 @@ removeIntercept <- function(X) {
 
 #' Calculate the Nominal Effective dimension
 #'
+#' @noRd
 #' @keywords internal
 calcNomEffDim <- function(X,
                           Z,
@@ -197,10 +210,11 @@ calcNomEffDim <- function(X,
     # if number of columns is high, use upper bound:
     if (dim.r[i] > 100 | nrow(X) > 10000) {
       rowSum <- spam::rowSums.spam(Zi)
-      if (all(rowSum==rowSum[1]))
+      if (all(rowSum == rowSum[1])) {
         EDnom[i] <- dim.r[i] - 1
-      else
+      } else {
         EDnom[i] <- dim.r[i]
+      }
     } else {
       XZ <- cbind(X, Zi)
       r <- qr(XZ)$rank
@@ -217,6 +231,7 @@ calcNomEffDim <- function(X,
 #'
 #' @importFrom utils hasName
 #'
+#' @noRd
 #' @keywords internal
 checkFormVars <- function(formula,
                           data) {
@@ -265,11 +280,19 @@ grp <- function(x) {
 #'
 #' @importFrom utils hasName
 #'
+#' @noRd
 #' @keywords internal
 checkGroup <- function(random,
-                       group) {
+                       group,
+                       data) {
   ## Only check if at least one of random and group is not NULL.
   if (!is.null(random) || !is.null(group)) {
+    ## Check that all columns in group are in data.
+    groupCols <- unlist(group)
+    if (any(groupCols < 1) || any(groupCols > ncol(data))) {
+      stop("All columns specified in group should be columns in data.\n",
+           call. = FALSE)
+    }
     if (is.null(random)) {
       grpVars <- NULL
     } else {
@@ -308,6 +331,7 @@ checkGroup <- function(random,
 
 #' Helper function for naming coefficients.
 #'
+#' @noRd
 #' @keywords internal
 nameCoefs <- function(coefs,
                       desMat = NULL,

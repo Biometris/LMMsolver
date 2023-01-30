@@ -55,6 +55,9 @@ expect_error(LMMsolve(fixed = pheno ~ cross, random = ~grp(QTL2),
 expect_error(LMMsolve(fixed = pheno ~ cross, random = ~grp(QTL2),
                       group = Lgrp, data = testDat),
              "The following variables are specified in grp in the random part")
+expect_error(LMMsolve(fixed = pheno ~ cross, random = ~grp(QTL),
+                      group = list(QTL = 3:7), data = testDat),
+             "All columns specified in group should be columns in data")
 
 ## Fit models with different components.
 mod0 <- LMMsolve(fixed = pheno ~ cross, data = testDat)
