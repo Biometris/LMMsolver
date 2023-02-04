@@ -128,7 +128,11 @@ obtainSmoothTrend <- function(object,
   ## Compute G per dimension.
   G <- lapply(X=knots, FUN = function(x) {
     constructG(knots = x, scaleX = scaleX, pord = pord)})
+  ## Compute G over all dimensions
   GTot <- Reduce('%x%', G)
+  ## no scaling for first column of GTot
+  GTot[,1] <- 1
+  ## Fixed effect over all dimensions
   XTot <- BxTot %*% GTot
 
   ## Remove intercept (needed when fitting model to avoid singularities).
@@ -139,6 +143,16 @@ obtainSmoothTrend <- function(object,
   } else {
     mu <- 0
   }
+
+  if (!is.null(splRes$term.labels.f)) {
+    beta <- c(mu, coef(object)[[splF_name]])
+  } else {
+    beta <- mu
+  }
+  u <- coef(object)[[splR_name]]
+  a <- GTot %*% beta + u
+  fit <- as.vector(BxTot %*% a)
+
   if (is.null(XTot)) {
     coefFix <- 0
   } else {
@@ -161,11 +175,12 @@ obtainSmoothTrend <- function(object,
       }
     }
   }
-  family = object$family
+  family <- object$family
   coefRan <- as.vector(BxTot %*% coef(object)[[splR_name]])
   ## Compute fitted values.
-  fit <- mu + coefFix + coefRan
+  fit_old <- mu + coefFix + coefRan
   familyFit <- family$linkinv(fit)
+  cat("Difference ", range(fit_old - fit), "\n")
   ## Construct output data.frame.
   if (!is.null(newdata)) {
     outDat <- newdata
