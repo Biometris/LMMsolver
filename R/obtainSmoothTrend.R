@@ -132,18 +132,12 @@ obtainSmoothTrend <- function(object,
   GTot <- Reduce('%x%', G)
   ## no scaling for first column of GTot
   GTot[,1] <- 1
-  ## Fixed effect over all dimensions
-  XTot <- BxTot %*% GTot
-
-  ## Remove intercept (needed when fitting model to avoid singularities).
-  XTot <- removeIntercept(XTot)
   ## Get intercept and compute contribution of fixed and random terms.
   if (includeIntercept) {
     mu <- coef(object)$'(Intercept)'
   } else {
     mu <- 0
   }
-
   if (!is.null(splRes$term.labels.f)) {
     beta <- c(mu, coef(object)[[splF_name]])
   } else {
@@ -153,34 +147,8 @@ obtainSmoothTrend <- function(object,
   a <- GTot %*% beta + u
   fit <- as.vector(BxTot %*% a)
 
-  if (is.null(XTot)) {
-    coefFix <- 0
-  } else {
-    if (deriv == 0) {
-      coefFix <- as.vector(XTot %*% coef(object)[[splF_name]])
-    } else {
-      ## only for spl1D, deriv option ignored for splDim > 1
-      if (deriv == 1 & pord==2) {
-        ## calculate scaling factor alpha
-        if (scaleX) {
-          xi <- GrevillePoints(knots[[1]])
-          scaleFactor <- 1/normVec(xi-mean(xi))
-        } else {
-          scaleFactor <- 1
-        }
-        coefFix <- coef(object)[[splF_name]]*scaleFactor
-      } else {
-        ## second derivative equal to zero
-        coefFix <- 0
-      }
-    }
-  }
   family <- object$family
-  coefRan <- as.vector(BxTot %*% coef(object)[[splR_name]])
-  ## Compute fitted values.
-  fit_old <- mu + coefFix + coefRan
   familyFit <- family$linkinv(fit)
-  cat("Difference ", range(fit_old - fit), "\n")
   ## Construct output data.frame.
   if (!is.null(newdata)) {
     outDat <- newdata
@@ -192,6 +160,12 @@ obtainSmoothTrend <- function(object,
   }
   ## only add standard errors if:
   if (deriv == 0 & includeIntercept & family$family == "gaussian") {
+    ## Fixed effect over all dimensions
+    XTot <- BxTot %*% GTot
+
+    ## Remove intercept (needed when fitting model to avoid singularities).
+    XTot <- removeIntercept(XTot)
+
     labels <- c(object$term.labels.f, object$term.labels.r)
     lU <- list()
     dim <- object$dim
