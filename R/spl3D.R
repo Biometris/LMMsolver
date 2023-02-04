@@ -59,10 +59,12 @@ spl3D <- function(x1,
   B3 <- Bsplines(knots[[3]], x3)
   q <- c(ncol(B1), ncol(B2), ncol(B3))
   B123 <- RowKronecker(RowKronecker(B1, B2), B3)
-  X1 <- constructX(B1, knots[[1]], scaleX, pord)
-  X2 <- constructX(B2, knots[[2]], scaleX, pord)
-  X3 <- constructX(B3, knots[[3]], scaleX, pord)
-  X <- RowKronecker(RowKronecker(X1, X2), X3)
+  G1 <- constructG(knots[[1]], scaleX, pord)
+  G2 <- constructG(knots[[2]], scaleX, pord)
+  G3 <- constructG(knots[[3]], scaleX, pord)
+  G <- G1 %x% G2 %x% G3
+  X <- B123 %*% G
+
   ## nominal effective dimension.
   EDnom = rep(ncol(B123) - ncol(X), 3)
   ## Remove intercept column to avoid singularity problems.

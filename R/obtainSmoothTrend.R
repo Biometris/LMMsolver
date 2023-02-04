@@ -125,16 +125,12 @@ obtainSmoothTrend <- function(object,
     ## Compute Bx over all dimensions.
     BxTot <- Reduce(`%x%`, Bx)
   }
-  ## Compute X per dimension.
-  X <- mapply(FUN = function(x, y) {
-    constructX(B = x, knots = y, scaleX = scaleX, pord = pord)
-  }, Bx, knots, SIMPLIFY = FALSE)
-  ## Compute X over all dimensions.
-  if (!is.null(newdata)) {
-    XTot <- Reduce(RowKronecker, X)
-  } else {
-    XTot <- Reduce(`%x%`, X)
-  }
+  ## Compute G per dimension.
+  G <- lapply(X=knots, FUN = function(x) {
+    constructG(knots = x, scaleX = scaleX, pord = pord)})
+  GTot <- Reduce('%x%', G)
+  XTot <- BxTot %*% GTot
+
   ## Remove intercept (needed when fitting model to avoid singularities).
   XTot <- removeIntercept(XTot)
   ## Get intercept and compute contribution of fixed and random terms.

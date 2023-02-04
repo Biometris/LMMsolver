@@ -49,9 +49,11 @@ spl2D <- function(x1,
   B2 <- Bsplines(knots[[2]], x2)
   q <- c(ncol(B1), ncol(B2))
   B12 <- RowKronecker(B1, B2)
-  X1 <- constructX(B1, knots[[1]], scaleX, pord)
-  X2 <- constructX(B2, knots[[2]], scaleX, pord)
-  X <- RowKronecker(X1, X2)
+  G1 <- constructG(knots[[1]], scaleX, pord)
+  G2 <- constructG(knots[[2]], scaleX, pord)
+  G <- G1 %x% G2
+  X <- B12 %*% G
+
   ## nominal effective dimension.
   EDnom = rep(ncol(B12) - ncol(X), 2)
   ## Remove intercept column to avoid singularity problems.

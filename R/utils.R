@@ -123,28 +123,6 @@ constructG <- function(knots, scaleX, pord)
   G
 }
 
-#' Construct fixed part of the spline model
-#'
-#' @param B matrix with B-spline basis.
-#' @param knots vector with the knot positions.
-#' @param scaleX logical. If scaleX is FALSE, the original x is used. If scaleX
-#' is TRUE, scaling is used, based on the B-splines basis. For details see
-#' the code.
-#' @param pord order of the penalty, values 1 or 2.
-#'
-#' @return a matrix X
-#'
-#' @noRd
-#' @keywords internal
-constructX <- function(B,
-                       knots,
-                       scaleX,
-                       pord) {
-  G <- constructG(knots, scaleX, pord)
-  X <- B %*% G
-  X
-}
-
 #' Construct constraint matrix
 #'
 #' @param knots knot positions of B-spline basis.
