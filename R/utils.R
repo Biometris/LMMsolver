@@ -82,8 +82,11 @@ constructPenalty <-function(q,
   return(DtD)
 }
 
-#' Consruct GrevillePoints, see Tom Lyche et al.
+#' Consruct Greville points,
 #'
+#' The Greville points \eqn{\xi_{1,j,d}} are defined by
+#' \deqn{\xi_{i,j,p} = \frac{x_{j+1} + \ldots + x_{j+d}}{d}}
+#' see Tom Lyche et al.
 #' @noRd
 #' @keywords internal
 GrevillePoints <- function(knots)
@@ -93,10 +96,37 @@ GrevillePoints <- function(knots)
   sapply(X=c(1:q), FUN=function(j){ sum(knots[(j+1):(j+d)])/d })
 }
 
+#' Construct G, such that BG = X
+#'
+#' @noRd
+#' @keywords internal
+constructG <- function(knots, scaleX, pord)
+{
+  if (pord==2) {
+    xi <- GrevillePoints(knots)
+    G <- cbind(1, xi)
+    if (scaleX) {
+      q <- length(xi)
+      xi_mn <- mean(xi)
+      alpha <- normVec(xi-xi_mn)
+      K <- matrix(data=c(1/sqrt(q),0,-xi_mn/alpha,1/alpha),nrow=2,ncol=2)
+      G <- G %*% K
+    }
+  } else { # pord==1
+    d <- attr(knots,"degree")
+    q <- length(knots) - (d + 1)
+    G <- matrix(data=1, nrow=q, ncol=1)
+    if (scaleX) {
+      G <- (1/sqrt(q))*G
+    }
+  }
+  G
+}
+
 #' Construct fixed part of the spline model
 #'
 #' @param B matrix with B-spline basis.
-#' @param x vector with values for x.
+#' @param knots vector with the knot positions.
 #' @param scaleX logical. If scaleX is FALSE, the original x is used. If scaleX
 #' is TRUE, scaling is used, based on the B-splines basis. For details see
 #' the code.
@@ -107,21 +137,11 @@ GrevillePoints <- function(knots)
 #' @noRd
 #' @keywords internal
 constructX <- function(B,
-                       x,
+                       knots,
                        scaleX,
                        pord) {
-  if (pord == 2) {
-    if (scaleX) {
-      ## calculate the linear/fixed parts.
-      U_null <- cbind(1, scale(seq_len(ncol(B))))
-      U_null <- apply(U_null, MARGIN = 2, function(x) (x / normVec(x)))
-      X <- B %*% U_null
-    } else {
-      X <- cbind(1, x)
-    }
-  } else {  # pord = 1
-    X <- matrix(data = 1, nrow = length(x), ncol = 1)
-  }
+  G <- constructG(knots, scaleX, pord)
+  X <- B %*% G
   X
 }
 

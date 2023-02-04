@@ -127,8 +127,8 @@ obtainSmoothTrend <- function(object,
   }
   ## Compute X per dimension.
   X <- mapply(FUN = function(x, y) {
-    constructX(B = x, x = y, scaleX = scaleX, pord = pord)
-  }, Bx, xGrid, SIMPLIFY = FALSE)
+    constructX(B = x, knots = y, scaleX = scaleX, pord = pord)
+  }, Bx, knots, SIMPLIFY = FALSE)
   ## Compute X over all dimensions.
   if (!is.null(newdata)) {
     XTot <- Reduce(RowKronecker, X)
