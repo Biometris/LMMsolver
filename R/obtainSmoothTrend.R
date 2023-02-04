@@ -153,14 +153,10 @@ obtainSmoothTrend <- function(object,
       if (deriv == 1 & pord==2) {
         ## calculate scaling factor alpha
         if (scaleX) {
-          range_org <- c(attr(knots[[1]],"xmin"), attr(knots[[1]], "xmax"))
-          Bx0 <- Bsplines(knots[[1]], range_org, deriv=0)
-          U_null <- scale(seq_len(ncol(Bx0)))
-          U_null <- U_null/normVec(U_null)
-          range_sc <- Bx0 %*% U_null
-          scaleFactor <- (range_sc[2]-range_sc[1])/(range_org[2]-range_org[1])
+          xi <- GrevillePoints(knots[[1]])
+          scaleFactor <- 1/normVec(xi-mean(xi))
         } else {
-          scaleFactor <- 1.0
+          scaleFactor <- 1
         }
         coefFix <- coef(object)[[splF_name]]*scaleFactor
       } else {

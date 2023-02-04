@@ -82,6 +82,17 @@ constructPenalty <-function(q,
   return(DtD)
 }
 
+#' Consruct GrevillePoints, see Tom Lyche et al.
+#'
+#' @noRd
+#' @keywords internal
+GrevillePoints <- function(knots)
+{
+  d <- attr(knots,"degree")
+  q <- length(knots) - (d + 1)
+  sapply(X=c(1:q), FUN=function(j){ sum(knots[(j+1):(j+d)])/d })
+}
+
 #' Construct fixed part of the spline model
 #'
 #' @param B matrix with B-spline basis.
