@@ -393,6 +393,8 @@ nameCoefs <- function(coefs,
       labDatNonFact <- names(isFactLab)[!isFactLab]
       if (length(labDatNonFact) > 0) {
         labDat <- cbind(labDatFact, labDatNonFact)
+        colnames(labDat) <- c(colnames(labDatFact), labDatNonFact)
+        labDat <- labDat[labISplit]
       } else {
         labDat <- labDatFact
       }
