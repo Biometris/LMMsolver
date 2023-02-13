@@ -387,36 +387,41 @@ nameCoefs <- function(coefs,
       }
     } else {
       ## Interaction term.
-      if (all(sapply(X = labISplit, FUN = function(labTerm) {
-        is.factor(data[[labTerm]])
-      }))) {
-        labDat <- unique(data[labISplit])
-        labDat <- lapply(X = seq_along(labDat), FUN = function(i) {
-          paste0(labISplit[i], "_", labDat[[i]])
-        })
-        if (type == "fixed") {
-          labDatAlt <- lapply(X = labDat, FUN = function(i) {
-            gsub("_", "", i)
-          })
-          interAcLevsIAlt <- levels(interaction(labDatAlt, sep = ":",
-                                                drop = TRUE))
-          interAcLevsI <- levels(interaction(labDat, sep = ":", drop = TRUE))
-          ## For fixed terms an extra 0 for the reference levels have to be added.
-          coefI <- c(rep(0, times = length(interAcLevsIAlt) - length(coefI)),
-                     coefI)
-          ## Zeros correspond to missing columns from design matrix.
-          ## Non-zeros to columns that are present in design matrix.
-          names(coefI) <- c(interAcLevsI[!interAcLevsIAlt %in% colnames(desMat)],
-                            interAcLevsI[interAcLevsIAlt %in% colnames(desMat)])
-          ## Reorder.
-          coefI <- coefI[interAcLevsI]
-          names(coefI) <- levels(interaction(labDat, sep = ":", drop = TRUE))
-        } else {
-          names(coefI) <- levels(interaction(labDat, sep = ":", drop = FALSE))
-        }
+      ## Factors and non-factors in term have to be treated differently.
+      isFactLab <- sapply(X = data[, labISplit], FUN = is.factor)
+      labDatFact <- unique(data[names(isFactLab)[isFactLab]])
+      labDatNonFact <- names(isFactLab)[!isFactLab]
+      if (length(labDatNonFact) > 0) {
+        labDat <- cbind(labDatFact, labDatNonFact)
       } else {
-        ## Numerical variable. Name equal to label.
-        names(coefI) <- labI
+        labDat <- labDatFact
+      }
+      labDat <- lapply(X = seq_along(labDat), FUN = function(i) {
+        if (isFactLab[i]) {
+          paste0(labISplit[i], "_", labDat[[i]])
+        } else {
+          labDat[[i]]
+        }
+      })
+      if (type == "fixed") {
+        labDatAlt <- lapply(X = labDat, FUN = function(i) {
+          gsub("_", "", i)
+        })
+        interAcLevsIAlt <- levels(interaction(labDatAlt, sep = ":",
+                                              drop = TRUE))
+        interAcLevsI <- levels(interaction(labDat, sep = ":", drop = TRUE))
+        ## For fixed terms an extra 0 for the reference levels have to be added.
+        coefI <- c(rep(0, times = length(interAcLevsIAlt) - length(coefI)),
+                   coefI)
+        ## Zeros correspond to missing columns from design matrix.
+        ## Non-zeros to columns that are present in design matrix.
+        names(coefI) <- c(interAcLevsI[!interAcLevsIAlt %in% colnames(desMat)],
+                          interAcLevsI[interAcLevsIAlt %in% colnames(desMat)])
+        ## Reorder.
+        coefI <- coefI[interAcLevsI]
+        names(coefI) <- levels(interaction(labDat, sep = ":", drop = TRUE))
+      } else {
+        names(coefI) <- levels(interaction(labDat, sep = ":", drop = FALSE))
       }
     }
     coefRes[[i]] <- coefI
