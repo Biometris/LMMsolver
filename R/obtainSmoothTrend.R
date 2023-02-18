@@ -244,22 +244,11 @@ obtainSmoothTrend <- function(object,
   ## Remove intercept (needed when fitting model to avoid singularities).
   XTot <- removeIntercept(XTot)
 
-  ## Get intercept and compute contribution of fixed and random terms.
-  if (includeIntercept) {
-    mu <- coef(object)$'(Intercept)'
-  } else {
-    mu <- 0
-  }
-  if (!is.null(splRes$term.labels.f)) {
-    beta <- coef(object)[[splF_name]]
-    predX <- as.vector(XTot %*% beta)
-  } else {
-    predX <- 0
-  }
-  u <- coef(object)[[splR_name]]
-  predB <- as.vector(BxTot %*% u)
-  fit <- mu + predX + predB
+  ## make the prediction design matrix
+  U <- constructU(object, grid, newdata, deriv, includeIntercept, which)
 
+  ## calculate the fit
+  fit <- as.vector(U %*% object$coefMME)
   family <- object$family
   familyFit <- family$linkinv(fit)
   ## Construct output data.frame.
@@ -273,7 +262,6 @@ obtainSmoothTrend <- function(object,
   }
   ## only add standard errors if:
   if (deriv == 0 & includeIntercept & family$family == "gaussian") {
-    U <- constructU(object, grid, newdata, deriv, includeIntercept, which)
     outDat[["se"]] <- calcStandardErrors(object$C, U)
   }
   return(outDat)
