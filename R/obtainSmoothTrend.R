@@ -1,3 +1,114 @@
+#' @noRd
+#' @keywords internal
+constructU <- function(object,
+                              grid = NULL,
+                              newdata = NULL,
+                              deriv = 0,
+                              includeIntercept = FALSE,
+                              which = 1) {
+  if (!inherits(object, "LMMsolve")) {
+    stop("object should be an object of class LMMsolve.\n")
+  }
+  if (is.null(object$splRes)) {
+    stop("The model was fitted without a spline component.\n")
+  }
+  if (is.null(grid) && is.null(newdata)) {
+    stop("Specify either grid or newdata.\n")
+  }
+  if (!is.numeric(which) || which > length(object$splRes)) {
+    stop("which should be an integer with value at most the number of fitted",
+         "spline components.\n")
+  }
+  ## Get dimension of fitted spline component.
+  splRes <- object$splRes[[which]]
+  splF_name <- splRes$term.labels.f
+  splR_name <- splRes$term.labels.r
+  ## Get content from splRes.
+  x <- splRes$x
+  knots <- splRes$knots
+  scaleX <- splRes$scaleX
+  pord <- splRes$pord
+  degree <- splRes$degree
+  splDim <- length(x)
+  if (splDim == 1 && (!is.numeric(deriv) || length(deriv) > 1 || deriv < 0 ||
+                      deriv != round(deriv))) {
+    stop("deriv should be an integer greater than or equal to zero.\n")
+  }
+  if (splDim > 1 && deriv != 0) {
+    deriv <- 0
+    warning("deriv is ignored for ", splDim, "-dimensional splines.\n",
+            call. = FALSE)
+  }
+  if (deriv > degree) {
+    stop(deriv,
+         "-order derivatives cannot be computed for B-splines of degree ",
+         degree)
+  }
+  if (!is.null(newdata)) {
+    if (!inherits(newdata, "data.frame")) {
+      stop("newdata should be a data.frame.\n")
+    }
+    missX <- names(x)[!sapply(X = names(x), FUN = function(name) {
+      hasName(x = newdata, name = name)
+    })]
+    if (length(missX) > 0) {
+      stop("The following smoothing variables are not in newdata:\n",
+           paste0(missX, collapse = ", "), "\n")
+    }
+    ## Construct grid for each dimension.
+    xGrid <- lapply(X = seq_along(x), FUN = function(i) {
+      newdata[[names(x)[i]]]
+    })
+    ## Compute Bx per dimension.
+    Bx <- mapply(FUN = Bsplines, knots, xGrid, deriv)
+    ## Compute Bx over all dimensions.
+    BxTot <- Reduce(RowKronecker, Bx)
+  } else {
+    if (!is.numeric(grid) || length(grid) != splDim) {
+      stop("grid should be a numeric vector with length equal to the dimension ",
+           "of the fitted spline: ", splDim,".\n")
+    }
+    ## Construct grid for each dimension.
+    xGrid <- lapply(X = seq_len(splDim), FUN = function(i) {
+      seq(attr(knots[[i]], which='xmin'), attr(knots[[i]], which='xmax'), length = grid[i])
+    })
+    ## Compute Bx per dimension.
+    Bx <- mapply(FUN = Bsplines, knots, xGrid, deriv)
+    ## Compute Bx over all dimensions.
+    BxTot <- Reduce(`%x%`, Bx)
+  }
+  ## Compute G per dimension.
+  G <- lapply(X=knots, FUN = function(x) {
+    constructG(knots = x, scaleX = scaleX, pord = pord)})
+  ## Compute G over all dimensions
+  GTot <- Reduce('%x%', G)
+  ## no scaling for first column of GTot
+  GTot[,1] <- 1
+  XTot <- BxTot %*% GTot
+  ## Remove intercept (needed when fitting model to avoid singularities).
+  XTot <- removeIntercept(XTot)
+
+  labels <- c(object$term.labels.f, object$term.labels.r)
+  lU <- list()
+  dim <- object$dim
+  for (i in seq_along(dim)) {
+    lU[[i]] = spam::spam(x = 0, nrow = nrow(BxTot), ncol = dim[i])
+  }
+  if (includeIntercept) {
+    lU[[1]] = spam::spam(x = 1, nrow = nrow(BxTot), ncol = 1)
+  }
+  if (!is.null(splRes$term.labels.f)) {
+    ndx.f <- which(splRes$term.labels.f == labels)
+    lU[[ndx.f]] <- XTot
+  }
+  ndx.r <- which(splRes$term.labels.r == labels)
+  lU[[ndx.r]] <- BxTot
+
+  U <- Reduce(spam::cbind.spam, lU)
+  return(U)
+}
+
+
 #' Obtain Smooth Trend.
 #'
 #' Obtain the smooth trend for models fitted with a spline component.
@@ -89,9 +200,6 @@ obtainSmoothTrend <- function(object,
          "-order derivatives cannot be computed for B-splines of degree ",
          degree)
   }
-  if (deriv > 0) {
-    includeIntercept <- FALSE
-  }
   if (!is.null(newdata)) {
     if (!inherits(newdata, "data.frame")) {
       stop("newdata should be a data.frame.\n")
@@ -132,6 +240,10 @@ obtainSmoothTrend <- function(object,
   GTot <- Reduce('%x%', G)
   ## no scaling for first column of GTot
   GTot[,1] <- 1
+  XTot <- BxTot %*% GTot
+  ## Remove intercept (needed when fitting model to avoid singularities).
+  XTot <- removeIntercept(XTot)
+
   ## Get intercept and compute contribution of fixed and random terms.
   if (includeIntercept) {
     mu <- coef(object)$'(Intercept)'
@@ -139,13 +251,14 @@ obtainSmoothTrend <- function(object,
     mu <- 0
   }
   if (!is.null(splRes$term.labels.f)) {
-    beta <- c(mu, coef(object)[[splF_name]])
+    beta <- coef(object)[[splF_name]]
+    predX <- as.vector(XTot %*% beta)
   } else {
-    beta <- mu
+    predX <- 0
   }
   u <- coef(object)[[splR_name]]
-  a <- GTot %*% beta + u
-  fit <- as.vector(BxTot %*% a)
+  predB <- as.vector(BxTot %*% u)
+  fit <- mu + predX + predB
 
   family <- object$family
   familyFit <- family$linkinv(fit)
@@ -160,29 +273,7 @@ obtainSmoothTrend <- function(object,
   }
   ## only add standard errors if:
   if (deriv == 0 & includeIntercept & family$family == "gaussian") {
-    ## Fixed effect over all dimensions
-    XTot <- BxTot %*% GTot
-
-    ## Remove intercept (needed when fitting model to avoid singularities).
-    XTot <- removeIntercept(XTot)
-
-    labels <- c(object$term.labels.f, object$term.labels.r)
-    lU <- list()
-    dim <- object$dim
-    for (i in seq_along(dim)) {
-      lU[[i]] = spam::spam(x = 0, nrow = nrow(BxTot), ncol = dim[i])
-    }
-    if (includeIntercept) {
-      lU[[1]] = spam::spam(x = 1, nrow = nrow(BxTot), ncol = 1)
-    }
-    if (!is.null(splRes$term.labels.f)) {
-      ndx.f <- which(splRes$term.labels.f == labels)
-      lU[[ndx.f]] <- XTot
-    }
-    ndx.r <- which(splRes$term.labels.r == labels)
-    lU[[ndx.r]] <- BxTot
-
-    U <- Reduce(spam::cbind.spam, lU)
+    U <- constructU(object, grid, newdata, deriv, includeIntercept, which)
     outDat[["se"]] <- calcStandardErrors(object$C, U)
   }
   return(outDat)
