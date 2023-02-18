@@ -14,6 +14,7 @@
 #' \item{varPar}{The number of variance parameters for each variance component}
 #' \item{VarDf}{The table with variance components}
 #' \item{theta}{The precision parameters}
+#' \item{coefMME}{A vector with all the estimated effects from mixed model equations}
 #' \item{coefficients}{The estimated effects from the mixed model equations}
 #' \item{yhat}{The fitted values}
 #' \item{residuals}{The residuals}
@@ -39,6 +40,7 @@ LMMsolveObject <- function(logL,
                            varPar,
                            VarDf,
                            theta,
+                           coefMME,
                            coefficients,
                            yhat,
                            residuals,
@@ -59,6 +61,7 @@ LMMsolveObject <- function(logL,
                  varPar = varPar,
                  VarDf = VarDf,
                  theta = theta,
+                 coefMME = coefMME,
                  coefficients = coefficients,
                  yhat = yhat,
                  residuals = residuals,

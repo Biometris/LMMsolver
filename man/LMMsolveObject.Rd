@@ -12,6 +12,7 @@ An object of class \code{LMMsolve} contains the following components:
 \item{varPar}{The number of variance parameters for each variance component}
 \item{VarDf}{The table with variance components}
 \item{theta}{The precision parameters}
+\item{coefMME}{A vector with all the estimated effects from mixed model equations}
 \item{coefficients}{The estimated effects from the mixed model equations}
 \item{yhat}{The fitted values}
 \item{residuals}{The residuals}
