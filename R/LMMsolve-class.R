@@ -19,6 +19,11 @@
 #' \item{yhat}{The fitted values}
 #' \item{residuals}{The residuals}
 #' \item{nIter}{The number of iterations for the mixed model to converge}
+#' \item{y}{Response variable}
+#' \item{X}{The design matrix for the fixed part of the mixed model}
+#' \item{Z}{The design matrix for the random part of the mixed model}
+#' \item{lGinv}{List with precision matrices for the random terms}
+#' \item{lRinv}{List with precision matrices for the residual}
 #' \item{C}{The mixed model coefficient matrix after last iteration}
 #' \item{cholC}{The cholesky decomposition of coefficient matrix C}
 #' \item{constantREML}{The REML constant}
@@ -45,6 +50,11 @@ LMMsolveObject <- function(logL,
                            yhat,
                            residuals,
                            nIter,
+                           y,
+                           X,
+                           Z,
+                           lGinv,
+                           lRinv,
                            C,
                            cholC,
                            constantREML,
@@ -66,8 +76,13 @@ LMMsolveObject <- function(logL,
                  yhat = yhat,
                  residuals = residuals,
                  nIter = nIter,
-                 C = C,
+                 y = y,
+                 X = X,
+                 Z = Z,
+                 lGinv = lGinv,
+                 lRinv = lRinv,
                  cholC = cholC,
+                 C = C,
                  constantREML = constantREML,
                  dim = dim,
                  Nres = Nres,
