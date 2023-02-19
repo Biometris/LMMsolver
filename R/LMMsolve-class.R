@@ -171,6 +171,7 @@ print.summary.LMMsolve <- function(x,
 #' Obtain the coefficients from the mixed model equations of an LMMsolve object.
 #'
 #' @param object an object of class LMMsolve
+#' @param se calculate standard errors, default FALSE.
 #' @param \dots some methods for this generic require additional arguments.
 #' None are used in this method.
 #'
@@ -193,16 +194,39 @@ print.summary.LMMsolve <- function(x,
 #'
 #' @export
 coef.LMMsolve <- function(object,
+                          se = FALSE,
                           ...) {
-
   u <- object$coefMME
   cf <- object$ndxCoefficients
-  coef <- lapply(cf, function(x) {  ndx <- x!=0
+
+  ## if not standard errors
+  if (!se) {
+    coef <- lapply(cf, function(x) {  ndx <- x!=0
                                     x[ndx] <- u[x[ndx]]
                                     return(x)
-                                 }
-                )
-  return(coef)
+                                  }
+                  )
+    return(coef)
+  }
+  # if standard errors
+  n <- length(u)
+  se <- calcStandardErrors(object$C, spam::diag.spam(1,n))
+
+  cf <- lapply(cf, function(x) {
+                         x_se <- x
+                         ndx1 <- x==0
+                         ndx2 <- x!=0
+                         x[ndx1] <- 0
+                         x[ndx2] <- u[x[ndx2]]
+                         x_se[ndx1] <- NA
+                         x_se[ndx2] <- se[x_se[ndx2]]
+                         df <- data.frame(coef= names(x), value=x, se=x_se,
+                                          zRatio= x/x_se)
+                         rownames(df) <- NULL
+                         return(df)
+                        }
+               )
+  return(cf)
 }
 
 #' Fitted values of an LMMsolve object.
