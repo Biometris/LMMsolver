@@ -15,7 +15,7 @@
 #' \item{VarDf}{The table with variance components}
 #' \item{theta}{The precision parameters}
 #' \item{coefMME}{A vector with all the estimated effects from mixed model equations}
-#' \item{coefficients}{The estimated effects from the mixed model equations}
+#' \item{ndxCoefficients}{The indices of the coefficients with the names}
 #' \item{yhat}{The fitted values}
 #' \item{residuals}{The residuals}
 #' \item{nIter}{The number of iterations for the mixed model to converge}
@@ -46,7 +46,7 @@ LMMsolveObject <- function(logL,
                            VarDf,
                            theta,
                            coefMME,
-                           coefficients,
+                           ndxCoefficients,
                            yhat,
                            residuals,
                            nIter,
@@ -72,7 +72,7 @@ LMMsolveObject <- function(logL,
                  VarDf = VarDf,
                  theta = theta,
                  coefMME = coefMME,
-                 coefficients = coefficients,
+                 ndxCoefficients = ndxCoefficients,
                  yhat = yhat,
                  residuals = residuals,
                  nIter = nIter,
@@ -194,7 +194,15 @@ print.summary.LMMsolve <- function(x,
 #' @export
 coef.LMMsolve <- function(object,
                           ...) {
-  return(object$coefficients)
+
+  u <- object$coefMME
+  cf <- object$ndxCoefficients
+  coef <- lapply(cf, function(x) {  ndx <- x!=0
+                                    x[ndx] <- u[x[ndx]]
+                                    return(x)
+                                 }
+                )
+  return(coef)
 }
 
 #' Fitted values of an LMMsolve object.

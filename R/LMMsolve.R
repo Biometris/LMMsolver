@@ -415,20 +415,22 @@ LMMsolve <- function(fixed,
     }
   }
 
-  ## Add names to coefficients.
+  ## Add names to ndx of coefficients.
+  ndxCf <- c(1:length(obj$a))
+
   ## Fixed terms.
   ef <- cumsum(dim.f)
   sf <- ef - dim.f + 1
-  coefF <- nameCoefs(coefs = obj$a, desMat = X, termLabels = term.labels.f,
+  ndxCoefF <- nameCoefs(coefs = ndxCf, desMat = X, termLabels = term.labels.f,
                      s = sf, e = ef, data = data, type = "fixed")
   ## Random terms.
   er <- sum(dim.f) + cumsum(dim.r)
   sr <- er - dim.r + 1
-  coefR <- nameCoefs(coefs = obj$a, termLabels = term.labels.r, s = sr, e = er,
+  ndxCoefR <- nameCoefs(coefs = ndxCf, termLabels = term.labels.r, s = sr, e = er,
                      data = data, group = group, type = "random")
   ## Combine result for fixed and random terms.
-  coefTot <- c(coefF, coefR)
-  names(coefTot) <- c(term.labels.f, term.labels.r)
+  ndxCoefTot <- c(ndxCoefF, ndxCoefR)
+  names(ndxCoefTot) <- c(term.labels.f, term.labels.r)
   ## Extract effective dimensions from fitted model.
   EffDimRes <- attributes(lRinv)$cnt
   EffDimNamesRes <- attributes(lRinv)$names
@@ -473,7 +475,7 @@ LMMsolve <- function(fixed,
                         VarDf = VarDf,
                         theta = obj$theta,
                         coefMME = obj$a,
-                        coefficients = coefTot,
+                        ndxCoefficients = ndxCoefTot,
                         yhat = obj$yhat,
                         residuals = obj$residuals,
                         nIter = obj$nIter,

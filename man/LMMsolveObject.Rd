@@ -13,7 +13,7 @@ An object of class \code{LMMsolve} contains the following components:
 \item{VarDf}{The table with variance components}
 \item{theta}{The precision parameters}
 \item{coefMME}{A vector with all the estimated effects from mixed model equations}
-\item{coefficients}{The estimated effects from the mixed model equations}
+\item{ndxCoefficients}{The indices of the coefficients with the names}
 \item{yhat}{The fitted values}
 \item{residuals}{The residuals}
 \item{nIter}{The number of iterations for the mixed model to converge}
