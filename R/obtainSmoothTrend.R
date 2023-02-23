@@ -2,12 +2,12 @@
 #'
 #' @noRd
 #' @keywords internal
-DesignMatrixPredSplines <- function(object,
-                              grid = NULL,
-                              newdata = NULL,
-                              deriv = 0,
-                              includeIntercept = FALSE,
-                              which = 1) {
+designMatrixPredSplines <- function(object,
+                                    grid = NULL,
+                                    newdata = NULL,
+                                    deriv = 0,
+                                    includeIntercept = FALSE,
+                                    which = 1) {
   ## Get dimension of fitted spline component.
   splRes <- object$splRes[[which]]
   splF_name <- splRes$term.labels.f
@@ -59,7 +59,8 @@ DesignMatrixPredSplines <- function(object,
     }
     ## Construct grid for each dimension.
     xGrid <- lapply(X = seq_len(splDim), FUN = function(i) {
-      seq(attr(knots[[i]], which='xmin'), attr(knots[[i]], which='xmax'), length = grid[i])
+      seq(attr(knots[[i]], which = 'xmin'), attr(knots[[i]], which = 'xmax'),
+          length = grid[i])
     })
     ## Compute Bx per dimension.
     Bx <- mapply(FUN = Bsplines, knots, xGrid, deriv)
@@ -164,14 +165,13 @@ obtainSmoothTrend <- function(object,
     stop("which should be an integer with value at most the number of fitted",
          "spline components.\n")
   }
-
   splRes <- object$splRes[[which]]
   x <- splRes$x
-
-  ## make the design matrix needed for predictions and corresponding standard errors
-  U <- DesignMatrixPredSplines(object, grid, newdata, deriv, includeIntercept, which)
+  ## make the design matrix needed for predictions and corresponding
+  ## standard errors.
+  U <- designMatrixPredSplines(object, grid, newdata, deriv,
+                               includeIntercept, which)
   xGrid <- attr(U,which="xGrid")
-
   ## calculate the predictions
   pred <- as.vector(U %*% object$coefMME)
   family <- object$family
@@ -186,8 +186,8 @@ obtainSmoothTrend <- function(object,
     outDat <- outDat[c(names(x), "ypred")]
   }
   ## only add standard errors if:
-  if (deriv == 0 & includeIntercept & family$family == "gaussian") {
-    outDat[["se"]] <- calcStandardErrors(object$C, U)
+  if (deriv == 0 && includeIntercept && family$family == "gaussian") {
+    outDat[["se"]] <- calcStandardErrors(C = object$C, D = U)
   }
   return(outDat)
 }

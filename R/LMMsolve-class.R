@@ -198,35 +198,32 @@ coef.LMMsolve <- function(object,
                           ...) {
   u <- object$coefMME
   cf <- object$ndxCoefficients
-
   ## if not standard errors
   if (!se) {
-    coef <- lapply(cf, function(x) {  ndx <- x!=0
-                                    x[ndx] <- u[x[ndx]]
-                                    return(x)
-                                  }
-                  )
-    return(coef)
+    coef <- lapply(X = cf, FUN = function(x) {
+      ndx <- x != 0
+      x[ndx] <- u[x[ndx]]
+      return(x)
+    })
+  } else {
+    # if standard errors
+    n <- length(u)
+    se <- calcStandardErrors(C = object$C,
+                             D = spam::diag.spam(x = 1, nrow = n))
+    coeff <- lapply(X = cf, FUN = function(x) {
+      x_se <- x
+      ndx1 <- x == 0
+      ndx2 <- x != 0
+      x[ndx1] <- 0
+      x[ndx2] <- u[x[ndx2]]
+      x_se[ndx1] <- NA
+      x_se[ndx2] <- se[x_se[ndx2]]
+      df <- data.frame(coef = names(x), value = x, se = x_se,
+                       zRatio = x / x_se, row.names = NULL)
+      return(df)
+    })
   }
-  # if standard errors
-  n <- length(u)
-  se <- calcStandardErrors(object$C, spam::diag.spam(1,n))
-
-  cf <- lapply(cf, function(x) {
-                         x_se <- x
-                         ndx1 <- x==0
-                         ndx2 <- x!=0
-                         x[ndx1] <- 0
-                         x[ndx2] <- u[x[ndx2]]
-                         x_se[ndx1] <- NA
-                         x_se[ndx2] <- se[x_se[ndx2]]
-                         df <- data.frame(coef= names(x), value=x, se=x_se,
-                                          zRatio= x/x_se)
-                         rownames(df) <- NULL
-                         return(df)
-                        }
-               )
-  return(cf)
+  return(coef)
 }
 
 #' Fitted values of an LMMsolve object.
@@ -275,7 +272,7 @@ fitted.LMMsolve <- function(object,
 #'
 #' @export
 residuals.LMMsolve <- function(object,
-                            ...) {
+                               ...) {
   return(as.vector(object$residuals))
 }
 
