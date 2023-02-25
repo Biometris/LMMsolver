@@ -304,7 +304,7 @@ LMMsolve <- function(fixed,
 
   ## calculate NomEff dimension for non-spline part
   Xs <- spam::as.spam(X)
-  NomEffDimRan <- calcNomEffDim(Xs, Z, dim.r)
+  NomEffDimRan <- calcNomEffDim(Xs, Z, dim.r, term.labels.r)
   ## Add spline part.
   splResList <- NULL
   if (!is.null(spline)) {
