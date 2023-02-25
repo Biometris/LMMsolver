@@ -161,6 +161,9 @@ sparseMixedModels <- function(y,
     EDmax <- c(EDmax_psi, EDmax_phi)
     ED <- EDmax - theta * dlogdetC
 
+    ## to make sure ED is always positive
+    ED <- pmax(ED, .Machine$double.eps)
+
     ## update the cholesky with new parameters theta
     C <- linearSum(theta = theta, matrixList = lC)
     cholC <- update(cholC, C)
