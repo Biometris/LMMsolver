@@ -203,7 +203,7 @@ LMMsolve <- function(fixed,
     ## Number of variance parameters (see Gilmour 1995) for each variance component
     varPar1 <- rep(1, length(dim1.r))
     if (ncol(Z1) > 1) {
-      Z1 <- Z1[, -1]
+      Z1 <- Z1[, -1, drop = FALSE]
       Z1 <- spam::as.spam.dgCMatrix(Z1)
     }
     else {
