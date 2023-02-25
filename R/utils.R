@@ -206,7 +206,8 @@ removeIntercept <- function(X) {
 #' @keywords internal
 calcNomEffDim <- function(X,
                           Z,
-                          dim.r) {
+                          dim.r,
+                          term.labels.r) {
   if (is.null(Z)) return(NULL)
   p <- ncol(X)
   EDnom <- vector(length = length(dim.r))
@@ -227,6 +228,11 @@ calcNomEffDim <- function(X,
     } else {
       XZ <- cbind(X, Zi)
       r <- qr(XZ)$rank
+      if (r==p) {
+        msg <- paste("Singularity problem with term", term.labels.r[i],
+                    "in the random part of the model")
+        stop(msg)
+      }
       EDnom[i] <- r - p
     }
   }
