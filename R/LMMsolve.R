@@ -175,6 +175,7 @@ LMMsolve <- function(fixed,
   condFactor <- condFactor(random, data)
   if (!is.null(condFactor)) {
     random = condFactor$random
+    #cat("random:", random, "\n")
   }
   ## Check that all variables used in formulas are in data.
   chkGroup <- checkGroup(random, group, data)

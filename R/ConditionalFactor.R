@@ -27,6 +27,7 @@ cf <- function(var, cond, level) {
 #' Function to analyse cf terms in the random part.
 #' @keywords internal
 condFactor <- function(random, data) {
+  if (is.null(random)) return(NULL)
   tf <- terms.formula(random, specials = c("cf"))
   f <- attr(tf, "term.labels")
   ndxAt <- attr(tf,"specials")$cf
