@@ -173,6 +173,12 @@ LMMsolve <- function(fixed,
   data <- droplevels(data)
   ## Check that all variables used in formulas are in data.
   chkGroup <- checkGroup(random, group, data)
+  ## Check random term for conditional factor
+  condFactor <- condFactor(random, data)
+  if (!is.null(condFactor)) {
+    #random = condFactor$random
+    stop("Conditional formating using cf() Not implemented yet")
+  }
   random <- chkGroup$random
   group <- chkGroup$group
   data <- checkFormVars(fixed, data)

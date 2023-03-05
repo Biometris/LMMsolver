@@ -15,7 +15,7 @@ cf <- function(var, cond, level) {
                                                            FUN = contrasts,
                                                            contrasts = FALSE))
   Z <- Z * (cond == level)
-  ndx <- which(colSums(Z)!=0)
+  ndx <- which(spam::colSums(Z)!=0)
   Z <- Z[, ndx]
   Z <- spam::as.spam.dgCMatrix(Z)
   termlabel <- paste0("cf(",cName,", ",level,"):",vName)
@@ -26,10 +26,12 @@ cf <- function(var, cond, level) {
 
 #' Function to analyse cf terms in the random part.
 #' @keywords internal
-CondFactor <- function(random, data) {
+condFactor <- function(random, data) {
   tf <- terms.formula(random, specials = c("cf"))
   f <- attr(tf, "term.labels")
   ndxAt <- attr(tf,"specials")$cf
+  if (is.null(ndxAt)) return(NULL)
+
   g <- f[ndxAt]
   Nterms <- length(g)
   dim.r <- NULL
@@ -44,7 +46,7 @@ CondFactor <- function(random, data) {
     dim.r <- c(dim.r, L$dim.r)
   }
   random <- tf[-ndxAt]
-  return(list(Z=Z, termlabel=termlabel, cflabel=cflabel, dim.r=dim.r, random=random))
+  return(list(Z=Z, term.labels.r=termlabel, coefLabels=cflabel, dim.r=dim.r, random=random))
 }
 
 
