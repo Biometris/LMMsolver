@@ -41,7 +41,7 @@ condFactor <- function(random, data) {
   cflabel <- list()
   for (i in 1:Nterms) {
     L <- eval(parse(text = g[i]), envir = data, enclos = parent.frame())
-    Z <- cbind.spam(Z, L$Z)
+    Z <- spam::cbind.spam(Z, L$Z)
     termlabel <- c(termlabel, L$termlabel)
     cflabel[[L$termlabel]] <- L$cflabel
     dim.r <- c(dim.r, L$dim.r)
