@@ -174,8 +174,7 @@ LMMsolve <- function(fixed,
   ## Check random term for conditional factor
   condFactor <- condFactor(random, data)
   if (!is.null(condFactor)) {
-    #random = condFactor$random
-    stop("Conditional formating using cf() Not implemented yet")
+    random = condFactor$random
   }
   ## Check that all variables used in formulas are in data.
   chkGroup <- checkGroup(random, group, data)
@@ -236,12 +235,26 @@ LMMsolve <- function(fixed,
     Z2 <- NULL
     varPar2 <- NULL
   }
-  if (!(is.null(random) & is.null(group))) {
-    Z <- spam::cbind.spam(Z1, Z2)
-    dim.r <- c(dim1.r, dim2.r)
-    term.labels.r <- c(term1.labels.r, term2.labels.r)
-    scFactor <- c(scFactor1, scFactor2)
-    varPar <- c(varPar1, varPar2)
+  if (!is.null(condFactor)) {
+    dim3.r <- condFactor$dim.r
+    term3.labels.r <- condFactor$term.labels.r
+    scFactor3 <- rep(1, length(dim3.r))
+    varPar3 <- rep(1, length(dim3.r))
+    Z3 <- condFactor$Z
+  } else {
+    dim3.r <- NULL
+    term3.labels.r <- NULL
+    scFactor3 <- NULL
+    Z3 <- NULL
+    varPar3 <- NULL
+  }
+
+  if (!(is.null(random) & is.null(group) & is.null(condFactor))) {
+    Z <- spam::cbind.spam(Z1, Z2, Z3)
+    dim.r <- c(dim1.r, dim2.r, dim3.r)
+    term.labels.r <- c(term1.labels.r, term2.labels.r, term3.labels.r)
+    scFactor <- c(scFactor1, scFactor2, scFactor3)
+    varPar <- c(varPar1, varPar2, varPar3)
     e <- cumsum(dim.r)
     s <- e - dim.r + 1
     lGinv <- list()

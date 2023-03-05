@@ -18,7 +18,7 @@ cf <- function(var, cond, level) {
   ndx <- which(spam::colSums(Z)!=0)
   Z <- Z[, ndx]
   Z <- spam::as.spam.dgCMatrix(Z)
-  termlabel <- paste0("cf(",cName,", ",level,"):",vName)
+  termlabel <- paste0("cf(",cName,", ",level,")_",vName)
   cflabel <- paste(termlabel, levels(var)[ndx],sep="_")
   L <- list(Z=Z, termlabel = termlabel, cflabel=cflabel, dim.r=ncol(Z))
   return(L)

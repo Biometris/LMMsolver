@@ -28,12 +28,11 @@ summary(obj2)
 obj1$loglik
 obj2$logL
 
-random = ~cf(block2,rep,"R1") + cf(block2,rep,"R2")
-
-LMMsolver:::condFactor(random, dat)
-str(obj)
-dim(obj$Z)
-obj$dim.r
-
 obj3 <- LMMsolve(fixed=yield~gen+rep,
-                 random=~cf(block2,rep,"R1"), data=dat)
+                 random=~cf(block,rep,"R1") + cf(block,rep,"R2"),
+                 data=dat)
+summary(obj3)
+
+obj1$loglik
+obj2$logL
+obj3$logL
