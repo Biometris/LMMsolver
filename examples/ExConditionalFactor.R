@@ -37,6 +37,3 @@ obj1$loglik
 obj2$logL
 obj3$logL
 
-obj3 <- LMMsolve(fixed=yield~gen+rep,
-                 data=dat)
-
