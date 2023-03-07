@@ -7,7 +7,7 @@ cf <- function(var, cond, level) {
 
   f <- as.formula(paste0("~-1+",vName))
 
-  mf <- model.frame(f, dat, drop.unused.levels = TRUE, na.action = NULL)
+  mf <- model.frame(f, data, drop.unused.levels = TRUE, na.action = NULL)
   mt <- terms(mf)
   f.terms <- all.vars(mt)[attr(mt, "dataClasses") == "factor"]
   Z <- Matrix::sparse.model.matrix(mt, data = mf,
