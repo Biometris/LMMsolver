@@ -71,11 +71,11 @@ obj2 <- LMMsolve(fixed=yield~ gen+rep + x1_ext + x2_ext,
 
 summary(obj2)
 
-dat$half <- as.factor(rep(c("H1","H2"),each=36))
+dat$Factor <- as.factor(rep(c("H1","H2"),each=36))
 
 obj3 <- LMMsolve(fixed=yield~gen+rep,
-                 spline=~spl1D(row,nseg=nseg,cond=half, level="H1") +
-                         spl1D(row,nseg=nseg,cond=half, level="H2"),
+                 spline=~spl1D(row,nseg=nseg,cond=Factor, level="H1") +
+                         spl1D(row,nseg=nseg,cond=Factor, level="H2"),
                  data=dat)
 
 summary(obj3)
