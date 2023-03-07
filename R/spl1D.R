@@ -64,7 +64,9 @@ spl1D <- function(x,
                   pord = 2,
                   degree = 3,
                   scaleX = TRUE,
-                  xlim = range(x)) {
+                  xlim = NULL,
+                  cond = NULL,
+                  level = NULL) {
   ## Checks.
   if (!is.numeric(pord) || length(pord) > 1 || !pord %in% 1:2) {
     stop("pord should be either 1 or 2.\n")
@@ -84,6 +86,13 @@ spl1D <- function(x,
          "are not in the data:\n", xName, "\n",
          call. = FALSE)
   }
+  conditional <- !is.null(cond) & !is.null(level)
+  if (conditional) {
+    Nelem <- length(x)
+    ndx <- cond==level
+    x <- x[ndx]
+  }
+  if (is.null(xlim)) { xlim <- range(x)}
   if (!is.numeric(xlim) || length(xlim) != 2 ||
       xlim[1] > range(x)[1] || xlim[2] < range(x)[2]) {
     stop("xlim should be a vector of length two with all values of ", xName,
@@ -93,6 +102,11 @@ spl1D <- function(x,
   knots[[1]] <- PsplinesKnots(xlim[1], xlim[2], degree = degree, nseg = nseg)
   B <- Bsplines(knots[[1]], x)
   q <- ncol(B)
+  if (conditional) {
+    B_ext <- spam::spam(x=0,nrow=Nelem, ncol=q)
+    B_ext[ndx,] <- B
+    B <- B_ext
+  }
   G <- constructG(knots[[1]], scaleX, pord)
   X <- B %*% G
   ## nominal effective dimension.

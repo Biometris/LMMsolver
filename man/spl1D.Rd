@@ -6,7 +6,16 @@
 \alias{spl3D}
 \title{Fit P-splines}
 \usage{
-spl1D(x, nseg, pord = 2, degree = 3, scaleX = TRUE, xlim = range(x))
+spl1D(
+  x,
+  nseg,
+  pord = 2,
+  degree = 3,
+  scaleX = TRUE,
+  xlim = NULL,
+  cond = NULL,
+  level = NULL
+)
 
 spl2D(
   x1,

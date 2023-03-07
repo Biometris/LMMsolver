@@ -334,10 +334,10 @@ LMMsolve <- function(fixed,
     for (i in 1:Nterms) {
       splRes <- eval(parse(text = splTerms[i]), envir = data, enclos = parent.frame())
       ## Multiple 1D gam models should have unique x variables.
-      if (!is.null(term.labels.f) && !is.null(splRes$term.labels.f) &&
-          splRes$term.labels.f %in% term.labels.f) {
-        stop("x variables in 1D splines should be unique.\n")
-      }
+      ##if (!is.null(term.labels.f) && !is.null(splRes$term.labels.f) &&
+      ##    splRes$term.labels.f %in% term.labels.f) {
+      ##  stop("x variables in 1D splines should be unique.\n")
+      ##}
       splResList[[i]] <- splRes
       ## Add to design matrix fixed effect X.
       X <- cbind(X, splRes$X)
