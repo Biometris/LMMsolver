@@ -35,47 +35,60 @@ summary(obj1)
 obj0$logL
 obj1$logL
 
-dat1 <- dat[1:36, ]
-dat2 <- dat[37:72,]
+#
+# splines within replicate
+#
 
-# splines by foot:
+# by foot, using group and ginverse arguments
+dat1 <- dat[dat$rep=='R1', ]
+dat2 <- dat[dat$rep=='R2', ]
+dat3 <- dat[dat$rep=='R3', ]
+
 txtSpl <- as.character(spl)[2]
 splRes1 <- eval(parse(text = txtSpl), envir = dat1, enclos = parent.frame())
 q1 <- ncol(splRes1$Z)
 
-# splines by foot:
 splRes2 <- eval(parse(text = txtSpl), envir = dat2, enclos = parent.frame())
 q2 <- ncol(splRes2$Z)
 
-lGrp <- list(B1 = 1:q, B2=c((q+1):(2*q)))
-lGinv <- list(B1 = splRes1$lGinv[[1]], B2=splRes2$lGinv[[1]])
+splRes3 <- eval(parse(text = txtSpl), envir = dat3, enclos = parent.frame())
+q3 <- ncol(splRes3$Z)
+
+lGrp <- list(B1 = 1:q, B2=c((q+1):(2*q)), B3=c((2*q+1):(3*q)))
+lGinv <- list(B1 = splRes1$lGinv[[1]],
+              B2 = splRes2$lGinv[[1]],
+              B3 = splRes3$lGinv[[1]])
 
 x1 <- splRes1$X[ , 1]
 x2 <- splRes2$X[ , 1]
+x3 <- splRes3$X[ , 1]
 
-zero1 <- matrix(data=0,ncol=1,nrow=36)
-zero2 <- matrix(data=0,ncol=q1,nrow=36)
+zeroV <- rep(1, 24)
+zeroM <- matrix(data=0,ncol=q1,nrow=24)
 
-p1 <- rbind(as.matrix(splRes1$Z), zero2)
-p2 <- rbind(zero2, as.matrix(splRes2$Z))
-x1_ext <- c(x1, zero1)
-x2_ext <- c(zero1, x2)
+p1 <- rbind(as.matrix(splRes1$Z), zeroM, zeroM)
+p2 <- rbind(zeroM, as.matrix(splRes2$Z),zeroM)
+p3 <- rbind(zeroM, zeroM, as.matrix(splRes3$Z))
 
-dat_ext <- cbind(p1,p2,x1_ext,x2_ext, dat)
+x1_ext <- c(x1, zeroV, zeroV)
+x2_ext <- c(zeroV, x2, zeroV)
+x3_ext <- c(zeroV, zeroV, x3)
 
-obj2 <- LMMsolve(fixed=yield~ gen+rep + x1_ext + x2_ext,
-                 random = ~grp(B1)+grp(B2),
+dat_ext <- cbind(p1,p2,p3,x1_ext,x2_ext,x3_ext, dat)
+
+obj2 <- LMMsolve(fixed=yield~ gen + rep + x1_ext + x2_ext + x3_ext,
+                 random = ~grp(B1)+grp(B2) + grp(B3),
                  ginverse = lGinv,
                  group = lGrp,
                  data=dat_ext)
 
 summary(obj2)
 
-dat$Factor <- as.factor(rep(c("H1","H2"),each=36))
-
+# splines within replicate using conditional formatting splines:
 obj3 <- LMMsolve(fixed=yield~gen+rep,
-                 spline=~spl1D(row,nseg=nseg,cond=Factor, level="H1") +
-                         spl1D(row,nseg=nseg,cond=Factor, level="H2"),
+                 spline=~spl1D(row,nseg=nseg, cond=rep, level="R1") +
+                         spl1D(row,nseg=nseg, cond=rep, level="R2") +
+                         spl1D(row,nseg=nseg, cond=rep, level="R3"),
                  data=dat)
 
 summary(obj3)
