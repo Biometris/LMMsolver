@@ -82,26 +82,9 @@ spl1D <- function(x,
       nseg != round(nseg)) {
     stop("nseg should be a positive integer.\n")
   }
-  ## if conditional factor is defined
-  if (!is.null(cond))
-  {
-     if (!is.factor(cond)) {
-       stop("cond should be a factor.\n")
-     }
-     if (is.null(level)) {
-       stop("level should be defined.\n")
-     }
-    if (!(level %in% levels(cond))) {
-       stop(paste(level, "not a level of", condition))
-    }
-    conditional <- TRUE
-  }
-  else {
-    if (!is.null(level)) {
-      stop("Argument level defined without conditonal factor.\n")
-    }
-    conditional <- FALSE
-  }
+  ## check (syntax) conditional factor
+  conditional <- checkConditionalFactor(cond, level)
+
   ## Save names of the x-variables so they can be used later on in predictions.
   xName <- deparse(substitute(x))
   if (!exists(xName, where = parent.frame(), inherits = FALSE)) {

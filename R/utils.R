@@ -438,4 +438,31 @@ nameCoefs <- function(coefs,
   return(coefRes)
 }
 
+#' Helper function to check Conditional Factor
+#' Gives an error if syntax not correct, otherwise returns a boolean:
+#' TRUE if a conditional factor is used, otherwise FALSE.
+#' @noRd
+#' @keywords internal
+checkConditionalFactor <- function(cond, level) {
+  ## if conditional factor is defined
+  if (!is.null(cond))
+  {
+    if (!is.factor(cond)) {
+      stop("cond should be a factor.\n")
+    }
+    if (is.null(level)) {
+      stop("level should be defined.\n")
+    }
+    if (!(level %in% levels(cond))) {
+      stop(paste(level, "not a level of", cond, "\n"))
+    }
+    conditional <- TRUE
+  } else {
+    if (!is.null(level)) {
+      stop("Argument level defined without conditonal factor.\n")
+    }
+    conditional <- FALSE
+  }
+  return(conditional)
+}
 
