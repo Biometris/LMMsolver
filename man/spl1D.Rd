@@ -24,8 +24,10 @@ spl2D(
   pord = 2,
   degree = 3,
   scaleX = TRUE,
-  x1lim = range(x1),
-  x2lim = range(x2)
+  x1lim = NULL,
+  x2lim = NULL,
+  cond = NULL,
+  level = NULL
 )
 
 spl3D(
