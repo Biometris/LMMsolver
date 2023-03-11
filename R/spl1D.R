@@ -126,6 +126,13 @@ spl1D <- function(x,
   }
   dim.r <- ncol(B)
   term.labels.r <- paste0("s(", xName, ")")
+  if (conditional) {
+    if (!is.null(term.labels.f)) {
+      term.labels.f <- paste0(term.labels.f, "_", level)
+    }
+    term.labels.r <- paste0(term.labels.r, "_", level)
+    names(lGinv) <- paste0("s(", xName, ")_", level)
+  }
   xList <- setNames(list(x), xName)
   return(list(X = X, Z = B, lGinv = lGinv, knots = knots,
               dim.f = dim.f, dim.r = dim.r, term.labels.f = term.labels.f,

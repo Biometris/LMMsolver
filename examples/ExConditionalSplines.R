@@ -8,8 +8,8 @@ data(john.alpha, package = "agridat")
 head(john.alpha)
 dat <- john.alpha
 
-# number of seqments per replicate, here for testing choosen to
-# be different
+# number of segments per replicate, here for testing
+# chosen to be different
 nseg <- c(20, 15, 10)
 degr <- 3
 q <- nseg + 3
