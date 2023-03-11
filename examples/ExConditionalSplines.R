@@ -23,9 +23,9 @@ txtSpl1 <- paste0("spl1D(row, nseg = ", nseg[1], ")")
 txtSpl2 <- paste0("spl1D(row, nseg = ", nseg[2], ")")
 txtSpl3 <- paste0("spl1D(row, nseg = ", nseg[3], ")")
 
-splRes1 <- eval(parse(text = txtSpl1), envir = dat1, enclos = parent.frame())
-splRes2 <- eval(parse(text = txtSpl2), envir = dat2, enclos = parent.frame())
-splRes3 <- eval(parse(text = txtSpl3), envir = dat3, enclos = parent.frame())
+splRes1 <- eval(parse(text = txtSpl1), envir = dat1)
+splRes2 <- eval(parse(text = txtSpl2), envir = dat2)
+splRes3 <- eval(parse(text = txtSpl3), envir = dat3)
 
 lGrp <- list(B1 = c(1:q[1]),
              B2 = c((q[1]+1):(q[1]+q[2])),
