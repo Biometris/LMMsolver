@@ -10,7 +10,10 @@
 #' @param degree The degree of B-spline basis, default \code{degree = 3}
 #' @param xlim,x1lim,x2lim,x3lim A numerical vector of length 2 containing the
 #' domain of the corresponding x covariate where the knots should be placed.
-#' Default set to \code{NULL} (covariate range).
+#' Default set to \code{NULL}, when the covariate range will be used.
+#' @param cond Conditional factor: splines are defined conditional on the level.
+#' Default \code{NULL}.
+#' @param level The level of the conditional factor. Default \code{NULL}.
 #'
 #' @return A list with the following elements:
 #' \itemize{
@@ -79,6 +82,26 @@ spl1D <- function(x,
       nseg != round(nseg)) {
     stop("nseg should be a positive integer.\n")
   }
+  ## if conditional factor is defined
+  if (!is.null(cond))
+  {
+     if (!is.factor(cond)) {
+       stop("cond should be a factor.\n")
+     }
+     if (is.null(level)) {
+       stop("level should be defined.\n")
+     }
+    if (!(level %in% levels(cond))) {
+       stop(paste(level, "not a level of", condition))
+    }
+    conditional <- TRUE
+  }
+  else {
+    if (!is.null(level)) {
+      stop("Argument level defined without conditonal factor.\n")
+    }
+    conditional <- FALSE
+  }
   ## Save names of the x-variables so they can be used later on in predictions.
   xName <- deparse(substitute(x))
   if (!exists(xName, where = parent.frame(), inherits = FALSE)) {
@@ -86,7 +109,6 @@ spl1D <- function(x,
          "are not in the data:\n", xName, "\n",
          call. = FALSE)
   }
-  conditional <- !is.null(cond) & !is.null(level)
   if (conditional) {
     Nelem <- length(x)
     ndx <- cond==level
