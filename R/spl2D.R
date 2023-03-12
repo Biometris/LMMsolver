@@ -64,9 +64,8 @@ spl2D <- function(x1,
   q <- c(ncol(B1), ncol(B2))
   B12 <- RowKronecker(B1, B2)
   if (conditional) {
-    B_ext <- spam::spam(x=0,nrow=Nelem, ncol=q[1]*q[2])
-    B_ext[ndx,] <- B12
-    B12 <- B_ext
+    sel <- which(ndx==TRUE)
+    B12 <- extSpamMatrix(B12, sel, length(ndx))
   }
   G1 <- constructG(knots[[1]], scaleX, pord)
   G2 <- constructG(knots[[2]], scaleX, pord)

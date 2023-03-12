@@ -108,9 +108,8 @@ spl1D <- function(x,
   B <- Bsplines(knots[[1]], x)
   q <- ncol(B)
   if (conditional) {
-    B_ext <- spam::spam(x=0,nrow=Nelem, ncol=q)
-    B_ext[ndx,] <- B
-    B <- B_ext
+    sel <- which(ndx==TRUE)
+    B <- extSpamMatrix(B, sel, length(ndx))
   }
   G <- constructG(knots[[1]], scaleX, pord)
   X <- B %*% G

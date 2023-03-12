@@ -441,6 +441,7 @@ nameCoefs <- function(coefs,
 #' Helper function to check Conditional Factor
 #' Gives an error if syntax not correct, otherwise returns a boolean:
 #' TRUE if a conditional factor is used, otherwise FALSE.
+#'
 #' @noRd
 #' @keywords internal
 checkConditionalFactor <- function(cond, level) {
@@ -465,4 +466,23 @@ checkConditionalFactor <- function(cond, level) {
   }
   return(conditional)
 }
+
+
+#' Extend the Spam matrix with extra zero rows.
+#' @noRd
+#' @keywords internal
+extSpamMatrix <- function(X, s, N)
+{
+  rPtr <- rep(0, N)
+  rPtr[s] <- diff(X@rowpointers, diff=1)
+  rPtr <- c(0, rPtr)
+  rPtr <- cumsum(rPtr) + 1
+
+  # change the slots of X:
+  X@dimension[1] <- N
+  X@rowpointers <- rPtr
+  return(X)
+}
+
+
 
