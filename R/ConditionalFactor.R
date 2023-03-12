@@ -5,15 +5,8 @@ cf <- function(var, cond, level) {
   vName <- deparse(substitute(var))
   cName <- deparse(substitute(cond))
 
-  f <- as.formula(paste0("~-1+",vName))
-
-  mf <- model.frame(f, data, drop.unused.levels = TRUE, na.action = NULL)
-  mt <- terms(mf)
-  f.terms <- all.vars(mt)[attr(mt, "dataClasses") == "factor"]
-  Z <- Matrix::sparse.model.matrix(mt, data = mf,
-                                    contrasts.arg = lapply(X = mf[, f.terms, drop = FALSE],
-                                                           FUN = contrasts,
-                                                           contrasts = FALSE))
+  df <- data.frame(x = var)
+  Z <- Matrix::sparse.model.matrix(~-1+x, df)
   Z <- Z * (cond == level)
   ndx <- which(spam::colSums(Z)!=0)
   Z <- Z[, ndx]
