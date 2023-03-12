@@ -173,9 +173,9 @@ LMMsolve <- function(fixed,
   data <- droplevels(data)
   ## Check random term for conditional factor
   condFactor <- condFactor(random, data)
+
   if (!is.null(condFactor)) {
     random = condFactor$random
-    #cat("random:", random, "\n")
   }
   ## Check that all variables used in formulas are in data.
   chkGroup <- checkGroup(random, group, data)

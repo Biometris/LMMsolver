@@ -5,14 +5,21 @@ cf <- function(var, cond, level) {
   vName <- deparse(substitute(var))
   cName <- deparse(substitute(cond))
 
+  ## check (syntax) conditional factor
+  if (!checkConditionalFactor(cond, level)) {
+    stop("checkConditionalFactor should return TRUE.\n")
+  }
+
+  ndx <- cond == level
+  var <- droplevels(var[ndx])
+
   df <- data.frame(x = var)
   Z <- Matrix::sparse.model.matrix(~-1+x, df)
-  Z <- Z * (cond == level)
-  ndx <- which(spam::colSums(Z)!=0)
-  Z <- Z[, ndx]
   Z <- spam::as.spam.dgCMatrix(Z)
+  s <- which(ndx==TRUE)
+  Z <- extSpamMatrix(Z, s, length(ndx))
   termlabel <- paste0("cf(",cName,", ",level,")_",vName)
-  cflabel <- paste(termlabel, levels(var)[ndx],sep="_")
+  cflabel <- paste(termlabel, levels(var),sep="_")
   L <- list(Z=Z, termlabel = termlabel, cflabel=cflabel, dim.r=ncol(Z))
   return(L)
 }

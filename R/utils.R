@@ -446,6 +446,7 @@ nameCoefs <- function(coefs,
 #' @keywords internal
 checkConditionalFactor <- function(cond, level) {
   ## if conditional factor is defined
+  cName <- deparse(substitute(cond))
   if (!is.null(cond))
   {
     if (!is.factor(cond)) {
@@ -455,7 +456,7 @@ checkConditionalFactor <- function(cond, level) {
       stop("level should be defined.\n")
     }
     if (!(level %in% levels(cond))) {
-      stop(paste(level, "not a level of", cond, "\n"))
+      stop(paste(level, "not a level of", cName, "\n"))
     }
     conditional <- TRUE
   } else {
