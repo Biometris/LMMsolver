@@ -4,6 +4,7 @@ library(LMMsolver)
 # nice small example with four supernodes:
 n1 = 3
 n2 = 6
+
 D1 = diff(diag(n1),diff=1)
 D2 = diff(diag(n2),diff=1)
 
@@ -47,5 +48,33 @@ det1
 det0-det1
 
 # output outline new version:
-LMMsolver:::dlogdet(obj0,lambda=lambda)
+LMMsolver:::dlogdet(obj0,theta=lambda)
 
+U@pivot
+U@invpivot
+
+# compare forward cholesky Rcpp with spam..
+set.seed(123)
+N <- nrow(B)
+b <- rnorm(N)
+
+# use LMMsolver C++ algorithm.
+y1 <- LMMsolver:::ForwardCholesky(U, b)
+y2 <- LMMsolver:::BackwardCholesky(U, y1)
+
+# use spam
+z1 <- forwardsolve.spam(U, b)
+z2 <- backsolve.spam(U, z1)
+
+range(y1-z1)
+range(y2-z2)
+
+range(B %*% z2 - b)
+range(B %*% y2 - b)
+
+
+library(microbenchmark)
+# compare computation time
+microbenchmark(forwardsolve.spam(U,b), LMMsolver:::ForwardCholesky(U,b),
+               backsolve.spam(U, z1), LMMsolver:::BackwardCholesky(U,y1),
+               update(U, B), times=1000L)

@@ -45,6 +45,18 @@ diagXCinvXt <- function(cholC, transposeX) {
     .Call(`_LMMsolver_diagXCinvXt`, cholC, transposeX)
 }
 
+ForwardCholesky <- function(cholC, b) {
+    .Call(`_LMMsolver_ForwardCholesky`, cholC, b)
+}
+
+BackwardCholesky <- function(cholC, b) {
+    .Call(`_LMMsolver_BackwardCholesky`, cholC, b)
+}
+
+JustTest <- function(x_ = NULL) {
+    .Call(`_LMMsolver_JustTest`, x_)
+}
+
 RowKron <- function(sX1, sX2) {
     .Call(`_LMMsolver_RowKron`, sX1, sX2)
 }
