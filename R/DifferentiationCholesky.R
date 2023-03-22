@@ -4,6 +4,8 @@ setClass("ADchol",
                    rowpointers = "numeric",
                    colpointers = "numeric",
                    rowindices = "numeric",
+                   pivot = "numeric",
+                   invpivot = "numeric",
                    entries = "numeric",
                    ADentries  = "numeric",
                    P = "matrix"))
@@ -42,6 +44,8 @@ ADchol <- function(lP) {
       rowpointers = L$rowpointers,
       colpointers = L$colpointers,
       rowindices = L$rowindices,
+      pivot = L$pivot,
+      invpivot = L$invpivot,
       entries = L$entries,
       ADentries = L$ADentries,
       P = L$P)

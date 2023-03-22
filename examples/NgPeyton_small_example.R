@@ -72,9 +72,16 @@ range(y2-z2)
 range(B %*% z2 - b)
 range(B %*% y2 - b)
 
+# simple example how we can solve Ax=b.
+lambda <- 2.5
+lambdaB <- lambda*B
+tst <- LMMsolver:::dlogdet(obj0,theta=lambda, b=b)
+x <- attr(tst, which="x.coef")
+range(lambdaB %*% x - b)
 
 library(microbenchmark)
 # compare computation time
 microbenchmark(forwardsolve.spam(U,b), LMMsolver:::ForwardCholesky(U,b),
                backsolve.spam(U, z1), LMMsolver:::BackwardCholesky(U,y1),
-               update(U, B), times=1000L)
+               update(U, B), LMMsolver:::dlogdet(obj0,theta=lambda,b=b),
+               LMMsolver:::dlogdet(obj0,theta=lambda),times=1000L)
