@@ -96,10 +96,6 @@ sparseMixedModels <- function(y,
     psi <- NULL
     phi <- theta
   }
-  C <- linearSum(theta = theta, matrixList = lC)
-  opt <- summary(C)
-  cholC <- chol(C, memory = list(nnzR = 8 * opt$nnz,
-                                 nnzcolindices = 4 * opt$nnz))
 
   ## Check the stucture of Rinv, don't allow for overlapping
   ## penalties
@@ -148,9 +144,14 @@ sparseMixedModels <- function(y,
     } else {
       logdetG <- 0
     }
+    ## update the expressions including Rinv
+    YtRinvY <- sum(phi * unlist(lYtRinvY))
+    WtRinvY <- as.vector(linearSum(theta = phi, matrixList = lWtRinvY))
+
     ## matrix C
-    dlogdetC <- dlogdet(ADcholC, theta)
+    dlogdetC <- dlogdet(ADcholC, theta, WtRinvY)
     logdetC <- attr(dlogdetC, which = "logdet")
+    a <- attr(dlogdetC,which="x.coef")
 
     ## calculate effective dimensions.
     if (!is.null(ADcholGinv)) {
@@ -163,15 +164,6 @@ sparseMixedModels <- function(y,
 
     ## to make sure ED is always positive
     ED <- pmax(ED, .Machine$double.eps)
-
-    ## update the cholesky with new parameters theta
-    C <- linearSum(theta = theta, matrixList = lC)
-    cholC <- update(cholC, C)
-
-    ## update the expressions including Rinv
-    YtRinvY <- sum(phi * unlist(lYtRinvY))
-    WtRinvY <- as.vector(linearSum(theta = phi, matrixList = lWtRinvY))
-    a <- spam::backsolve.spam(cholC, spam::forwardsolve.spam(cholC, WtRinvY))
 
     ## calculate Sum of Squares
     SS_all <- calcSumSquares(lYtRinvY, lWtRinvY, lWtRinvW, lQ, a, Nvarcomp)
@@ -197,6 +189,13 @@ sparseMixedModels <- function(y,
   if (it == maxit) {
     warning("No convergence after ", maxit, " iterations \n", call. = FALSE)
   }
+
+  ## MB: not really needed, just to keep consistent with previous versions.
+  C <- linearSum(theta = theta, matrixList = lC)
+  opt <- summary(C)
+  cholC <- chol(C, memory = list(nnzR = 8 * opt$nnz,
+                                 nnzcolindices = 4 * opt$nnz))
+
   ## calculate yhat and residuals
   yhat <- W %*% a
   r <- y - yhat
