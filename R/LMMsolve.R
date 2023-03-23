@@ -157,7 +157,7 @@ LMMsolve <- function(fixed,
       stop("weights should be a numeric vector with positive values")
     }
   } else {
-    w <- rep(1.0, nrow(data))
+    w <- rep(1, nrow(data))
   }
   if (!is.null(residual) &&
       (!inherits(residual, "formula") || length(terms(residual)) != 2)) {
@@ -169,11 +169,22 @@ LMMsolve <- function(fixed,
   if (!is.numeric(maxit) || length(maxit) > 1 || maxit < 0) {
     stop("maxit should be a positive numerical value.")
   }
+  ## Check that all variables used in fixed formula are in data.
+  data <- checkFormVars(fixed, data)
+  ## Remove NA for response variable from data.
+  respVar <- all.vars(fixed)[attr(terms(fixed), "response")]
+  respVarNA <- is.na(data[[respVar]])
+  if (sum(respVarNA) > 0) {
+    warning(sum(respVarNA), " observations removed with missing value for ",
+            respVar, ".\n", call. = FALSE)
+    data <- data[!respVarNA, ]
+    ## remove missing values for weight (default w=1).
+    w <- w[!respVarNA]
+  }
   ## Drop unused factor levels from data.
   data <- droplevels(data)
   ## Check random term for conditional factor
   condFactor <- condFactor(random, data)
-
   if (!is.null(condFactor)) {
     random = condFactor$random
   }
@@ -181,19 +192,8 @@ LMMsolve <- function(fixed,
   chkGroup <- checkGroup(random, group, data)
   random <- chkGroup$random
   group <- chkGroup$group
-  data <- checkFormVars(fixed, data)
   data <- checkFormVars(random, data)
   data <- checkFormVars(residual, data)
-  ## Remove NA for response variable from data.
-  respVar <- all.vars(fixed)[attr(terms(fixed), "response")]
-  respVarNA <- is.na(data[[respVar]])
-  if (sum(respVarNA) > 0) {
-    warning(sum(respVarNA), " observations removed with missing value for ",
-            respVar, ".\n", call. = FALSE)
-    data <- droplevels(data[!respVarNA, ])
-    ## remove missing values for weight (default w=1).
-    w <- w[!respVarNA]
-  }
   ## Make random part.
   if (!is.null(random)) {
     mf <- model.frame(random, data, drop.unused.levels = TRUE, na.action = NULL)
