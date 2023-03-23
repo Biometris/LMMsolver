@@ -468,18 +468,18 @@ checkConditionalFactor <- function(cond, level) {
   return(conditional)
 }
 
-
 #' Extend the Spam matrix with extra zero rows.
+#'
 #' @noRd
 #' @keywords internal
-extSpamMatrix <- function(X, s, N)
-{
+extSpamMatrix <- function(X,
+                          s,
+                          N) {
   rPtr <- rep(0, N)
-  rPtr[s] <- diff(X@rowpointers, diff=1)
+  rPtr[s] <- diff(X@rowpointers, differences = 1)
   rPtr <- c(0, rPtr)
   rPtr <- cumsum(rPtr) + 1
-
-  # change the slots of X:
+  ## change the slots of X.
   X@dimension[1] <- N
   X@rowpointers <- rPtr
   return(X)

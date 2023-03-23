@@ -1,38 +1,41 @@
 
 #' define cf() function, to allow for variances conditional on factor:
+#'
 #' @noRd
-cf <- function(var, cond, level) {
+cf <- function(var,
+               cond,
+               level) {
   vName <- deparse(substitute(var))
   cName <- deparse(substitute(cond))
-
-  ## check (syntax) conditional factor
+  ## check (syntax) conditional factor.
   if (!checkConditionalFactor(cond, level)) {
-    stop("checkConditionalFactor should return TRUE.\n")
+    stop("checkConditionalFactor should return TRUE.\n",
+         call. = FALSE)
   }
-
   ndx <- cond == level
   var <- droplevels(var[ndx])
-
   df <- data.frame(x = var)
-  Z <- Matrix::sparse.model.matrix(~-1+x, df)
+  Z <- Matrix::sparse.model.matrix(~-1+x, data = df)
   Z <- spam::as.spam.dgCMatrix(Z)
-  s <- which(ndx==TRUE)
-  Z <- extSpamMatrix(Z, s, length(ndx))
-  termlabel <- paste0("cf(",cName,", ",level,")_",vName)
-  cflabel <- paste(termlabel, levels(var),sep="_")
-  L <- list(Z=Z, termlabel = termlabel, cflabel=cflabel, dim.r=ncol(Z))
+  s <- which(ndx)
+  Z <- extSpamMatrix(X = Z, s = s, N = length(ndx))
+  termlabel <- paste0("cf(", cName, ", ", level, ")_", vName)
+  cflabel <- paste(termlabel, levels(var), sep = "_")
+  L <- list(Z = Z, termlabel = termlabel, cflabel = cflabel, dim.r = ncol(Z))
   return(L)
 }
 
 #' Function to analyse cf terms in the random part.
+#'
+#' @noRd
 #' @keywords internal
-condFactor <- function(random, data) {
+condFactor <- function(random,
+                       data) {
   if (is.null(random)) return(NULL)
-  tf <- terms.formula(random, specials = c("cf"))
+  tf <- terms.formula(random, specials = "cf")
   f <- attr(tf, "term.labels")
-  ndxAt <- attr(tf,"specials")$cf
+  ndxAt <- attr(tf, "specials")$cf
   if (is.null(ndxAt)) return(NULL)
-
   g <- f[ndxAt]
   Nterms <- length(g)
   dim.r <- NULL
@@ -47,7 +50,8 @@ condFactor <- function(random, data) {
     dim.r <- c(dim.r, L$dim.r)
   }
   random <- tf[-ndxAt]
-  return(list(Z=Z, term.labels.r=termlabel, coefLabels=cflabel, dim.r=dim.r, random=random))
+  return(list(Z = Z, term.labels.r = termlabel, coefLabels = cflabel,
+              dim.r = dim.r, random = random))
 }
 
 
