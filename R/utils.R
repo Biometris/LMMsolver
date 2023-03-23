@@ -249,14 +249,15 @@ calcNomEffDim <- function(X,
 #' @noRd
 #' @keywords internal
 checkFormVars <- function(formula,
-                          data) {
+                          data,
+                          naAllowed = TRUE) {
   if (!is.null(formula)) {
     ## Get variables in formula.
     formVars <- all.vars(formula)
+    ## Get the name of formula as passed to the function.
+    formName <- deparse(substitute(formula))
     missVars <- formVars[!hasName(data, formVars)]
     if (length(missVars) > 0) {
-      ## Get the name of formula as passed to the function.
-      formName <- deparse(substitute(formula))
       stop("The following variables in the ", formName, " part of the model ",
            "are not in the data:\n", paste0(missVars, collapse = ", "), "\n",
            call. = FALSE)
@@ -268,10 +269,21 @@ checkFormVars <- function(formula,
       })]
       if (length(naVars) > 0) {
         ## Get the name of formula as passed to the function.
-        formName <- deparse(substitute(formula))
         stop("The following variables in the ", formName, " part of the model ",
              "only have missing values:\n",
              paste0(naVars, collapse = ", "), "\n", call. = FALSE)
+      }
+      ## Check that variables have no NA values.
+      if (!naAllowed) {
+        anyNaVars <- formVars[sapply(X = formVars, FUN = function(formVar) {
+          any(is.na(data[[formVar]]))
+        })]
+        if (length(anyNaVars) > 0) {
+          ## Get the name of formula as passed to the function.
+          stop("The following variables in the ", formName,
+               " part of the model have missing values:\n",
+               paste0(anyNaVars, collapse = ", "), "\n", call. = FALSE)
+        }
       }
       for (formVar in formVars) {
         if (is.character(data[[formVar]])) {

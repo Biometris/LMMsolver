@@ -170,7 +170,7 @@ LMMsolve <- function(fixed,
     stop("maxit should be a positive numerical value.")
   }
   ## Check that all variables used in fixed formula are in data.
-  data <- checkFormVars(fixed, data)
+  data <- checkFormVars(fixed, data, naAllowed = FALSE)
   ## Remove NA for response variable from data.
   respVar <- all.vars(fixed)[attr(terms(fixed), "response")]
   respVarNA <- is.na(data[[respVar]])
