@@ -249,7 +249,6 @@ LMMsolve <- function(fixed,
     Z3 <- NULL
     varPar3 <- NULL
   }
-
   if (!(is.null(random) & is.null(group) & is.null(condFactor))) {
     Z <- spam::cbind.spam(Z1, Z2, Z3)
     dim.r <- c(dim1.r, dim2.r, dim3.r)
@@ -321,7 +320,6 @@ LMMsolve <- function(fixed,
   } else {
     dim.f <- as.numeric(table(attr(X, "assign")))
   }
-
   ## calculate NomEff dimension for non-spline part
   Xs <- spam::as.spam(X)
   NomEffDimRan <- calcNomEffDim(Xs, Z, dim.r, term.labels.r)
@@ -367,7 +365,6 @@ LMMsolve <- function(fixed,
   nRes <- length(lRinv)
   scFactor <- c(scFactor, rep(1, nRes))
   y <- model.response(mf)
-
   ## check whether the variance for response is not zero.
   if (is.null(residual)) {
     if (var(y) < .Machine$double.eps / 2) {
@@ -386,7 +383,6 @@ LMMsolve <- function(fixed,
   }
   ## Make X sparse.
   Xs <- spam::as.spam(X)
-
   ## Fit the model.
   if (!is.null(theta)) {
     if (length(theta) != length(scFactor)) {
@@ -409,15 +405,13 @@ LMMsolve <- function(fixed,
     eval(family$initialize)
     mu <- mustart
     eta <- family$linkfun(mustart)
-
     nNonRes <- length(theta) - nRes
-    fixedTheta <- c(rep(FALSE,nNonRes), rep(TRUE,nRes))
-    theta[(nNonRes+1):(nNonRes+nRes)] <- 1.0
-
+    fixedTheta <- c(rep(FALSE, nNonRes), rep(TRUE, nRes))
+    theta[(nNonRes + 1):(nNonRes + nRes)] <- 1
     for (i in 1:maxit) {
       deriv <- family$mu.eta(eta)
       z <- (eta - offset) + (y - mu)/deriv
-      wGLM <- as.vector(deriv^2/family$variance(mu))
+      wGLM <- as.vector(deriv^2 / family$variance(mu))
       wGLM <- wGLM*w
       lRinv <- constructRinv(df = data, residual = residual, weights = wGLM)
       obj <- sparseMixedModels(y = z, X = Xs, Z = Z, lGinv = lGinv, lRinv = lRinv,
@@ -427,17 +421,15 @@ LMMsolve <- function(fixed,
       eta <- obj$yhat + offset
       mu <- family$linkinv(eta)
       theta <- obj$theta
-      tol <- sum((eta - eta.old)^2)/sum(eta^2)
+      tol <- sum((eta - eta.old)^2) / sum(eta^2)
       if (trace) {
         cat("Generalized Linear Mixed Model iteration", i, ", tol=", tol, "\n")
       }
       if (tol < tolerance) break;
     }
   }
-
   ## Add names to ndx of coefficients.
-  ndxCf <- c(1:length(obj$a))
-
+  ndxCf <- seq_along(obj$a)
   ## Fixed terms.
   ef <- cumsum(dim.f)
   sf <- ef - dim.f + 1
