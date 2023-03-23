@@ -33,4 +33,7 @@ LMM1 <- LMMsolve(fixed = yield ~ rep + gen,
 ## Obtain coefficients.
 coefs1 <- coef(LMM1)
 
+## Obtain coefficients with standard errors.
+coefs2 <- coef(LMM1, se = TRUE)
+
 }

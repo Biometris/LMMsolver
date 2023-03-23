@@ -190,6 +190,9 @@ print.summary.LMMsolve <- function(x,
 #' ## Obtain coefficients.
 #' coefs1 <- coef(LMM1)
 #'
+#' ## Obtain coefficients with standard errors.
+#' coefs2 <- coef(LMM1, se = TRUE)
+#'
 #' @importFrom stats coef
 #'
 #' @export
@@ -198,7 +201,7 @@ coef.LMMsolve <- function(object,
                           ...) {
   u <- object$coefMME
   cf <- object$ndxCoefficients
-  ## if not standard errors
+  ## if not standard errors.
   if (!se) {
     coef <- lapply(X = cf, FUN = function(x) {
       ndx <- x != 0
@@ -206,18 +209,16 @@ coef.LMMsolve <- function(object,
       return(x)
     })
   } else {
-    # if standard errors
+    ## if standard errors.
     n <- length(u)
     se <- calcStandardErrors(C = object$C,
                              D = spam::diag.spam(x = 1, nrow = n))
-    coeff <- lapply(X = cf, FUN = function(x) {
-      x_se <- x
-      ndx1 <- x == 0
-      ndx2 <- x != 0
-      x[ndx1] <- 0
-      x[ndx2] <- u[x[ndx2]]
-      x_se[ndx1] <- NA
-      x_se[ndx2] <- se[x_se[ndx2]]
+    coef <- lapply(X = cf, FUN = function(x) {
+      x_se <- rep(NA, times = length(x))
+      ndx <- x != 0
+      xNdx <- x[ndx]
+      x[ndx] <- u[xNdx]
+      x_se[ndx] <- se[xNdx]
       df <- data.frame(coef = names(x), value = x, se = x_se,
                        zRatio = x / x_se, row.names = NULL)
       return(df)
