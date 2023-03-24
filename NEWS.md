@@ -1,6 +1,10 @@
 # LMMsolver 1.0.4.9000
 
 -   Small bugs in assignment of names to fixed model coefficients when columns were dropped from the model are fixed.  
+-   Calculation of standard errors for coefficients, with `coef(obj, se=TRUE)`.
+-   Implementation of Generalized Linear Mixed Models (GLMM) with additional argument `family` in `LMMsolve` function.
+-   Variance components and splines can be conditional on a factor. For variance components, this is implemented in the `cf(var, cond, level)` function. For 1D and 2D splines, additional arguments `cond` and `level` are added. 
+-   Several small bugs fixed. 
 
 # LMMsolver 1.0.4
 
