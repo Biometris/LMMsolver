@@ -182,10 +182,11 @@ LMMsolve <- function(fixed,
     w <- w[!respVarNA]
   }
 
-  ## Remove zero weights
+  ## Remove observations with zero weights
   weightsZero <- (w==0)
   if (sum(weightsZero) > 0) {
-    warning(sum(weightsZero), " observations removed with weight zero \n ", call. = FALSE)
+    warning(sum(weightsZero), " observations removed with zero weights \n ",
+            call. = FALSE)
     data <- data[!weightsZero, ]
     ## remove missing values for weight (default w=1).
     w <- w[!weightsZero]
