@@ -153,8 +153,8 @@ LMMsolve <- function(fixed,
       stop("weights not defined in dataframe data")
     }
     w <- data[[weights]]
-    if (!is.numeric(w) || sum(is.na(w)) != 0 || min(w) <= 0) {
-      stop("weights should be a numeric vector with positive values")
+    if (!is.numeric(w) || sum(is.na(w)) != 0 || min(w) < 0) {
+      stop("weights should be a numeric vector with non-negative values")
     }
   } else {
     w <- rep(1, nrow(data))
@@ -181,6 +181,16 @@ LMMsolve <- function(fixed,
     ## remove missing values for weight (default w=1).
     w <- w[!respVarNA]
   }
+
+  ## Remove zero weights
+  weightsZero <- (w==0)
+  if (sum(weightsZero) > 0) {
+    warning(sum(weightsZero), " observations removed with weight zero \n ", call. = FALSE)
+    data <- data[!weightsZero, ]
+    ## remove missing values for weight (default w=1).
+    w <- w[!weightsZero]
+  }
+
   ## Drop unused factor levels from data.
   data <- droplevels(data)
   ## Check random term for conditional factor
