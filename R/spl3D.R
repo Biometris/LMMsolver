@@ -64,7 +64,6 @@ spl3D <- function(x1,
   G3 <- constructG(knots[[3]], scaleX, pord)
   G <- G1 %x% G2 %x% G3
   X <- B123 %*% G
-
   ## nominal effective dimension.
   EDnom = rep(ncol(B123) - ncol(X), 3)
   ## Remove intercept column to avoid singularity problems.

@@ -82,9 +82,6 @@ spl1D <- function(x,
       nseg != round(nseg)) {
     stop("nseg should be a positive integer.\n")
   }
-  ## check (syntax) conditional factor
-  conditional <- checkConditionalFactor(cond, level)
-
   ## Save names of the x-variables so they can be used later on in predictions.
   xName <- deparse(substitute(x))
   if (!exists(xName, where = parent.frame(), inherits = FALSE)) {
@@ -92,12 +89,14 @@ spl1D <- function(x,
          "are not in the data:\n", xName, "\n",
          call. = FALSE)
   }
+  ## check (syntax) conditional factor.
+  conditional <- checkConditionalFactor(x, cond, level)
   if (conditional) {
     Nelem <- length(x)
-    ndx <- cond==level
+    ndx <- cond == level
     x <- x[ndx]
   }
-  if (is.null(xlim)) { xlim <- range(x)}
+  if (is.null(xlim)) { xlim <- range(x) }
   if (!is.numeric(xlim) || length(xlim) != 2 ||
       xlim[1] > range(x)[1] || xlim[2] < range(x)[2]) {
     stop("xlim should be a vector of length two with all values of ", xName,
@@ -108,13 +107,13 @@ spl1D <- function(x,
   B <- Bsplines(knots[[1]], x)
   q <- ncol(B)
   if (conditional) {
-    sel <- which(ndx==TRUE)
+    sel <- which(ndx)
     B <- extSpamMatrix(B, sel, length(ndx))
   }
   G <- constructG(knots[[1]], scaleX, pord)
   X <- B %*% G
   ## nominal effective dimension.
-  EDnom = ncol(B) - ncol(X)
+  EDnom <- ncol(B) - ncol(X)
   ## Remove intercept column to avoid singularity problems.
   X <- removeIntercept(X)
   ## Construct list of sparse precision matrices.
@@ -141,9 +140,7 @@ spl1D <- function(x,
   return(list(X = X, Z = B, lGinv = lGinv, knots = knots,
               dim.f = dim.f, dim.r = dim.r, term.labels.f = term.labels.f,
               term.labels.r = term.labels.r, x = xList, pord = pord,
-              degree = degree, scaleX = scaleX, EDnom = EDnom, scaleFactor=scaleFactor))
+              degree = degree, scaleX = scaleX, EDnom = EDnom,
+              scaleFactor = scaleFactor))
 }
-
-
-
 

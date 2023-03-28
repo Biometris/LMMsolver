@@ -77,3 +77,20 @@ obj1 <- LMMsolve(fixed = yield ~ 1, random = ~ gen,
 
 ## Check that full LMM solve object is correct.
 expect_equivalent_to_reference(obj1, "spl2DFull", tolerance = 1e-6)
+
+## Test combination of splines with conditional factor.
+
+obj2 <- LMMsolve(fixed = yield ~ 1, random = ~ gen,
+                 spline = ~ spl2D(x1 = bed, x2 = row, nseg = c(3, 3),
+                                  cond = rep, level = "R1"),
+                 data = durban.rowcol,
+                 tolerance = 1e-6)
+
+sumObj2 <- summary(obj2)
+expect_equal(nrow(sumObj2), 6)
+expect_equal(sumObj2[["Term"]],
+             c("(Intercept)", "lin(bed, row)_R1", "gen", "s(bed)_R1",
+               "s(row)_R1", "residual"))
+expect_equal(sumObj2[["Ratio"]],
+             c(1, 1, 0.458895940871542, 4.82648592298555e-05,
+               0.0821598533833015, 0.458895940885926))
