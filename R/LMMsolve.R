@@ -195,7 +195,7 @@ LMMsolve <- function(fixed,
   ## Check random term for conditional factor
   condFactor <- condFactor(random, data)
   if (!is.null(condFactor)) {
-    random = condFactor$random
+    random <- condFactor$random
   }
   ## Check that all variables used in formulas are in data.
   chkGroup <- checkGroup(random, group, data)
@@ -258,7 +258,7 @@ LMMsolve <- function(fixed,
     Z3 <- NULL
     varPar3 <- NULL
   }
-  if (!(is.null(random) & is.null(group) & is.null(condFactor))) {
+  if (!(is.null(random) && is.null(group) && is.null(condFactor))) {
     Z <- spam::cbind.spam(Z1, Z2, Z3)
     dim.r <- c(dim1.r, dim2.r, dim3.r)
     term.labels.r <- c(term1.labels.r, term2.labels.r, term3.labels.r)

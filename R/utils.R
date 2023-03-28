@@ -462,26 +462,32 @@ nameCoefs <- function(coefs,
 #'
 #' @noRd
 #' @keywords internal
-checkConditionalFactor <- function(cond, level) {
+checkConditionalFactor <- function(var,
+                                   cond,
+                                   level) {
   ## if conditional factor is defined
-  cName <- deparse(substitute(cond))
-  if (!is.null(cond))
-  {
+  vName <- deparse(substitute(var, env = parent.frame()))
+  cName <- deparse(substitute(cond, env = parent.frame()))
+  conditional <- FALSE
+  if (vName != "NULL") {
+    if (inherits(try(var, silent = TRUE), "try-error")) {
+      stop(vName, " should be a variable in data.\n", call. = FALSE)
+    }
+  }
+  if (cName != "NULL") {
+    if (inherits(try(cond, silent = TRUE), "try-error") || is.null(cond)) {
+      stop(cName, " should be a variable in data.\n", call. = FALSE)
+    }
     if (!is.factor(cond)) {
-      stop("cond should be a factor.\n")
+      stop("cond should be a factor.\n", call. = FALSE)
     }
     if (is.null(level)) {
-      stop("level should be defined.\n")
+      stop("level should be defined.\n", call. = FALSE)
     }
     if (!(level %in% levels(cond))) {
-      stop(paste(level, "not a level of", cName, "\n"))
+      stop(level, " is not a level of ", cName, ".\n", call. = FALSE)
     }
     conditional <- TRUE
-  } else {
-    if (!is.null(level)) {
-      stop("Argument level defined without conditonal factor.\n")
-    }
-    conditional <- FALSE
   }
   return(conditional)
 }

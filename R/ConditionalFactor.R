@@ -8,14 +8,11 @@ cf <- function(var,
   vName <- deparse(substitute(var))
   cName <- deparse(substitute(cond))
   ## check (syntax) conditional factor.
-  if (!checkConditionalFactor(cond, level)) {
-    stop("checkConditionalFactor should return TRUE.\n",
-         call. = FALSE)
-  }
+  checkConditionalFactor(var, cond, level)
   ndx <- cond == level
   var <- droplevels(var[ndx])
   df <- data.frame(x = var)
-  Z <- Matrix::sparse.model.matrix(~-1+x, data = df)
+  Z <- Matrix::sparse.model.matrix(~-1 + x, data = df)
   Z <- spam::as.spam.dgCMatrix(Z)
   s <- which(ndx)
   Z <- extSpamMatrix(X = Z, s = s, N = length(ndx))
@@ -42,8 +39,8 @@ condFactor <- function(random,
   Z <- NULL
   termlabel <- NULL
   cflabel <- list()
-  for (i in 1:Nterms) {
-    L <- eval(parse(text = g[i]), envir = data, enclos = parent.frame())
+  for (gTerm in g) {
+    L <- eval(parse(text = gTerm), envir = data, enclos = parent.frame())
     Z <- spam::cbind.spam(Z, L$Z)
     termlabel <- c(termlabel, L$termlabel)
     cflabel[[L$termlabel]] <- L$cflabel

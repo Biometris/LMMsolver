@@ -10,19 +10,18 @@
 #' @keywords internal
 RowKronecker <- function(X1,
                          X2) {
-  if (isTRUE(class(X1) == 'spam') & isTRUE(class(X2) == 'spam')) {
+  if (inherits(X1, "spam") && inherits(X2, "spam")) {
     L <- RowKron(X1, X2)
-    rowKron <- spam::spam(x=0, nrow=0,ncol=0)
+    rowKron <- spam::spam(x = 0, nrow = 0, ncol = 0)
     rowKron@entries <- L$entries
     rowKron@colindices <- L$colindices
     rowKron@rowpointers <- L$rowpointers
     rowKron@dimension <- L$dimension
-    return(rowKron)
+  } else {
+    one.1 <- matrix(1, 1, ncol(X1))
+    one.2 <- matrix(1, 1, ncol(X2))
+    rowKron <- kronecker(X1, one.2) * kronecker(one.1, X2)
   }
-
-  one.1 <- matrix(1, 1, ncol(X1))
-  one.2 <- matrix(1, 1, ncol(X2))
-  rowKron <- kronecker(X1, one.2) * kronecker(one.1, X2)
   return(rowKron)
 }
 
@@ -47,7 +46,7 @@ PsplinesKnots <- function(xmin,
   attr(knots, "degree") <- degree
   attr(knots, "xmin") <- xmin
   attr(knots, "xmax") <- xmax
-  attr(knots, "dx") <- (xmax-xmin)/nseg
+  attr(knots, "dx") <- dx
 
   return(knots)
 }
