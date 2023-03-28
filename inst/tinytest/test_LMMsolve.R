@@ -1,10 +1,12 @@
 load("testdata.rda")
 
 ## Test that general input checks work correctly.
+
 expect_error(LMMsolve(fixed = pheno ~ cross, data = "testDat"),
              "data should be a data.frame")
 
 ## Test fixed, random and residual formulas (spline part is tested in spl checks).
+
 expect_error(LMMsolve(fixed = ~ cross, data = testDat),
              "fixed should be a formula of the form")
 expect_error(LMMsolve(fixed = pheno ~ cross, random = pheno ~ cross,
@@ -22,6 +24,7 @@ expect_error(LMMsolve(fixed = pheno ~ cross, residual = ~tst, data = testDat),
              "The following variables in the residual part of the model are not")
 
 ## Test ginverse.
+
 ginv <- matrix(1:4, nrow = 2)
 ginvL <- list(ginv = ginv)
 ginvLS <- list(ginv = ginv %*% t(ginv))
@@ -40,6 +43,7 @@ expect_error(LMMsolve(fixed = pheno ~ cross, random = ~ind, ginverse = ginvLS2,
              "Dimensions of ind should match number of levels")
 
 ## Test other input parameters.
+
 expect_error(LMMsolve(fixed = pheno ~ cross, data = testDat, tolerance = -1),
              "tolerance should be a positive numerical value")
 expect_error(LMMsolve(fixed = pheno ~ cross, data = testDat, maxit= -1),
@@ -48,6 +52,7 @@ expect_warning(LMMsolve(fixed = pheno ~ cross, data = testDat, maxit= 1),
                "No convergence after 1 iterations")
 
 ## Test use of grp - group.
+
 Lgrp <- list(QTL = 3:5)
 expect_error(LMMsolve(fixed = pheno ~ cross, random = ~grp(QTL2),
                       data = testDat),
@@ -60,6 +65,7 @@ expect_error(LMMsolve(fixed = pheno ~ cross, random = ~grp(QTL),
              "All columns specified in group should be columns in data")
 
 ## Fit models with different components.
+
 mod0 <- LMMsolve(fixed = pheno ~ cross, data = testDat)
 mod1 <- LMMsolve(fixed = pheno ~ cross, residual = ~cross, data = testDat)
 mod2 <- LMMsolve(fixed = pheno ~ cross, random = ~grp(QTL),
@@ -71,6 +77,7 @@ mod5 <- LMMsolve(fixed = pheno ~ cross, random = ~ind, ginverse = ginvLS3,
                  data = testDat)
 
 ## Compare results with predefined output.
+
 expect_equivalent_to_reference(mod0, "LMMsolve0")
 expect_equivalent_to_reference(mod1, "LMMsolve1")
 expect_equivalent_to_reference(mod2, "LMMsolve2")
@@ -79,17 +86,20 @@ expect_equivalent_to_reference(mod4, "LMMsolve4")
 expect_equivalent_to_reference(mod5, "LMMsolve5")
 
 ## Group not used in random part should be ignored.
+
 mod3a <- LMMsolve(fixed = pheno ~ cross, random = ~grp(QTL) + ind,
                   group = c(Lgrp, list(QTL2 = 1:2)), data = testDat)
 expect_equivalent(mod3, mod3a)
 
 ## Test option trace.
+
 expect_stdout(LMMsolve(fixed = pheno ~ cross, data = testDat, trace = TRUE),
               "iter logLik")
 expect_stdout(LMMsolve(fixed = pheno ~ cross, data = testDat, trace = TRUE),
               "2 -207.1218")
 
 ## Test that zero-variance in response in caught.
+
 testDatZv1 <- testDatZv2 <- testDat
 testDatZv1[["pheno"]] <- 1
 testDatZv2[testDatZv2[["cross"]] == "AxB", "pheno"] <- 1
@@ -101,12 +111,28 @@ expect_error(LMMsolve(fixed = pheno ~ cross, residual = ~cross,
              "Variance response variable zero or almost zero for levels")
 
 ## Test that variables with only NA are caught.
+
 testDatNA <- testDat
 testDatNA[["cross"]] <- NA
 expect_error(LMMsolve(fixed = pheno ~ cross, data = testDatNA),
              "in the fixed part of the model only have missing values")
 
+## Test that variables with NA in fixed part are caught.
+
+testDatNAFix <- testDat
+testDatNAFix[1, "cross"] <- NA
+expect_error(LMMsolve(fixed = pheno ~ cross, data = testDatNAFix),
+             "variables in the fixed part of the model have missing values")
+
+# NA in response variable should still be allowed.
+
+testDatNAResp <- testDat
+testDatNAResp[1, "pheno"] <- NA
+expect_warning(LMMsolve(fixed = pheno ~ cross, data = testDatNAResp),
+               "1 observations removed with missing value for pheno")
+
 ## Test that result for character variables is identical to that of factors.
+
 testDatChar <- testDat
 testDatChar[["cross"]] <- as.character(testDatChar[["cross"]])
 
@@ -114,9 +140,11 @@ modChar <-  LMMsolve(fixed = pheno ~ cross, residual = ~cross,
                      data = testDatChar)
 
 ## Checking equality gives a warning since spam doesn't check attributes.
+
 expect_equivalent(modChar, mod1)
 
 ## Test that interaction terms are labeled correctly.
+
 testDatInt <- testDat
 testDatInt[["rep"]] <- factor(c(rep(c("r1", "r2"), each = 50),
                                 rep(c("r1", "r2"), each = 40)))
@@ -133,11 +161,13 @@ expect_silent(LMMsolve(fixed = pheno ~ rep + rep:cross, data = testDatInt))
 expect_silent(LMMsolve(fixed = pheno ~ rep*cross, data = testDatInt))
 
 ## Test that interaction terms are labeled correctly when level missing.
+
 testDatInt2 <- testDat
 testDatInt2[["rep"]] <- factor(c(rep(c("r1", "r2"), each = 50),
                                  rep("r1", times = 80)))
 
 # Interaction in fixed part.
+
 modIntMiss <- LMMsolve(fixed = pheno ~ rep:cross, data = testDatInt2)
 coefsIntMiss <- coef(modIntMiss)$`rep:cross`
 expect_equal(names(coefsIntMiss),
