@@ -39,6 +39,14 @@ expect_equal(names(coefMod), c("(Intercept)", "lin(x1, x2, x3)", "s(x1, x2, x3)"
 
 expect_equal_to_reference(coefMod, "modCoefs", tolerance = 1e-6)
 
+# Coef with SE.
+coefModSe <- coef(mod, se = TRUE)
+expect_inherits(coefModSe, "list")
+expect_length(coefModSe, 3)
+expect_inherits(coefModSe[[1]], "data.frame")
+
+expect_equal_to_reference(coefModSe, "modCoefsSe", tolerance = 1e-6)
+
 ## Check fitted function.
 fitMod <- fitted(mod)
 
