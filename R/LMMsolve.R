@@ -170,7 +170,7 @@ LMMsolve <- function(fixed,
     stop("maxit should be a positive numerical value.")
   }
   ## Check that all variables used in fixed formula are in data.
-  data <- checkFormVars(fixed, data, naAllowed = TRUE)
+  data <- checkFormVars(fixed, data, naAllowed = FALSE)
   ## Remove NA for response variable from data.
   respVar <- all.vars(fixed)[attr(terms(fixed), "response")]
   respVarNA <- is.na(data[[respVar]])
@@ -181,9 +181,8 @@ LMMsolve <- function(fixed,
     ## remove missing values for weight (default w=1).
     w <- w[!respVarNA]
   }
-
   ## Remove observations with zero weights
-  weightsZero <- (w==0)
+  weightsZero <- w == 0
   if (sum(weightsZero) > 0) {
     # warning(sum(weightsZero), " observations removed with zero weights \n ",
     #        call. = FALSE)
@@ -191,7 +190,6 @@ LMMsolve <- function(fixed,
     ## remove missing values for weight (default w=1).
     w <- w[!weightsZero]
   }
-
   ## Drop unused factor levels from data.
   data <- droplevels(data)
   ## Check random term for conditional factor

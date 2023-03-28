@@ -75,8 +75,8 @@ calcScaleFactor <- function(knots,
 #'
 #' @noRd
 #' @keywords internal
-constructPenalty <-function(q,
-                            pord) {
+constructPenalty <- function(q,
+                             pord) {
   D <- spam::diff.spam(spam::diag.spam(q), diff = pord)
   DtD <- spam::crossprod.spam(D)
   return(DtD)
@@ -89,20 +89,20 @@ constructPenalty <-function(q,
 #' see Tom Lyche et al.
 #' @noRd
 #' @keywords internal
-GrevillePoints <- function(knots)
-{
+GrevillePoints <- function(knots) {
   d <- attr(knots,"degree")
   q <- length(knots) - (d + 1)
-  sapply(X=c(1:q), FUN=function(j){ sum(knots[(j+1):(j+d)])/d })
+  sapply(X = c(1:q), FUN = function(j) { sum(knots[(j+1):(j+d)]) / d })
 }
 
 #' Construct G, such that BG = X
 #'
 #' @noRd
 #' @keywords internal
-constructG <- function(knots, scaleX, pord)
-{
-  if (pord==2) {
+constructG <- function(knots,
+                       scaleX,
+                       pord) {
+  if (pord == 2) {
     xi <- GrevillePoints(knots)
     G <- cbind(1, xi)
     if (scaleX) {
@@ -120,7 +120,7 @@ constructG <- function(knots, scaleX, pord)
       G <- (1/sqrt(q))*G
     }
   }
-  G
+  return(G)
 }
 
 #' Construct constraint matrix
@@ -230,7 +230,7 @@ calcNomEffDim <- function(X,
       r <- qr(XZ)$rank
       if (r==p) {
         msg <- paste("Singularity problem with term", term.labels.r[i],
-                    "in the random part of the model")
+                     "in the random part of the model")
         stop(msg)
       }
       EDnom[i] <- r - p
@@ -275,14 +275,20 @@ checkFormVars <- function(formula,
       }
       ## Check that variables have no NA values.
       if (!naAllowed) {
-        anyNaVars <- formVars[sapply(X = formVars, FUN = function(formVar) {
-          any(is.na(data[[formVar]]))
-        })]
-        if (length(anyNaVars) > 0) {
-          ## Get the name of formula as passed to the function.
-          stop("The following variables in the ", formName,
-               " part of the model have missing values:\n",
-               paste0(anyNaVars, collapse = ", "), "\n", call. = FALSE)
+        ## NA allowed in response variable.
+        respVar <- formVars[attr(terms(formula), "response")]
+        nonRespVars <- setdiff(formVars, respVar)
+        if (length(nonRespVars) > 0) {
+          anyNaVars <- nonRespVars[sapply(X = nonRespVars,
+                                          FUN = function(nonRespVar) {
+                                            any(is.na(data[[nonRespVar]]))
+                                          })]
+          if (length(anyNaVars) > 0) {
+            ## Get the name of formula as passed to the function.
+            stop("The following variables in the ", formName,
+                 " part of the model have missing values:\n",
+                 paste0(anyNaVars, collapse = ", "), "\n", call. = FALSE)
+          }
         }
       }
       for (formVar in formVars) {
