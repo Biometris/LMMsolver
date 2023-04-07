@@ -31,6 +31,8 @@ navbar:
           href: https://biometris.github.io/statgenGxE
         - text: "statgenGWAS"
           href: https://biometris.github.io/statgenGWAS
+        - text: "statgenQTLxT"
+          href: https://biometris.github.io/statgenQTLxT
         - text: "statgenHTP"
           href: https://biometris.github.io/statgenHTP
         - text: "statgenIBD"
