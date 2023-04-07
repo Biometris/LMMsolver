@@ -43,34 +43,13 @@
     <loc>/reference/RowKronecker.html</loc>
   </url>
   <url>
-    <loc>/reference/calcNomEffDim.html</loc>
-  </url>
-  <url>
     <loc>/reference/calcStandardErrors.html</loc>
-  </url>
-  <url>
-    <loc>/reference/checkFormVars.html</loc>
-  </url>
-  <url>
-    <loc>/reference/checkGroup.html</loc>
   </url>
   <url>
     <loc>/reference/coef.LMMsolve.html</loc>
   </url>
   <url>
-    <loc>/reference/constructCCt.html</loc>
-  </url>
-  <url>
-    <loc>/reference/constructGinvSplines.html</loc>
-  </url>
-  <url>
-    <loc>/reference/constructPenalty.html</loc>
-  </url>
-  <url>
     <loc>/reference/constructRinv.html</loc>
-  </url>
-  <url>
-    <loc>/reference/constructX.html</loc>
   </url>
   <url>
     <loc>/reference/deviance.LMMsolve.html</loc>
@@ -80,9 +59,6 @@
   </url>
   <url>
     <loc>/reference/displayMME.html</loc>
-  </url>
-  <url>
-    <loc>/reference/expandGinv.html</loc>
   </url>
   <url>
     <loc>/reference/fitted.LMMsolve.html</loc>
@@ -97,16 +73,7 @@
     <loc>/reference/multipop.html</loc>
   </url>
   <url>
-    <loc>/reference/nameCoefs.html</loc>
-  </url>
-  <url>
-    <loc>/reference/normVec.html</loc>
-  </url>
-  <url>
     <loc>/reference/obtainSmoothTrend.html</loc>
-  </url>
-  <url>
-    <loc>/reference/removeIntercept.html</loc>
   </url>
   <url>
     <loc>/reference/residuals.LMMsolve.html</loc>
