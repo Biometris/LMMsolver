@@ -1,4 +1,4 @@
-# LMMsolver 1.0.4.9000
+# LMMsolver 1.0.5
 
 -   Small bugs in assignment of names to fixed model coefficients when columns were dropped from the model are fixed.  
 -   Calculation of standard errors for coefficients, with `coef(obj, se=TRUE)`.
