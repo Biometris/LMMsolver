@@ -69,6 +69,12 @@ obj1 <- LMMsolve(fixed = yield ~ rep + gen,
 devJABES2020paper_LV <- 54.49
 expect_equal(round(deviance(obj1), 2) , devJABES2020paper_LV)
 
+## From R 4.3 there is an extra item in the family output.
+## This gives problems with the comparison.
+## Therefore it is removed first.
+
+obj1$family$dispersion <- NULL
+
 ## Check that full LMM solve object is correct.
 expect_equivalent_to_reference(obj1, "spl1DFull")
 

@@ -78,6 +78,17 @@ mod5 <- LMMsolve(fixed = pheno ~ cross, random = ~ind, ginverse = ginvLS3,
 
 ## Compare results with predefined output.
 
+## From R 4.3 there is an extra item in the family output.
+## This gives problems with the comparison.
+## Therefore it is removed first.
+
+mod0$family$dispersion <- NULL
+mod1$family$dispersion <- NULL
+mod2$family$dispersion <- NULL
+mod3$family$dispersion <- NULL
+mod4$family$dispersion <- NULL
+mod5$family$dispersion <- NULL
+
 expect_equivalent_to_reference(mod0, "LMMsolve0")
 expect_equivalent_to_reference(mod1, "LMMsolve1")
 expect_equivalent_to_reference(mod2, "LMMsolve2")
@@ -89,6 +100,7 @@ expect_equivalent_to_reference(mod5, "LMMsolve5")
 
 mod3a <- LMMsolve(fixed = pheno ~ cross, random = ~grp(QTL) + ind,
                   group = c(Lgrp, list(QTL2 = 1:2)), data = testDat)
+mod3a$family$dispersion <- NULL
 expect_equivalent(mod3, mod3a)
 
 ## Test option trace.
@@ -140,7 +152,7 @@ modChar <-  LMMsolve(fixed = pheno ~ cross, residual = ~cross,
                      data = testDatChar)
 
 ## Checking equality gives a warning since spam doesn't check attributes.
-
+modChar$family$dispersion <- NULL
 expect_equivalent(modChar, mod1)
 
 ## Test that interaction terms are labeled correctly.

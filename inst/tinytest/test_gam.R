@@ -40,6 +40,12 @@ obj0 <- LMMsolve(fixed = yield ~ 1,
                    spl1D(x = col, nseg = 3),
                  data = dat)
 
+## From R 4.3 there is an extra item in the family output.
+## This gives problems with the comparison.
+## Therefore it is removed first.
+
+obj0$family$dispersion <- NULL
+
 ## Check that full LMM solve object is correct.
 expect_equivalent_to_reference(obj0, "gam1DFull")
 

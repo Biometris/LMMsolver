@@ -34,6 +34,13 @@ obj0 <- LMMsolve(fixed = yield ~ gen + rep,
                  data = john.alpha)
 
 ## Check that full LMM solve object is correct.
+
+## From R 4.3 there is an extra item in the family output.
+## This gives problems with the comparison.
+## Therefore it is removed first.
+
+obj0$family$dispersion <- NULL
+
 expect_equivalent_to_reference(obj0, "cfFull")
 
 ## Check that NA in response doesn't crash the model (issue #102)

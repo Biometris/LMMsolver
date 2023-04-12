@@ -75,6 +75,12 @@ obj1 <- LMMsolve(fixed = yield ~ 1, random = ~ gen,
                  data = durban.rowcol,
                  tolerance = 1e-6)
 
+## From R 4.3 there is an extra item in the family output.
+## This gives problems with the comparison.
+## Therefore it is removed first.
+
+obj1$family$dispersion <- NULL
+
 ## Check that full LMM solve object is correct.
 expect_equivalent_to_reference(obj1, "spl2DFull", tolerance = 1e-6)
 

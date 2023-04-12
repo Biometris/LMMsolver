@@ -88,5 +88,11 @@ obj1 <- LMMsolve(fixed = y ~ 1,
                  data = simDat,
                  tolerance = 1e-3)
 
+## From R 4.3 there is an extra item in the family output.
+## This gives problems with the comparison.
+## Therefore it is removed first.
+
+obj1$family$dispersion <- NULL
+
 ## Check that full LMM solve object is correct.
 expect_equivalent_to_reference(obj1, "spl3DFull")
