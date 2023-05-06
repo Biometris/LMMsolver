@@ -18,7 +18,8 @@ LMMsolve(
   tolerance = 1e-06,
   trace = FALSE,
   maxit = 250,
-  theta = NULL
+  theta = NULL,
+  grpTheta = NULL
 )
 }
 \arguments{
