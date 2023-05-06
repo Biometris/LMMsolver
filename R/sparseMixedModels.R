@@ -46,7 +46,8 @@ sparseMixedModels <- function(y,
                               tolerance = 1.0e-6,
                               trace = FALSE,
                               theta = NULL,
-                              fixedTheta = NULL) {
+                              fixedTheta = NULL,
+                              grpTheta = NULL) {
   Ntot <- length(y)
   p <- ncol(X)
   q <- ncol(Z)
@@ -89,6 +90,22 @@ sparseMixedModels <- function(y,
     ## Fix a penalty theta, if value becomes high.
     fixedTheta <- rep(FALSE, length = NvarcompTot)
   }
+  if (!is.null(grpTheta)) {
+    ##
+    ## here should be some checks
+    ##
+    nGrp <- max(grpTheta)
+    conM <- spam::spam(x=0, nrow=NvarcompTot, ncol=nGrp)
+    for (i in 1:NvarcompTot) {
+      conM[i, grpTheta[i]] <- 1
+    }
+    # Need to be checked, for the moment all FALSE:
+    fixedThetaRes <- rep(FALSE, length= nGrp)
+  } else {
+    conM <- spam::diag(1,NvarcompTot)
+    fixedThetaRes <- fixedTheta
+  }
+
   if (Nvarcomp > 0) {
     psi <- theta[1:Nvarcomp]
     phi <- theta[-(1:Nvarcomp)]
@@ -180,10 +197,14 @@ sparseMixedModels <- function(y,
     if (abs(logLprev - logL) < tolerance) {
       break
     }
-    ## Update the penalties theta that are not fixed.
-    theta <- ifelse(fixedTheta, theta, ED / SS_all)
-    ## Set elements of theta fixed if penalty > 1.0e6.
+    ED_restr <- as.vector(ED %*% conM)
+    SS_all_restr <- as.vector(SS_all %*% conM)
+    theta_restr <- ifelse(fixedThetaRes, theta_restr, ED_restr/SS_all_restr)
+    theta <- as.vector(conM %*% theta_restr)
+
     fixedTheta <- (theta > 1.0e6) | (fixedTheta == TRUE)
+    fixedThetaRes <- (theta_restr > 1.0e6) | (fixedThetaRes == TRUE)
+
     logLprev <- logL
   }
   if (it == maxit) {

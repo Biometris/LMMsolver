@@ -48,6 +48,8 @@
 #' algorithm. Default \code{maxit = 250}.
 #' @param theta initial values for penalty or precision parameters. Default
 #' \code{NULL}, all precision parameters set equal to 1.
+#' @param grpTheta a vector to give components the same penalty. Default
+#' \code{NULL}, all components have a separate penalty.
 #'
 #' @return An object of class \code{LMMsolve} representing the fitted model.
 #' See \code{\link{LMMsolveObject}} for a full description of the components in
@@ -113,7 +115,8 @@ LMMsolve <- function(fixed,
                      tolerance = 1.0e-6,
                      trace = FALSE,
                      maxit = 250,
-                     theta = NULL) {
+                     theta = NULL,
+                     grpTheta = NULL) {
   ## Input checks.
   if (!inherits(data, "data.frame")) {
     stop("data should be a data.frame.\n")
@@ -401,10 +404,19 @@ LMMsolve <- function(fixed,
   } else {
     theta <- 1 / scFactor
   }
+  if (!is.null(grpTheta)) {
+    if (length(grpTheta) != length(scFactor)) {
+      stop("Argument grpTheta has wrong length \n")
+    }
+  } else {
+    grpTheta <- c(1:length(scFactor))
+  }
+
+
   if (family$family == "gaussian") {
     obj <- sparseMixedModels(y = y, X = Xs, Z = Z, lGinv = lGinv, lRinv = lRinv,
                              tolerance = tolerance, trace = trace, maxit = maxit,
-                             theta = theta)
+                             theta = theta, grpTheta=grpTheta)
   } else {
     ## MB, 23 jan 2023
     ## binomial needs global weights
@@ -425,7 +437,8 @@ LMMsolve <- function(fixed,
       lRinv <- constructRinv(df = data, residual = residual, weights = wGLM)
       obj <- sparseMixedModels(y = z, X = Xs, Z = Z, lGinv = lGinv, lRinv = lRinv,
                                tolerance = tolerance, trace = trace, maxit = maxit,
-                               theta = theta, fixedTheta = fixedTheta)
+                               theta = theta, fixedTheta = fixedTheta,
+                               grpTheta = grpTheta)
       eta.old <- eta
       eta <- obj$yhat + offset
       mu <- family$linkinv(eta)
