@@ -310,14 +310,15 @@ LMMsolve <- function(fixed,
   mf <- model.frame(fixed, data, drop.unused.levels = TRUE)
   mt <- terms(mf)
   f.terms <- all.vars(mt)[attr(mt, "dataClasses") == "factor"]
-  X <- model.matrix(mt, data = mf,
+  X <- Matrix::sparse.model.matrix(mt, data = mf,
                     contrasts.arg = lapply(X = mf[, f.terms, drop = FALSE],
                                            FUN = contrasts, contrasts = TRUE))
   term.labels.f <- attr(mt, "term.labels")
 
-  q <- qr(X)
-  remCols <- q$pivot[-seq(q$rank)]
-  if (length(remCols) > 0) {
+  if (Matrix::rankMatrix(X, method="qr") != ncol(X)) {
+    ## qr analysis
+    q <- qr(as.matrix(X))
+    remCols <- q$pivot[-seq(q$rank)]
     ## Compare terms before and after removing extra columns.
     ## If a complete term is removed, it also has to be removed from the labels.
     f.terms.orig <- as.numeric(names(table(attr(X, "assign"))))
@@ -332,8 +333,9 @@ LMMsolve <- function(fixed,
   } else {
     dim.f <- as.numeric(table(attr(X, "assign")))
   }
+
   ## calculate NomEff dimension for non-spline part
-  Xs <- spam::as.spam(X)
+  Xs <- spam::as.spam.dgCMatrix(X)
   NomEffDimRan <- calcNomEffDim(Xs, Z, dim.r, term.labels.r)
   ## Add spline part.
   splResList <- NULL
@@ -393,8 +395,9 @@ LMMsolve <- function(fixed,
            levelsNoVar, "\n")
     }
   }
-  ## Make X sparse.
-  Xs <- spam::as.spam(X)
+  ## Convert to spam matrix and cleanup
+  Xs <- spam::as.spam.dgCMatrix(X)
+  Xs <- spam::cleanup(Xs)
   ## Fit the model.
   if (!is.null(theta)) {
     if (length(theta) != length(scFactor)) {
