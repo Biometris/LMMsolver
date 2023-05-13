@@ -33,10 +33,41 @@ displayMME(obj2)
 obj1$loglik
 obj2$logL
 
+whatPred = "gen"
+
 # predictions using asreml
-pred1 <- predict(obj1, classify='gen',sed=TRUE)
+pred1 <- predict(obj1, classify=whatPred, sed=TRUE)
 #head(pred1$pvals[1:4,])
 pred1$sed[1:3,1:3]
+
+pred2 <- LMMsolver:::predictTest(obj2, classify=whatPred)
+
+range(pred1$pvals$predicted.value - pred2$prediction)
+range(pred1$pvals$std.error - pred2$se)
+
+obj3 <- asreml(fixed = yield~rep,
+               random=~gen+rep:block,
+               data = dat)
+
+obj4 <- LMMsolve(fixed = yield~rep,
+                 random=~gen+rep:block,
+                 data = dat,
+                 trace = FALSE,
+                 tolerance = 1.0e-10)
+summary(obj4)
+
+obj3$loglik
+obj4$logL
+
+# predictions using asreml
+pred3 <- predict(obj3, classify=whatPred, sed=TRUE)
+#head(pred1$pvals[1:4,])
+pred3$sed[1:3,1:3]
+
+pred4 <- LMMsolver:::predictTest(obj4, classify=whatPred)
+
+range(pred3$pvals$predicted.value - pred4$prediction)
+range(pred3$pvals$std.error - pred4$se)
 
 # predictions plus standard errors,
 # averaging over fixed rep, ignoring random rep:block
