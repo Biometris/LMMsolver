@@ -216,7 +216,7 @@ calcNomEffDim <- function(X,
   # for each variance component in Z:
   for (i in 1:length(dim.r)) {
     ndx <- s[i]:e[i]
-    Zi <- Z[, ndx]
+    Zi <- Z[, ndx, drop = FALSE]
     # if number of columns is high, use upper bound:
     if (dim.r[i] > 100 | nrow(X) > 10000) {
       rowSum <- spam::rowSums.spam(Zi)
@@ -228,11 +228,10 @@ calcNomEffDim <- function(X,
     } else {
       XZ <- cbind(X, Zi)
       XZ_Matrix <- spam::as.dgCMatrix.spam(XZ)
-      r <- Matrix::rankMatrix(XZ_Matrix, method="qr", warn.t = FALSE)
-      if (r==p) {
-        msg <- paste("Singularity problem with term", term.labels.r[i],
-                     "in the random part of the model")
-        stop(msg)
+      r <- Matrix::rankMatrix(XZ_Matrix, method = "qr", warn.t = FALSE)
+      if (r == p) {
+        stop("Singularity problem with term", term.labels.r[i],
+             "in the random part of the model")
       }
       EDnom[i] <- r - p
     }

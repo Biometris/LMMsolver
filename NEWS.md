@@ -1,3 +1,7 @@
+# LMMsolver 1.0.5.9000
+
+- A small bug for models with more than 10.000 observations and only a numeric variable in the random part of the model is fixed.
+
 # LMMsolver 1.0.5
 
 -   Small bugs in assignment of names to fixed model coefficients when columns were dropped from the model are fixed.  
