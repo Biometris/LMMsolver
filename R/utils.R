@@ -331,6 +331,10 @@ checkGroup <- function(random,
     } else {
       ## Extract variables specified in grp() functions in random part.
       randTerms <- terms(random, specials = "grp")
+      ## The next line seems redundant, but for some reason it reorders
+      ## the terms/attributes in such a way that the order matches.
+      ## The following code is based on a matching order.
+      randTerms <- randTerms[seq_along(labels(randTerms))]
       grpPos <- attr(randTerms, which = "specials")$grp
       grpTerms <- sapply(X = grpPos, FUN = function(pos) {randTerms[pos]})
       grpVars <- sapply(X = grpTerms, FUN = all.vars)
