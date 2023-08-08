@@ -22,14 +22,14 @@ probabilities (Li et al. 2021).
 
 ## Installation
 
--   Install from CRAN:
+- Install from CRAN:
 
 ``` r
 install.packages("LMMsolver")
 ```
 
--   Install latest development version from GitHub (requires
-    [remotes](https://github.com/r-lib/remotes) package):
+- Install latest development version from GitHub (requires
+  [remotes](https://github.com/r-lib/remotes) package):
 
 ``` r
 remotes::install_github("Biometris/LMMsolver", ref = "develop", dependencies = TRUE)
@@ -44,6 +44,7 @@ the `spam` package (Furrer and Sain 2010).
 ``` r
 library(LMMsolver)
 library(ggplot2)
+#> Warning: package 'ggplot2' was built under R version 4.3.0
 
 ## Get precipitation data from spam
 data(USprecip, package = "spam")
@@ -86,15 +87,22 @@ the USA.
 
 ``` r
 plotDat <- obtainSmoothTrend(obj1, grid = c(200, 300), includeIntercept = TRUE)
-usa = maps::map("usa", regions = "main", plot = FALSE)
-v <- sp::point.in.polygon(plotDat$lon, plotDat$lat, usa$x, usa$y)
-plotDat <- plotDat[v == 1, ]
+plotDat <- sf::st_as_sf(plotDat, coords = c("lon", "lat"))
+usa <- sf::st_as_sf(maps::map("usa", regions = "main", plot = FALSE))
+sf::st_crs(usa) <- sf::st_crs(plotDat)
+intersection <- sf::st_intersects(plotDat, usa)
+plotDat <- plotDat[!is.na(as.numeric(intersection)), ]
 
-ggplot(plotDat, aes(x = lon, y = lat, fill = ypred)) +
-  geom_tile(show.legend = TRUE) +
+ggplot(usa) + 
+  geom_sf(color = NA) +
+  geom_tile(data = plotDat, 
+            mapping = aes(geometry = geometry, fill = ypred), 
+            linewidth = 0,
+            stat = "sf_coordinates") +
   scale_fill_gradientn(colors = topo.colors(100))+
-  labs(title = "Precipitation (anomaly) US April 1948", x = "Longitude", y = "Latitude") +
-  coord_fixed() +
+  labs(title = "Precipitation (anomaly) US April 1948", 
+       x = "Longitude", y = "Latitude") +
+  coord_sf() +
   theme(panel.grid = element_blank())
 ```
 
@@ -112,10 +120,10 @@ vignette("Solving_Linear_Mixed_Models")
 
 <div id="ref-Boer2020" class="csl-entry">
 
-Boer, Martin P., Hans Peter Piepho, and Emlyn R. Williams. 2020. “<span
-class="nocase">Linear Variance, P-splines and Neighbour Differences for
-Spatial Adjustment in Field Trials: How are they Related?</span>” *J.
-Agric. Biol. Environ. Stat.* 25 (4): 676–98.
+Boer, Martin P., Hans Peter Piepho, and Emlyn R. Williams. 2020.
+“<span class="nocase">Linear Variance, P-splines and Neighbour
+Differences for Spatial Adjustment in Field Trials: How are they
+Related?</span>” *J. Agric. Biol. Environ. Stat.* 25 (4): 676–98.
 <https://doi.org/10.1007/S13253-020-00412-4>.
 
 </div>
@@ -123,10 +131,10 @@ Agric. Biol. Environ. Stat.* 25 (4): 676–98.
 <div id="ref-Bustos-Korts2019" class="csl-entry">
 
 Bustos-Korts, Daniela, Martin P. Boer, Marcos Malosetti, Scott Chapman,
-Karine Chenu, Bangyou Zheng, and Fred A. van Eeuwijk. 2019. “<span
-class="nocase">Combining Crop Growth Modeling and Statistical Genetic
-Modeling to Evaluate Phenotyping Strategies</span>.” *Front. Plant Sci.*
-10 (November). <https://doi.org/10.3389/fpls.2019.01491>.
+Karine Chenu, Bangyou Zheng, and Fred A. van Eeuwijk. 2019.
+“<span class="nocase">Combining Crop Growth Modeling and Statistical
+Genetic Modeling to Evaluate Phenotyping Strategies</span>.” *Front.
+Plant Sci.* 10 (November). <https://doi.org/10.3389/fpls.2019.01491>.
 
 </div>
 

@@ -1,6 +1,7 @@
 # LMMsolver 1.0.5.9000
 
-- A small bug for models with more than 10.000 observations and only a numeric variable in the random part of the model is fixed.
+- The dependency package `sp` is replaced by `sf`.
+- A small bug for models with more than 10.000 observations and only a numeric variable in the. random part of the model is fixed.
 - Weights are now checked for missing values after removing observations with missing values in response. This prevents spurious errors when both response and weight are missing.
 
 # LMMsolver 1.0.5

@@ -228,15 +228,22 @@ A plot for the smooth trend can be obtained in a similar way as for the one-dime
 
 ```{r Plot_USprecip}
 plotDat3 <- obtainSmoothTrend(obj3, grid = c(200, 300), includeIntercept = TRUE)
-usa = maps::map("usa", regions = "main", plot = FALSE)
-v <- sp::point.in.polygon(plotDat3$lon, plotDat3$lat, usa$x, usa$y)
-plotDat3 <- plotDat3[v == 1, ]
+plotDat3 <- sf::st_as_sf(plotDat3, coords = c("lon", "lat"))
+usa <- sf::st_as_sf(maps::map("usa", regions = "main", plot = FALSE))
+sf::st_crs(usa) <- sf::st_crs(plotDat3)
+intersection <- sf::st_intersects(plotDat3, usa)
+plotDat3 <- plotDat3[!is.na(as.numeric(intersection)), ]
 
-ggplot(plotDat3, aes(x = lon, y = lat, fill = ypred)) +
-  geom_tile(show.legend = TRUE) +
+ggplot(usa) + 
+  geom_sf(color = NA) +
+  geom_tile(data = plotDat3, 
+            mapping = aes(geometry = geometry, fill = ypred), 
+            linewidth = 0,
+            stat = "sf_coordinates") +
   scale_fill_gradientn(colors = topo.colors(100))+
-  labs(title = "Precipitation (anomaly)", x = "Longitude", y = "Latitude") +
-  coord_fixed() +
+  labs(title = "Precipitation (anomaly) US April 1948", 
+       x = "Longitude", y = "Latitude") +
+  coord_sf() +
   theme(panel.grid = element_blank())
 ```
 
