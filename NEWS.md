@@ -1,11 +1,12 @@
 # LMMsolver 1.0.5.9000
 
 - A small bug for models with more than 10.000 observations and only a numeric variable in the random part of the model is fixed.
+- Weights are now checked for missing values after removing observations with missing values in response. This prevents spurious errors when both response and weight are missing.
 
 # LMMsolver 1.0.5
 
 -   Small bugs in assignment of names to fixed model coefficients when columns were dropped from the model are fixed.  
--   Calculation of standard errors for coefficients, with `coef(obj, se=TRUE)`.
+-   Calculation of standard errors for coefficients, with `coef(obj, se = TRUE)`.
 -   Implementation of Generalized Linear Mixed Models (GLMM) with additional argument `family` in `LMMsolve` function.
 -   Variance components and splines can be conditional on a factor. For variance components, this is implemented in the `cf(var, cond, level)` function. For 1D and 2D splines, additional arguments `cond` and `level` are added. 
 -   Several small bugs fixed. 

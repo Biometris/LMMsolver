@@ -151,17 +151,6 @@ LMMsolve <- function(fixed,
          (is.matrix(x) || spam::is.spam(x)) && isSymmetric(x)}))))) {
     stop("ginverse should be a named list of symmetric matrices.\n")
   }
-  if (!is.null(weights)) {
-    if (!(weights %in% colnames(data))) {
-      stop("weights not defined in dataframe data")
-    }
-    w <- data[[weights]]
-    if (!is.numeric(w) || sum(is.na(w)) != 0 || min(w) < 0) {
-      stop("weights should be a numeric vector with non-negative values")
-    }
-  } else {
-    w <- rep(1, nrow(data))
-  }
   if (!is.null(residual) &&
       (!inherits(residual, "formula") || length(terms(residual)) != 2)) {
     stop("residual should be a formula of the form \" ~ pred\".\n")
@@ -181,8 +170,20 @@ LMMsolve <- function(fixed,
     warning(sum(respVarNA), " observations removed with missing value for ",
             respVar, ".\n", call. = FALSE)
     data <- data[!respVarNA, ]
-    ## remove missing values for weight (default w=1).
-    w <- w[!respVarNA]
+  }
+  ## Check for weights should be done after removing observations with NA for
+  ## response var. This prevents error messages when both response var and
+  ## weight are NA.
+  if (!is.null(weights)) {
+    if (!(weights %in% colnames(data))) {
+      stop("weights not defined in dataframe data")
+    }
+    w <- data[[weights]]
+    if (!is.numeric(w) || sum(is.na(w)) != 0 || min(w) < 0) {
+      stop("weights should be a numeric vector with non-negative values")
+    }
+  } else {
+    w <- rep(1, nrow(data))
   }
   ## Remove observations with zero weights
   weightsZero <- w == 0
