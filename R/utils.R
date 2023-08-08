@@ -335,17 +335,19 @@ checkGroup <- function(random,
       grpTerms <- sapply(X = grpPos, FUN = function(pos) {randTerms[pos]})
       grpVars <- sapply(X = grpTerms, FUN = all.vars)
       ## Check for variables in grp missing in group.
-      if (is.null(group)) {
-        grpMiss <- grpVars
-      } else {
-        grpMiss <- grpVars[sapply(X = grpVars, FUN = function(grpVar) {
-          !hasName(x = group, name = grpVar)
-        })]
-      }
-      if (length(grpMiss) > 0) {
-        stop("The following variables are specified in grp in the random part ",
-             "of the model but not present in group:\n",
-             paste0(grpMiss, collapse = ", "), "\n", call. = FALSE)
+      if (length(grpVars) > 0) {
+        if (is.null(group)) {
+          grpMiss <- grpVars
+        } else {
+          grpMiss <- grpVars[sapply(X = grpVars, FUN = function(grpVar) {
+            !hasName(x = group, name = grpVar)
+          })]
+        }
+        if (length(grpMiss) > 0) {
+          stop("The following variables are specified in grp in the random part ",
+               "of the model but not present in group:\n",
+               paste0(grpMiss, collapse = ", "), "\n", call. = FALSE)
+        }
       }
       ## Remove grp terms from random part of the model.
       if (length(grpPos) > 0) {
