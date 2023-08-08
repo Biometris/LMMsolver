@@ -55,7 +55,7 @@ USprecip <- USprecip[USprecip$infill == 1, ]
 
 A two-dimensional P-spline can be defined with the `spl2D()` function, with longitude and latitude as covariates. The number of segments chosen here is equal to the number of segments used in @Rodriguez-Alvarez2015.
 
-```{r runobj3}
+```{r runobj}
 obj1 <- LMMsolve(fixed = anomaly ~ 1,
                  spline = ~spl2D(x1 = lon, x2 = lat, nseg = c(41, 41)),
                  data = USprecip)
@@ -71,15 +71,22 @@ The spatial trend for the precipitation can now be plotted on the map of the USA
 
 ```{r Plot_USprecip}
 plotDat <- obtainSmoothTrend(obj1, grid = c(200, 300), includeIntercept = TRUE)
-usa = maps::map("usa", regions = "main", plot = FALSE)
-v <- sp::point.in.polygon(plotDat$lon, plotDat$lat, usa$x, usa$y)
-plotDat <- plotDat[v == 1, ]
+plotDat <- sf::st_as_sf(plotDat, coords = c("lon", "lat"))
+usa <- sf::st_as_sf(maps::map("usa", regions = "main", plot = FALSE))
+sf::st_crs(usa) <- sf::st_crs(plotDat)
+intersection <- sf::st_intersects(plotDat, usa)
+plotDat <- plotDat[!is.na(as.numeric(intersection)), ]
 
-ggplot(plotDat, aes(x = lon, y = lat, fill = ypred)) +
-  geom_tile(show.legend = TRUE) +
+ggplot(usa) + 
+  geom_sf(color = NA) +
+  geom_tile(data = plotDat, 
+            mapping = aes(geometry = geometry, fill = ypred), 
+            linewidth = 0,
+            stat = "sf_coordinates") +
   scale_fill_gradientn(colors = topo.colors(100))+
-  labs(title = "Precipitation (anomaly) US April 1948", x = "Longitude", y = "Latitude") +
-  coord_fixed() +
+  labs(title = "Precipitation (anomaly) US April 1948", 
+       x = "Longitude", y = "Latitude") +
+  coord_sf() +
   theme(panel.grid = element_blank())
 ```
 

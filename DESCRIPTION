@@ -30,7 +30,7 @@ Imports:
     Matrix,
     methods,
     Rcpp (>= 0.10.4), 
-    sp,
+    sf,
     spam, 
     splines
 LinkingTo: Rcpp
