@@ -55,36 +55,36 @@ calcStandardErrors <- function(C,
 #' Test function for predict, for the moment internal
 #'
 #' @keywords internal
-predictTest <- function(object, classify) {
+predictTest <- function(object,
+                        classify) {
   term.labels <- c(object$term.labels.f, object$term.labels.r)
 
-  IsFixed <- term.labels %in% object$term.labels.f
+  isFixed <- term.labels %in% object$term.labels.f
 
   dim <- object$dim
 
   e <- cumsum(dim)
   s <- e - dim + 1
-  df.terms <- data.frame(label=term.labels, s=s, e=e, Fixed=IsFixed)
-  df.terms
+  df.terms <- data.frame(label = term.labels, s = s, e = e, fixed = isFixed)
 
-  f <- which(classify==term.labels)
+  f <- which(classify == term.labels)
 
   ndxPred <- object$ndxCoefficients[[classify]]
 
   nr <- length(ndxPred)
   nc <- ncol(object$C)
-  Dg <- spam::spam(x=1,nrow=nr,ncol=1) # intercept.
+  Dg <- spam::spam(x = 1, nrow = nr, ncol = 1) # intercept.
   for (i in 2:length(df.terms)) {
-    if (i==f) {
+    if (i == f) {
       M <- spam::diag.spam(nr)
-      if (df.terms$Fixed[i]) {
-        M <- M[,-1]
+      if (df.terms$fixed[i]) {
+        M <- M[, -1]
       }
     } else {
-      if (df.terms$Fixed[i]) {
-        M <- spam::spam(x=1/(dim[i]+1), nrow=nr,ncol=dim[i])
+      if (df.terms$fixed[i]) {
+        M <- spam::spam(x = 1 / (dim[i] + 1), nrow = nr, ncol = dim[i])
       } else {
-        M <- spam::diag.spam(x=0,nrow=nr,ncol=dim[i])
+        M <- spam::diag.spam(x = 0, nrow = nr, ncol = dim[i])
       }
     }
     Dg <- spam::cbind.spam(Dg, M)
@@ -92,10 +92,10 @@ predictTest <- function(object, classify) {
   cat("Dim Dg", dim(Dg),"\n")
 
   ypred <- as.vector(Dg %*% object$coefMME)
-  ypredse <- LMMsolver:::calcStandardErrors(object$C, Dg)
+  ypredse <- calcStandardErrors(object$C, Dg)
 
   df <- data.frame(name=names(ndxPred), prediction = ypred, se = ypredse)
-  df
+  return(df)
 }
 
 
