@@ -316,9 +316,8 @@ LMMsolve <- function(fixed,
                                            FUN = contrasts, contrasts = TRUE))
   term.labels.f <- attr(mt, "term.labels")
 
-  if (Matrix::rankMatrix(X, method="qr") != ncol(X)) {
-    ## qr analysis
-    q <- qr(as.matrix(X))
+  q <- qr(as.matrix(X))
+  if (q$rank != ncol(X)) {
     remCols <- q$pivot[-seq(q$rank)]
     ## Compare terms before and after removing extra columns.
     ## If a complete term is removed, it also has to be removed from the labels.

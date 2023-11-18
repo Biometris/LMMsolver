@@ -227,8 +227,7 @@ calcNomEffDim <- function(X,
       }
     } else {
       XZ <- cbind(X, Zi)
-      XZ_Matrix <- spam::as.dgCMatrix.spam(XZ)
-      r <- Matrix::rankMatrix(XZ_Matrix, method = "qr", warn.t = FALSE)
+      r <- qr(as.matrix(XZ))$rank
       if (r == p) {
         stop("Singularity problem with term", term.labels.r[i],
              "in the random part of the model")
