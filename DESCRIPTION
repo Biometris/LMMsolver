@@ -30,7 +30,6 @@ Imports:
     Matrix,
     methods,
     Rcpp (>= 0.10.4), 
-    sf,
     spam, 
     splines
 LinkingTo: Rcpp
@@ -38,5 +37,6 @@ RoxygenNote: 7.2.3
 Suggests: 
     rmarkdown,
     knitr,
+    sf,
     tinytest
 VignetteBuilder: knitr
