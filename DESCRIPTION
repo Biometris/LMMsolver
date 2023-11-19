@@ -29,7 +29,7 @@ Imports:
     maps,
     Matrix,
     methods,
-    Rcpp (>= 0.10.4),
+    Rcpp (>= 0.12.18),
     sf,
     spam,
     splines
