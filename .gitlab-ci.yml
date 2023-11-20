@@ -13,7 +13,7 @@ before_script:
   - apt-get install -y --no-install-recommends qpdf pandoc pandoc-citeproc
   - export PATH="/usr/local/lib/R/site-library/littler/examples/:${PATH}"
   - echo "options(Ncpus = $(nproc --all))" >> /usr/local/lib/R/etc/Rprofile.site
-  - install2.r devtools
+  - RUN R -e "install.packages('devtools', method = 'wget')"
   - r -e 'devtools::install_dev_deps()'
 
 r-release:
