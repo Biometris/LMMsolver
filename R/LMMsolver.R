@@ -1,4 +1,4 @@
-#' Linear Mixed Model Solver
+#' Linear Mixed Model Solver using sparse matrix algebra.
 #'
 #' An efficient and flexible system to solve sparse mixed model
 #' equations, for models that are often used in statistical genetics.
