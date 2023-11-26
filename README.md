@@ -12,12 +12,12 @@ downloads](https://cranlogs.r-pkg.org/badges/LMMsolver)](https://www.r-pkg.org/p
 The aim of the `LMMsolver` package is to provide an efficient and
 flexible system to estimate variance components using restricted maximum
 likelihood or REML (Patterson and Thompson 1971), for models where the
-mixed model equations are sparse. An example of an application is using
-splines to model spatial (Rodríguez-Álvarez et al. 2018; Boer, Piepho,
-and Williams 2020) or temporal (Bustos-Korts et al. 2019) trends.
-Another example is mixed model Quantitative Trait Locus (QTL) analysis
-for multiparental populations, allowing for heterogeneous residual
-variance and design matrices with Identity-By-Descent (IBD)
+mixed model equations are sparse (Boer 2023). An example of an
+application is using splines to model spatial (Rodríguez-Álvarez et al.
+2018; Boer, Piepho, and Williams 2020) or temporal (Bustos-Korts et al.
+2019) trends. Another example is mixed model Quantitative Trait Locus
+(QTL) analysis for multiparental populations, allowing for heterogeneous
+residual variance and design matrices with Identity-By-Descent (IBD)
 probabilities (Li et al. 2021).
 
 ## Installation
@@ -44,7 +44,6 @@ the `spam` package (Furrer and Sain 2010).
 ``` r
 library(LMMsolver)
 library(ggplot2)
-#> Warning: package 'ggplot2' was built under R version 4.3.0
 
 ## Get precipitation data from spam
 data(USprecip, package = "spam")
@@ -100,7 +99,7 @@ ggplot(usa) +
             linewidth = 0,
             stat = "sf_coordinates") +
   scale_fill_gradientn(colors = topo.colors(100))+
-  labs(title = "Precipitation (anomaly) US April 1948", 
+  labs(title = "Precipitation (anomaly)", 
        x = "Longitude", y = "Latitude") +
   coord_sf() +
   theme(panel.grid = element_blank())
@@ -118,9 +117,17 @@ vignette("Solving_Linear_Mixed_Models")
 
 <div id="refs" class="references csl-bib-body hanging-indent">
 
+<div id="ref-boer2023" class="csl-entry">
+
+Boer, Martin P. 2023. “Tensor Product P-Splines Using a Sparse Mixed
+Model Formulation.” *Statistical Modelling* 23 (5-6): 465–79.
+https://doi.org/<https://doi.org/10.1177/1471082X231178591>.
+
+</div>
+
 <div id="ref-Boer2020" class="csl-entry">
 
-Boer, Martin P., Hans Peter Piepho, and Emlyn R. Williams. 2020.
+Boer, Martin P., Hans-Peter Piepho, and Emlyn R. Williams. 2020.
 “<span class="nocase">Linear Variance, P-splines and Neighbour
 Differences for Spatial Adjustment in Field Trials: How are they
 Related?</span>” *J. Agric. Biol. Environ. Stat.* 25 (4): 676–98.
