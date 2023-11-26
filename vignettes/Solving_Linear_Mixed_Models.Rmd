@@ -196,7 +196,7 @@ The growth rate (first derivative) as function of time can be obtained using `de
 plotDatDt <- obtainSmoothTrend(obj2, grid = 1000, deriv = 1)
 
 ggplot(data = plotDatDt, aes(x = das, y = ypred)) +
-  geom_line(color = "red", size = 1) +
+  geom_line(color = "red", linewidth = 1) +
   labs(title = "APSIM growth rate as function of time", 
        x = "days after sowing", y = "growth rate (kg/day)") +
   theme(panel.grid = element_blank())
@@ -246,7 +246,7 @@ ggplot(usa) +
             linewidth = 0,
             stat = "sf_coordinates") +
   scale_fill_gradientn(colors = topo.colors(100))+
-  labs(title = "Precipitation (anomaly) US April 1948", 
+  labs(title = "Precipitation (anomaly)", 
        x = "Longitude", y = "Latitude") +
   coord_sf() +
   theme(panel.grid = element_blank())
