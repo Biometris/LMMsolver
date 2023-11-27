@@ -40,3 +40,5 @@ Suggests:
     knitr,
     tinytest
 VignetteBuilder: knitr
+URL: https://biometris.github.io/LMMsolver/index.html, https://github.com/Biometris/LMMsolver/
+BugReports: https://github.com/Biometris/LMMsolver/issues
