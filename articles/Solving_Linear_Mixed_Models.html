@@ -8,8 +8,8 @@
 <meta name="description" content="LMMsolver">
 <title>Solving Linear Mixed Models using LMMsolver • LMMsolver</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.2.2/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.2.2/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
+<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Solving Linear Mixed Models using LMMsolver">
 <meta property="og:description" content="LMMsolver">
@@ -27,7 +27,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">LMMsolver</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.6</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -102,16 +102,16 @@
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Solving Linear Mixed Models using LMMsolver</h1>
             
-            <h4 data-toc-skip class="date">2023-11-19</h4>
+            <h4 data-toc-skip class="date">2023-11-27</h4>
       
-      
+      <small class="dont-index">Source: <a href="https://github.com/Biometris/LMMsolver/blob/HEAD/vignettes/Solving_Linear_Mixed_Models.Rmd" class="external-link"><code>vignettes/Solving_Linear_Mixed_Models.Rmd</code></a></small>
       <div class="d-none name"><code>Solving_Linear_Mixed_Models.Rmd</code></div>
     </div>
 
     
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">LMMsolver</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://biometris.github.io/LMMsolver/index.html" class="external-link">LMMsolver</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
 <h2 class="unnumbered" id="the-lmmsolver-package">The LMMsolver package<a class="anchor" aria-label="anchor" href="#the-lmmsolver-package"></a>
@@ -119,13 +119,15 @@
 <p>The aim of the <code>LMMsolver</code> package is to provide an
 efficient and flexible system to estimate variance components using
 restricted maximum likelihood or REML <span class="citation">(<a href="#ref-Patterson1971" role="doc-biblioref">Patterson and Thompson
-1971</a>)</span>, for models where the mixed model equations are sparse.
-An example of an application is using splines to model spatial <span class="citation">(<a href="#ref-Rodriguez-Alvarez2018" role="doc-biblioref">Rodríguez-Álvarez et al. 2018</a>; <a href="#ref-Boer2020" role="doc-biblioref">Boer, Piepho, and Williams
-2020</a>)</span> or temporal <span class="citation">(<a href="#ref-Bustos-Korts2019" role="doc-biblioref">Bustos-Korts et al.
-2019</a>)</span> trends. Another example is mixed model Quantitative
-Trait Locus (QTL) analysis for multiparental populations, allowing for
-heterogeneous residual variance and design matrices with
-Identity-By-Descent (IBD) probabilities <span class="citation">(<a href="#ref-Li2021" role="doc-biblioref">Li et al. 2021</a>)</span>.</p>
+1971</a>)</span>, for models where the mixed model equations are sparse
+<span class="citation">(<a href="#ref-boer2023" role="doc-biblioref">Boer 2023</a>)</span>. An example of an application
+is using splines to model spatial <span class="citation">(<a href="#ref-Rodriguez-Alvarez2018" role="doc-biblioref">Rodríguez-Álvarez
+et al. 2018</a>; <a href="#ref-Boer2020" role="doc-biblioref">Boer,
+Piepho, and Williams 2020</a>)</span> or temporal <span class="citation">(<a href="#ref-Bustos-Korts2019" role="doc-biblioref">Bustos-Korts et al. 2019</a>)</span> trends.
+Another example is mixed model Quantitative Trait Locus (QTL) analysis
+for multiparental populations, allowing for heterogeneous residual
+variance and design matrices with Identity-By-Descent (IBD)
+probabilities <span class="citation">(<a href="#ref-Li2021" role="doc-biblioref">Li et al. 2021</a>)</span>.</p>
 <p>A Linear Mixed Model (LMM) has the form</p>
 <p><span class="math display">\[
   y = X \beta + Z u + e, \quad u \sim N(0,G), \quad e \sim N(0,R)
@@ -149,7 +151,7 @@ equations can be solved using efficient sparse matrix algebra
 implemented in the <code>spam</code> package <span class="citation">(<a href="#ref-Furrer2010" role="doc-biblioref">Furrer and Sain
 2010</a>)</span>. To calculate the derivatives of the log-likelihood in
 an efficient way, the automatic differentiation of the Cholesky matrix
-<span class="citation">(<a href="#ref-Smith1995" role="doc-biblioref">Smith 1995</a>)</span> was implemented in C++ using
+<span class="citation">(<a href="#ref-Smith1995" role="doc-biblioref">Smith 1995</a>; <a href="#ref-boer2023" role="doc-biblioref">Boer 2023</a>)</span> was implemented in C++ using
 the <code>Rcpp</code> package <span class="citation">(<a href="#ref-Eddelbuettel2018" role="doc-biblioref">Eddelbuettel and
 Balamuta 2018</a>)</span>.</p>
 </div>
@@ -247,14 +249,9 @@ grid of 1000 points can be obtained as follows:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## Plot smooth trend.</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">plotDat1</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">plot</span>, y <span class="op">=</span> <span class="va">ypred</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>color <span class="op">=</span> <span class="st">"red"</span>, size <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>color <span class="op">=</span> <span class="st">"red"</span>, linewidth <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Smooth spatial trend oats data"</span>, x <span class="op">=</span> <span class="st">"plotnr"</span>, y <span class="op">=</span> <span class="st">"yield"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>panel.grid <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Please use `linewidth` instead.</span></span>
-<span><span class="co">#&gt; This warning is displayed once every 8 hours.</span></span>
-<span><span class="co">#&gt; Call `lifecycle::last_lifecycle_warnings()` to see where this warning was</span></span>
-<span><span class="co">#&gt; generated.</span></span></code></pre></div>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>panel.grid <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Solving_Linear_Mixed_Models_files/figure-html/plot1D-1.png" width="672"></p>
 </div>
 <div class="section level4">
@@ -341,9 +338,9 @@ standard error bands in blue:</p>
 <span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">APSIMdat</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">das</span>, y <span class="op">=</span> <span class="va">biomass</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">1.2</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">plotDat2</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">ypred</span><span class="op">)</span>, color <span class="op">=</span> <span class="st">"red"</span>, size <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">plotDat2</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">ypred</span><span class="op">-</span><span class="fl">2</span><span class="op">*</span><span class="va">se</span><span class="op">)</span>, col<span class="op">=</span><span class="st">'blue'</span>, size<span class="op">=</span><span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">plotDat2</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">ypred</span><span class="op">+</span><span class="fl">2</span><span class="op">*</span><span class="va">se</span><span class="op">)</span>, col<span class="op">=</span><span class="st">'blue'</span>, size<span class="op">=</span><span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">plotDat2</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">ypred</span><span class="op">)</span>, color <span class="op">=</span> <span class="st">"red"</span>, linewidth <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">plotDat2</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">ypred</span><span class="op">-</span><span class="fl">2</span><span class="op">*</span><span class="va">se</span><span class="op">)</span>, col<span class="op">=</span><span class="st">'blue'</span>, linewidth <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">plotDat2</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">ypred</span><span class="op">+</span><span class="fl">2</span><span class="op">*</span><span class="va">se</span><span class="op">)</span>, col<span class="op">=</span><span class="st">'blue'</span>, linewidth <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"APSIM biomass as function of time"</span>, </span>
 <span>       x <span class="op">=</span> <span class="st">"days after sowing"</span>, y <span class="op">=</span> <span class="st">"biomass (kg)"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>panel.grid <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
@@ -355,7 +352,7 @@ obtained using <code>deriv = 1</code> in function
 <code class="sourceCode R"><span><span class="va">plotDatDt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/obtainSmoothTrend.html">obtainSmoothTrend</a></span><span class="op">(</span><span class="va">obj2</span>, grid <span class="op">=</span> <span class="fl">1000</span>, deriv <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">plotDatDt</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">das</span>, y <span class="op">=</span> <span class="va">ypred</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>color <span class="op">=</span> <span class="st">"red"</span>, size <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>color <span class="op">=</span> <span class="st">"red"</span>, linewidth <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"APSIM growth rate as function of time"</span>, </span>
 <span>       x <span class="op">=</span> <span class="st">"days after sowing"</span>, y <span class="op">=</span> <span class="st">"growth rate (kg/day)"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>panel.grid <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
@@ -403,15 +400,22 @@ the penalty parameters:</p>
 the one-dimensional examples:</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">plotDat3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/obtainSmoothTrend.html">obtainSmoothTrend</a></span><span class="op">(</span><span class="va">obj3</span>, grid <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">200</span>, <span class="fl">300</span><span class="op">)</span>, includeIntercept <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="va">usa</span> <span class="op">=</span> <span class="fu">maps</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/maps/man/map.html" class="external-link">map</a></span><span class="op">(</span><span class="st">"usa"</span>, regions <span class="op">=</span> <span class="st">"main"</span>, plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="va">v</span> <span class="op">&lt;-</span> <span class="fu">sp</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/sp/man/point.in.polygon.html" class="external-link">point.in.polygon</a></span><span class="op">(</span><span class="va">plotDat3</span><span class="op">$</span><span class="va">lon</span>, <span class="va">plotDat3</span><span class="op">$</span><span class="va">lat</span>, <span class="va">usa</span><span class="op">$</span><span class="va">x</span>, <span class="va">usa</span><span class="op">$</span><span class="va">y</span><span class="op">)</span></span>
-<span><span class="va">plotDat3</span> <span class="op">&lt;-</span> <span class="va">plotDat3</span><span class="op">[</span><span class="va">v</span> <span class="op">==</span> <span class="fl">1</span>, <span class="op">]</span></span>
+<span><span class="va">plotDat3</span> <span class="op">&lt;-</span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html" class="external-link">st_as_sf</a></span><span class="op">(</span><span class="va">plotDat3</span>, coords <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"lon"</span>, <span class="st">"lat"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">usa</span> <span class="op">&lt;-</span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html" class="external-link">st_as_sf</a></span><span class="op">(</span><span class="fu">maps</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/maps/man/map.html" class="external-link">map</a></span><span class="op">(</span><span class="st">"usa"</span>, regions <span class="op">=</span> <span class="st">"main"</span>, plot <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html" class="external-link">st_crs</a></span><span class="op">(</span><span class="va">usa</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html" class="external-link">st_crs</a></span><span class="op">(</span><span class="va">plotDat3</span><span class="op">)</span></span>
+<span><span class="va">intersection</span> <span class="op">&lt;-</span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_binary_pred.html" class="external-link">st_intersects</a></span><span class="op">(</span><span class="va">plotDat3</span>, <span class="va">usa</span><span class="op">)</span></span>
+<span><span class="va">plotDat3</span> <span class="op">&lt;-</span> <span class="va">plotDat3</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">intersection</span><span class="op">)</span><span class="op">)</span>, <span class="op">]</span></span>
 <span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">plotDat3</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">lon</span>, y <span class="op">=</span> <span class="va">lat</span>, fill <span class="op">=</span> <span class="va">ypred</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html" class="external-link">geom_tile</a></span><span class="op">(</span>show.legend <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">usa</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsf.html" class="external-link">geom_sf</a></span><span class="op">(</span>color <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html" class="external-link">geom_tile</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">plotDat3</span>, </span>
+<span>            mapping <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>geometry <span class="op">=</span> <span class="va">geometry</span>, fill <span class="op">=</span> <span class="va">ypred</span><span class="op">)</span>, </span>
+<span>            linewidth <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>            stat <span class="op">=</span> <span class="st">"sf_coordinates"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_gradient.html" class="external-link">scale_fill_gradientn</a></span><span class="op">(</span>colors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/grDevices/palettes.html" class="external-link">topo.colors</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span><span class="op">)</span><span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Precipitation (anomaly)"</span>, x <span class="op">=</span> <span class="st">"Longitude"</span>, y <span class="op">=</span> <span class="st">"Latitude"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_fixed.html" class="external-link">coord_fixed</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Precipitation (anomaly)"</span>, </span>
+<span>       x <span class="op">=</span> <span class="st">"Longitude"</span>, y <span class="op">=</span> <span class="st">"Latitude"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsf.html" class="external-link">coord_sf</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>panel.grid <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Solving_Linear_Mixed_Models_files/figure-html/Plot_USprecip-1.png" width="672"></p>
 <p>Instead of using the <code>grid</code> argument, <code>newdata</code>
@@ -507,8 +511,13 @@ by:</p>
 <h3 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h3>
 <div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-boer2023" class="csl-entry">
+Boer, Martin P. 2023. <span>“Tensor Product <span>P</span>-Splines Using
+a Sparse Mixed Model Formulation.”</span> <em>Statistical Modelling</em>
+23 (5-6): 465–79. https://doi.org/<a href="https://doi.org/10.1177/1471082X231178591" class="external-link">https://doi.org/10.1177/1471082X231178591</a>.
+</div>
 <div id="ref-Boer2020" class="csl-entry">
-Boer, Martin P., Hans Peter Piepho, and Emlyn R. Williams. 2020.
+Boer, Martin P., Hans-Peter Piepho, and Emlyn R. Williams. 2020.
 <span>“<span class="nocase">Linear Variance, P-splines and Neighbour
 Differences for Spatial Adjustment in Field Trials: How are they
 Related?</span>”</span> <em>J. Agric. Biol. Environ. Stat.</em> 25 (4):
@@ -521,9 +530,10 @@ Modeling to Evaluate Phenotyping Strategies</span>.”</span> <em>Front.
 Plant Sci.</em> 10 (November). <a href="https://doi.org/10.3389/fpls.2019.01491" class="external-link">https://doi.org/10.3389/fpls.2019.01491</a>.
 </div>
 <div id="ref-Eddelbuettel2018" class="csl-entry">
-Eddelbuettel, Dirk, and James Joseph Balamuta. 2018. <span>“<span class="nocase">Extending extit<span>R</span> with extit<span>C++</span>:
-A Brief Introduction to extit<span>Rcpp</span></span>.”</span> <em>The
-American Statistician</em> 72 (1): 28–36. <a href="https://doi.org/10.1080/00031305.2017.1375990" class="external-link">https://doi.org/10.1080/00031305.2017.1375990</a>.
+Eddelbuettel, Dirk, and James Joseph Balamuta. 2018. <span>“Extending
+<span>R</span> with <span>C</span>++: A Brief Introduction to
+<span>R</span>cpp.”</span> <em>The American Statistician</em> 72 (1):
+28–36. <a href="https://doi.org/10.1080/00031305.2017.1375990" class="external-link">https://doi.org/10.1080/00031305.2017.1375990</a>.
 </div>
 <div id="ref-Eilers1996" class="csl-entry">
 Eilers, PHC, and BD Marx. 1996. <span>“<span class="nocase">Flexible

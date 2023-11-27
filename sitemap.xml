@@ -34,7 +34,7 @@
     <loc>/reference/LMMsolveObject.html</loc>
   </url>
   <url>
-    <loc>/reference/LMMsolver-package.html</loc>
+    <loc>/reference/LMMsolver.html</loc>
   </url>
   <url>
     <loc>/reference/PsplinesKnots.html</loc>
@@ -74,6 +74,9 @@
   </url>
   <url>
     <loc>/reference/obtainSmoothTrend.html</loc>
+  </url>
+  <url>
+    <loc>/reference/predictTest.html</loc>
   </url>
   <url>
     <loc>/reference/residuals.LMMsolve.html</loc>
