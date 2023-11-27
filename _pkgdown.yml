@@ -55,6 +55,7 @@ articles:
 reference:
 - title: Solve mixed models
 - contents:
+  - LMMsolver
   - LMMsolve
   - LMMsolveObject
   - summary.LMMsolve
