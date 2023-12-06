@@ -1,14 +1,14 @@
 citHeader("To cite LMMsolver in publications use:")
 
-citEntry(entry = "Article",
+bibentry(bibtype = "Article",
          title        = "Tensor product {P}-splines using a sparse mixed model formulation",
-         author       = as.person("Martin P. Boer"),
+         author       = person("Martin P. Boer"),
          journal      = "Statistical Modelling",
          year         = "2023",
          volume       = "23",
          number       = "5-6",
          pages        = "465 - 479",
-         url          = "https://doi.org/10.1177/1471082X231178591",
+         doi          = "10.1177/1471082X231178591",
 
          textVersion  =
            paste("Martin P. Boer (2023).",
