@@ -38,7 +38,7 @@ spl3D <- function(x1,
   checkLim(lim = x1lim, limName = "x1lim", x = x1, xName = x1Name)
   checkLim(lim = x2lim, limName = "x2lim", x = x2, xName = x2Name)
   checkLim(lim = x3lim, limName = "x3lim", x = x3, xName = x3Name)
-  knots <- list()
+  knots <- vector(mode = "list", length = 3)
   knots[[1]] <- PsplinesKnots(x1lim[1], x1lim[2], degree = degree, nseg = nseg[1])
   knots[[2]] <- PsplinesKnots(x2lim[1], x2lim[2], degree = degree, nseg = nseg[2])
   knots[[3]] <- PsplinesKnots(x3lim[1], x3lim[2], degree = degree, nseg = nseg[3])

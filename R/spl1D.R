@@ -97,7 +97,7 @@ spl1D <- function(x,
     x <- x[ndx]
   }
   checkLim(lim = xlim, limName = "xlim", x = x, xName = xName)
-  knots <- list()
+  knots <- vector(mode = "list", length = 1)
   knots[[1]] <- PsplinesKnots(xlim[1], xlim[2], degree = degree, nseg = nseg)
   B <- Bsplines(knots[[1]], x)
   q <- ncol(B)
