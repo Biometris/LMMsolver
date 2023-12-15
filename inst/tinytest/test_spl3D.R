@@ -59,7 +59,7 @@ expect_error(LMMsolve(fixed = y ~ 1, data = simDat,
 expect_error(LMMsolve(fixed = y ~ 1, data = simDat,
                       spline = ~spl3D(x1 = x1, x2 = x2, x3 = x3, nseg = c(4, 4, 4),
                                       x1lim = c(2, 72))),
-             "x1lim should be a vector of length two")
+             "All values of x1 should be between the lower and upper value of x1lim")
 
 # x2lim
 expect_error(LMMsolve(fixed = y ~ 1, data = simDat,
@@ -69,7 +69,7 @@ expect_error(LMMsolve(fixed = y ~ 1, data = simDat,
 expect_error(LMMsolve(fixed = y ~ 1, data = simDat,
                       spline = ~spl3D(x1 = x1, x2 = x2, x3 = x3, nseg = c(4, 4, 4),
                                       x2lim = c(2, 72))),
-             "x2lim should be a vector of length two")
+             "All values of x2 should be between the lower and upper value of x2lim")
 
 # x3lim
 expect_error(LMMsolve(fixed = y ~ 1, data = simDat,
@@ -79,7 +79,7 @@ expect_error(LMMsolve(fixed = y ~ 1, data = simDat,
 expect_error(LMMsolve(fixed = y ~ 1, data = simDat,
                       spline = ~spl3D(x1 = x1, x2 = x2, x3 = x3, nseg = c(4, 4, 4),
                                       x3lim = c(2, 72))),
-             "x3lim should be a vector of length two")
+             "All values of x3 should be between the lower and upper value of x3lim")
 
 ## Fit model.
 

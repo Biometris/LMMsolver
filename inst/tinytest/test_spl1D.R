@@ -39,11 +39,14 @@ expect_error(LMMsolve(fixed = yield ~ rep + gen, data = john.alpha,
 
 # xlim
 expect_error(LMMsolve(fixed = yield ~ rep + gen, data = john.alpha,
+                      spline = ~spl1D(x = plot, nseg = 10, xlim = "a")),
+             "xlim should be numeric")
+expect_error(LMMsolve(fixed = yield ~ rep + gen, data = john.alpha,
                       spline = ~spl1D(x = plot, nseg = 10, xlim = 10)),
              "xlim should be a vector of length two")
 expect_error(LMMsolve(fixed = yield ~ rep + gen, data = john.alpha,
                       spline = ~spl1D(x = plot, nseg = 10, xlim = c(2, 72))),
-             "xlim should be a vector of length two")
+             "All values of plot should be between the lower and upper value of xlim")
 
 ## Fit models as described in JABES2020 paper.
 

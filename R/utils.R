@@ -514,5 +514,27 @@ extSpamMatrix <- function(X,
   return(X)
 }
 
+#' Helper function for checking limits
+#' The same check is done in the different spline functions so a helper
+#' function is created to avoid duplicate code.
+#'
+#' @noRd
+#' @keywords internal
+checkLim <- function(lim,
+                     limName,
+                     x,
+                     xName) {
+  if (!is.numeric(lim)) {
+    stop(limName, " should be numeric.\n", call. = FALSE)
+  }
+  if (length(lim) != 2) {
+    stop(limName, " should be a vector of length two.\n", call. = FALSE)
+  }
+  if (lim[1] > range(x)[1] || lim[2] < range(x)[2]) {
+    stop("All values of ", xName , " should be between the lower ",
+         "and upper value of ", limName, ".\n", call. = FALSE)
+  }
+}
+
 
 

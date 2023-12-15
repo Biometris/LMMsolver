@@ -96,11 +96,7 @@ spl1D <- function(x,
     ndx <- cond == level
     x <- x[ndx]
   }
-  if (!is.numeric(xlim) || length(xlim) != 2 ||
-      xlim[1] > range(x)[1] || xlim[2] < range(x)[2]) {
-    stop("xlim should be a vector of length two with all values of ", xName,
-         " between its lower and upper value.\n")
-  }
+  checkLim(lim = xlim, limName = "xlim", x = x, xName = xName)
   knots <- list()
   knots[[1]] <- PsplinesKnots(xlim[1], xlim[2], degree = degree, nseg = nseg)
   B <- Bsplines(knots[[1]], x)

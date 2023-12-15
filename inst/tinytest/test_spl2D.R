@@ -56,7 +56,7 @@ expect_error(LMMsolve(fixed = yield ~ 1, data = durban.rowcol,
 expect_error(LMMsolve(fixed = yield ~ 1, data = durban.rowcol,
                       spline = ~spl2D(x1 = bed, x2 = row, nseg = c(10, 10),
                                       x1lim = c(2, 72))),
-             "x1lim should be a vector of length two")
+             "All values of bed should be between the lower and upper value of x1lim")
 
 # x2lim
 expect_error(LMMsolve(fixed = yield ~ 1, data = durban.rowcol,
@@ -66,7 +66,7 @@ expect_error(LMMsolve(fixed = yield ~ 1, data = durban.rowcol,
 expect_error(LMMsolve(fixed = yield ~ 1, data = durban.rowcol,
                       spline = ~spl2D(x1 = bed, x2 = row, nseg = c(10, 10),
                                       x2lim = c(2, 72))),
-             "x2lim should be a vector of length two")
+             "All values of row should be between the lower and upper value of x2lim")
 
 ## Fit simplified (for speed) version of model described in bioRxiv 2021 paper.
 
