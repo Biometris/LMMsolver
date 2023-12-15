@@ -7,8 +7,8 @@ spl2D <- function(x1,
                   pord = 2,
                   degree = 3,
                   scaleX = TRUE,
-                  x1lim = NULL,
-                  x2lim = NULL,
+                  x1lim = range(x1),
+                  x2lim = range(x2),
                   cond = NULL,
                   level = NULL) {
   ## Checks.
@@ -42,8 +42,6 @@ spl2D <- function(x1,
     x1 <- x1[ndx]
     x2 <- x2[ndx]
   }
-  if (is.null(x1lim)) { x1lim <- range(x1) }
-  if (is.null(x2lim)) { x2lim <- range(x2) }
   if (!is.numeric(x1lim) || length(x1lim) != 2 ||
       x1lim[1] > range(x1)[1] || x1lim[2] < range(x1)[2]) {
     stop("x1lim should be a vector of length two with all values of ", x1Name,

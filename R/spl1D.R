@@ -67,7 +67,7 @@ spl1D <- function(x,
                   pord = 2,
                   degree = 3,
                   scaleX = TRUE,
-                  xlim = NULL,
+                  xlim = range(x),
                   cond = NULL,
                   level = NULL) {
   ## Checks.
@@ -96,7 +96,6 @@ spl1D <- function(x,
     ndx <- cond == level
     x <- x[ndx]
   }
-  if (is.null(xlim)) { xlim <- range(x) }
   if (!is.numeric(xlim) || length(xlim) != 2 ||
       xlim[1] > range(x)[1] || xlim[2] < range(x)[2]) {
     stop("xlim should be a vector of length two with all values of ", xName,
