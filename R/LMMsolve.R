@@ -419,7 +419,7 @@ LMMsolve <- function(fixed,
   if (family$family == "gaussian") {
     obj <- sparseMixedModels(y = y, X = Xs, Z = Z, lGinv = lGinv, lRinv = lRinv,
                              tolerance = tolerance, trace = trace, maxit = maxit,
-                             theta = theta, grpTheta=grpTheta)
+                             theta = theta, grpTheta = grpTheta)
   } else {
     ## MB, 23 jan 2023
     ## binomial needs global weights
