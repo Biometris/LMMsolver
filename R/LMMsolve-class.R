@@ -32,7 +32,8 @@
 #' \item{term.labels.f}{The names of the fixed terms in the mixed model}
 #' \item{term.labels.r}{The names of the random terms in the mixed model}
 #' \item{splRes}{An object with definition of spline argument}
-#' \item{family}{An object of class family specifying the distribution and link function}.
+#' \item{family}{An object of class family specifying the distribution and link function}
+#' \item{trace}{A data.frame with the convergence sequence for the log likelihood and effective dimensions}.
 #'
 #' @usage NULL
 #'
@@ -63,7 +64,8 @@ LMMsolveObject <- function(logL,
                            term.labels.f,
                            term.labels.r,
                            splRes,
-                           family) {
+                           family,
+                           trace) {
   structure(list(logL = logL,
                  sigma2e = sigma2e,
                  tau2e = tau2e,
@@ -89,7 +91,8 @@ LMMsolveObject <- function(logL,
                  term.labels.f = term.labels.f,
                  term.labels.r = term.labels.r,
                  splRes = splRes,
-                 family = family),
+                 family = family,
+                 trace = trace),
             class = c("LMMsolve", "list"))
 }
 

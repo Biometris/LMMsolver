@@ -529,5 +529,6 @@ LMMsolve <- function(fixed,
                         term.labels.f = term.labels.f,
                         term.labels.r = term.labels.r,
                         splRes = splResList,
-                        family = family))
+                        family = family,
+                        trace = obj$trace))
 }

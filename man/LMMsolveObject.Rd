@@ -30,7 +30,8 @@ mixed model}
 \item{term.labels.f}{The names of the fixed terms in the mixed model}
 \item{term.labels.r}{The names of the random terms in the mixed model}
 \item{splRes}{An object with definition of spline argument}
-\item{family}{An object of class family specifying the distribution and link function}.
+\item{family}{An object of class family specifying the distribution and link function}
+\item{trace}{A data.frame with the convergence sequence for the log likelihood and effective dimensions}.
 }
 \description{
 An object of class \code{LMMsolve} returned by the LMMsolve function,

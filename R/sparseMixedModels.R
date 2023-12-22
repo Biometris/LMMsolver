@@ -141,6 +141,7 @@ sparseMixedModels <- function(y,
   if (trace) {
     cat("iter logLik\n")
   }
+  traceDf <- NULL
   for (it in 1:maxit) {
     if (Nvarcomp > 0) {
       psi <- theta[1:length(psi)]
@@ -190,6 +191,8 @@ sparseMixedModels <- function(y,
 
     ## calculate REMLlogL, see e.g. Smith 1995
     logL <- -0.5 * (logdetR + logdetG + logdetC + yPy)
+    ## Add to trace.
+    traceDf <- rbind(traceDf, c(iter = it, logLik = logL, ED))
 
     if (trace) {
       cat(sprintf("%4d %8.4f\n", it, logL))
@@ -223,9 +226,12 @@ sparseMixedModels <- function(y,
   names(phi) <- names(lRinv)
   names(psi) <- names(lGinv)
   EDnames <- c(names(lGinv), names(lRinv))
+  traceDf <- data.frame(traceDf)
+  colnames(traceDf)[-(1:2)] <- paste("ED", EDnames)
   L <- list(logL = logL, sigma2e = 1 / phi, tau2e = 1 / psi, ED = ED,
             theta = theta, EDnames = EDnames, a = a, yhat = yhat,
-            residuals = r, nIter = it, C = C, cholC = cholC)
+            residuals = r, nIter = it, C = C, cholC = cholC,
+            trace = traceDf)
   return(L)
 }
 
