@@ -333,12 +333,15 @@ LMMsolve <- function(fixed,
   } else {
     dim.f <- as.numeric(table(attr(X, "assign")))
   }
+  nNonSplinesRandom <- length(dim.r)
 
-  ## calculate NomEff dimension for non-spline part
-  Xs <- spam::as.spam.dgCMatrix(X)
-  NomEffDimRan <- calcNomEffDim(Xs, Z, dim.r, term.labels.r)
+  ## Convert to spam matrix and cleanup
+  #Xs <- spam::as.spam.dgCMatrix(X)
+  #Xs <- spam::cleanup(Xs)
+
   ## Add spline part.
   splResList <- NULL
+  NomEffDimRan <- NULL
   if (!is.null(spline)) {
     splTerms <- labels(splTrms)
     Nterms <- length(splTerms)
@@ -370,6 +373,14 @@ LMMsolve <- function(fixed,
       scFactor <- c(scFactor, splRes$scaleFactor)
     }
   }
+  if (nNonSplinesRandom > 0) {
+    ## calculate NomEff dimension for non-spline part
+    Xs <- spam::as.spam.dgCMatrix(X)
+    NomEffDimNonSplines <- calcNomEffDim(Xs, Z, dim.r[c(1:nNonSplinesRandom)], term.labels.r)
+    ## combine with splines part
+    NomEffDimRan <- c(NomEffDimNonSplines, NomEffDimRan)
+  }
+
   ## Add intercept.
   if (attr(mt, "intercept") == 1) {
     term.labels.f <- c("(Intercept)", term.labels.f)
@@ -414,7 +425,6 @@ LMMsolve <- function(fixed,
   } else {
     grpTheta <- c(1:length(scFactor))
   }
-
 
   if (family$family == "gaussian") {
     obj <- sparseMixedModels(y = y, X = Xs, Z = Z, lGinv = lGinv, lRinv = lRinv,
