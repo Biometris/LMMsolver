@@ -1,4 +1,8 @@
-# LMMsolver 1.0.5.9000
+# LMMsolver 1.0.6.9000
+
+-   A data.frame `trace` with convergence sequence for log-likelihood and effective dimensions, added as extra output returned by `LMMsolve()`.
+
+# LMMsolver 1.0.6
 
 -   A new argument `grpTheta` for `LMMsolve()` to give components in the model the same penalty. 
 -   The dependency package `sp` is replaced by `sf`.
