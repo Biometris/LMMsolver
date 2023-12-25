@@ -373,9 +373,13 @@ LMMsolve <- function(fixed,
       scFactor <- c(scFactor, splRes$scaleFactor)
     }
   }
+
+  ## Convert to spam matrix and cleanup
+  Xs <- spam::as.spam.dgCMatrix(X)
+  Xs <- spam::cleanup(Xs)
+
   if (nNonSplinesRandom > 0) {
     ## calculate NomEff dimension for non-spline part
-    Xs <- spam::as.spam.dgCMatrix(X)
     NomEffDimNonSplines <- calcNomEffDim(Xs, Z, dim.r[c(1:nNonSplinesRandom)], term.labels.r)
     ## combine with splines part
     NomEffDimRan <- c(NomEffDimNonSplines, NomEffDimRan)
@@ -406,9 +410,6 @@ LMMsolve <- function(fixed,
            levelsNoVar, "\n")
     }
   }
-  ## Convert to spam matrix and cleanup
-  Xs <- spam::as.spam.dgCMatrix(X)
-  Xs <- spam::cleanup(Xs)
   ## Fit the model.
   if (!is.null(theta)) {
     if (length(theta) != length(scFactor)) {
