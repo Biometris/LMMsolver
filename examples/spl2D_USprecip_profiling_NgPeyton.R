@@ -97,6 +97,14 @@ length(sn)
 ns <- diff(sn, diff=1)
 table(ns)
 
+fun_org <- function() {LMMsolver:::construct_ADchol_Rcpp_original(cholC,listP)}
+fun_new <- function() {LMMsolver:::construct_ADchol_Rcpp(cholC,listP)}
+
+x1 <- fun_org()
+x2 <- fun_new()
+all.equal(x1,x2)
+
+microbenchmark(fun_org(),fun_new(), times=10L)
 
 obj0 <- LMMsolver:::ADchol(listP)
 

@@ -12,7 +12,7 @@ using namespace std;
 // Transform to C++ Notation indices
 void transf2C(IntegerVector& ndx);
 
-/*
+
 // not very efficient (but not too bad): Make a Class?
 double getvalueC(IntegerVector rowpointers,
                  IntegerVector colindices,
@@ -25,6 +25,6 @@ vector<double> convert_matrix(const vector<int>& rowindices_ext,
                               const IntegerVector& pivot,
                               SEXP A);
 
-*/
+
 
 #endif

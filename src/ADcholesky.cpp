@@ -111,7 +111,6 @@ List construct_ADchol_Rcpp(SEXP U,
   return L;
 }
 
-/*
 // U is a cholesky matrix
 // ZtZ is crossproduct design matrix Z
 // P is a precision matrix.
@@ -194,11 +193,6 @@ List construct_ADchol_Rcpp_original(SEXP U,
   L["P"] = P_matrix;
   return L;
 }
-
-
-*/
-
-
 
 // make indmap for supernode J:
 void makeIndMap(IntegerVector& indmap,
