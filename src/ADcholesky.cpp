@@ -67,7 +67,7 @@ List construct_ADchol_Rcpp(SEXP U,
     transf2C(colindices_P);
 
     vector<double> result(size, 0.0);
-
+    vector<double> z(N);
     for (int J=0; J<Nsupernodes;J++)
     {
       int s = rowpointers[J];
@@ -75,7 +75,7 @@ List construct_ADchol_Rcpp(SEXP U,
       {
         int r = pivot[j];
         if (rowpointers_P[r] != rowpointers_P[r+1]) {
-          NumericVector z(N,0.0);
+          fill(z.begin(), z.end(), 0.0); // init z
           for (int ll=rowpointers_P[r];ll<rowpointers_P[r+1];ll++) {
             int c = colindices_P[ll];
             z[invpivot[c]] = entries_P[ll];
