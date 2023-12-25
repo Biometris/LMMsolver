@@ -29,6 +29,97 @@ List construct_ADchol_Rcpp(SEXP U,
                            const List& P_list) {
   Rcpp::S4 obj_spam(U);
   IntegerVector supernodes = Rcpp::clone<Rcpp::IntegerVector>(obj_spam.slot("supernodes"));
+
+  // Exchange row and columns compared to spam object, as in Ng and Peyton 1993
+  IntegerVector colpointers = Rcpp::clone<Rcpp::IntegerVector>(obj_spam.slot("rowpointers"));
+  IntegerVector rowpointers = Rcpp::clone<Rcpp::IntegerVector>(obj_spam.slot("colpointers"));
+  IntegerVector rowindices = Rcpp::clone<Rcpp::IntegerVector>(obj_spam.slot("colindices"));
+
+  IntegerVector pivot = Rcpp::clone<Rcpp::IntegerVector>(obj_spam.slot("pivot"));
+  IntegerVector invpivot = Rcpp::clone<Rcpp::IntegerVector>(obj_spam.slot("invpivot"));
+
+  IntegerVector Dim = Rcpp::clone<Rcpp::IntegerVector>(obj_spam.slot("dimension"));
+
+  // copy not really needed or used ...
+  NumericVector entries = Rcpp::clone<Rcpp::NumericVector>(obj_spam.slot("entries"));
+  NumericVector ADentries = Rcpp::clone<Rcpp::NumericVector>(obj_spam.slot("entries"));
+
+  transf2C(supernodes);
+  transf2C(rowpointers);
+  transf2C(colpointers);
+  transf2C(rowindices);
+  transf2C(pivot);
+  transf2C(invpivot);
+
+  const int Nsupernodes = supernodes.size()-1;
+  const int N = colpointers.size() - 1;
+  const int size = colpointers[N];
+  const int n_prec_matrices = P_list.size();
+  NumericMatrix P_matrix(size, n_prec_matrices);
+  for (int i=0;i<n_prec_matrices;i++)
+  {
+    Rcpp::S4 obj(P_list[i]);
+    IntegerVector rowpointers_P = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("rowpointers"));
+    IntegerVector colindices_P  = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("colindices"));
+    NumericVector entries_P     = obj.slot("entries");
+
+    transf2C(rowpointers_P);
+    transf2C(colindices_P);
+
+    vector<double> result(size, 0.0);
+
+    for (int J=0; J<Nsupernodes;J++)
+    {
+      int s = rowpointers[J];
+      for (int j=supernodes[J]; j<supernodes[J+1]; j++)
+      {
+        int r = pivot[j];
+        if (rowpointers_P[r] != rowpointers_P[r+1]) {
+          NumericVector z(N,0.0);
+          for (int ll=rowpointers_P[r];ll<rowpointers_P[r+1];ll++) {
+            int c = colindices_P[ll];
+            z[invpivot[c]] = entries_P[ll];
+          }
+
+          int k = s;
+          for (int ndx = colpointers[j]; ndx < colpointers[j+1]; ndx++)
+          {
+            int ii = rowindices[k++];
+            result[ndx] = z[ii];
+          }
+        }
+        s++;
+      }
+    }
+
+    for (int j=0;j<size;j++)
+    {
+      P_matrix(j,i) = result[j];
+    }
+  }
+
+  List L;
+  L["supernodes"] = supernodes;
+  L["colpointers"] = colpointers;
+  L["rowpointers"] = rowpointers;
+  L["rowindices"] =  rowindices;
+  L["pivot"] = pivot;
+  L["invpivot"] = invpivot;
+  L["entries"] = entries;
+  L["ADentries"] = ADentries;
+  L["P"] = P_matrix;
+  return L;
+}
+
+/*
+// U is a cholesky matrix
+// ZtZ is crossproduct design matrix Z
+// P is a precision matrix.
+// [[Rcpp::export]]
+List construct_ADchol_Rcpp_original(SEXP U,
+                           const List& P_list) {
+  Rcpp::S4 obj_spam(U);
+  IntegerVector supernodes = Rcpp::clone<Rcpp::IntegerVector>(obj_spam.slot("supernodes"));
   IntegerVector rowpointers = Rcpp::clone<Rcpp::IntegerVector>(obj_spam.slot("rowpointers"));
   IntegerVector colpointers = Rcpp::clone<Rcpp::IntegerVector>(obj_spam.slot("colpointers"));
   IntegerVector colindices = Rcpp::clone<Rcpp::IntegerVector>(obj_spam.slot("colindices"));
@@ -103,6 +194,11 @@ List construct_ADchol_Rcpp(SEXP U,
   L["P"] = P_matrix;
   return L;
 }
+
+
+*/
+
+
 
 // make indmap for supernode J:
 void makeIndMap(IntegerVector& indmap,
@@ -804,7 +900,6 @@ NumericVector BackwardCholesky(SEXP cholC, NumericVector& b)
 //Not used, just to show the structure of the sparse cholesky matrix with supernodes.
 
 /*
-
 // [[Rcpp::export]]
 NumericMatrix PrintCholesky(SEXP cholC)
 {
@@ -814,6 +909,9 @@ NumericMatrix PrintCholesky(SEXP cholC)
   IntegerVector colpointers = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("rowpointers"));
   IntegerVector rowpointers = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("colpointers"));
   IntegerVector rowindices = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("colindices"));
+  IntegerVector pivot = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("pivot"));
+  IntegerVector invpivot = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("invpivot"));
+
   NumericVector L = Rcpp::clone<Rcpp::NumericVector>(obj.slot("entries"));
 
   // C using indices starting at 0:
@@ -821,6 +919,8 @@ NumericMatrix PrintCholesky(SEXP cholC)
   transf2C(colpointers);
   transf2C(rowpointers);
   transf2C(rowindices);
+  transf2C(pivot);
+  transf2C(invpivot);
 
   const int Nsupernodes = supernodes.size()-1;
   const int N = colpointers.size() - 1;
@@ -842,7 +942,6 @@ NumericMatrix PrintCholesky(SEXP cholC)
       s++;
     }
   }
-
   return A;
 }
 
