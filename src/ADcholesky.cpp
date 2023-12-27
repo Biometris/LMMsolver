@@ -75,7 +75,7 @@ List construct_ADchol_Rcpp(SEXP U,
       {
         int r = pivot[j];
         if (rowpointers_P[r] != rowpointers_P[r+1]) {
-          fill(z.begin(), z.end(), 0.0); // init z
+          std::fill(z.begin(), z.end(), 0.0);
           for (int ll=rowpointers_P[r];ll<rowpointers_P[r+1];ll++) {
             int c = colindices_P[ll];
             z[invpivot[c]] = entries_P[ll];
