@@ -13,4 +13,6 @@ void transf2C(IntegerVector& ndx);
 
 IntegerVector GetIntVector(Rcpp::S4 obj, const String& slotName, int ArrayIndexing);
 
+NumericVector GetNumericVector(Rcpp::S4 obj, const String& slotName);
+
 #endif

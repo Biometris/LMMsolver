@@ -29,3 +29,9 @@ IntegerVector GetIntVector(Rcpp::S4 obj, const String& slotName, int ArrayIndexi
   stop("argument ArrayIndex should be 0-based (C/C++) or 1-based (R).");
   return x;
 }
+
+NumericVector GetNumericVector(Rcpp::S4 obj, const String& slotName) {
+  NumericVector x = Rcpp::clone<Rcpp::NumericVector>(obj.slot(slotName));
+  return x;
+}
+
