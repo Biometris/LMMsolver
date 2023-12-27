@@ -22,18 +22,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// construct_ADchol_Rcpp_original
-List construct_ADchol_Rcpp_original(SEXP U, const List& P_list);
-RcppExport SEXP _LMMsolver_construct_ADchol_Rcpp_original(SEXP USEXP, SEXP P_listSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type U(USEXP);
-    Rcpp::traits::input_parameter< const List& >::type P_list(P_listSEXP);
-    rcpp_result_gen = Rcpp::wrap(construct_ADchol_Rcpp_original(U, P_list));
-    return rcpp_result_gen;
-END_RCPP
-}
 // logdet
 double logdet(SEXP arg, NumericVector lambda);
 RcppExport SEXP _LMMsolver_logdet(SEXP argSEXP, SEXP lambdaSEXP) {
@@ -106,6 +94,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// PrintCholesky
+NumericMatrix PrintCholesky(SEXP cholC);
+RcppExport SEXP _LMMsolver_PrintCholesky(SEXP cholCSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type cholC(cholCSEXP);
+    rcpp_result_gen = Rcpp::wrap(PrintCholesky(cholC));
+    return rcpp_result_gen;
+END_RCPP
+}
 // RowKron
 List RowKron(SEXP sX1, SEXP sX2);
 RcppExport SEXP _LMMsolver_RowKron(SEXP sX1SEXP, SEXP sX2SEXP) {
@@ -121,13 +120,13 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_LMMsolver_construct_ADchol_Rcpp", (DL_FUNC) &_LMMsolver_construct_ADchol_Rcpp, 2},
-    {"_LMMsolver_construct_ADchol_Rcpp_original", (DL_FUNC) &_LMMsolver_construct_ADchol_Rcpp_original, 2},
     {"_LMMsolver_logdet", (DL_FUNC) &_LMMsolver_logdet, 2},
     {"_LMMsolver_dlogdet", (DL_FUNC) &_LMMsolver_dlogdet, 3},
     {"_LMMsolver_partialDerivCholesky", (DL_FUNC) &_LMMsolver_partialDerivCholesky, 1},
     {"_LMMsolver_diagXCinvXt", (DL_FUNC) &_LMMsolver_diagXCinvXt, 2},
     {"_LMMsolver_ForwardCholesky", (DL_FUNC) &_LMMsolver_ForwardCholesky, 2},
     {"_LMMsolver_BackwardCholesky", (DL_FUNC) &_LMMsolver_BackwardCholesky, 2},
+    {"_LMMsolver_PrintCholesky", (DL_FUNC) &_LMMsolver_PrintCholesky, 1},
     {"_LMMsolver_RowKron", (DL_FUNC) &_LMMsolver_RowKron, 2},
     {NULL, NULL, 0}
 };

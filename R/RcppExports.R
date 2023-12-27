@@ -5,10 +5,6 @@ construct_ADchol_Rcpp <- function(U, P_list) {
     .Call(`_LMMsolver_construct_ADchol_Rcpp`, U, P_list)
 }
 
-construct_ADchol_Rcpp_original <- function(U, P_list) {
-    .Call(`_LMMsolver_construct_ADchol_Rcpp_original`, U, P_list)
-}
-
 logdet <- function(arg, lambda) {
     .Call(`_LMMsolver_logdet`, arg, lambda)
 }
@@ -55,6 +51,10 @@ ForwardCholesky <- function(cholC, b) {
 
 BackwardCholesky <- function(cholC, b) {
     .Call(`_LMMsolver_BackwardCholesky`, cholC, b)
+}
+
+PrintCholesky <- function(cholC) {
+    .Call(`_LMMsolver_PrintCholesky`, cholC)
 }
 
 RowKron <- function(sX1, sX2) {
