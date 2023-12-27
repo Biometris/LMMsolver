@@ -57,6 +57,10 @@ PrintCholesky <- function(cholC) {
     .Call(`_LMMsolver_PrintCholesky`, cholC)
 }
 
+GetIntVector <- function(obj, slotName, ArrayIndexing) {
+    .Call(`_LMMsolver_GetIntVector`, obj, slotName, ArrayIndexing)
+}
+
 RowKron <- function(sX1, sX2) {
     .Call(`_LMMsolver_RowKron`, sX1, sX2)
 }

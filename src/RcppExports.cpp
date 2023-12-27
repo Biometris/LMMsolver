@@ -105,6 +105,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// GetIntVector
+IntegerVector GetIntVector(Rcpp::S4 obj, const String& slotName, int ArrayIndexing);
+RcppExport SEXP _LMMsolver_GetIntVector(SEXP objSEXP, SEXP slotNameSEXP, SEXP ArrayIndexingSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::S4 >::type obj(objSEXP);
+    Rcpp::traits::input_parameter< const String& >::type slotName(slotNameSEXP);
+    Rcpp::traits::input_parameter< int >::type ArrayIndexing(ArrayIndexingSEXP);
+    rcpp_result_gen = Rcpp::wrap(GetIntVector(obj, slotName, ArrayIndexing));
+    return rcpp_result_gen;
+END_RCPP
+}
 // RowKron
 List RowKron(SEXP sX1, SEXP sX2);
 RcppExport SEXP _LMMsolver_RowKron(SEXP sX1SEXP, SEXP sX2SEXP) {
@@ -127,6 +140,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_LMMsolver_ForwardCholesky", (DL_FUNC) &_LMMsolver_ForwardCholesky, 2},
     {"_LMMsolver_BackwardCholesky", (DL_FUNC) &_LMMsolver_BackwardCholesky, 2},
     {"_LMMsolver_PrintCholesky", (DL_FUNC) &_LMMsolver_PrintCholesky, 1},
+    {"_LMMsolver_GetIntVector", (DL_FUNC) &_LMMsolver_GetIntVector, 3},
     {"_LMMsolver_RowKron", (DL_FUNC) &_LMMsolver_RowKron, 2},
     {NULL, NULL, 0}
 };
