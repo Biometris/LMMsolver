@@ -443,6 +443,7 @@ LMMsolve <- function(fixed,
     nNonRes <- length(theta) - nRes
     fixedTheta <- c(rep(FALSE, nNonRes), rep(TRUE, nRes))
     theta[(nNonRes + 1):(nNonRes + nRes)] <- 1
+    trace_GLMM <- NULL
     for (i in 1:maxit) {
       deriv <- family$mu.eta(eta)
       z <- (eta - offset) + (y - mu)/deriv
@@ -458,6 +459,10 @@ LMMsolve <- function(fixed,
       mu <- family$linkinv(eta)
       theta <- obj$theta
       tol <- sum((eta - eta.old)^2) / sum(eta^2)
+
+      aux.df <- data.frame(itOuter = rep(i, obj$nIter),
+                           tol=c(rep(NA,obj$nIter-1), tol))
+      trace_GLMM <- rbind(trace_GLMM, cbind(aux.df, obj$trace))
       if (trace) {
         cat("Generalized Linear Mixed Model iteration", i, ", tol=", tol, "\n")
       }
@@ -515,6 +520,11 @@ LMMsolve <- function(fixed,
   ## Compute REML constant.
   constantREML <- -0.5 * log(2 * pi) * (length(y) - sum(dim.f))
   dim <- c(dim.f, dim.r)
+  if (family$family == "gaussian") {
+    trace <- obj$trace
+  } else {
+    trace <- trace_GLMM
+  }
   return(LMMsolveObject(logL = obj$logL,
                         sigma2e = obj$sigma2e,
                         tau2e = obj$tau2e,
@@ -541,5 +551,5 @@ LMMsolve <- function(fixed,
                         term.labels.r = term.labels.r,
                         splRes = splResList,
                         family = family,
-                        trace = obj$trace))
+                        trace = trace))
 }
