@@ -229,8 +229,9 @@ calcNomEffDim <- function(X,
       XZ <- cbind(X, Zi)
       r <- qr(as.matrix(XZ))$rank
       if (r == p) {
-        stop("Singularity problem with term", term.labels.r[i],
-             "in the random part of the model")
+        stop("Singularity problem with term ", term.labels.r[i],
+             " in the random part of the model.\n",
+             call. = FALSE)
       }
       EDnom[i] <- r - p
     }
