@@ -22,18 +22,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// logdet
-double logdet(Rcpp::S4 obj, NumericVector lambda);
-RcppExport SEXP _LMMsolver_logdet(SEXP objSEXP, SEXP lambdaSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Rcpp::S4 >::type obj(objSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type lambda(lambdaSEXP);
-    rcpp_result_gen = Rcpp::wrap(logdet(obj, lambda));
-    return rcpp_result_gen;
-END_RCPP
-}
 // dlogdet
 NumericVector dlogdet(Rcpp::S4 obj, NumericVector theta, Nullable<NumericVector> b_);
 RcppExport SEXP _LMMsolver_dlogdet(SEXP objSEXP, SEXP thetaSEXP, SEXP b_SEXP) {
@@ -94,17 +82,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// PrintCholesky
-NumericMatrix PrintCholesky(SEXP cholC);
-RcppExport SEXP _LMMsolver_PrintCholesky(SEXP cholCSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type cholC(cholCSEXP);
-    rcpp_result_gen = Rcpp::wrap(PrintCholesky(cholC));
-    return rcpp_result_gen;
-END_RCPP
-}
 // GetIntVector
 IntegerVector GetIntVector(Rcpp::S4 obj, const String& slotName, int ArrayIndexing);
 RcppExport SEXP _LMMsolver_GetIntVector(SEXP objSEXP, SEXP slotNameSEXP, SEXP ArrayIndexingSEXP) {
@@ -130,18 +107,41 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// logdet
+double logdet(Rcpp::S4 obj, NumericVector lambda);
+RcppExport SEXP _LMMsolver_logdet(SEXP objSEXP, SEXP lambdaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::S4 >::type obj(objSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type lambda(lambdaSEXP);
+    rcpp_result_gen = Rcpp::wrap(logdet(obj, lambda));
+    return rcpp_result_gen;
+END_RCPP
+}
+// PrintCholesky
+NumericMatrix PrintCholesky(SEXP cholC);
+RcppExport SEXP _LMMsolver_PrintCholesky(SEXP cholCSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type cholC(cholCSEXP);
+    rcpp_result_gen = Rcpp::wrap(PrintCholesky(cholC));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_LMMsolver_construct_ADchol_Rcpp", (DL_FUNC) &_LMMsolver_construct_ADchol_Rcpp, 2},
-    {"_LMMsolver_logdet", (DL_FUNC) &_LMMsolver_logdet, 2},
     {"_LMMsolver_dlogdet", (DL_FUNC) &_LMMsolver_dlogdet, 3},
     {"_LMMsolver_partialDerivCholesky", (DL_FUNC) &_LMMsolver_partialDerivCholesky, 1},
     {"_LMMsolver_diagXCinvXt", (DL_FUNC) &_LMMsolver_diagXCinvXt, 2},
     {"_LMMsolver_ForwardCholesky", (DL_FUNC) &_LMMsolver_ForwardCholesky, 2},
     {"_LMMsolver_BackwardCholesky", (DL_FUNC) &_LMMsolver_BackwardCholesky, 2},
-    {"_LMMsolver_PrintCholesky", (DL_FUNC) &_LMMsolver_PrintCholesky, 1},
     {"_LMMsolver_GetIntVector", (DL_FUNC) &_LMMsolver_GetIntVector, 3},
     {"_LMMsolver_RowKron", (DL_FUNC) &_LMMsolver_RowKron, 2},
+    {"_LMMsolver_logdet", (DL_FUNC) &_LMMsolver_logdet, 2},
+    {"_LMMsolver_PrintCholesky", (DL_FUNC) &_LMMsolver_PrintCholesky, 1},
     {NULL, NULL, 0}
 };
 

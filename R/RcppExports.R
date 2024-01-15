@@ -5,10 +5,6 @@ construct_ADchol_Rcpp <- function(obj_spam, P_list) {
     .Call(`_LMMsolver_construct_ADchol_Rcpp`, obj_spam, P_list)
 }
 
-logdet <- function(obj, lambda) {
-    .Call(`_LMMsolver_logdet`, obj, lambda)
-}
-
 #' Calculate the partial derivatives of log-determinant.
 #'
 #' This function calculates the partial derivatives of the the log-determinant in an
@@ -53,15 +49,19 @@ BackwardCholesky <- function(cholC, b) {
     .Call(`_LMMsolver_BackwardCholesky`, cholC, b)
 }
 
-PrintCholesky <- function(cholC) {
-    .Call(`_LMMsolver_PrintCholesky`, cholC)
-}
-
 GetIntVector <- function(obj, slotName, ArrayIndexing) {
     .Call(`_LMMsolver_GetIntVector`, obj, slotName, ArrayIndexing)
 }
 
 RowKron <- function(sX1, sX2) {
     .Call(`_LMMsolver_RowKron`, sX1, sX2)
+}
+
+logdet <- function(obj, lambda) {
+    .Call(`_LMMsolver_logdet`, obj, lambda)
+}
+
+PrintCholesky <- function(cholC) {
+    .Call(`_LMMsolver_PrintCholesky`, cholC)
 }
 
