@@ -138,11 +138,11 @@ void cmod1(NumericVector& L, int j, int J,
   {
     int jk = colpointers[k] + (j-k);
     int ik = jk;
-    double Ljk = L[jk];
+    const double& Ljk = L[jk];
     for (int ij=s; ij<e; ij++)
     {
-       L[ij] -= L[ik]*Ljk;
-       ik++;
+       L[ij] -= L[ik++]*Ljk;
+       //ik++;
     }
   }
 }
@@ -174,7 +174,7 @@ void ADcmod1(NumericVector& F,
 }
 
 // Adjust column j for all columns in supernode K:
-void cmod2(NumericVector& L, int j, int K,
+void cmod2(NumericVector& L, int j, int K, int sz,
            NumericVector& t,
            const IntegerVector& indmap,
            const IntegerVector& supernodes,
@@ -182,47 +182,49 @@ void cmod2(NumericVector& L, int j, int K,
            const IntegerVector& colpointers,
            const IntegerVector& rowindices)
 {
-  // get number of elements r >= j in supernode K:
-  int sz =0;
-
-  // t is dense version of L[j], updated values at end of function:
-  //const int N = colpointers.size() - 1;
-  for (int r = rowpointers[K+1] - 1;r>=rowpointers[K];r--)
+  const int& sCol = supernodes[K];
+  const int& eCol = supernodes[K+1];
+  if (eCol - sCol > 1)
   {
-    int ndx = rowindices[r];
-    //int pos = colpointers[j+1] - 1 - indmap[ndx];
-    t[sz] = 0.0;
-    sz++;
-    if (ndx==j)
-    {
-      break;
+    // init t:
+    for (int i=0;i<sz;i++) {
+      t[i] = 0.0;
     }
-  }
 
-  // for all columns k in supernode K:
-  for (int k=supernodes[K]; k<supernodes[K+1]; k++)
-  {
+    for (int k=sCol; k<eCol; k++)
+    {
+      int jk = colpointers[k+1]-sz;
+      int ik = jk;
+      const double& Ljk = L[jk];
+      for (int i=sz-1;i>=0;i--)
+      {
+        t[i] += L[ik++]*Ljk;
+        //ik++;
+      }
+    }
+
+    int r = rowpointers[K+1]-1;
+    int ref_pos = colpointers[j+1] - 1;
+    for (int i=0;i<sz;i++)
+    {
+      int ndx = rowindices[r--];
+      int pos = ref_pos - indmap[ndx];
+      L[pos] -= t[i];
+    }
+  } else {
+    // if only one column in supernode:
+    int k = sCol;
     int jk = colpointers[k+1]-sz;
     int ik = jk;
-    double Ljk = L[jk];
-    for (int i=sz-1;i>=0;i--)
+    const double& Ljk = L[jk];
+    int r = rowpointers[K+1] - sz;
+    int ref_pos = colpointers[j+1] - 1;
+    for (int i=0;i<sz;i++)
     {
-      t[i] += L[ik]*Ljk;
-      ik++;
-    }
-  }
-
-  // write results dense matrix t back to L_j
-  sz=0;
-  for (int r = rowpointers[K+1] - 1;r>=rowpointers[K];r--)
-  {
-    int ndx = rowindices[r];
-    int pos = colpointers[j+1] - 1 - indmap[ndx];
-    L[pos] -= t[sz];
-    sz++;
-    if (ndx==j)
-    {
-      break;
+      int ndx = rowindices[r++];
+      int pos = ref_pos - indmap[ndx];
+      L[pos] -= L[ik++]*Ljk;
+      //ik++;
     }
   }
 }
@@ -335,11 +337,14 @@ void cholesky(NumericVector& L,
     makeIndMap(indmap, J, rowpointers, rowindices);
     for (int j=supernodes[J];j<supernodes[J+1];j++)
     {
+      //Rcout << "column " << j << endl;
       for (Node **ptr = &S[j]; *ptr;)
       {
         Node *f = removefirstnode(ptr);
         int K = f->data;
-        cmod2(L, j, K, t, indmap, supernodes, rowpointers, colpointers, rowindices);
+        int sz = rowpointers[K+1] - colhead[K];
+        //Rcout << "   diff row-ptr " << rowpointers[K+1] - colhead[K] << endl;
+        cmod2(L, j, K, sz, t, indmap, supernodes, rowpointers, colpointers, rowindices);
 
         colhead[K]++;
         if (colhead[K] < rowpointers[K+1]) {
@@ -854,4 +859,5 @@ NumericMatrix PrintCholesky(SEXP cholC)
   }
   return A;
 }
+
 
