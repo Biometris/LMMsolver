@@ -23,27 +23,27 @@ BEGIN_RCPP
 END_RCPP
 }
 // logdet
-double logdet(SEXP arg, NumericVector lambda);
-RcppExport SEXP _LMMsolver_logdet(SEXP argSEXP, SEXP lambdaSEXP) {
+double logdet(Rcpp::S4 obj, NumericVector lambda);
+RcppExport SEXP _LMMsolver_logdet(SEXP objSEXP, SEXP lambdaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type arg(argSEXP);
+    Rcpp::traits::input_parameter< Rcpp::S4 >::type obj(objSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type lambda(lambdaSEXP);
-    rcpp_result_gen = Rcpp::wrap(logdet(arg, lambda));
+    rcpp_result_gen = Rcpp::wrap(logdet(obj, lambda));
     return rcpp_result_gen;
 END_RCPP
 }
 // dlogdet
-NumericVector dlogdet(SEXP ADobj, NumericVector theta, Nullable<NumericVector> b_);
-RcppExport SEXP _LMMsolver_dlogdet(SEXP ADobjSEXP, SEXP thetaSEXP, SEXP b_SEXP) {
+NumericVector dlogdet(Rcpp::S4 obj, NumericVector theta, Nullable<NumericVector> b_);
+RcppExport SEXP _LMMsolver_dlogdet(SEXP objSEXP, SEXP thetaSEXP, SEXP b_SEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type ADobj(ADobjSEXP);
+    Rcpp::traits::input_parameter< Rcpp::S4 >::type obj(objSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type theta(thetaSEXP);
     Rcpp::traits::input_parameter< Nullable<NumericVector> >::type b_(b_SEXP);
-    rcpp_result_gen = Rcpp::wrap(dlogdet(ADobj, theta, b_));
+    rcpp_result_gen = Rcpp::wrap(dlogdet(obj, theta, b_));
     return rcpp_result_gen;
 END_RCPP
 }

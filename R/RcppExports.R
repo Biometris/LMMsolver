@@ -5,8 +5,8 @@ construct_ADchol_Rcpp <- function(U, P_list) {
     .Call(`_LMMsolver_construct_ADchol_Rcpp`, U, P_list)
 }
 
-logdet <- function(arg, lambda) {
-    .Call(`_LMMsolver_logdet`, arg, lambda)
+logdet <- function(obj, lambda) {
+    .Call(`_LMMsolver_logdet`, obj, lambda)
 }
 
 #' Calculate the partial derivatives of log-determinant.
@@ -33,8 +33,8 @@ logdet <- function(arg, lambda) {
 #' @noRd
 #' @keywords internal
 #'
-dlogdet <- function(ADobj, theta, b_ = NULL) {
-    .Call(`_LMMsolver_dlogdet`, ADobj, theta, b_)
+dlogdet <- function(obj, theta, b_ = NULL) {
+    .Call(`_LMMsolver_dlogdet`, obj, theta, b_)
 }
 
 partialDerivCholesky <- function(cholC) {

@@ -118,7 +118,7 @@ void makeIndMap(IntegerVector& indmap,
                 const IntegerVector& rowindices)
 {
   int s = rowpointers[J];
-  int e  = rowpointers[J+1];
+  int e = rowpointers[J+1];
   int l = 0;
   for (int i=e-1; i>=s;i--)
   {
@@ -131,12 +131,12 @@ void cmod1(NumericVector& L, int j, int J,
            const IntegerVector& supernodes,
            const IntegerVector& colpointers)
 {
-  int s = colpointers[j];
-  int e = colpointers[j+1];
+  const int& s = colpointers[j];
+  const int& e = colpointers[j+1];
   // for all columns in supernode J left to j:
   for (int k=supernodes[J];k<j;k++)
   {
-    int jk = colpointers[k] + (j-k);
+    const int& jk = colpointers[k] + (j-k);
     int ik = jk;
     const double& Ljk = L[jk];
     for (int ij=s; ij<e; ij++)
@@ -187,7 +187,8 @@ void cmod2(NumericVector& L, int j, int K, int sz,
   if (eCol - sCol > 1)
   {
     // init t:
-    for (int i=0;i<sz;i++) {
+    for (int i=0;i<sz;i++)
+    {
       t[i] = 0.0;
     }
 
@@ -231,7 +232,7 @@ void cmod2(NumericVector& L, int j, int K, int sz,
 
 // Adjust column j for all columns in supernode K:
 void ADcmod2(NumericVector& F,
-            const NumericVector& L, int j, int K,
+            const NumericVector& L, int j, int K, int sz,
            NumericVector& t,
            const IntegerVector& indmap,
            const IntegerVector& supernodes,
@@ -240,22 +241,22 @@ void ADcmod2(NumericVector& F,
            const IntegerVector& rowindices)
 {
   // get number of elements r >= j in supernode K:
-  int sz =0;
 
   // t is dense version of L[j], updated values at end of function:
   //const int N = colpointers.size() - 1;
+  int i=0;
   for (int r = rowpointers[K+1] - 1;r>=rowpointers[K];r--)
   {
     int ndx = rowindices[r];
     int pos = colpointers[j+1] - 1 - indmap[ndx];
-    t[sz] = F[pos];
-    sz++;
-    if (ndx==j)
-    {
-      break;
-    }
+    t[i++] = F[pos];
+    //i++;
+    //if (ndx==j)
+    //{
+    //  break;
+    //}
   }
-
+  //Rcout << "test " << i << " " << sz << endl;
   // for all columns k in supernode K:
   for (int k=supernodes[K]; k<supernodes[K+1]; k++)
   {
@@ -277,8 +278,9 @@ void ADcmod2(NumericVector& F,
 
 void cdiv(NumericVector& L, int j, const IntegerVector& colpointers)
 {
-  const int s = colpointers[j];
-  const int e = colpointers[j+1];
+  const int& s = colpointers[j];
+  const int& e = colpointers[j+1];
+
   // pivot:
   L[s] = sqrt(L[s]);
   // update column j:
@@ -330,20 +332,17 @@ void cholesky(NumericVector& L,
       S[rNdx] = add(nodeJ, S[rNdx]);
     }
   }
-
   IntegerVector indmap(N,0);
   NumericVector t(N);
   for (int J=0; J<Nsupernodes;J++) {
     makeIndMap(indmap, J, rowpointers, rowindices);
     for (int j=supernodes[J];j<supernodes[J+1];j++)
     {
-      //Rcout << "column " << j << endl;
       for (Node **ptr = &S[j]; *ptr;)
       {
         Node *f = removefirstnode(ptr);
         int K = f->data;
         int sz = rowpointers[K+1] - colhead[K];
-        //Rcout << "   diff row-ptr " << rowpointers[K+1] - colhead[K] << endl;
         cmod2(L, j, K, sz, t, indmap, supernodes, rowpointers, colpointers, rowindices);
 
         colhead[K]++;
@@ -408,7 +407,8 @@ void ADcholesky(NumericVector& F,
           }  else {
              delete f;
           }
-          ADcmod2(F, L, j, K, t, indmap, supernodes, rowpointers,colpointers,rowindices);
+          int sz = rowpointers[K+1] - 1 - colhead[K];
+          ADcmod2(F, L, j, K, sz, t, indmap, supernodes, rowpointers,colpointers,rowindices);
        }
     }
   }
@@ -437,6 +437,41 @@ void initAD(NumericVector& F, const NumericVector& L, const IntegerVector& colpo
   }
 }
 
+// [[Rcpp::export]]
+double logdet(Rcpp::S4 obj, NumericVector lambda)
+{
+  //Rcpp::S4 obj(arg);
+  IntegerVector supernodes = obj.slot("supernodes");
+  IntegerVector rowpointers = obj.slot("rowpointers");
+  IntegerVector colpointers = obj.slot("colpointers");
+  IntegerVector rowindices = obj.slot("rowindices");
+  NumericVector L = obj.slot("entries");
+  NumericMatrix P = obj.slot("P");
+  //NumericMatrix P = Rcpp::clone<Rcpp::NumericMatrix>(obj.slot("P"));
+
+  // define matrix L (lower triangle matrix values)
+  const int sz = P.nrow();
+  const int n_prec_mat = P.ncol();
+  //NumericVector L(sz, 0.0);
+  for (int i=0;i<sz;i++)
+  {
+    L[i] = 0.0;
+  }
+  for (int k=0;k<n_prec_mat;k++)
+  {
+    NumericMatrix::Column Pk = P(_, k);
+    double alpha = lambda[k];
+    for (int i=0;i<sz;i++)
+    {
+      L[i] += alpha*Pk[i];
+    }
+  }
+  cholesky(L, supernodes, rowpointers, colpointers, rowindices);
+  return logdet(L, colpointers);
+}
+
+
+/*
 // [[Rcpp::export]]
 double logdet(SEXP arg, NumericVector lambda)
 {
@@ -469,7 +504,7 @@ double logdet(SEXP arg, NumericVector lambda)
   cholesky(L, supernodes, rowpointers, colpointers, rowindices);
   return logdet(L, colpointers);
 }
-
+*/
 
 NumericVector forwardCholesky(
     const NumericVector& L,
@@ -588,10 +623,10 @@ NumericVector backwardCholesky(
 //' @keywords internal
 //'
 // [[Rcpp::export]]
-NumericVector dlogdet(SEXP ADobj, NumericVector theta,
+NumericVector dlogdet(Rcpp::S4 obj, NumericVector theta,
                       Nullable<NumericVector> b_ = R_NilValue)
 {
-  Rcpp::S4 obj(ADobj);
+  //Rcpp::S4 obj(ADobj);
   IntegerVector supernodes = obj.slot("supernodes");
   IntegerVector rowpointers = obj.slot("rowpointers");
   IntegerVector colpointers = obj.slot("colpointers");
