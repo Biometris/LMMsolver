@@ -25,9 +25,9 @@ using namespace std;
 // ZtZ is crossproduct design matrix Z
 // P is a precision matrix.
 // [[Rcpp::export]]
-List construct_ADchol_Rcpp(SEXP U,
+List construct_ADchol_Rcpp(Rcpp::S4 obj_spam,
                            const List& P_list) {
-  Rcpp::S4 obj_spam(U);
+  //Rcpp::S4 obj_spam(U);
   IntegerVector supernodes = Rcpp::clone<Rcpp::IntegerVector>(obj_spam.slot("supernodes"));
 
   // Exchange row and columns compared to spam object, as in Ng and Peyton 1993

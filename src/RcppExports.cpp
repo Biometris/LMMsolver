@@ -11,14 +11,14 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // construct_ADchol_Rcpp
-List construct_ADchol_Rcpp(SEXP U, const List& P_list);
-RcppExport SEXP _LMMsolver_construct_ADchol_Rcpp(SEXP USEXP, SEXP P_listSEXP) {
+List construct_ADchol_Rcpp(Rcpp::S4 obj_spam, const List& P_list);
+RcppExport SEXP _LMMsolver_construct_ADchol_Rcpp(SEXP obj_spamSEXP, SEXP P_listSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type U(USEXP);
+    Rcpp::traits::input_parameter< Rcpp::S4 >::type obj_spam(obj_spamSEXP);
     Rcpp::traits::input_parameter< const List& >::type P_list(P_listSEXP);
-    rcpp_result_gen = Rcpp::wrap(construct_ADchol_Rcpp(U, P_list));
+    rcpp_result_gen = Rcpp::wrap(construct_ADchol_Rcpp(obj_spam, P_list));
     return rcpp_result_gen;
 END_RCPP
 }
