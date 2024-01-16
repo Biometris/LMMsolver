@@ -1,16 +1,15 @@
-// Backwards Automated Differentation of Cholesky Algorithm
-// to calculate the partial derivatives of log-determinant of
-// a positive definite symmetric (sparse) matrix.
+// sparse left-looking Cholesky using supernodes.
 //
-// For details on the implementation of sparse Cholesky, see:
-// Ng and Peyton 1993, Furrer and Sain 2010
+// For details see:
+// Ng, Esmond G., and Barry W. Peyton.,
+// "Block sparse Cholesky algorithms on advanced uniprocessor computers."
+// SIAM Journal on Scientific Computing 14, no. 5 (1993): 1034-1056.
 //
-// For details on Backwards Automated Differentiation see:
-// S.P. Smith 1995, Differentiation of the Cholesky Algorithm
-// and
-// S.P. Smith 2000, A TUTORIAL ON SIMPLICITY AND COMPUTATIONAL DIFFERENTIATION FOR
-// STATISTICIANS
-//
+// Furrer, Reinhard, and Stephan R. Sain.
+// "spam: A sparse matrix R package with emphasis on MCMC
+// methods for Gaussian Markov random fields."
+// Journal of Statistical Software 36 (2010): 1-25.
+
 #include <Rcpp.h>
 #include <set>
 #include <vector>
@@ -67,51 +66,34 @@ void cmod2(NumericVector& L, int j, int K, int sz,
            const IntegerVector& colpointers,
            const IntegerVector& rowindices)
 {
+  // init t:
+  for (int i=0;i<sz;i++)
+  {
+    t[i] = 0.0;
+  }
+
   const int& sCol = supernodes[K];
   const int& eCol = supernodes[K+1];
-  if (eCol - sCol > 1)
+
+  for (int k=sCol; k<eCol; k++)
   {
-    // init t:
-    for (int i=0;i<sz;i++)
-    {
-      t[i] = 0.0;
-    }
-
-    for (int k=sCol; k<eCol; k++)
-    {
-      int jk = colpointers[k+1]-sz;
-      int ik = jk;
-      const double& Ljk = L[jk];
-      for (int i=sz-1;i>=0;i--)
-      {
-        t[i] += L[ik++]*Ljk;
-        //ik++;
-      }
-    }
-
-    int r = rowpointers[K+1]-1;
-    int ref_pos = colpointers[j+1] - 1;
-    for (int i=0;i<sz;i++)
-    {
-      int ndx = rowindices[r--];
-      int pos = ref_pos - indmap[ndx];
-      L[pos] -= t[i];
-    }
-  } else {
-    // if only one column in supernode:
-    int k = sCol;
     int jk = colpointers[k+1]-sz;
     int ik = jk;
     const double& Ljk = L[jk];
-    int r = rowpointers[K+1] - sz;
-    int ref_pos = colpointers[j+1] - 1;
-    for (int i=0;i<sz;i++)
+    for (int i=sz-1;i>=0;i--)
     {
-      int ndx = rowindices[r++];
-      int pos = ref_pos - indmap[ndx];
-      L[pos] -= L[ik++]*Ljk;
+      t[i] += L[ik++]*Ljk;
       //ik++;
     }
+  }
+
+  int r = rowpointers[K+1]-1;
+  int ref_pos = colpointers[j+1] - 1;
+  for (int i=0;i<sz;i++)
+  {
+    int ndx = rowindices[r--];
+    int pos = ref_pos - indmap[ndx];
+    L[pos] -= t[i];
   }
 }
 

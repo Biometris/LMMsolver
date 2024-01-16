@@ -1,16 +1,24 @@
-// Backwards Automated Differentation of Cholesky Algorithm
+// Backwards Automated Differentiation of Cholesky Algorithm
 // to calculate the partial derivatives of log-determinant of
-// a positive definite symmetric (sparse) matrix.
+// positive definite symmetric sparse matrices.
 //
-// For details on the implementation of sparse Cholesky, see:
-// Ng and Peyton 1993, Furrer and Sain 2010
+// References:
+// Ng, Esmond G., and Barry W. Peyton.,
+// "Block sparse Cholesky algorithms on advanced uniprocessor computers."
+// SIAM Journal on Scientific Computing 14, no. 5 (1993): 1034-1056.
 //
-// For details on Backwards Automated Differentiation see:
-// S.P. Smith 1995, Differentiation of the Cholesky Algorithm
-// and
+// Furrer, Reinhard, and Stephan R. Sain.
+// "spam: A sparse matrix R package with emphasis on MCMC
+// methods for Gaussian Markov random fields."
+// Journal of Statistical Software 36 (2010): 1-25.
+//
+// Smith, Stephen P. "Differentiation of the Cholesky algorithm."
+// Journal of Computational and Graphical Statistics 4, no. 2 (1995): 134-147.
+//
 // S.P. Smith 2000, A TUTORIAL ON SIMPLICITY AND COMPUTATIONAL DIFFERENTIATION FOR
 // STATISTICIANS
 //
+
 #include <Rcpp.h>
 #include <set>
 #include <vector>
