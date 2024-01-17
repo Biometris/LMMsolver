@@ -21,5 +21,25 @@ void cholesky(NumericVector& L,
 
 double logdet(const NumericVector& L, const IntegerVector& colpointers);
 
+NumericVector backwardCholesky(
+    const NumericVector& L,
+    const NumericVector& b,
+    const IntegerVector& supernodes,
+    const IntegerVector& rowpointers,
+    const IntegerVector& colpointers,
+    const IntegerVector& rowindices,
+    const IntegerVector& pivot,
+    const IntegerVector& invpivot);
+
+NumericVector forwardCholesky(
+    const NumericVector& L,
+    const NumericVector& b,
+    const IntegerVector& supernodes,
+    const IntegerVector& rowpointers,
+    const IntegerVector& colpointers,
+    const IntegerVector& rowindices,
+    const IntegerVector& pivot,
+    const IntegerVector& invpivot);
+
 
 #endif

@@ -219,6 +219,99 @@ double logdet(Rcpp::S4 obj, NumericVector lambda)
   return logdet(L, colpointers);
 }
 
+NumericVector forwardCholesky(
+    const NumericVector& L,
+    const NumericVector& b,
+    const IntegerVector& supernodes,
+    const IntegerVector& rowpointers,
+    const IntegerVector& colpointers,
+    const IntegerVector& rowindices,
+    const IntegerVector& pivot,
+    const IntegerVector& invpivot)
+{
+  const int Nsupernodes = supernodes.size()-1;
+  const int N = colpointers.size() - 1;
+  NumericVector x(N);
+  NumericVector Pb(N);  // permutation of P
+  NumericVector sum(N); // sum for each column
+  for (int i=0;i<N;i++)
+  {
+    Pb[i] = b[pivot[i]];
+  }
+  for (int J=0; J<Nsupernodes;J++)
+  {
+    int s = rowpointers[J];
+    for (int j=supernodes[J]; j<supernodes[J+1]; j++)
+    {
+      const double x_j = (Pb[j]-sum[j])/L[colpointers[j]];
+      x[j] = x_j;
+      // the non-diagonal elements of column j
+      for (int ndx = colpointers[j]+1, k=s+1; ndx < colpointers[j+1]; ndx++)
+      {
+        int i = rowindices[k++];
+        sum[i] += L[ndx]*x_j;
+      }
+      s++;
+    }
+  }
+
+  NumericVector xP(N); // inverse permutation
+  for (int i=0;i<N;i++) {
+    xP[i] = x[invpivot[i]];
+  }
+  return xP;
+
+}
+
+
+NumericVector backwardCholesky(
+    const NumericVector& L,
+    const NumericVector& b,
+    const IntegerVector& supernodes,
+    const IntegerVector& rowpointers,
+    const IntegerVector& colpointers,
+    const IntegerVector& rowindices,
+    const IntegerVector& pivot,
+    const IntegerVector& invpivot)
+{
+  const int Nsupernodes = supernodes.size()-1;
+  const int N = colpointers.size() - 1;
+  NumericVector x(N);
+  NumericVector Pb(N);  // permutation of P
+  NumericVector sum(N); // sum for each column
+  for (int i=0;i<N;i++)
+  {
+    Pb[i] = b[pivot[i]];
+  }
+  for (int J=Nsupernodes-1; J>=0;J--)
+  {
+    int NodeSz = supernodes[J+1] - supernodes[J];
+    int s = rowpointers[J]+(NodeSz-1);
+    for (int j=supernodes[J+1]-1; j>=supernodes[J]; j--)
+    {
+      //Rcout << "column " << j << endl;
+      double alpha = L[colpointers[j]];
+      double x_j = Pb[j];
+      // the non-diagonal elements of column j
+      for (int ndx = colpointers[j]+1, k=s+1; ndx < colpointers[j+1]; ndx++)
+      {
+        int i = rowindices[k++];
+        x_j -= L[ndx]*x[i];
+      }
+      x[j] = x_j/alpha;
+      s--;
+    }
+  }
+
+  NumericVector xP(N); // inverse permutation
+  for (int i=0;i<N;i++) {
+    xP[i] = x[invpivot[i]];
+  }
+  return xP;
+}
+
+
+
 // Just to show the structure of the sparse cholesky matrix with supernodes.
 // [[Rcpp::export]]
 NumericMatrix PrintCholesky(SEXP cholC)
