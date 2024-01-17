@@ -61,7 +61,7 @@ logdet <- function(obj, lambda) {
     .Call(`_LMMsolver_logdet`, obj, lambda)
 }
 
-PrintCholesky <- function(cholC) {
-    .Call(`_LMMsolver_PrintCholesky`, cholC)
+PrintCholesky <- function(obj) {
+    .Call(`_LMMsolver_PrintCholesky`, obj)
 }
 

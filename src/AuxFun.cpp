@@ -9,7 +9,8 @@ using namespace std;
 // Transform to C++ Notation indices
 void transf2C(IntegerVector& ndx)
 {
-  for (int i=0;i<ndx.size();i++)
+  const int n = ndx.size();
+  for (int i=0;i<n;i++)
   {
     ndx[i]--;
   }

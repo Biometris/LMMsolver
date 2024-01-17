@@ -310,13 +310,12 @@ NumericVector backwardCholesky(
   return xP;
 }
 
-
-
 // Just to show the structure of the sparse cholesky matrix with supernodes.
 // [[Rcpp::export]]
-NumericMatrix PrintCholesky(SEXP cholC)
+NumericMatrix PrintCholesky(Rcpp::S4 obj)
 {
-  Rcpp::S4 obj(cholC);
+  Rcout << "Class: " << as<std::string>(obj.attr("class")) << std::endl;
+
   // We use transpose for calculating Automated Differentiation.
   IntegerVector supernodes = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("supernodes"));
   IntegerVector colpointers = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("rowpointers"));

@@ -120,13 +120,13 @@ BEGIN_RCPP
 END_RCPP
 }
 // PrintCholesky
-NumericMatrix PrintCholesky(SEXP cholC);
-RcppExport SEXP _LMMsolver_PrintCholesky(SEXP cholCSEXP) {
+NumericMatrix PrintCholesky(Rcpp::S4 obj);
+RcppExport SEXP _LMMsolver_PrintCholesky(SEXP objSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type cholC(cholCSEXP);
-    rcpp_result_gen = Rcpp::wrap(PrintCholesky(cholC));
+    Rcpp::traits::input_parameter< Rcpp::S4 >::type obj(objSEXP);
+    rcpp_result_gen = Rcpp::wrap(PrintCholesky(obj));
     return rcpp_result_gen;
 END_RCPP
 }
