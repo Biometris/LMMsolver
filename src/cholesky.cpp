@@ -14,7 +14,7 @@
 #include <set>
 #include <vector>
 #include "AuxFun.h"
-#include "NodeList.h"
+//#include "NodeList.h"
 #include "SparseMatrix.h"
 #include "cholesky.h"
 
@@ -112,6 +112,14 @@ void cdiv(NumericVector& L, int j, const IntegerVector& colpointers)
   }
 }
 
+// insert element J in link starting at HEAD[i]
+inline void insert(IntegerVector& HEAD, IntegerVector& LINK, int i, int J)
+{
+  int x = HEAD[i];
+  HEAD[i] = J;
+  LINK[J] = x;
+}
+
 void cholesky(NumericVector& L,
            const IntegerVector& supernodes,
            const IntegerVector& rowpointers,
@@ -120,7 +128,10 @@ void cholesky(NumericVector& L,
 {
   const int N = colpointers.size() - 1;
   const int Nsupernodes = supernodes.size()-1;
-  vector<Node *> S(N);
+
+  // linked lists, see section 4.2 Ng and Peyton
+  IntegerVector HEAD(N,-1);
+  IntegerVector LINK(Nsupernodes,-1);
 
   IntegerVector colhead = clone(rowpointers);
   for (int J=0; J<Nsupernodes;J++)
@@ -130,31 +141,32 @@ void cholesky(NumericVector& L,
     if (colhead[J] < rowpointers[J+1]-1)
     {
       int rNdx = rowindices[colhead[J]+1];
-      Node *nodeJ = new Node(J);
-      S[rNdx] = add(nodeJ, S[rNdx]);
+      insert(HEAD, LINK, rNdx, J);
     }
   }
+
   IntegerVector indmap(N,0);
   NumericVector t(N);
   for (int J=0; J<Nsupernodes;J++) {
     makeIndMap(indmap, J, rowpointers, rowindices);
     for (int j=supernodes[J];j<supernodes[J+1];j++)
     {
-      for (Node **ptr = &S[j]; *ptr;)
+      int K = HEAD[j];
+      while (K!=-1)
       {
-        Node *f = removefirstnode(ptr);
-        int K = f->data;
+        int nextK = LINK[K];
         int sz = rowpointers[K+1] - colhead[K];
         cmod2(L, j, K, sz, t, indmap, supernodes, rowpointers, colpointers, rowindices);
 
         colhead[K]++;
-        if (colhead[K] < rowpointers[K+1]) {
+        if (colhead[K] < rowpointers[K+1])
+        {
           int rNdx = rowindices[colhead[K]];
-          S[rNdx] = add(f, S[rNdx]);
-        } else {
-          delete f;
+          insert(HEAD, LINK, rNdx, K);
         }
+        K = nextK;
       }
+      HEAD[j] = -1;
       cmod1(L, j, J, supernodes, colpointers);
       cdiv(L, j, colpointers);
     }
