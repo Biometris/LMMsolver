@@ -20,8 +20,18 @@ random design matrices with Identity-By-Descent (IBD) probabilities.
 Martin P. Boer (2023). \emph{Tensor product P-splines using a sparse mixed model formulation},
 Statistical Modelling, 23, p. 465 - 479. \doi{10.1177/1471082X231178591}
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://biometris.github.io/LMMsolver/index.html}
+  \item \url{https://github.com/Biometris/LMMsolver/}
+  \item Report bugs at \url{https://github.com/Biometris/LMMsolver/issues}
+}
+
+}
 \author{
 Martin Boer \email{martin.boer@wur.nl}
 
 Bart-Jan van Rossum \email{bart-jan.vanrossum@wur.nl} (maintainer)
 }
+\keyword{internal}

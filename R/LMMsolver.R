@@ -9,7 +9,6 @@
 #'
 #' @name LMMsolver
 #' @aliases LMMsolver LMMsolver-package
-#' @docType package
 #' @title Package LMMsolver
 #' @author Martin Boer \email{martin.boer@@wur.nl}
 #' @author Bart-Jan van Rossum \email{bart-jan.vanrossum@@wur.nl} (maintainer)
@@ -19,4 +18,5 @@
 #' @useDynLib LMMsolver, .registration = TRUE
 #' @importFrom Rcpp sourceCpp
 # The next and last line should be the word 'NULL'.
-NULL
+#' @keywords internal
+"_PACKAGE"
