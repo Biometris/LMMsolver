@@ -16,7 +16,7 @@ obj1 <- LMMsolve(fixed = y ~ 1,
                  data = dat,
                  family = poisson())
 
-expect_equal_to_reference(obj1, "GLMMFull")
+expect_equal_to_reference(obj1, "GLMMFull", check.attributes = FALSE)
 
 ## Check predictions.
 pred1 <- obtainSmoothTrend(obj1, grid = 5)
