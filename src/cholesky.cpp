@@ -14,7 +14,6 @@
 #include <set>
 #include <vector>
 #include "AuxFun.h"
-//#include "NodeList.h"
 #include "SparseMatrix.h"
 #include "cholesky.h"
 
@@ -112,13 +111,6 @@ void cdiv(NumericVector& L, int j, const IntegerVector& colpointers)
   }
 }
 
-// insert element J in link starting at HEAD[i]
-inline void insert(IntegerVector& HEAD, IntegerVector& LINK, int i, int J)
-{
-  int x = HEAD[i];
-  HEAD[i] = J;
-  LINK[J] = x;
-}
 
 void cholesky(NumericVector& L,
            const IntegerVector& supernodes,

@@ -15,4 +15,6 @@ IntegerVector GetIntVector(Rcpp::S4 obj, const String& slotName, int ArrayIndexi
 
 NumericVector GetNumericVector(Rcpp::S4 obj, const String& slotName);
 
+void insert(IntegerVector& HEAD, IntegerVector& LINK, int i, int J);
+
 #endif

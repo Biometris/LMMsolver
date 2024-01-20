@@ -23,7 +23,6 @@
 #include <set>
 #include <vector>
 #include "AuxFun.h"
-#include "NodeList.h"
 #include "SparseMatrix.h"
 #include "cholesky.h"
 
@@ -220,7 +219,11 @@ void ADcholesky(NumericVector& F,
 {
   const int N = colpointers.size() - 1;
   const int Nsupernodes = supernodes.size()-1;
-  vector<Node*> S(N);
+  //vector<Node*> S(N);
+
+  // linked lists, see section 4.2 Ng and Peyton
+  IntegerVector HEAD(N,-1);
+  IntegerVector LINK(Nsupernodes,-1);
 
   IntegerVector colhead = clone(rowpointers);
   IntegerVector coltop = clone(rowpointers);
@@ -232,8 +235,9 @@ void ADcholesky(NumericVector& F,
     if (colhead[J] > coltop[J])
     {
       int rNdx = rowindices[colhead[J]];
-      Node *nodeJ = new Node(J);
-      S[rNdx] = add(nodeJ, S[rNdx]);
+      insert(HEAD, LINK, rNdx, J);
+      //Node *nodeJ = new Node(J);
+      //S[rNdx] = add(nodeJ, S[rNdx]);
     }
   }
   IntegerVector indmap(N,0);
@@ -243,23 +247,24 @@ void ADcholesky(NumericVector& F,
     makeIndMap(indmap, J, rowpointers, rowindices);
     for (int j = supernodes[J+1]-1; j>=supernodes[J]; j--)
     {
-       ADcdiv(F, L, j, colpointers);
-       ADcmod1(F, L, j, J, supernodes, colpointers);
-       for (Node **ptr = &S[j]; *ptr;)
-       {
-          Node *f = removefirstnode(ptr);
-          int K = f->data;
-          colhead[K]--;
-          if (colhead[K] > coltop[K])
-          {
-             int rNdx = rowindices[colhead[K]];
-             S[rNdx] = add(f, S[rNdx]);
-          }  else {
-             delete f;
-          }
-          int sz = rowpointers[K+1] - 1 - colhead[K];
-          ADcmod2(F, L, j, K, sz, t, indmap, supernodes, rowpointers,colpointers,rowindices);
-       }
+      ADcdiv(F, L, j, colpointers);
+      ADcmod1(F, L, j, J, supernodes, colpointers);
+
+      int K = HEAD[j];
+      while (K!=-1)
+      {
+        int nextK = LINK[K];
+        colhead[K]--;
+        if (colhead[K] > coltop[K])
+        {
+           int rNdx = rowindices[colhead[K]];
+           insert(HEAD, LINK, rNdx, K);
+        }
+        int sz = rowpointers[K+1] - 1 - colhead[K];
+        ADcmod2(F, L, j, K, sz, t, indmap, supernodes, rowpointers,colpointers,rowindices);
+        K = nextK;
+      }
+      HEAD[j] = -1;
     }
   }
   return;
