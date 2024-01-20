@@ -236,8 +236,6 @@ void ADcholesky(NumericVector& F,
     {
       int rNdx = rowindices[colhead[J]];
       insert(HEAD, LINK, rNdx, J);
-      //Node *nodeJ = new Node(J);
-      //S[rNdx] = add(nodeJ, S[rNdx]);
     }
   }
   IntegerVector indmap(N,0);
@@ -385,9 +383,9 @@ NumericVector dlogdet(Rcpp::S4 obj, NumericVector theta,
 
 
 // [[Rcpp::export]]
-NumericVector partialDerivCholesky(SEXP cholC)
+NumericVector partialDerivCholesky(Rcpp::S4 obj)
 {
-  Rcpp::S4 obj(cholC);
+  //Rcpp::S4 obj(cholC);
 
   // We use transpose for calculating Automated Differentiation.
   IntegerVector supernodes = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("supernodes"));
@@ -431,9 +429,9 @@ void updateH(NumericVector& H, const SparseMatrix& tX, int i, int j, double alph
 }
 
 // [[Rcpp::export]]
-NumericVector diagXCinvXt(SEXP cholC, SEXP transposeX)
+NumericVector diagXCinvXt(Rcpp::S4 obj, SEXP transposeX)
 {
-  Rcpp::S4 obj(cholC);
+  //Rcpp::S4 obj(cholC);
   SparseMatrix tX(transposeX);
   const int nPred = tX.dim[1];
 
@@ -476,6 +474,7 @@ NumericVector diagXCinvXt(SEXP cholC, SEXP transposeX)
   return H;
 }
 
+/*
 
 // [[Rcpp::export]]
 NumericVector ForwardCholesky(SEXP cholC, NumericVector& b)
@@ -531,6 +530,6 @@ NumericVector BackwardCholesky(SEXP cholC, NumericVector& b)
                          colpointers, rowindices, pivot, invpivot);
 }
 
-
+*/
 
 

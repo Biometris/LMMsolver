@@ -36,49 +36,25 @@ BEGIN_RCPP
 END_RCPP
 }
 // partialDerivCholesky
-NumericVector partialDerivCholesky(SEXP cholC);
-RcppExport SEXP _LMMsolver_partialDerivCholesky(SEXP cholCSEXP) {
+NumericVector partialDerivCholesky(Rcpp::S4 obj);
+RcppExport SEXP _LMMsolver_partialDerivCholesky(SEXP objSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type cholC(cholCSEXP);
-    rcpp_result_gen = Rcpp::wrap(partialDerivCholesky(cholC));
+    Rcpp::traits::input_parameter< Rcpp::S4 >::type obj(objSEXP);
+    rcpp_result_gen = Rcpp::wrap(partialDerivCholesky(obj));
     return rcpp_result_gen;
 END_RCPP
 }
 // diagXCinvXt
-NumericVector diagXCinvXt(SEXP cholC, SEXP transposeX);
-RcppExport SEXP _LMMsolver_diagXCinvXt(SEXP cholCSEXP, SEXP transposeXSEXP) {
+NumericVector diagXCinvXt(Rcpp::S4 obj, SEXP transposeX);
+RcppExport SEXP _LMMsolver_diagXCinvXt(SEXP objSEXP, SEXP transposeXSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type cholC(cholCSEXP);
+    Rcpp::traits::input_parameter< Rcpp::S4 >::type obj(objSEXP);
     Rcpp::traits::input_parameter< SEXP >::type transposeX(transposeXSEXP);
-    rcpp_result_gen = Rcpp::wrap(diagXCinvXt(cholC, transposeX));
-    return rcpp_result_gen;
-END_RCPP
-}
-// ForwardCholesky
-NumericVector ForwardCholesky(SEXP cholC, NumericVector& b);
-RcppExport SEXP _LMMsolver_ForwardCholesky(SEXP cholCSEXP, SEXP bSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type cholC(cholCSEXP);
-    Rcpp::traits::input_parameter< NumericVector& >::type b(bSEXP);
-    rcpp_result_gen = Rcpp::wrap(ForwardCholesky(cholC, b));
-    return rcpp_result_gen;
-END_RCPP
-}
-// BackwardCholesky
-NumericVector BackwardCholesky(SEXP cholC, NumericVector& b);
-RcppExport SEXP _LMMsolver_BackwardCholesky(SEXP cholCSEXP, SEXP bSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type cholC(cholCSEXP);
-    Rcpp::traits::input_parameter< NumericVector& >::type b(bSEXP);
-    rcpp_result_gen = Rcpp::wrap(BackwardCholesky(cholC, b));
+    rcpp_result_gen = Rcpp::wrap(diagXCinvXt(obj, transposeX));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -136,8 +112,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_LMMsolver_dlogdet", (DL_FUNC) &_LMMsolver_dlogdet, 3},
     {"_LMMsolver_partialDerivCholesky", (DL_FUNC) &_LMMsolver_partialDerivCholesky, 1},
     {"_LMMsolver_diagXCinvXt", (DL_FUNC) &_LMMsolver_diagXCinvXt, 2},
-    {"_LMMsolver_ForwardCholesky", (DL_FUNC) &_LMMsolver_ForwardCholesky, 2},
-    {"_LMMsolver_BackwardCholesky", (DL_FUNC) &_LMMsolver_BackwardCholesky, 2},
     {"_LMMsolver_GetIntVector", (DL_FUNC) &_LMMsolver_GetIntVector, 3},
     {"_LMMsolver_RowKron", (DL_FUNC) &_LMMsolver_RowKron, 2},
     {"_LMMsolver_logdet", (DL_FUNC) &_LMMsolver_logdet, 2},

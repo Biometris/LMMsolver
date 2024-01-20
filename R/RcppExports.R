@@ -33,20 +33,12 @@ dlogdet <- function(obj, theta, b_ = NULL) {
     .Call(`_LMMsolver_dlogdet`, obj, theta, b_)
 }
 
-partialDerivCholesky <- function(cholC) {
-    .Call(`_LMMsolver_partialDerivCholesky`, cholC)
+partialDerivCholesky <- function(obj) {
+    .Call(`_LMMsolver_partialDerivCholesky`, obj)
 }
 
-diagXCinvXt <- function(cholC, transposeX) {
-    .Call(`_LMMsolver_diagXCinvXt`, cholC, transposeX)
-}
-
-ForwardCholesky <- function(cholC, b) {
-    .Call(`_LMMsolver_ForwardCholesky`, cholC, b)
-}
-
-BackwardCholesky <- function(cholC, b) {
-    .Call(`_LMMsolver_BackwardCholesky`, cholC, b)
+diagXCinvXt <- function(obj, transposeX) {
+    .Call(`_LMMsolver_diagXCinvXt`, obj, transposeX)
 }
 
 GetIntVector <- function(obj, slotName, ArrayIndexing) {
