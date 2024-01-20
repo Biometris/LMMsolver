@@ -1,6 +1,7 @@
 # LMMsolver 1.0.6.9000
 
 -   A data.frame `trace` with convergence sequence for log-likelihood and effective dimensions, added as extra output returned by `LMMsolve()`.
+-   Bug in v1.0.6 for GLMM models fixed.
 
 # LMMsolver 1.0.6
 

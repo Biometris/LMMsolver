@@ -21,6 +21,5 @@ expect_equal_to_reference(obj1, "GLMMFull", check.attributes = FALSE)
 ## Check predictions.
 pred1 <- obtainSmoothTrend(obj1, grid = 5)
 
-expect_equal(pred1$ypred,
-             c(1.93819981341273, 3773.16179336444, 5643.79520955318,
-               4112.77605040993, 0.515942676848778))
+expect_equal(pred1$ypred, c(1.735118429947, 3588.132243336660,
+                            5337.660426348466, 3904.681375838120, 0.576329536209))

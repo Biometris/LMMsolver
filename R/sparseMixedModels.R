@@ -85,22 +85,24 @@ sparseMixedModels <- function(y,
   lC <- lapply(X = lC, FUN = spam::cleanup)
   if (is.null(theta)) {
     theta <- rep(1, Nvarcomp + Nres)
+    theta_restr <- theta
+  } else {
+    theta_restr <- theta
   }
   if (is.null(fixedTheta)) {
     ## Fix a penalty theta, if value becomes high.
     fixedTheta <- rep(FALSE, length = NvarcompTot)
   }
   if (!is.null(grpTheta)) {
-    ##
-    ## here should be some checks
-    ##
     nGrp <- max(grpTheta)
+    if (length(fixedTheta) != nGrp) {
+      stop("problem with number of groups defined in grpTheta argument")
+    }
     conM <- spam::spam(x = 0, nrow = NvarcompTot, ncol = nGrp)
     for (i in 1:NvarcompTot) {
       conM[i, grpTheta[i]] <- 1
     }
-    # Need to be checked, for the moment all FALSE:
-    fixedThetaRes <- rep(FALSE, length = nGrp)
+    fixedThetaRes <- fixedTheta
   } else {
     conM <- spam::diag(1, NvarcompTot)
     fixedThetaRes <- fixedTheta
