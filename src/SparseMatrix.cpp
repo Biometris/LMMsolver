@@ -7,6 +7,12 @@ using namespace std;
 
 SparseMatrix::SparseMatrix(Rcpp::S4 obj)
 {
+  if (as<std::string>(obj.attr("class")) != "spam") {
+    std::string str = "wrong class " +
+      as<std::string>(obj.attr("class")) +
+      " for SparseMatrix constructor, should be class spam.";
+    stop(str);
+  }
   // get numeric values:
   entries = GetNumericVector(obj, "entries");
   // use 0-based indexing in C++/Rcpp:
@@ -17,7 +23,7 @@ SparseMatrix::SparseMatrix(Rcpp::S4 obj)
 }
 
 // [[Rcpp::export]]
-List RowKron(SEXP sX1, SEXP sX2)
+List RowKron(Rcpp::S4 sX1, Rcpp::S4 sX2)
 {
   SparseMatrix X1(sX1);
   SparseMatrix X2(sX2);

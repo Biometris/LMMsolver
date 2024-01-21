@@ -36,28 +36,21 @@ using namespace std;
 List construct_ADchol_Rcpp(Rcpp::S4 obj_spam,
                            const List& P_list) {
   //Rcpp::S4 obj_spam(U);
-  IntegerVector supernodes = Rcpp::clone<Rcpp::IntegerVector>(obj_spam.slot("supernodes"));
+  IntegerVector supernodes = GetIntVector(obj_spam, "supernodes", 0);
 
   // Exchange row and columns compared to spam object, as in Ng and Peyton 1993
-  IntegerVector colpointers = Rcpp::clone<Rcpp::IntegerVector>(obj_spam.slot("rowpointers"));
-  IntegerVector rowpointers = Rcpp::clone<Rcpp::IntegerVector>(obj_spam.slot("colpointers"));
-  IntegerVector rowindices = Rcpp::clone<Rcpp::IntegerVector>(obj_spam.slot("colindices"));
+  IntegerVector colpointers = GetIntVector(obj_spam, "rowpointers", 0);
+  IntegerVector rowpointers = GetIntVector(obj_spam, "colpointers", 0);
+  IntegerVector rowindices = GetIntVector(obj_spam, "colindices", 0);
 
-  IntegerVector pivot = Rcpp::clone<Rcpp::IntegerVector>(obj_spam.slot("pivot"));
-  IntegerVector invpivot = Rcpp::clone<Rcpp::IntegerVector>(obj_spam.slot("invpivot"));
+  IntegerVector pivot = GetIntVector(obj_spam, "pivot", 0);
+  IntegerVector invpivot = GetIntVector(obj_spam, "invpivot", 0);
 
   IntegerVector Dim = Rcpp::clone<Rcpp::IntegerVector>(obj_spam.slot("dimension"));
 
   // copy not really needed or used ...
   NumericVector entries = Rcpp::clone<Rcpp::NumericVector>(obj_spam.slot("entries"));
   NumericVector ADentries = Rcpp::clone<Rcpp::NumericVector>(obj_spam.slot("entries"));
-
-  transf2C(supernodes);
-  transf2C(rowpointers);
-  transf2C(colpointers);
-  transf2C(rowindices);
-  transf2C(pivot);
-  transf2C(invpivot);
 
   const int Nsupernodes = supernodes.size()-1;
   const int N = colpointers.size() - 1;
@@ -67,12 +60,9 @@ List construct_ADchol_Rcpp(Rcpp::S4 obj_spam,
   for (int i=0;i<n_prec_matrices;i++)
   {
     Rcpp::S4 obj(P_list[i]);
-    IntegerVector rowpointers_P = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("rowpointers"));
-    IntegerVector colindices_P  = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("colindices"));
+    IntegerVector rowpointers_P = GetIntVector(obj, "rowpointers", 0);
+    IntegerVector colindices_P  = GetIntVector(obj, "colindices", 0);
     NumericVector entries_P     = obj.slot("entries");
-
-    transf2C(rowpointers_P);
-    transf2C(colindices_P);
 
     vector<double> result(size, 0.0);
     vector<double> z(N);
@@ -155,23 +145,15 @@ void ADcmod2(NumericVector& F,
            const IntegerVector& colpointers,
            const IntegerVector& rowindices)
 {
-  // get number of elements r >= j in supernode K:
-
   // t is dense version of L[j], updated values at end of function:
-  //const int N = colpointers.size() - 1;
   int i=0;
   for (int r = rowpointers[K+1] - 1;r>=rowpointers[K];r--)
   {
     int ndx = rowindices[r];
     int pos = colpointers[j+1] - 1 - indmap[ndx];
     t[i++] = F[pos];
-    //i++;
-    //if (ndx==j)
-    //{
-    //  break;
-    //}
   }
-  //Rcout << "test " << i << " " << sz << endl;
+
   // for all columns k in supernode K:
   for (int k=supernodes[K]; k<supernodes[K+1]; k++)
   {
@@ -196,6 +178,7 @@ void ADcdiv(NumericVector& F,
 {
   const int s = colpointers[j];
   const int e = colpointers[j+1];
+
   // update AD for column j:
   const double& Ls = L[s];
   double& Fs = F[s];
@@ -219,7 +202,6 @@ void ADcholesky(NumericVector& F,
 {
   const int N = colpointers.size() - 1;
   const int Nsupernodes = supernodes.size()-1;
-  //vector<Node*> S(N);
 
   // linked lists, see section 4.2 Ng and Peyton
   IntegerVector HEAD(N,-1);
@@ -278,7 +260,6 @@ void initAD(NumericVector& F, const NumericVector& L, const IntegerVector& colpo
   }
 }
 
-
 //' Calculate the partial derivatives of log-determinant.
 //'
 //' This function calculates the partial derivatives of the the log-determinant in an
@@ -307,7 +288,6 @@ void initAD(NumericVector& F, const NumericVector& L, const IntegerVector& colpo
 NumericVector dlogdet(Rcpp::S4 obj, NumericVector theta,
                       Nullable<NumericVector> b_ = R_NilValue)
 {
-  //Rcpp::S4 obj(ADobj);
   IntegerVector supernodes = obj.slot("supernodes");
   IntegerVector rowpointers = obj.slot("rowpointers");
   IntegerVector colpointers = obj.slot("colpointers");
@@ -315,7 +295,6 @@ NumericVector dlogdet(Rcpp::S4 obj, NumericVector theta,
   NumericVector L = obj.slot("entries");
   NumericVector F = obj.slot("ADentries");
   NumericMatrix P = obj.slot("P");
-  //NumericMatrix P = Rcpp::clone<Rcpp::NumericMatrix>(obj.slot("P"));
 
   // define matrix L (lower triangle matrix values)
   const int sz = P.nrow();
@@ -381,24 +360,17 @@ NumericVector dlogdet(Rcpp::S4 obj, NumericVector theta,
   return gradient;
 }
 
-
 // [[Rcpp::export]]
 NumericVector partialDerivCholesky(Rcpp::S4 obj)
 {
-  //Rcpp::S4 obj(cholC);
+  IntegerVector supernodes = GetIntVector(obj, "supernodes", 0);
 
-  // We use transpose for calculating Automated Differentiation.
-  IntegerVector supernodes = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("supernodes"));
-  IntegerVector colpointers = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("rowpointers"));
-  IntegerVector rowpointers = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("colpointers"));
-  IntegerVector rowindices = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("colindices"));
+  // Exchange row and columns compared to spam object, as in Ng and Peyton 1993
+  IntegerVector colpointers = GetIntVector(obj, "rowpointers", 0);
+  IntegerVector rowpointers = GetIntVector(obj, "colpointers", 0);
+  IntegerVector rowindices = GetIntVector(obj, "colindices", 0);
+
   NumericVector L = Rcpp::clone<Rcpp::NumericVector>(obj.slot("entries"));
-
-  // C using indices starting at 0:
-  transf2C(supernodes);
-  transf2C(colpointers);
-  transf2C(rowpointers);
-  transf2C(rowindices);
 
   const int sz = L.size();
   NumericVector F(sz, 0.0);
@@ -429,24 +401,18 @@ void updateH(NumericVector& H, const SparseMatrix& tX, int i, int j, double alph
 }
 
 // [[Rcpp::export]]
-NumericVector diagXCinvXt(Rcpp::S4 obj, SEXP transposeX)
+NumericVector diagXCinvXt(Rcpp::S4 obj, Rcpp::S4 transposeX)
 {
-  //Rcpp::S4 obj(cholC);
   SparseMatrix tX(transposeX);
   const int nPred = tX.dim[1];
 
-  // We use transpose for calculating Automated Differentiation.
-  IntegerVector supernodes = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("supernodes"));
-  IntegerVector colpointers = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("rowpointers"));
-  IntegerVector rowpointers = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("colpointers"));
-  IntegerVector rowindices = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("colindices"));
-  NumericVector L = Rcpp::clone<Rcpp::NumericVector>(obj.slot("entries"));
+  IntegerVector supernodes = GetIntVector(obj, "supernodes", 0);
+  // Exchange row and columns compared to spam object, as in Ng and Peyton 1993
+  IntegerVector colpointers = GetIntVector(obj, "rowpointers", 0);
+  IntegerVector rowpointers = GetIntVector(obj, "colpointers", 0);
+  IntegerVector rowindices = GetIntVector(obj, "colindices", 0);
 
-  // C using indices starting at 0:
-  transf2C(supernodes);
-  transf2C(colpointers);
-  transf2C(rowpointers);
-  transf2C(rowindices);
+  NumericVector L = Rcpp::clone<Rcpp::NumericVector>(obj.slot("entries"));
 
   const int sz = L.size();
   NumericVector F(sz, 0.0);

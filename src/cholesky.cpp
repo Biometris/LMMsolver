@@ -308,23 +308,15 @@ NumericMatrix PrintCholesky(Rcpp::S4 obj)
 {
   Rcout << "Class: " << as<std::string>(obj.attr("class")) << std::endl;
 
-  // We use transpose for calculating Automated Differentiation.
-  IntegerVector supernodes = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("supernodes"));
-  IntegerVector colpointers = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("rowpointers"));
-  IntegerVector rowpointers = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("colpointers"));
-  IntegerVector rowindices = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("colindices"));
-  IntegerVector pivot = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("pivot"));
-  IntegerVector invpivot = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("invpivot"));
+  IntegerVector supernodes = GetIntVector(obj, "supernodes", 0);
+  // Exchange row and columns compared to spam object, as in Ng and Peyton 1993
+  IntegerVector colpointers = GetIntVector(obj, "rowpointers", 0);
+  IntegerVector rowpointers = GetIntVector(obj, "colpointers", 0);
+  IntegerVector rowindices = GetIntVector(obj, "colindices", 0);
+  IntegerVector pivot = GetIntVector(obj, "pivot", 0);
+  IntegerVector invpivot = GetIntVector(obj, "invpivot", 0);
 
   NumericVector L = Rcpp::clone<Rcpp::NumericVector>(obj.slot("entries"));
-
-  // C using indices starting at 0:
-  transf2C(supernodes);
-  transf2C(colpointers);
-  transf2C(rowpointers);
-  transf2C(rowindices);
-  transf2C(pivot);
-  transf2C(invpivot);
 
   const int Nsupernodes = supernodes.size()-1;
   const int N = colpointers.size() - 1;

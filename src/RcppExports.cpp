@@ -47,13 +47,13 @@ BEGIN_RCPP
 END_RCPP
 }
 // diagXCinvXt
-NumericVector diagXCinvXt(Rcpp::S4 obj, SEXP transposeX);
+NumericVector diagXCinvXt(Rcpp::S4 obj, Rcpp::S4 transposeX);
 RcppExport SEXP _LMMsolver_diagXCinvXt(SEXP objSEXP, SEXP transposeXSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Rcpp::S4 >::type obj(objSEXP);
-    Rcpp::traits::input_parameter< SEXP >::type transposeX(transposeXSEXP);
+    Rcpp::traits::input_parameter< Rcpp::S4 >::type transposeX(transposeXSEXP);
     rcpp_result_gen = Rcpp::wrap(diagXCinvXt(obj, transposeX));
     return rcpp_result_gen;
 END_RCPP
@@ -72,13 +72,13 @@ BEGIN_RCPP
 END_RCPP
 }
 // RowKron
-List RowKron(SEXP sX1, SEXP sX2);
+List RowKron(Rcpp::S4 sX1, Rcpp::S4 sX2);
 RcppExport SEXP _LMMsolver_RowKron(SEXP sX1SEXP, SEXP sX2SEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type sX1(sX1SEXP);
-    Rcpp::traits::input_parameter< SEXP >::type sX2(sX2SEXP);
+    Rcpp::traits::input_parameter< Rcpp::S4 >::type sX1(sX1SEXP);
+    Rcpp::traits::input_parameter< Rcpp::S4 >::type sX2(sX2SEXP);
     rcpp_result_gen = Rcpp::wrap(RowKron(sX1, sX2));
     return rcpp_result_gen;
 END_RCPP
