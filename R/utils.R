@@ -422,12 +422,12 @@ nameCoefs <- function(coefs,
       isFactLab <- sapply(X = data[, labISplit], FUN = is.factor)
       labDatFact <- unique(data[names(isFactLab)[isFactLab]])
       labDatNonFact <- names(isFactLab)[!isFactLab]
-      if (length(labDatNonFact) > 0) {
+      if (length(labDatFact) > 0 && length(labDatNonFact) > 0) {
         labDat <- cbind(labDatFact, labDatNonFact)
         colnames(labDat) <- c(colnames(labDatFact), labDatNonFact)
         labDat <- labDat[labISplit]
       } else {
-        labDat <- labDatFact
+        labDat <- if (length(labDatFact) > 0) labDatFact else labDatNonFact
       }
       labDat <- lapply(X = seq_along(labDat), FUN = function(i) {
         if (isFactLab[i]) {
