@@ -74,7 +74,7 @@ predictTest <- function(object,
   nr <- length(ndxPred)
   nc <- ncol(object$C)
   Dg <- spam::spam(x = 1, nrow = nr, ncol = 1) # intercept.
-  for (i in 2:length(df.terms)) {
+  for (i in 2:nrow(df.terms)) {
     if (i == f) {
       M <- spam::diag.spam(nr)
       if (df.terms$fixed[i]) {
@@ -89,7 +89,7 @@ predictTest <- function(object,
     }
     Dg <- spam::cbind.spam(Dg, M)
   }
-  cat("Dim Dg", dim(Dg),"\n")
+  #cat("Dim Dg", dim(Dg),"\n")
 
   ypred <- as.vector(Dg %*% object$coefMME)
   ypredse <- calcStandardErrors(object$C, Dg)
