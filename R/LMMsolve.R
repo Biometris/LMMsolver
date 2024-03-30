@@ -274,7 +274,7 @@ LMMsolve <- function(fixed,
     for (i in 1:length(dim.r)) {
       tmp <- rep(0, sum(dim.r))
       tmp[s[i]:e[i]] <- 1
-      lGinv[[i]] <- spam::diag.spam(tmp)
+      lGinv[[i]] <- spam::cleanup(spam::diag.spam(tmp))
     }
     names(lGinv) <- term.labels.r
   } else {

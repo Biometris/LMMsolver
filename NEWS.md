@@ -1,5 +1,6 @@
 # LMMsolver 1.0.6.9000
 
+-   Improved efficiency for models where the `residual` argument of `LMMsolve()` is used.
 -   A data.frame `trace` with convergence sequence for log-likelihood and effective dimensions, added as extra output returned by `LMMsolve()`.
 -   Bug in v1.0.6 for GLMM models fixed.
 
