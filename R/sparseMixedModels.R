@@ -82,6 +82,7 @@ sparseMixedModels <- function(y,
   lWtRinvW <- lapply(X = lWtRinvW, FUN = spam::cleanup)
   lQ <- lapply(X = lQ, FUN = spam::cleanup)
   lGinv <- lapply(X = lGinv, FUN = spam::cleanup)
+  lRinv <- lapply(X = lRinv, FUN = spam::cleanup)
   lC <- lapply(X = lC, FUN = spam::cleanup)
   if (is.null(theta)) {
     theta <- rep(1, Nvarcomp + Nres)
