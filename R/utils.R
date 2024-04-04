@@ -423,7 +423,12 @@ nameCoefs <- function(coefs,
       labDatFact <- unique(data[names(isFactLab)[isFactLab]])
       labDatNonFact <- names(isFactLab)[!isFactLab]
       if (length(labDatFact) > 0 && length(labDatNonFact) > 0) {
-        labDat <- cbind(labDatFact, labDatNonFact)
+        labDatNonFactDf <- as.data.frame(matrix(data = labDatNonFact,
+                                                nrow = nrow(labDatFact),
+                                                ncol = length(labDatNonFact),
+                                                byrow = TRUE,
+                                                dimnames = list(NULL, labDatNonFact)))
+        labDat <- cbind(labDatFact, labDatNonFactDf)
         colnames(labDat) <- c(colnames(labDatFact), labDatNonFact)
         labDat <- labDat[labISplit]
       } else {

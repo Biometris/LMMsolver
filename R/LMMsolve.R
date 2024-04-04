@@ -213,9 +213,9 @@ LMMsolve <- function(fixed,
     mt <- terms(mf)
     f.terms <- all.vars(mt)[attr(mt, "dataClasses") == "factor"]
     Z1 <- Matrix::sparse.model.matrix(mt, data = mf,
-                       contrasts.arg = lapply(X = mf[, f.terms, drop = FALSE],
-                                              FUN = contrasts,
-                                              contrasts = FALSE))
+                                      contrasts.arg = lapply(X = mf[, f.terms, drop = FALSE],
+                                                             FUN = contrasts,
+                                                             contrasts = FALSE))
     dim1.r <- table(attr(Z1, "assign"))[-1]
     term1.labels.r <- attr(mt, "term.labels")
     scFactor1 <- rep(1, length(dim1.r))
@@ -312,8 +312,8 @@ LMMsolve <- function(fixed,
   mt <- terms(mf)
   f.terms <- all.vars(mt)[attr(mt, "dataClasses") == "factor"]
   X <- Matrix::sparse.model.matrix(mt, data = mf,
-                    contrasts.arg = lapply(X = mf[, f.terms, drop = FALSE],
-                                           FUN = contrasts, contrasts = TRUE))
+                                   contrasts.arg = lapply(X = mf[, f.terms, drop = FALSE],
+                                                          FUN = contrasts, contrasts = TRUE))
   term.labels.f <- attr(mt, "term.labels")
 
   q <- qr(as.matrix(X))
@@ -475,12 +475,12 @@ LMMsolve <- function(fixed,
   ef <- cumsum(dim.f)
   sf <- ef - dim.f + 1
   ndxCoefF <- nameCoefs(coefs = ndxCf, desMat = X, termLabels = term.labels.f,
-                     s = sf, e = ef, data = data, type = "fixed")
+                        s = sf, e = ef, data = data, type = "fixed")
   ## Random terms.
   er <- sum(dim.f) + cumsum(dim.r)
   sr <- er - dim.r + 1
-  ndxCoefR <- nameCoefs(coefs = ndxCf, termLabels = term.labels.r, s = sr, e = er,
-                     data = data, group = group, type = "random")
+  ndxCoefR <- nameCoefs(coefs = ndxCf, termLabels = term.labels.r, s = sr,
+                        e = er, data = data, group = group, type = "random")
   ## Combine result for fixed and random terms.
   ndxCoefTot <- c(ndxCoefF, ndxCoefR)
   names(ndxCoefTot) <- c(term.labels.f, term.labels.r)
