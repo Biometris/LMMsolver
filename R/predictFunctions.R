@@ -139,7 +139,7 @@ predictTest <- function(object, classify) {
   for (i in ndx_averaging) {
     Dg <- Dg + auxFun(object, i, nr, nc, NULL)
   }
-  Dg <- cleanup(Dg)
+  Dg <- spam::cleanup(Dg)
 
   ypred <- as.vector(Dg %*% object$coefMME)
   ypredse <- LMMsolver:::calcStandardErrors(object$C, Dg)
