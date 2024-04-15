@@ -4,6 +4,7 @@
 -   A data.frame `trace` with convergence sequence for log-likelihood and effective dimensions, added as extra output returned by `LMMsolve()`.
 -   Bug in v1.0.6 for GLMM models fixed.
 -   Coefficients for three way interactions with one factor and two non-factors are now labelled correctly.
+-   Calculates standard errors in function `obtainSmoothTrend()` for GLMM.
 
 # LMMsolver 1.0.6
 

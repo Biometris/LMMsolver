@@ -173,9 +173,9 @@ obtainSmoothTrend <- function(object,
                                includeIntercept, which)
   xGrid <- attr(U,which="xGrid")
   ## calculate the predictions
-  pred <- as.vector(U %*% object$coefMME)
+  eta <- as.vector(U %*% object$coefMME)
   family <- object$family
-  familyPred <- family$linkinv(pred)
+  familyPred <- family$linkinv(eta)
   ## Construct output data.frame.
   if (!is.null(newdata)) {
     outDat <- newdata
@@ -186,8 +186,8 @@ obtainSmoothTrend <- function(object,
     outDat <- outDat[c(names(x), "ypred")]
   }
   ## only add standard errors if:
-  if (deriv == 0 && includeIntercept && family$family == "gaussian") {
-    outDat[["se"]] <- calcStandardErrors(C = object$C, D = U)
+  if (deriv == 0 && includeIntercept) {
+    outDat[["se"]] <- calcStandardErrors(C = object$C, D = U)*abs(family$mu.eta(eta))
   }
   return(outDat)
 }
