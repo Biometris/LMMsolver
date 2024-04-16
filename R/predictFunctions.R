@@ -142,7 +142,7 @@ predictTest <- function(object, classify) {
   Dg <- spam::cleanup(Dg)
 
   ypred <- as.vector(Dg %*% object$coefMME)
-  ypredse <- LMMsolver:::calcStandardErrors(object$C, Dg)
+  ypredse <- calcStandardErrors(object$C, Dg)
 
   if (Interaction) {
     marg1_labels <- sapply(namesI, FUN = function(x) { strsplit(x,split=":")[[1]][1]})
