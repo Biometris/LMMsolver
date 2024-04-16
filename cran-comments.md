@@ -1,16 +1,15 @@
 ## Major release
 
-Extra arguments to some functions and mostly minor bugfixes
+Generalizations in some of the functions, increased efficiency and some minor bugfixes
 
 ----
 
 ## Test environments
 
-* local Windows 10 install, R 4.3.2
+* local Windows 10 install, R 4.3.3
 * winbuilder (develop)
 * Ubuntu (on github actions, devel and release)
 * macOS (on github actions, release)
-* R-hub (devel and release)
 
 ----
 
