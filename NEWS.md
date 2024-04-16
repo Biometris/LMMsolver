@@ -1,10 +1,10 @@
-# LMMsolver 1.0.6.9000
+# LMMsolver 1.0.7
 
 -   Improved efficiency for models where the `residual` argument of `LMMsolve()` is used.
 -   A data.frame `trace` with convergence sequence for log-likelihood and effective dimensions, added as extra output returned by `LMMsolve()`.
 -   Bug in v1.0.6 for GLMM models fixed.
 -   Coefficients for three way interactions with one factor and two non-factors are now labelled correctly.
--   Calculates standard errors in function `obtainSmoothTrend()` for GLMM.
+-   Standard errors in function `obtainSmoothTrend()` for GLMM models are now calculated.
 
 # LMMsolver 1.0.6
 
