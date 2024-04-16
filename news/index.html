@@ -6,11 +6,11 @@
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
     
 
-    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light"><div class="container">
+    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light" data-bs-theme="light"><div class="container">
     
     <a class="navbar-brand me-2" href="../index.html">LMMsolver</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.7</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -79,7 +79,15 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="1.0.5.9000" id="lmmsolver-1059000">LMMsolver 1.0.5.9000<a class="anchor" aria-label="anchor" href="#lmmsolver-1059000"></a></h2>
+<h2 class="pkg-version" data-toc-text="1.0.7" id="lmmsolver-107">LMMsolver 1.0.7<a class="anchor" aria-label="anchor" href="#lmmsolver-107"></a></h2>
+<ul><li>Improved efficiency for models where the <code>residual</code> argument of <code><a href="../reference/LMMsolve.html">LMMsolve()</a></code> is used.</li>
+<li>A data.frame <code>trace</code> with convergence sequence for log-likelihood and effective dimensions, added as extra output returned by <code><a href="../reference/LMMsolve.html">LMMsolve()</a></code>.</li>
+<li>Bug in v1.0.6 for GLMM models fixed.</li>
+<li>Coefficients for three way interactions with one factor and two non-factors are now labelled correctly.</li>
+<li>Standard errors in function <code><a href="../reference/obtainSmoothTrend.html">obtainSmoothTrend()</a></code> for GLMM models are now calculated.</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.0.6" id="lmmsolver-106">LMMsolver 1.0.6<a class="anchor" aria-label="anchor" href="#lmmsolver-106"></a></h2><p class="text-muted">CRAN release: 2023-11-27</p>
 <ul><li>A new argument <code>grpTheta</code> for <code><a href="../reference/LMMsolve.html">LMMsolve()</a></code> to give components in the model the same penalty.</li>
 <li>The dependency package <code>sp</code> is replaced by <code>sf</code>.</li>
 <li>A small bug for models with more than 10.000 observations and only a numeric variable in the random part of the model is fixed.</li>
@@ -134,7 +142,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.8.</p>
 </div>
 
     </footer></div>

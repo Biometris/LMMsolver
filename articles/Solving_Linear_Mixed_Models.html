@@ -23,11 +23,11 @@
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
     
 
-    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light"><div class="container">
+    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light" data-bs-theme="light"><div class="container">
     
     <a class="navbar-brand me-2" href="../index.html">LMMsolver</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.7</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -102,7 +102,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Solving Linear Mixed Models using LMMsolver</h1>
             
-            <h4 data-toc-skip class="date">2023-11-27</h4>
+            <h4 data-toc-skip class="date">2024-04-16</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/Biometris/LMMsolver/blob/HEAD/vignettes/Solving_Linear_Mixed_Models.Rmd" class="external-link"><code>vignettes/Solving_Linear_Mixed_Models.Rmd</code></a></small>
       <div class="d-none name"><code>Solving_Linear_Mixed_Models.Rmd</code></div>
@@ -118,16 +118,16 @@
 </h2>
 <p>The aim of the <code>LMMsolver</code> package is to provide an
 efficient and flexible system to estimate variance components using
-restricted maximum likelihood or REML <span class="citation">(<a href="#ref-Patterson1971" role="doc-biblioref">Patterson and Thompson
-1971</a>)</span>, for models where the mixed model equations are sparse
-<span class="citation">(<a href="#ref-boer2023" role="doc-biblioref">Boer 2023</a>)</span>. An example of an application
-is using splines to model spatial <span class="citation">(<a href="#ref-Rodriguez-Alvarez2018" role="doc-biblioref">Rodríguez-Álvarez
-et al. 2018</a>; <a href="#ref-Boer2020" role="doc-biblioref">Boer,
-Piepho, and Williams 2020</a>)</span> or temporal <span class="citation">(<a href="#ref-Bustos-Korts2019" role="doc-biblioref">Bustos-Korts et al. 2019</a>)</span> trends.
-Another example is mixed model Quantitative Trait Locus (QTL) analysis
-for multiparental populations, allowing for heterogeneous residual
-variance and design matrices with Identity-By-Descent (IBD)
-probabilities <span class="citation">(<a href="#ref-Li2021" role="doc-biblioref">Li et al. 2021</a>)</span>.</p>
+restricted maximum likelihood or REML <span class="citation">(<a href="#ref-Patterson1971">Patterson and Thompson 1971</a>)</span>, for
+models where the mixed model equations are sparse <span class="citation">(<a href="#ref-boer2023">Boer 2023</a>)</span>. An
+example of an application is using splines to model spatial <span class="citation">(<a href="#ref-Rodriguez-Alvarez2018">Rodríguez-Álvarez
+et al. 2018</a>; <a href="#ref-Boer2020">Boer, Piepho, and Williams
+2020</a>)</span> or temporal <span class="citation">(<a href="#ref-Bustos-Korts2019">Bustos-Korts et al. 2019</a>)</span>
+trends. Another example is mixed model Quantitative Trait Locus (QTL)
+analysis for multiparental populations, allowing for heterogeneous
+residual variance and design matrices with Identity-By-Descent (IBD)
+probabilities <span class="citation">(<a href="#ref-Li2021">Li et al.
+2021</a>)</span>.</p>
 <p>A Linear Mixed Model (LMM) has the form</p>
 <p><span class="math display">\[
   y = X \beta + Z u + e, \quad u \sim N(0,G), \quad e \sim N(0,R)
@@ -145,15 +145,15 @@ Q_{R,i}
 standard mixed models <span class="math inline">\(1/{\psi_i}\)</span>
 are the variance components and <span class="math inline">\(1/{\phi_i}\)</span> the residual variances. We use
 a formulation in terms of precision parameters to allow for non-standard
-mixed models using tensor product splines introduced in <span class="citation">Rodríguez-Álvarez et al. (<a href="#ref-Rodriguez-Alvarez2015" role="doc-biblioref">2015</a>)</span>.</p>
+mixed models using tensor product splines introduced in <span class="citation">Rodríguez-Álvarez et al. (<a href="#ref-Rodriguez-Alvarez2015">2015</a>)</span>.</p>
 <p>If the matrices <span class="math inline">\(G^{-1}\)</span> and <span class="math inline">\(R^{-1}\)</span> are sparse, the mixed model
 equations can be solved using efficient sparse matrix algebra
-implemented in the <code>spam</code> package <span class="citation">(<a href="#ref-Furrer2010" role="doc-biblioref">Furrer and Sain
-2010</a>)</span>. To calculate the derivatives of the log-likelihood in
-an efficient way, the automatic differentiation of the Cholesky matrix
-<span class="citation">(<a href="#ref-Smith1995" role="doc-biblioref">Smith 1995</a>; <a href="#ref-boer2023" role="doc-biblioref">Boer 2023</a>)</span> was implemented in C++ using
-the <code>Rcpp</code> package <span class="citation">(<a href="#ref-Eddelbuettel2018" role="doc-biblioref">Eddelbuettel and
-Balamuta 2018</a>)</span>.</p>
+implemented in the <code>spam</code> package <span class="citation">(<a href="#ref-Furrer2010">Furrer and Sain 2010</a>)</span>. To calculate
+the derivatives of the log-likelihood in an efficient way, the automatic
+differentiation of the Cholesky matrix <span class="citation">(<a href="#ref-Smith1995">Smith 1995</a>; <a href="#ref-boer2023">Boer
+2023</a>)</span> was implemented in C++ using the <code>Rcpp</code>
+package <span class="citation">(<a href="#ref-Eddelbuettel2018">Eddelbuettel and Balamuta
+2018</a>)</span>.</p>
 </div>
 <div class="section level2">
 <h2 id="smooth-trend-in-one-dimension-">Smooth trend in one dimension.<a class="anchor" aria-label="anchor" href="#smooth-trend-in-one-dimension-"></a>
@@ -183,11 +183,11 @@ spatial trend, to show some of the options of the package.</p>
 </h4>
 <p>In this subsection we will illustrate how the package can be used to
 fit mixed model P-splines, for details see <span class="citation">Boer,
-Piepho, and Williams (<a href="#ref-Boer2020" role="doc-biblioref">2020</a>)</span>.</p>
+Piepho, and Williams (<a href="#ref-Boer2020">2020</a>)</span>.</p>
 <p>In the following mixed model we include rep and gen as fixed effect,
-and we use <code>spl1D</code> to model a one dimensional P-spline <span class="citation">(<a href="#ref-Eilers1996" role="doc-biblioref">Eilers
-and Marx 1996</a>)</span> with 100 segments, and the default choice of
-cubical B-splines and second order differences:</p>
+and we use <code>spl1D</code> to model a one dimensional P-spline <span class="citation">(<a href="#ref-Eilers1996">Eilers and Marx
+1996</a>)</span> with 100 segments, and the default choice of cubical
+B-splines and second order differences:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## Fit mixed model with fixed and spline part.</span></span>
 <span><span class="va">obj1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/LMMsolve.html">LMMsolve</a></span><span class="op">(</span>fixed <span class="op">=</span> <span class="va">yield</span> <span class="op">~</span> <span class="va">rep</span> <span class="op">+</span> <span class="va">gen</span>,</span>
@@ -195,13 +195,16 @@ cubical B-splines and second order differences:</p>
 <span>                 data <span class="op">=</span> <span class="va">john.alpha</span><span class="op">)</span></span></code></pre></div>
 <p>A high number of segments can be used for splines in one dimension,
 as the corresponding mixed model equations are sparse, and therefore can
-be solved fast <span class="citation">(<a href="#ref-Smith1995" role="doc-biblioref">Smith 1995</a>; <a href="#ref-Furrer2010" role="doc-biblioref">Furrer and Sain 2010</a>)</span>.</p>
+be solved fast <span class="citation">(<a href="#ref-Smith1995">Smith
+1995</a>; <a href="#ref-Furrer2010">Furrer and Sain
+2010</a>)</span>.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/deviance.html" class="external-link">deviance</a></span><span class="op">(</span><span class="va">obj1</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 49.87</span></span></code></pre></div>
-<p>We can obtain a table with effective dimensions (see e.g. <span class="citation">Rodríguez-Álvarez et al. (<a href="#ref-Rodriguez-Alvarez2018" role="doc-biblioref">2018</a>)</span>)
-and penalties (the precision parameters <span class="math inline">\(\psi_i\)</span> and <span class="math inline">\(\phi_i\)</span>) using the <code>summary</code>
-function:</p>
+<p>We can obtain a table with effective dimensions (see e.g. <span class="citation">Rodríguez-Álvarez et al. (<a href="#ref-Rodriguez-Alvarez2018">2018</a>)</span>) and penalties (the
+precision parameters <span class="math inline">\(\psi_i\)</span> and
+<span class="math inline">\(\phi_i\)</span>) using the
+<code>summary</code> function:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">obj1</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Table with effective dimensions and penalties: </span></span>
@@ -259,9 +262,10 @@ grid of 1000 points can be obtained as follows:</p>
 <code>ginverse</code> arguments.<a class="anchor" aria-label="anchor" href="#modelling-spatial-trend-using-random-and-ginverse-arguments-"></a>
 </h4>
 <p>Another way to correct for spatial trend is using the Linear Variance
-(LV) model, which is closely connected to the P-splines model <span class="citation">(<a href="#ref-Boer2020" role="doc-biblioref">Boer,
-Piepho, and Williams 2020</a>)</span>. First we need to define the
-precision matrix for the LV model, see Appendix in <span class="citation">Boer, Piepho, and Williams (<a href="#ref-Boer2020" role="doc-biblioref">2020</a>)</span> for details:</p>
+(LV) model, which is closely connected to the P-splines model <span class="citation">(<a href="#ref-Boer2020">Boer, Piepho, and Williams
+2020</a>)</span>. First we need to define the precision matrix for the
+LV model, see Appendix in <span class="citation">Boer, Piepho, and
+Williams (<a href="#ref-Boer2020">2020</a>)</span> for details:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## Add plot as factor.</span></span>
 <span><span class="va">john.alpha</span><span class="op">$</span><span class="va">plotF</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="va">john.alpha</span><span class="op">$</span><span class="va">plot</span><span class="op">)</span></span>
@@ -290,7 +294,7 @@ arguments:</p>
 <span><span class="co">#&gt;   VarComp Variance</span></span>
 <span><span class="co">#&gt;     plotF     0.01</span></span>
 <span><span class="co">#&gt;  residual     0.06</span></span></code></pre></div>
-<p>as reported in <span class="citation">Boer, Piepho, and Williams (<a href="#ref-Boer2020" role="doc-biblioref">2020</a>)</span>, Table 1.</p>
+<p>as reported in <span class="citation">Boer, Piepho, and Williams (<a href="#ref-Boer2020">2020</a>)</span>, Table 1.</p>
 </div>
 </div>
 <div class="section level3">
@@ -299,7 +303,7 @@ arguments:</p>
 <p>In this section we show an example of mixed model P-splines to fit
 biomass as function of time. As an example we use wheat data simulated
 with the crop growth model APSIM. This data set is included in the
-package. For details on this simulated data see <span class="citation">Bustos-Korts et al. (<a href="#ref-Bustos-Korts2019" role="doc-biblioref">2019</a>)</span>.</p>
+package. For details on this simulated data see <span class="citation">Bustos-Korts et al. (<a href="#ref-Bustos-Korts2019">2019</a>)</span>.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">APSIMdat</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">APSIMdat</span><span class="op">)</span></span>
@@ -362,11 +366,11 @@ obtained using <code>deriv = 1</code> in function
 <div class="section level2">
 <h2 id="smooth-trends-in-two-dimensions">Smooth trends in two dimensions<a class="anchor" aria-label="anchor" href="#smooth-trends-in-two-dimensions"></a>
 </h2>
-<p>For two-dimensional mixed P-splines we use the model defined in <span class="citation">Rodríguez-Álvarez et al. (<a href="#ref-Rodriguez-Alvarez2015" role="doc-biblioref">2015</a>)</span>.
-As an example we use the <code>USprecip</code> data set in the
-<code>spam</code> package <span class="citation">(<a href="#ref-Furrer2010" role="doc-biblioref">Furrer and Sain
+<p>For two-dimensional mixed P-splines we use the model defined in <span class="citation">Rodríguez-Álvarez et al. (<a href="#ref-Rodriguez-Alvarez2015">2015</a>)</span>. As an example we use
+the <code>USprecip</code> data set in the <code>spam</code> package
+<span class="citation">(<a href="#ref-Furrer2010">Furrer and Sain
 2010</a>)</span>, analysed in <span class="citation">Rodríguez-Álvarez
-et al. (<a href="#ref-Rodriguez-Alvarez2015" role="doc-biblioref">2015</a>)</span>.</p>
+et al. (<a href="#ref-Rodriguez-Alvarez2015">2015</a>)</span>.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## Get precipitation data from spam</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">USprecip</span>, package <span class="op">=</span> <span class="st">"spam"</span><span class="op">)</span></span>
@@ -377,7 +381,7 @@ et al. (<a href="#ref-Rodriguez-Alvarez2015" role="doc-biblioref">2015</a>)</spa
 <p>The two-dimensional P-spline can be defined with the
 <code><a href="../reference/spl1D.html">spl2D()</a></code> function, and with longitude and latitude as
 covariates. The number of segments chosen here is equal to the number of
-segments used in <span class="citation">Rodríguez-Álvarez et al. (<a href="#ref-Rodriguez-Alvarez2015" role="doc-biblioref">2015</a>)</span>.</p>
+segments used in <span class="citation">Rodríguez-Álvarez et al. (<a href="#ref-Rodriguez-Alvarez2015">2015</a>)</span>.</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">obj3</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/LMMsolve.html">LMMsolve</a></span><span class="op">(</span>fixed <span class="op">=</span> <span class="va">anomaly</span> <span class="op">~</span> <span class="fl">1</span>,</span>
 <span>                 spline <span class="op">=</span> <span class="op">~</span><span class="fu"><a href="../reference/spl1D.html">spl2D</a></span><span class="op">(</span>x1 <span class="op">=</span> <span class="va">lon</span>, x2 <span class="op">=</span> <span class="va">lat</span>, nseg <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">41</span>, <span class="fl">41</span><span class="op">)</span><span class="op">)</span>,</span>
@@ -452,13 +456,13 @@ can be used to make predictions for locations specified in a
 </h2>
 <p>In QTL-mapping for multiparental populations the Identity-By-Descent
 (IBD) probabilities are used as genetic predictors in the mixed model
-<span class="citation">(<a href="#ref-Li2021" role="doc-biblioref">Li et
-al. 2021</a>)</span>. The following simulated example is for
-illustration. It consists of three parents (A, B, and C), and two
-crosses AxB, and AxC. AxB is a population of 100 Doubled Haploids (DH),
-AxC of 80 DHs. The probabilities, pA, pB, and pC, are for a position on
-the genome close to a simulated QTL. This simulated data is included in
-the package.</p>
+<span class="citation">(<a href="#ref-Li2021">Li et al.
+2021</a>)</span>. The following simulated example is for illustration.
+It consists of three parents (A, B, and C), and two crosses AxB, and
+AxC. AxB is a population of 100 Doubled Haploids (DH), AxC of 80 DHs.
+The probabilities, pA, pB, and pC, are for a position on the genome
+close to a simulated QTL. This simulated data is included in the
+package.</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## Load data for multiparental population.</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">multipop</span><span class="op">)</span></span>
@@ -510,7 +514,7 @@ by:</p>
 <div class="section level3">
 <h3 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h3>
-<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
 <div id="ref-boer2023" class="csl-entry">
 Boer, Martin P. 2023. <span>“Tensor Product <span>P</span>-Splines Using
 a Sparse Mixed Model Formulation.”</span> <em>Statistical Modelling</em>
@@ -589,7 +593,7 @@ Cholesky Algorithm</span>.”</span> <em>J. Comput. Graph. Stat.</em> 4
 
 <div class="pkgdown-footer-right">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.8.</p>
 </div>
 
     </footer>

@@ -1,7 +1,7 @@
-pandoc: 2.19.2
-pkgdown: 2.0.7
+pandoc: 3.1.11
+pkgdown: 2.0.8
 pkgdown_sha: ~
 articles:
   Solving_Linear_Mixed_Models: Solving_Linear_Mixed_Models.html
-last_built: 2023-11-27T14:57Z
+last_built: 2024-04-16T13:34Z
 
