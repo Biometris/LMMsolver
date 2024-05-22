@@ -163,6 +163,11 @@ LMMsolve <- function(fixed,
   if (!is.numeric(maxit) || length(maxit) > 1 || maxit < 0) {
     stop("maxit should be a positive numerical value.")
   }
+  if (!is.null(grpTheta) &&
+      (!is.numeric(grpTheta) || !isTRUE(all.equal(round(grpTheta),grpTheta)) ||
+       max(grpTheta) != length(unique(grpTheta)))) {
+    stop("grpTheta should be integers 1,2,...nGrp")
+  }
   ## Check that all variables used in fixed formula are in data.
   data <- checkFormVars(fixed, data, naAllowed = FALSE)
   ## Remove NA for response variable from data.

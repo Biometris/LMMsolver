@@ -1,3 +1,6 @@
+# LMMsolver 1.0.7.9000
+-   Bug in `grpTheta` argument of `LMMsolve()` fixed.  
+
 # LMMsolver 1.0.7
 
 -   Improved efficiency for models where the `residual` argument of `LMMsolve()` is used.

@@ -92,7 +92,11 @@ sparseMixedModels <- function(y,
   }
   if (is.null(fixedTheta)) {
     ## Fix a penalty theta, if value becomes high.
-    fixedTheta <- rep(FALSE, length = NvarcompTot)
+    if (!is.null(grpTheta)) {
+      fixedTheta <- rep(FALSE, length = max(grpTheta))
+    } else {
+      fixedTheta <- rep(FALSE, length = NvarcompTot)
+    }
   }
   if (!is.null(grpTheta)) {
     nGrp <- max(grpTheta)
