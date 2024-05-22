@@ -32,6 +32,7 @@
 #' \item{term.labels.f}{The names of the fixed terms in the mixed model}
 #' \item{term.labels.r}{The names of the random terms in the mixed model}
 #' \item{splRes}{An object with definition of spline argument}
+#' \item{deviance}{The relative deviance}
 #' \item{family}{An object of class family specifying the distribution and link function}
 #' \item{trace}{A data.frame with the convergence sequence for the log likelihood and effective dimensions}.
 #'
@@ -65,6 +66,7 @@ LMMsolveObject <- function(logL,
                            term.labels.r,
                            splRes,
                            family,
+                           deviance,
                            trace) {
   structure(list(logL = logL,
                  sigma2e = sigma2e,
@@ -92,6 +94,7 @@ LMMsolveObject <- function(logL,
                  term.labels.r = term.labels.r,
                  splRes = splRes,
                  family = family,
+                 deviance = deviance,
                  trace = trace),
             class = c("LMMsolve", "list"))
 }
@@ -324,6 +327,8 @@ logLik.LMMsolve <- function(object,
 #' Obtain the deviance of a model fitted using LMMsolve.
 #'
 #' @inheritParams logLik.LMMsolve
+#' @param relative Deviance relative conditional or absolute unconditional
+#' (-2*logLik(object))? Default \code{relative = TRUE}.
 #'
 #' @return The deviance of the fitted model.
 #'
@@ -336,15 +341,17 @@ logLik.LMMsolve <- function(object,
 #'                 data = john.alpha)
 #'
 #' ## Obtain deviance.
-#' logLik(LMM1)
-#'
-#' ## Obtain deviance. without constant.
-#' logLik(LMM1, includeConstant = FALSE)
+#' deviance(LMM1)
 #'
 #' @export
 deviance.LMMsolve <- function(object,
+                              relative = TRUE,
                               includeConstant = TRUE,
                               ...) {
+  if (relative) {
+    return(object$deviance)
+  }
+  # else
   logL <- logLik(object, includeConstant = includeConstant)
   dev <- -2 * logL
   return(dev)

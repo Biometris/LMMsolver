@@ -4,10 +4,13 @@
 \alias{deviance.LMMsolve}
 \title{Deviance of an LMMsolve object}
 \usage{
-\method{deviance}{LMMsolve}(object, includeConstant = TRUE, ...)
+\method{deviance}{LMMsolve}(object, relative = TRUE, includeConstant = TRUE, ...)
 }
 \arguments{
 \item{object}{an object of class LMMsolve}
+
+\item{relative}{Deviance relative conditional or absolute unconditional
+(-2*logLik(object))? Default \code{relative = TRUE}.}
 
 \item{includeConstant}{Should the constant in the restricted log-likelihood
 be included. Default is \code{TRUE}, as for example in \code{lme4} and SAS.
@@ -31,9 +34,6 @@ LMM1 <- LMMsolve(fixed = yield ~ rep + gen,
                 data = john.alpha)
 
 ## Obtain deviance.
-logLik(LMM1)
-
-## Obtain deviance. without constant.
-logLik(LMM1, includeConstant = FALSE)
+deviance(LMM1)
 
 }

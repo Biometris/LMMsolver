@@ -438,6 +438,8 @@ LMMsolve <- function(fixed,
     obj <- sparseMixedModels(y = y, X = Xs, Z = Z, lGinv = lGinv, lRinv = lRinv,
                              tolerance = tolerance, trace = trace, maxit = maxit,
                              theta = theta, grpTheta = grpTheta)
+    dev.residuals <- family$dev.resids(y, obj$yhat, w)
+    deviance <- sum(dev.residuals)
   } else {
     ## MB, 23 jan 2023
     ## binomial needs global weights
@@ -473,7 +475,11 @@ LMMsolve <- function(fixed,
       if (trace) {
         cat("Generalized Linear Mixed Model iteration", i, ", tol=", tol, "\n")
       }
-      if (tol < tolerance) break;
+      if (tol < tolerance) {
+        dev.residuals <- family$dev.resids(y, mu, w)
+        deviance <- sum(dev.residuals)
+        break;
+      }
     }
   }
   ## Add names to ndx of coefficients.
@@ -558,5 +564,6 @@ LMMsolve <- function(fixed,
                         term.labels.r = term.labels.r,
                         splRes = splResList,
                         family = family,
+                        deviance = deviance,
                         trace = trace))
 }

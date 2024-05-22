@@ -30,6 +30,7 @@ mixed model}
 \item{term.labels.f}{The names of the fixed terms in the mixed model}
 \item{term.labels.r}{The names of the random terms in the mixed model}
 \item{splRes}{An object with definition of spline argument}
+\item{deviance}{The relative deviance}
 \item{family}{An object of class family specifying the distribution and link function}
 \item{trace}{A data.frame with the convergence sequence for the log likelihood and effective dimensions}.
 }

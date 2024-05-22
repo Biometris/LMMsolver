@@ -57,7 +57,7 @@ obj0 <- LMMsolve(fixed = yield ~ rep + gen,
 
 ## Compare deviance with JABES2020 paper, table 1.
 devJABES2020paper_baseline <- 69.91
-expect_equal(round(deviance(obj0), 2), devJABES2020paper_baseline)
+expect_equal(round(deviance(obj0, relative=FALSE), 2), devJABES2020paper_baseline)
 
 ## Number of plots
 N <- nrow(john.alpha)
@@ -70,7 +70,7 @@ obj1 <- LMMsolve(fixed = yield ~ rep + gen,
 
 ## Compare deviance with JABES2020 paper LV model, table 1.
 devJABES2020paper_LV <- 54.49
-expect_equal(round(deviance(obj1), 2) , devJABES2020paper_LV)
+expect_equal(round(deviance(obj1, relative=FALSE), 2) , devJABES2020paper_LV)
 
 ## From R 4.3 there is an extra item in the family output.
 ## This gives problems with the comparison.
