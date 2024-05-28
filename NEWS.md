@@ -1,4 +1,6 @@
 # LMMsolver 1.0.7.9000
+
+-   Improved efficiency initialization for large datasets.
 -   Bug in `grpTheta` argument of `LMMsolve()` fixed. 
 -   Deviance function changes, with extra argument `relative`, giving the relative conditional deviance as defined in McCullagh and Nelder. The default is `relative=TRUE`, for `relative=FALSE` it returns `-2*logLik(obj)`
 
