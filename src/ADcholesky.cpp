@@ -57,11 +57,8 @@ List construct_ADchol_Rcpp(Rcpp::S4 obj_spam,
   const int size = colpointers[N];
   const int n_prec_matrices = P_list.size();
   NumericMatrix P_matrix(size, n_prec_matrices);
-  //cout << "N = " << N << endl;
   for (int i=0;i<n_prec_matrices;i++)
   {
-    //Rcout << "precision matrix " << i+1 << " (size= " << size <<  ")" << endl;
-
     Rcpp::S4 obj(P_list[i]);
     IntegerVector rowpointers_P = GetIntVector(obj, "rowpointers", 0);
     IntegerVector colindices_P  = GetIntVector(obj, "colindices", 0);
@@ -76,10 +73,7 @@ List construct_ADchol_Rcpp(Rcpp::S4 obj_spam,
       for (int j=supernodes[J]; j<supernodes[J+1]; j++)
       {
         int r = j;
-        //Rcout << "column " << j+1 << " chol, and row " << r+1 << " precision matrix" << endl;
-
         if (rowpointers_P[r] != rowpointers_P[r+1]) {
-          //std::fill(z.begin(), z.end(), 0.0);
           int k = s;
           int ndx = colpointers[j+1]-1;
           for (int ll=rowpointers_P[r+1]-1;ll>=rowpointers_P[r];ll--) {
@@ -90,25 +84,11 @@ List construct_ADchol_Rcpp(Rcpp::S4 obj_spam,
               ndx--;
             }
             result[ndx] = entries_P[ll];
-
-            //z[c] = entries_P[ll];
-            //Rcout << "  set z[" << c+1 << "] = " <<
-            //        entries_P[ll] << ", c=" << c+1 << endl;
             if (c == r) break;
           }
-
-          //int k = s;
-          //for (int ndx = colpointers[j+1]-1; ndx >= colpointers[j]; ndx--)
-          //{
-          //  int ii = rowindices[k--];
-          //  result[ndx] = z[ii];
-          //  Rcout << "      set result[" << ndx+1 << "] = " << z[ii] << endl;
-          //}
         }
-        //s++;
       }
     }
-    //Rcout << "end prec " << i+1 << " (size= " << size <<  ")" << endl;
 
     for (int j=0;j<size;j++)
     {
@@ -128,7 +108,6 @@ List construct_ADchol_Rcpp(Rcpp::S4 obj_spam,
   L["P"] = P_matrix;
   return L;
 }
-
 
 
 // j is current column in Supernode J

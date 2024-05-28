@@ -38,6 +38,8 @@ ADchol <- function(lP) {
   opt <- summary(C)
   cholC <- chol(C, memory = list(nnzR = 8 * opt$nnz,
                                  nnzcolindices = 4 * opt$nnz))
+  # reorder the matrices in list lP by double transpose, row-permutations are much faster
+  # than column permutations (see help permutation() function in spam library)
   lQ <- lapply(lP, function(x) {
     z <- x[cholC@pivot,]
     tz <- t(z)
