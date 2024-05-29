@@ -42,9 +42,9 @@ ADchol <- function(lP) {
   # than column permutations (see help permutation() function in spam library)
   lQ <- lapply(lP, function(x) {
     z <- x[cholC@pivot,]
-    tz <- t(z)
+    tz <- spam::t(z)
     tz <- tz[cholC@pivot,]
-    t(tz) })
+    return(spam::t(tz)) })
   L <- construct_ADchol_Rcpp(cholC, lQ)
   new("ADchol",
       supernodes = L$supernodes,
