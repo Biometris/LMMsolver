@@ -122,10 +122,19 @@ int cntProduct(Rcpp::S4 sA, const Rcpp::S4 sB)
 
 
 // [[Rcpp::export]]
-Rcpp::S4 MatrixProduct(Rcpp::S4 sA, const Rcpp::S4 sB)
+Rcpp::S4 MatrixProduct(Rcpp::S4 sA, Rcpp::S4 sB)
 {
+  if ((as<std::string>(sA.attr("class")) != "spam") ||
+      (as<std::string>(sB.attr("class")) != "spam"))
+  {
+    stop("Both arguments for MatrixProduct should be of class spam");
+  }
   SparseMatrix A(sA);
   SparseMatrix B(sB);
+  if (A.dim[1] != B.dim[0])
+  {
+    stop("MatrixProduct wrong dimensions");
+  }
   const int nRows = A.dim[0];
   const int nCols = B.dim[1];
   const int N = cntProduct(A, B);

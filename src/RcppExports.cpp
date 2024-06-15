@@ -96,13 +96,13 @@ BEGIN_RCPP
 END_RCPP
 }
 // MatrixProduct
-Rcpp::S4 MatrixProduct(Rcpp::S4 sA, const Rcpp::S4 sB);
+Rcpp::S4 MatrixProduct(Rcpp::S4 sA, Rcpp::S4 sB);
 RcppExport SEXP _LMMsolver_MatrixProduct(SEXP sASEXP, SEXP sBSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Rcpp::S4 >::type sA(sASEXP);
-    Rcpp::traits::input_parameter< const Rcpp::S4 >::type sB(sBSEXP);
+    Rcpp::traits::input_parameter< Rcpp::S4 >::type sB(sBSEXP);
     rcpp_result_gen = Rcpp::wrap(MatrixProduct(sA, sB));
     return rcpp_result_gen;
 END_RCPP

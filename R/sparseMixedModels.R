@@ -65,7 +65,7 @@ sparseMixedModels <- function(y,
     } else {
       xW <- x %*% W
     }
-    spam::crossprod.spam(W, xW)
+    MatrixProduct(t(W), xW)
   })
   lWtRinvY <- lapply(X = lRinv, FUN = function(x) {
     spam::crossprod.spam(W, x %*% y) })

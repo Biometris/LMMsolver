@@ -110,6 +110,29 @@ det0-det1
 ED <- theta * LMMsolver:::dlogdet(obj0,theta)
 ED
 
+U <- cbind(obj1$X, obj1$Z)
+tU <- t(U)
+funSpam <- function(A, B) { A %*% B}
+
+funMP <- function(A,B)
+{
+  LMMsolver:::MatrixProduct(A,B)
+}
+
+cntMP <- function(A,B)
+{
+  LMMsolver:::cntProduct(A,B)
+}
+
+cntMP(tU,U)
+x1 <- funSpam(tU,U)
+x2 <- funMP(tU,U)
+all.equal(x1, x2)
+
+# compare computation time
+microbenchmark(funSpam(tU,U), funMP(tU,U), cntMP(tU, U), times=25L)
+
+
 # compare direct way using dlogdet, and second option
 #dlogdet1 <- as.numeric(LMMsolver:::dlogdet(obj0,theta))
 #A <- LMMsolver:::DerivCholesky(cholC);
