@@ -64,10 +64,127 @@ List RowKron(Rcpp::S4 sX1, Rcpp::S4 sX2)
       }
     }
   }
+  // Note: Better to use S4 constructor:
   List L = List::create(Named("entries") = entries,
                         Named("colindices") = colindices,
                         Named("rowpointers") = rowpointers,
                         Named("dimension") = dimension);
   return L;
 }
+
+// help function, to count the number of non-zero's in C=A*B
+int cntProduct(const SparseMatrix& A, const SparseMatrix B)
+{
+  const int nRows = A.dim[0];
+
+  int cnt=0;
+  vector<bool> S(B.dim[1],false);
+  vector<int> ndx(B.dim[1],-1);
+  for (int i=0;i<nRows;i++)
+  {
+    int ptr_ndx = 0;
+    int s1 = A.rowpointers[i];
+    int e1 = A.rowpointers[i+1];
+    for (int j=s1;j<e1;j++)
+    {
+      int m = A.colindices[j];
+      int s2 = B.rowpointers[m];
+      int e2 = B.rowpointers[m+1];
+      for (int k=s2;k<e2;k++)
+      {
+        int index = B.colindices[k];
+        if(!S[index])
+        {
+          S[index] = true;
+          cnt++;
+          ndx[ptr_ndx++] = index;
+        }
+      }
+    }
+    for (int j=0;j<ptr_ndx;j++)
+    {
+      S[ndx[j]] = false;
+      ndx[j] = -1;
+    }
+  }
+  return cnt;
+}
+
+
+// [[Rcpp::export]]
+int cntProduct(Rcpp::S4 sA, const Rcpp::S4 sB)
+{
+  SparseMatrix A(sA);
+  SparseMatrix B(sB);
+  int cnt = cntProduct(A, B);
+  return cnt;
+}
+
+
+// [[Rcpp::export]]
+Rcpp::S4 MatrixProduct(Rcpp::S4 sA, const Rcpp::S4 sB)
+{
+  SparseMatrix A(sA);
+  SparseMatrix B(sB);
+  const int nRows = A.dim[0];
+  const int nCols = B.dim[1];
+  const int N = cntProduct(A, B);
+
+  IntegerVector dimension(2);
+  IntegerVector rowpointers(nRows+1);
+  rowpointers[nRows] = N+1;
+  dimension[0] = nRows;
+  dimension[1] = nCols;
+
+  IntegerVector colindices(N,-1);
+  NumericVector entries(N, 0.0);
+
+  int cnt=0;
+  vector<bool> S(B.dim[1],false);
+  vector<double> val(B.dim[1],0.0);
+  vector<int> ndx(B.dim[1],-1);
+  for (int i=0;i<nRows;i++)
+  {
+    int ptr_ndx = 0;
+    rowpointers[i] = cnt + 1;
+    int s1 = A.rowpointers[i];
+    int e1 = A.rowpointers[i+1];
+    for (int j=s1;j<e1;j++)
+    {
+      double alpha = A.entries[j];
+      int m = A.colindices[j];
+      int s2 = B.rowpointers[m];
+      int e2 = B.rowpointers[m+1];
+      for (int k=s2;k<e2;k++)
+      {
+        int index = B.colindices[k];
+        if (!S[index]) {
+          S[index] = true;
+          ndx[ptr_ndx++] = index;
+        }
+        val[index] += alpha*B.entries[k];
+      }
+    }
+    sort(ndx.begin(),ndx.begin()+ptr_ndx);
+    for (int j=0;j<ptr_ndx;j++) {
+      colindices[cnt] = ndx[j] + 1;
+      entries[cnt] = val[ndx[j]];
+      cnt++;
+      S[ndx[j]] = false;
+      val[ndx[j]] = 0.0;
+      ndx[j] = -1;
+    }
+  }
+
+  // see Masaki Tsuda, Rcpp for everyone,
+  // https://teuder.github.io/rcpp4everyone_en/
+  S4 L("spam");
+  L.slot("entries") = entries;
+  L.slot("colindices") = colindices;
+  L.slot("rowpointers") = rowpointers;
+  L.slot("dimension") = dimension;
+  return L;
+}
+
+
 
