@@ -23,7 +23,7 @@ SparseMatrix::SparseMatrix(Rcpp::S4 obj)
 }
 
 // [[Rcpp::export]]
-List RowKron(Rcpp::S4 sX1, Rcpp::S4 sX2)
+Rcpp::S4 RowKron(Rcpp::S4 sX1, Rcpp::S4 sX2)
 {
   SparseMatrix X1(sX1);
   SparseMatrix X2(sX2);
@@ -64,11 +64,13 @@ List RowKron(Rcpp::S4 sX1, Rcpp::S4 sX2)
       }
     }
   }
-  // Note: Better to use S4 constructor:
-  List L = List::create(Named("entries") = entries,
-                        Named("colindices") = colindices,
-                        Named("rowpointers") = rowpointers,
-                        Named("dimension") = dimension);
+  // see Masaki Tsuda, Rcpp for everyone,
+  // https://teuder.github.io/rcpp4everyone_en/
+  S4 L("spam");
+  L.slot("entries") = entries;
+  L.slot("colindices") = colindices;
+  L.slot("rowpointers") = rowpointers;
+  L.slot("dimension") = dimension;
   return L;
 }
 

@@ -72,7 +72,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // RowKron
-List RowKron(Rcpp::S4 sX1, Rcpp::S4 sX2);
+Rcpp::S4 RowKron(Rcpp::S4 sX1, Rcpp::S4 sX2);
 RcppExport SEXP _LMMsolver_RowKron(SEXP sX1SEXP, SEXP sX2SEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
