@@ -204,7 +204,10 @@ ggplot(data = plotDatDt, aes(x = das, y = ypred)) +
 
 # Smooth trends in two dimensions
 
-For two-dimensional mixed P-splines we use the model defined in @Rodriguez-Alvarez2015. As an example we use the `USprecip` data set in the `spam` package [@Furrer2010], analysed in @Rodriguez-Alvarez2015.
+For two-dimensional mixed P-splines as defined in @boer2023 we will two examples. The first one for US precipitation data. The second one modelling Sea Surface Temperature (SST) as described in @cressie2022.
+
+## USprecip
+
 
 ```{r USprecip data}
 ## Get precipitation data from spam
@@ -266,6 +269,98 @@ head(us.cities)
 pred3 <- obtainSmoothTrend(obj3, newdata = us.cities, includeIntercept = TRUE)
 head(pred3)
 ```
+
+## Sea Surfaces Temperatures 
+
+```{r SeaSurfaceTemp}
+data(SeaSurfaceTemp)
+head(SeaSurfaceTemp)
+# convert from Kelvin to Celsius
+df <- SeaSurfaceTemp
+df$sst <- df$sst - 273.15
+### split in training and test set
+df_train <- df[df$type=="train",]
+df_test <- df[df$type=="test",]
+
+```
+LMMsolver
+```{r SeaTempAnalysis}
+
+nseg <- c(70, 70)
+
+obj <- LMMsolve(sst~1,spline=~spl2D(lon,lat,nseg=nseg,
+                              x1lim=c(-60,-48), x2lim=c(-50,-35)),
+                data=df_train)
+summary(obj)
+``` 
+
+
+```{r predictions}
+## Run prediction scripts using fine-regular grid of pred locations
+## throughout the spatial domain D.
+grid_over_D <- expand.grid(
+  lon = seq(-60, -48, length.out = 200),
+  lat = seq(-50, -35, length.out = 200)
+)
+
+pred_grid <- obtainSmoothTrend(obj, newdata=grid_over_D, includeIntercept = TRUE)
+pred_test <- obtainSmoothTrend(obj, newdata=df_test, includeIntercept = TRUE)
+
+#' Plot data
+#' ==================
+
+## A layer which will be added to most of the plots throughout the script:
+map_layer <- geom_map(
+  data = map_data("world"), map = map_data("world"),
+  aes(group = group, map_id = region),
+  fill = "black", colour = "white", linewidth = 0.1
+)
+
+## A palette for the data and predictions
+nasa_palette <- c(
+  "#03006d","#02008f","#0000b6","#0001ef","#0000f6","#0428f6","#0b53f7",
+  "#0f81f3","#18b1f5","#1ff0f7","#27fada","#3efaa3","#5dfc7b","#85fd4e",
+  "#aefc2a","#e9fc0d","#f6da0c","#f5a009","#f6780a","#f34a09","#f2210a",
+  "#f50008","#d90009","#a80109","#730005"
+)
+
+BM_box <- cbind(lon = c(-60, -48), lat = c(-50, -35))
+
+plot_of_SST_training_data <- ggplot() +
+  scale_colour_gradientn(colours = nasa_palette, name = expression(degree*C)) +
+  xlab("Longitude (deg)") + ylab("Latitude (deg)") +
+  map_layer + xlim(BM_box[, "lon"]) + ylim(BM_box[, "lat"]) + theme_bw() +
+  coord_fixed(expand = FALSE) +
+  geom_point(data = df_train, aes(lon, lat, colour = sst),size=0.5)
+
+# make a plot
+plotDat <- pred_grid
+plotDat <- plotDat[plotDat$se<5, ]
+
+## Plot prediction
+plot_predictions <- ggplot(plotDat) +
+  geom_tile(aes(x = lon, y = lat, fill = ypred)) +
+  scale_fill_gradientn(colours = nasa_palette) +
+  labs(
+    fill = "pred.",
+    x = "Longitude (deg)", y = "Latitude (deg)"
+  ) +
+  map_layer +
+  theme_bw() +
+  coord_fixed(expand = FALSE, xlim = c(-60, -48), ylim = c(-50, -35)) +
+  scale_x_continuous(breaks = c(-58, -54, -50))
+
+plot_of_SST_training_data
+plot_predictions
+
+#' Root-mean-squared prediction error
+#' ==================
+Y <- (pred_test$sst - pred_test$ypred)^2
+round(sqrt(mean(Y)),2)
+```
+
+
+
 
 # QTL mapping with IBD probabilities.
 
