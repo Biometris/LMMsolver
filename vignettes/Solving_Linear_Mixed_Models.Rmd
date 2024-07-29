@@ -204,10 +204,10 @@ ggplot(data = plotDatDt, aes(x = das, y = ypred)) +
 
 # Smooth trends in two dimensions
 
-For two-dimensional mixed P-splines as defined in @boer2023 we will two examples. The first one for US precipitation data. The second one modelling Sea Surface Temperature (SST) as described in @cressie2022.
+For two-dimensional mixed P-splines as defined in @boer2023 we will use two examples. The first one for US precipitation data. The second one modelling Sea Surface Temperature (SST) as described in @cressie2022.
 
-## USprecip
-
+## US precipitation example
+As a first example we use the `USprecip` data set in the spam package [@Furrer2010], analysed in @Rodriguez-Alvarez2015.
 
 ```{r USprecip data}
 ## Get precipitation data from spam
@@ -270,11 +270,21 @@ pred3 <- obtainSmoothTrend(obj3, newdata = us.cities, includeIntercept = TRUE)
 head(pred3)
 ```
 
-## Sea Surfaces Temperatures 
+## Sea Surface Temperatures 
+The second example 2D P-splines is Sea Surface Temperatures (SST) [@cressie2022]. In their study they compare a wide range of software packages to analyse the SST data. For the comparison they focus on a region of the ocean known as the Brazil-Malvinas confluence zone, an energetic region of the
+ocean just off the coastof Argentina and Uruguay, where the
+(warm) Brazil current and the (cold) Malvinas current meet [@cressie2022].
+
+They divided the data within this region into a training and a testing data set, each consisting of approximately 8,000 observations. 
 
 ```{r SeaSurfaceTemp}
 data(SeaSurfaceTemp)
-head(SeaSurfaceTemp)
+head(SeaSurfaceTemp, 5)
+``` 
+
+First we convert SST from Kelvin and split the data in a training and test set.
+
+```{r convert_and_split}
 # convert from Kelvin to Celsius
 df <- SeaSurfaceTemp
 df$sst <- df$sst - 273.15
@@ -283,40 +293,10 @@ df_train <- df[df$type=="train",]
 df_test <- df[df$type=="test",]
 
 ```
-LMMsolver
-```{r SeaTempAnalysis}
 
-nseg <- c(70, 70)
+The next plot shows the raw data, using the same color palette as in @cressie2022.
 
-obj <- LMMsolve(sst~1,spline=~spl2D(lon,lat,nseg=nseg,
-                              x1lim=c(-60,-48), x2lim=c(-50,-35)),
-                data=df_train)
-summary(obj)
-``` 
-
-
-```{r predictions}
-## Run prediction scripts using fine-regular grid of pred locations
-## throughout the spatial domain D.
-grid_over_D <- expand.grid(
-  lon = seq(-60, -48, length.out = 200),
-  lat = seq(-50, -35, length.out = 200)
-)
-
-pred_grid <- obtainSmoothTrend(obj, newdata=grid_over_D, includeIntercept = TRUE)
-pred_test <- obtainSmoothTrend(obj, newdata=df_test, includeIntercept = TRUE)
-
-#' Plot data
-#' ==================
-
-## A layer which will be added to most of the plots throughout the script:
-map_layer <- geom_map(
-  data = map_data("world"), map = map_data("world"),
-  aes(group = group, map_id = region),
-  fill = "black", colour = "white", linewidth = 0.1
-)
-
-## A palette for the data and predictions
+```{r SST_raw_data}
 nasa_palette <- c(
   "#03006d","#02008f","#0000b6","#0001ef","#0000f6","#0428f6","#0b53f7",
   "#0f81f3","#18b1f5","#1ff0f7","#27fada","#3efaa3","#5dfc7b","#85fd4e",
@@ -324,21 +304,40 @@ nasa_palette <- c(
   "#f50008","#d90009","#a80109","#730005"
 )
 
+map_layer <- geom_map(
+  data = map_data("world"), map = map_data("world"),
+  aes(group = group, map_id = region),
+  fill = "black", colour = "white", linewidth = 0.1
+)
+
 BM_box <- cbind(lon = c(-60, -48), lat = c(-50, -35))
 
-plot_of_SST_training_data <- ggplot() +
+ggplot() +
   scale_colour_gradientn(colours = nasa_palette, name = expression(degree*C)) +
   xlab("Longitude (deg)") + ylab("Latitude (deg)") +
   map_layer + xlim(BM_box[, "lon"]) + ylim(BM_box[, "lat"]) + theme_bw() +
   coord_fixed(expand = FALSE) +
   geom_point(data = df_train, aes(lon, lat, colour = sst),size=0.5)
+```
 
-# make a plot
-plotDat <- pred_grid
-plotDat <- plotDat[plotDat$se<5, ]
+For this complicated data we need more segments for `spl2D()` as in the previous example, because of the strong local changes in Sea Surface Temperatures in this region. 
 
-## Plot prediction
-plot_predictions <- ggplot(plotDat) +
+```{r SeaTempAnalysis}
+
+obj <- LMMsolve(sst~1,spline=~spl2D(lon,lat, nseg=c(70,70),
+                           x1lim=c(-60,-48), x2lim=c(-50,-35)),
+                data=df_train)
+summary(obj)
+``` 
+
+The predictions on a grid are shown in the next figure
+
+```{r predictions_grid}
+pred_grid <- obtainSmoothTrend(obj, grid=c(200, 200), includeIntercept = TRUE)
+pred_grid <- pred_grid[pred_grid$se<5, ]
+
+## Plot predictions on a grid
+ggplot(pred_grid) +
   geom_tile(aes(x = lon, y = lat, fill = ypred)) +
   scale_fill_gradientn(colours = nasa_palette) +
   labs(
@@ -349,17 +348,40 @@ plot_predictions <- ggplot(plotDat) +
   theme_bw() +
   coord_fixed(expand = FALSE, xlim = c(-60, -48), ylim = c(-50, -35)) +
   scale_x_continuous(breaks = c(-58, -54, -50))
+```
 
-plot_of_SST_training_data
-plot_predictions
+The standard errors for the predictions are in the column `se` in the data frame `pred_grid` and can be plotted using the following code:
 
-#' Root-mean-squared prediction error
-#' ==================
-Y <- (pred_test$sst - pred_test$ypred)^2
-round(sqrt(mean(Y)),2)
+```{r seSST}
+ ## Plot standard error
+ggplot(pred_grid) +
+   geom_raster(aes(x = lon, y = lat, fill = se)) +
+   scale_fill_distiller(palette = "BrBG", direction = -1) +
+   labs( fill = "s.e.", x = "Longitude (deg)", y = "Latitude (deg)") +
+   map_layer +
+   theme_bw() +
+   coord_fixed(expand = FALSE, xlim = c(-60, -48), ylim = c(-50, -35)) +
+   scale_x_continuous(breaks = c(-58, -54, -50))
 ```
 
 
+Predictions for the test set can be obtained using the `newdata` argument
+```{r test_set}
+pred_test <- obtainSmoothTrend(obj, newdata=df_test, includeIntercept = TRUE)
+ggplot(pred_test,aes(x=sst,y=ypred)) + geom_point() +
+     xlab("observed SST (Celsius)") + ylab("predicted SST (Celsius)") +
+     geom_abline(intercept=0,slope=1,col='red')
+```
+
+Calculation of the root mean squared prediction error (RMSPE) for the test set:
+
+```{r RMSE_test}
+Y <- (pred_test$sst - pred_test$ypred)^2
+RMSE <- sqrt(mean(Y))
+RMSE
+``` 
+
+The RMSPE is in the same range (0.44-0.46) as for the software packages used in @cressie2022. On a standard desktop the calculations using `LMMsolver` take less than 10 seconds, taking advantage of the sparse structure of the P-splines mixed model [@boer2023]. 
 
 
 # QTL mapping with IBD probabilities.

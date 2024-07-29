@@ -1,5 +1,6 @@
 # LMMsolver 1.0.7.9000
 
+-   new 2D example Sea Surface Temperature added.
 -   Issue with product of two large matrices fixed. 
 -   Improved efficiency initialization for large datasets.
 -   Bug in `grpTheta` argument of `LMMsolve()` fixed. 
