@@ -220,10 +220,12 @@ calcNomEffDim <- function(X,
     # if number of columns is high, use upper bound:
     if (dim.r[i] > 100 | nrow(X) > 10000) {
       rowSum <- spam::rowSums.spam(Zi)
+      colSum <- spam::colSums.spam(Zi)
+      nNonZeroCols <- sum(colSum != 0)
       if (all(rowSum == rowSum[1])) {
-        EDnom[i] <- dim.r[i] - 1
+        EDnom[i] <- nNonZeroCols - 1
       } else {
-        EDnom[i] <- dim.r[i]
+        EDnom[i] <- nNonZeroCols
       }
     } else {
       XZ <- cbind(X, Zi)
