@@ -139,7 +139,6 @@ LMMsolve <- function(fixed,
     splSpec <- attr(splTrms, "specials")
     if (length(terms(splTrms)) != 2 ||
         ## Spline formula should consist of splxD() terms and nothing else.
-        length(splSpec[!sapply(X = splSpec, FUN = is.null)]) > 1 ||
         length(unlist(splSpec)) != length(labels(terms(spline))) ||
         length(splSpec$spl2D) > 1 ||
         length(splSpec$spl3D) > 1) {
@@ -378,6 +377,14 @@ LMMsolve <- function(fixed,
       term.labels.f <- c(term.labels.f, splRes$term.labels.f)
       term.labels.r <- c(term.labels.r, splRes$term.labels.r)
       scFactor <- c(scFactor, splRes$scaleFactor)
+    }
+    # if splines of different dimensions are combined:
+    if (length(splSpec[!sapply(X = splSpec, FUN = is.null)]) > 1) {
+       #check whether variables are uniquely defined
+        nameVar <- unlist(lapply(splResList, function(z) {names(z$x)}))
+        if (length(nameVar)!=length(unique(nameVar))) {
+        stop("variables in splines should be unique.\n")
+      }
     }
   }
 

@@ -22,12 +22,12 @@ expect_error(LMMsolve(fixed = yield ~ 1,
                       data = dat),
              "in the spline part of the model are not in the data")
 
-## Only multiple 1D splines with different x-variables allowed.
+## Only splines with different variables allowed.
 expect_error(LMMsolve(fixed = yield ~ 1,
                       spline = ~spl1D(x = row, nseg = 36) +
                         spl2D(x1 = col, x2 = row, nseg = c(30, 36)),
                       data = dat),
-             "spline should be a formula of form")
+             "variables in splines should be unique")
 expect_error(LMMsolve(fixed = yield ~ 1,
                       spline = ~spl1D(x = row, nseg = 36) +
                         spl1D(x = row, nseg = 30),
