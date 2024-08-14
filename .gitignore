@@ -9,4 +9,5 @@ inst/doc
 public
 examples/deployment.R
 docs
-examples/
+src/notused/
+R/unused functions/
