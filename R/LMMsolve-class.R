@@ -421,5 +421,67 @@ diagnosticsMME <- function(object) {
   print(spam::summary.spam(chol(object$C)))
 }
 
+#' Predict function
+#'
+#' @param object an object of class LMMsolve.
+#' @param newdata A data.frame containing new points for which the smooth
+#' trend should be computed. Column names should include the names used when
+#' fitting the spline model.
+#'
+#' @export
+predict.LMMsolve <- function(object, newdata) {
+  nGam <- length(object$splRes)
+  xGrid <- list()
+  for (s in 1:nGam) {
+    x <- object$splRes[[s]]$x
+    xGrid[[s]] <- lapply(X = seq_along(x), FUN = function(i) {
+      newdata[[names(x)[i]]]})
+  }
+
+  BxTot <- list()
+  for (s in 1:nGam) {
+    Bx <- mapply(FUN = Bsplines, object$splRes[[s]]$knots, xGrid[[s]], deriv=0)
+    BxTot[[s]] <- Reduce(RowKronecker, Bx)
+  }
+
+  XTot <- list()
+  for (s in 1:nGam) {
+    pord <- object$splRes[[s]]$pord
+    scaleX <- object$splRes[[s]]$scaleX
+    G <- lapply(X=object$splRes[[s]]$knots, FUN = function(x) {
+      constructG(knots = x, scaleX = scaleX, pord = pord)})
+    ## Compute G over all dimensions
+    GTot <- Reduce('%x%', G)
+    ## no scaling for first column of GTot
+    GTot[,1] <- 1
+    X <- BxTot[[s]] %*% GTot
+    ## Remove intercept (needed when fitting model to avoid singularities).
+    XTot[[s]] <- removeIntercept(X)
+  }
+
+  dim <- object$dim
+  lU <- list()
+  nRow <- nrow(newdata)
+  for (i in seq_along(dim)) {
+    lU[[i]] = spam::spam(x = 0, nrow = nRow, ncol = dim[i])
+  }
+  # intercept:
+  lU[[1]] = spam::spam(x = 1, nrow = nRow, ncol = 1)
+
+  labels <- c(object$term.labels.f, object$term.labels.r)
+
+  for (s in 1:nGam) {
+    ndx.f <- which(object$splRes[[s]]$term.labels.f == labels)
+    ndx.r <- which(object$splRes[[s]]$term.labels.r == labels)
+    lU[[ndx.f]] <- XTot[[s]]
+    lU[[ndx.r]] <- BxTot[[s]]
+  }
+  U <- Reduce(spam::cbind.spam, lU)
+  newdata$ypred <- as.vector(U %*% object$coefMME)
+  newdata$se <- calcStandardErrors(C = object$C, D = U)
+  newdata
+}
+
+
 
 
