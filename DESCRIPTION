@@ -31,7 +31,7 @@ Imports:
     spam,
     splines
 LinkingTo: Rcpp
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 Suggests: 
     rmarkdown,
     knitr,
