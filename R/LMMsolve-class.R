@@ -430,26 +430,51 @@ diagnosticsMME <- function(object) {
 #'
 #' @export
 predict.LMMsolve <- function(object, newdata) {
+  if (!inherits(object, "LMMsolve")) {
+    stop("object should be an object of class LMMsolve.\n")
+  }
+  if (is.null(object$splRes)) {
+    stop("The model was fitted without a spline component.\n")
+  }
+  if (!inherits(newdata, "data.frame")) {
+    stop("newdata should be a data.frame.\n")
+  }
+
+  varNames <- unlist(sapply(object$splRes,function(z){names(z$x)}))
+  colNames <- colnames(newdata)
+  Missing <- !(varNames %in% colNames)
+  if (sum(Missing) > 0) {
+    missingVar <- paste(varNames[Missing], collapse=",")
+    str <- paste0("variables (", missingVar, ") in data.frame newdata missing.\n")
+    stop(str)
+  }
+
+  # some extra checks for models that are not implemented yet:
+  if (object$family$family != "gaussian") {
+    stop("predict function for non-gaussian data not implemented yet")
+  }
+  nFixedTerms <- length(sapply(object$splRes, function(x) { x$term.labels.f }))
+  if (nFixedTerms + 1 > length(obj$term.labels.f))
+    stop("Extra fixed terms in GAM model, not implemented yet.\n")
+
+  nRanddomTerms <- length(sapply(object$splRes, function(x) { x$term.labels.r }))
+  if (nFixedTerms  > length(obj$term.labels.f))
+    stop("Extra random terms in GAM model, not implemented yet.\n")
+
   nGam <- length(object$splRes)
   xGrid <- list()
-  for (s in 1:nGam) {
-    x <- object$splRes[[s]]$x
-    xGrid[[s]] <- lapply(X = seq_along(x), FUN = function(i) {
-      newdata[[names(x)[i]]]})
-  }
-
   BxTot <- list()
-  for (s in 1:nGam) {
-    Bx <- mapply(FUN = Bsplines, object$splRes[[s]]$knots, xGrid[[s]], deriv=0)
-    BxTot[[s]] <- Reduce(RowKronecker, Bx)
-  }
-
   XTot <- list()
   for (s in 1:nGam) {
-    pord <- object$splRes[[s]]$pord
-    scaleX <- object$splRes[[s]]$scaleX
-    G <- lapply(X=object$splRes[[s]]$knots, FUN = function(x) {
-      constructG(knots = x, scaleX = scaleX, pord = pord)})
+    spl <- object$splRes[[s]]
+    x <- spl$x
+    xGrid[[s]] <- lapply(X = seq_along(x), FUN = function(i) {
+      newdata[[names(x)[i]]]})
+
+    Bx <- mapply(FUN = Bsplines, spl$knots, xGrid[[s]], deriv=0)
+    BxTot[[s]] <- Reduce(RowKronecker, Bx)
+    G <- lapply(X=spl$knots, FUN = function(x) {
+      constructG(knots = x, scaleX = spl$scaleX, pord = spl$pord)})
     ## Compute G over all dimensions
     GTot <- Reduce('%x%', G)
     ## no scaling for first column of GTot
@@ -471,15 +496,17 @@ predict.LMMsolve <- function(object, newdata) {
   labels <- c(object$term.labels.f, object$term.labels.r)
 
   for (s in 1:nGam) {
-    ndx.f <- which(object$splRes[[s]]$term.labels.f == labels)
-    ndx.r <- which(object$splRes[[s]]$term.labels.r == labels)
+    spl <- object$splRes[[s]]
+    ndx.f <- which(spl$term.labels.f == labels)
+    ndx.r <- which(spl$term.labels.r == labels)
     lU[[ndx.f]] <- XTot[[s]]
     lU[[ndx.r]] <- BxTot[[s]]
   }
+
   U <- Reduce(spam::cbind.spam, lU)
   newdata$ypred <- as.vector(U %*% object$coefMME)
   newdata$se <- calcStandardErrors(C = object$C, D = U)
-  newdata
+  return(newdata)
 }
 
 
