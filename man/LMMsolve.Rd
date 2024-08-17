@@ -30,7 +30,8 @@ form "response ~ pred"}
 form "~ pred".}
 
 \item{spline}{A formula for the spline part of the model. Should be of the
-form "~ spl1D()", ~ spl2D()" or "~spl3D()".}
+form "~ spl1D()", ~ spl2D()" or "~spl3D()". Generalized Additive Models (GAMs) can
+also be used, for example "~ spl1D() + spl2D()"}
 
 \item{group}{A named list where each component is a numeric vector
 specifying contiguous fields in data that are to be considered as a
