@@ -65,6 +65,7 @@ reference:
   - residuals.LMMsolve
   - logLik.LMMsolve
   - deviance.LMMsolve
+  - predict.LMMsolve
   - diagnosticsMME
   - displayMME
 - title: Spline functions
