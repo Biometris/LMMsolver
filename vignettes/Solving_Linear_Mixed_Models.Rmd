@@ -205,7 +205,7 @@ ggplot(data = plotDatDt, aes(x = das, y = ypred)) +
 
 # Smooth trends in two dimensions
 
-For two-dimensional mixed P-splines as defined in @boer2023 we will use two examples. The first one for US precipitation data. The second one modelling Sea Surface Temperature (SST) as described in @cressie2022.
+For two-dimensional mixed P-splines as defined in @boer2023 we will use two examples. The first example is US precipitation data. The second example models a data set for Sea Surface Temperature (SST) described in @cressie2022.
 
 ## US precipitation example
 As a first example we use the `USprecip` data set in the spam package [@Furrer2010], analysed in @Rodriguez-Alvarez2015.
@@ -272,26 +272,25 @@ head(pred3)
 ```
 
 ## Sea Surface Temperatures 
-The second example 2D P-splines is Sea Surface Temperatures (SST) [@cressie2022]. In their study they compare a wide range of software packages to analyse the SST data. For the comparison they focus on a region of the ocean known as the Brazil-Malvinas confluence zone, an energetic region of the
-ocean just off the coastof Argentina and Uruguay, where the
-(warm) Brazil current and the (cold) Malvinas current meet [@cressie2022].
+The second example using two-dimensional P-splines is for Sea Surface Temperatures (SST) data [@cressie2022]. In their study they compare a wide range of software packages to analyse the SST data. For the comparison they focus on a region of the ocean known as the Brazil-Malvinas confluence zone, an energetic region of the ocean just off the coast of Argentina and Uruguay, where the warm Brazil current and the cold Malvinas current meet [@cressie2022].
 
 They divided the data within this region into a training and a testing data set, each consisting of approximately 8,000 observations. 
 
 ```{r SeaSurfaceTemp}
 data(SeaSurfaceTemp)
 head(SeaSurfaceTemp, 5)
+table(SeaSurfaceTemp$type)
 ``` 
 
-First we convert SST from Kelvin and split the data in a training and test set.
+First we convert SST from Kelvin to Celsisu and split the data in the training and test set:
 
 ```{r convert_and_split}
 # convert from Kelvin to Celsius
 df <- SeaSurfaceTemp
 df$sst <- df$sst - 273.15
 ### split in training and test set
-df_train <- df[df$type=="train",]
-df_test <- df[df$type=="test",]
+df_train <- df[df$type=="train", ]
+df_test <- df[df$type=="test", ]
 
 ```
 
@@ -318,7 +317,7 @@ ggplot() +
   xlab("Longitude (deg)") + ylab("Latitude (deg)") +
   map_layer + xlim(BM_box[, "lon"]) + ylim(BM_box[, "lat"]) + theme_bw() +
   coord_fixed(expand = FALSE) +
-  geom_point(data = df_train, aes(lon, lat, colour = sst),size=0.5)
+  geom_point(data = df_train, aes(lon, lat, colour = sst), size=0.5)
 ```
 
 For this complicated data we need more segments for `spl2D()` as in the previous example, because of the strong local changes in Sea Surface Temperatures in this region. 
