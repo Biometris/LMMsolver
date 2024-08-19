@@ -28,12 +28,11 @@ summary(obj)
 # make predictions on a grid for functions f1 and f2
 #
 
-grid <- seq(0,1, length=200)
-grid_f1 <- expand.grid(x1=grid, x2=0.5, x3=0.5)
+grid_f1 <- expand.grid(x1=seq(0,1,length=200), x2=0.5, x3=0.5)
 pred_f1 <- predict(obj, newdata=grid_f1)
 p1 <- ggplot(pred_f1, aes(x = x1, y=ypred)) + geom_line() + ggtitle("f1")
 
-grid_f2 <- expand.grid(x1=0.5, x2=grid, x3=grid)
+grid_f2 <- expand.grid(x1=0.5, x2=seq(0,1,length=200), x3=seq(0,1,length=200))
 pred_f2 <- predict(obj, newdata=grid_f2)
 p2 <- ggplot(pred_f2, aes(x = x2, y = x3, fill = ypred)) +
   geom_tile(show.legend = TRUE) +
@@ -55,7 +54,22 @@ y_true <- f1(x1) + f2(x2, x3)
 newdat <- data.frame(x1, x2, x3, y_true)
 pred <- predict(obj, newdata=newdat)
 
-ggplot(pred, aes(x=y_true, y=ypred)) + geom_point() + geom_abline(intercept=0, slope=1, col='red')
+ggplot(pred, aes(x=y_true, y=ypred)) + geom_point() +
+  geom_abline(intercept=0, slope=1, col='blue')
 
+#
+# comparison with SOP
+#
+library(SOP)
 
+# for comparison, don't set the range in LMMsolver...
+obj0 <- LMMsolve(y~1,spline=~spl1D(x1, nseg=17) + spl2D(x2, x3, nseg=c(12,17)), data=dat)
+obj1 <- sop(formula = y ~ f(x1, nseg = 17) + f(x2,x3, nseg=c(12,17)), data = dat)
+pred <- predict(obj0, newdata=newdat, standard.errors = TRUE)
+pred_sop <- predict(obj1, newdata=newdat, se.fit=TRUE)
+
+deviance(obj0) - deviance(obj1)
+
+range(pred$ypred - pred_sop$fit)
+range(pred$se - pred_sop$se.fit)
 
