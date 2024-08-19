@@ -458,11 +458,11 @@ predict.LMMsolve <- function(object, newdata, standard.errors = FALSE) {
     stop("predict function for non-gaussian data not implemented yet")
   }
   nFixedTerms <- length(sapply(object$splRes, function(x) { x$term.labels.f }))
-  if (nFixedTerms + 1 > length(obj$term.labels.f))
+  if (nFixedTerms + 1 > length(object$term.labels.f))
     stop("Extra fixed terms in GAM model, not implemented yet.\n")
 
   nRanddomTerms <- length(sapply(object$splRes, function(x) { x$term.labels.r }))
-  if (nFixedTerms  > length(obj$term.labels.f))
+  if (nFixedTerms  > length(object$term.labels.f))
     stop("Extra random terms in GAM model, not implemented yet.\n")
 
   nGam <- length(object$splRes)
