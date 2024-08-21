@@ -427,10 +427,10 @@ diagnosticsMME <- function(object) {
 #' @param newdata A data.frame containing new points for which the smooth
 #' trend should be computed. Column names should include the names used when
 #' fitting the spline model.
-#' @param standard.errors calculate standard errors, default FALSE.
+#' @param standard.errors calculate standard errors, default \code{FALSE}.
 #'
 #' @return A data.frame with predictions for the smooth trend on the specified
-#' grid. The standard errors are saved if `se=TRUE`.
+#' grid. The standard errors are saved if `standard.erros=TRUE`.
 #'
 #' @export
 predict.LMMsolve <- function(object, newdata, standard.errors = FALSE) {
