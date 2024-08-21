@@ -13,11 +13,11 @@
 trend should be computed. Column names should include the names used when
 fitting the spline model.}
 
-\item{standard.errors}{calculate standard errors, default FALSE.}
+\item{standard.errors}{calculate standard errors, default \code{FALSE}.}
 }
 \value{
 A data.frame with predictions for the smooth trend on the specified
-grid. The standard errors are saved if `se=TRUE`.
+grid. The standard errors are saved if `standard.erros=TRUE`.
 }
 \description{
 Predict function

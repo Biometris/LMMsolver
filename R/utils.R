@@ -392,14 +392,17 @@ nameCoefs <- function(coefs,
       ## No interactions.
       if (labI == "(Intercept)") {
         names(coefI) <- "(Intercept)"
+        attr(coefI, "termType") <- "(Intercept)"
       } else if (startsWith(x = labI, prefix = "lin(") ||
                  startsWith(x = labI, prefix = "s(") ||
                  startsWith(x = labI, prefix = "cf(")) {
         ## Spline and (cf) terms are just named 1...n.
         names(coefI) <- paste0(labI, "_", seq_along(coefI))
+        attr(coefI, "termType") <- "fun" ## function
       } else if (!is.null(group) && labI %in% names(group)) {
         ## For group combine group name and column name.
         names(coefI) <- paste(labI, colnames(data)[group[[labI]]], sep = "_")
+        attr(coefI, "termType") <- "grp"
       } else if (is.factor(data[[labI]])) {
         ## For fixed terms an extra 0 for the reference level has to be added.
         if (type == "fixed") {
@@ -414,9 +417,11 @@ nameCoefs <- function(coefs,
                                 levels(data[[labI]])) %in% colnames(desMat)])
         }
         names(coefI) <- coefINames
+        attr(coefI, "termType") <- "factor"
       } else {
         ## Numerical variable. Name equal to label.
         names(coefI) <- labI
+        attr(coefI, "termType") <- "variable"
       }
     } else {
       ## Interaction term.
@@ -460,9 +465,11 @@ nameCoefs <- function(coefs,
         ## Reorder.
         coefI <- coefI[interAcLevsI]
         names(coefI) <- levels(interaction(labDat, sep = ":", drop = TRUE))
+
       } else {
         names(coefI) <- levels(interaction(labDat, sep = ":", drop = FALSE))
       }
+      attr(coefI, "termType") <- "interaction"
     }
     coefRes[[i]] <- coefI
   }
@@ -544,5 +551,37 @@ checkLim <- function(lim,
   }
 }
 
+#' @noRd
+#' @keywords internal
+makeDesignTerm <- function(obj, newdat, term) {
+  coefI <- obj$ndxCoefficients[[term]]
+  type <- attr(coefI, which="termType")
+  #cat("type: ", type, "\n")
+  if (type == "factor") {
+    lab <- names(coefI)
+    df1 <- data.frame(lab, ndx = as.numeric(coefI))
+    x <- paste0(term, "_", newdat[[term]])
+    chk <- x %in% lab
+    if (sum(!chk) > 0) {
+      lev <- paste(unique(x[!chk]), collapse=',')
+      err <- paste("levels", lev, "not defined")
+      stop(err)
+    }
+    df2 <- data.frame(lab=x, nr=c(1:length(x)))
+    df <- merge(df1, df2)
+    df <- df[df$ndx!=0, ]
+    l <- list(i=df$nr,j=df$ndx,v = rep(1, nrow(df)))
+    M <- spam::spam(l, nrow=length(x), ncol=nrow(obj$C))
+  } else if (type == "variable") {
+    v <- newdat[[term]]
+    ndx <- as.numeric(coefI)
+    l <- list(i=1:length(v), j=rep(ndx,length(v)), v=v)
+    M <- spam::spam(l, nrow=length(v), ncol=nrow(obj$C))
+  } else {
+    str <- paste("Make predictions for type", type, "not implemented yet\n" )
+    stop(str)
+  }
+  return(M)
+}
 
 

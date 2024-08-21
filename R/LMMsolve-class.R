@@ -207,6 +207,11 @@ coef.LMMsolve <- function(object,
                           ...) {
   u <- object$coefMME
   cf <- object$ndxCoefficients
+
+  ## remove termType attribute, only needed for predict function
+  cf <- lapply(cf, function(x) { attr(x,which="termType") <- NULL
+                                 return(x) })
+
   ## if not standard errors.
   if (!se) {
     coef <- lapply(X = cf, FUN = function(x) {
@@ -437,9 +442,9 @@ predict.LMMsolve <- function(object, newdata, standard.errors = FALSE) {
   if (!inherits(object, "LMMsolve")) {
     stop("object should be an object of class LMMsolve.\n")
   }
-  if (is.null(object$splRes)) {
-    stop("The model was fitted without a spline component.\n")
-  }
+  #if (is.null(object$splRes)) {
+  #  stop("The model was fitted without a spline component.\n")
+  #}
   if (!inherits(newdata, "data.frame")) {
     stop("newdata should be a data.frame.\n")
   }
@@ -457,19 +462,14 @@ predict.LMMsolve <- function(object, newdata, standard.errors = FALSE) {
   if (object$family$family != "gaussian") {
     stop("predict function for non-gaussian data not implemented yet")
   }
-  nFixedTerms <- length(sapply(object$splRes, function(x) { x$term.labels.f }))
-  if (nFixedTerms + 1 > length(object$term.labels.f))
-    stop("Extra fixed terms in GAM model, not implemented yet.\n")
-
-  nRanddomTerms <- length(sapply(object$splRes, function(x) { x$term.labels.r }))
-  if (nFixedTerms  > length(object$term.labels.f))
-    stop("Extra random terms in GAM model, not implemented yet.\n")
+  splFixLab <- sapply(object$splRes, function(x) { x$term.labels.f })
+  splRanLab <- sapply(object$splRes, function(x) { x$term.labels.r })
 
   nGam <- length(object$splRes)
   xGrid <- list()
   BxTot <- list()
   XTot <- list()
-  for (s in 1:nGam) {
+  for (s in seq_len(nGam)) {
     spl <- object$splRes[[s]]
     x <- spl$x
     xGrid[[s]] <- lapply(X = seq_along(x), FUN = function(i) {
@@ -487,7 +487,6 @@ predict.LMMsolve <- function(object, newdata, standard.errors = FALSE) {
     ## Remove intercept (needed when fitting model to avoid singularities).
     XTot[[s]] <- removeIntercept(X)
   }
-
   dim <- object$dim
   lU <- list()
   nRow <- nrow(newdata)
@@ -499,15 +498,21 @@ predict.LMMsolve <- function(object, newdata, standard.errors = FALSE) {
 
   labels <- c(object$term.labels.f, object$term.labels.r)
 
-  for (s in 1:nGam) {
+  for (s in seq_len(nGam)) {
     spl <- object$splRes[[s]]
     ndx.f <- which(spl$term.labels.f == labels)
     ndx.r <- which(spl$term.labels.r == labels)
     lU[[ndx.f]] <- XTot[[s]]
     lU[[ndx.r]] <- BxTot[[s]]
   }
-
   U <- Reduce(spam::cbind.spam, lU)
+
+  tmp <- object$term.labels.f[-1]
+  fixTerms <- setdiff(tmp, splFixLab)
+  nFixTerms <- length(fixTerms)
+  for (i in seq_len(nFixTerms)) {
+    U <- U + makeDesignTerm(object, newdata, fixTerms[i])
+  }
 
   outDat <- newdata
   ypred <- as.vector(U %*% object$coefMME)
