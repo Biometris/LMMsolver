@@ -65,7 +65,7 @@ library(SOP)
 # for comparison, don't set the range in LMMsolver...
 obj0 <- LMMsolve(y~1,spline=~spl1D(x1, nseg=17) + spl2D(x2, x3, nseg=c(12,17)), data=dat)
 obj1 <- sop(formula = y ~ f(x1, nseg = 17) + f(x2,x3, nseg=c(12,17)), data = dat)
-pred <- predict(obj0, newdata=newdat, standard.errors = TRUE)
+pred <- predict(obj0, newdata=newdat, se.fit = TRUE)
 pred_sop <- predict(obj1, newdata=newdat, se.fit=TRUE)
 
 deviance(obj0) - deviance(obj1)
