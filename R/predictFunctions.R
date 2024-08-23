@@ -42,8 +42,8 @@ calcStandardErrors <- function(C,
   ## !!! NOT CHANGE THE LINE OF CODE BELOW !!!
   ## It adds extra zeros ("fill-ins") to matrix C, needed
   ## to calculate the Partial Derivatives of Cholesky, not equal to zero.
-  C = C + 0 * spam::crossprod.spam(D)
-  cholC <- chol(C)
+  C <- C + 0 * spam::t.spam(D) %*% D
+  cholC <- spam::chol.spam(C)
   p <- cholC@pivot
   tD <- t(D)
   tDp <- tD[p, ]
