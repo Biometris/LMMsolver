@@ -4,7 +4,7 @@
 \alias{predict.LMMsolve}
 \title{Predict function}
 \usage{
-\method{predict}{LMMsolve}(object, newdata, standard.errors = FALSE)
+\method{predict}{LMMsolve}(object, newdata, se.fit = FALSE)
 }
 \arguments{
 \item{object}{an object of class LMMsolve.}
@@ -13,11 +13,11 @@
 trend should be computed. Column names should include the names used when
 fitting the spline model.}
 
-\item{standard.errors}{calculate standard errors, default \code{FALSE}.}
+\item{se.fit}{calculate standard errors, default \code{FALSE}.}
 }
 \value{
 A data.frame with predictions for the smooth trend on the specified
-grid. The standard errors are saved if `standard.erros=TRUE`.
+grid. The standard errors are saved if `se.fit=TRUE`.
 }
 \description{
 Predict function

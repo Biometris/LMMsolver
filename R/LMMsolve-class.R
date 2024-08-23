@@ -432,13 +432,13 @@ diagnosticsMME <- function(object) {
 #' @param newdata A data.frame containing new points for which the smooth
 #' trend should be computed. Column names should include the names used when
 #' fitting the spline model.
-#' @param standard.errors calculate standard errors, default \code{FALSE}.
+#' @param se.fit calculate standard errors, default \code{FALSE}.
 #'
 #' @return A data.frame with predictions for the smooth trend on the specified
-#' grid. The standard errors are saved if `standard.erros=TRUE`.
+#' grid. The standard errors are saved if `se.fit=TRUE`.
 #'
 #' @export
-predict.LMMsolve <- function(object, newdata, standard.errors = FALSE) {
+predict.LMMsolve <- function(object, newdata, se.fit = FALSE) {
   if (!inherits(object, "LMMsolve")) {
     stop("object should be an object of class LMMsolve.\n")
   }
@@ -517,7 +517,7 @@ predict.LMMsolve <- function(object, newdata, standard.errors = FALSE) {
   outDat <- newdata
   ypred <- as.vector(U %*% object$coefMME)
   outDat[["ypred"]] <- ypred
-  if (standard.errors) {
+  if (se.fit) {
     outDat[["se"]] <- calcStandardErrors(C = object$C, D = U)
   }
 
