@@ -459,9 +459,9 @@ predict.LMMsolve <- function(object, newdata, se.fit = FALSE) {
   }
 
   # some items not implemented yet
-  s1 <-sum(sapply(obj2$ndxCoefficients,
-                   function(x) {attr(x,which="termType") == "factor"}))
-  if (s1 > 0) stop("predict function for factors not implemented yet")
+  #s1 <-sum(sapply(obj2$ndxCoefficients,
+  #                 function(x) {attr(x,which="termType") == "factor"}))
+  #if (s1 > 0) stop("predict function for factors not implemented yet")
   s2 <-sum(sapply(obj2$ndxCoefficients,
                    function(x) {attr(x,which="termType") == "grp"}))
   if (s2 > 0) stop("predict function for grp() not implemented yet")
@@ -534,6 +534,14 @@ predict.LMMsolve <- function(object, newdata, se.fit = FALSE) {
   }
 
   outDat <- newdata
+
+  ranTerms <- setdiff(object$term.labels.r, splRanLab)
+  nRanTerms <- length(ranTerms)
+  for (i in seq_len(nRanTerms)) {
+    term <- ranTerms[[i]]
+    outDat[[term]] <- rep("Excluded",nRow)
+  }
+
   ypred <- as.vector(U %*% object$coefMME)
   outDat[["ypred"]] <- ypred
   if (se.fit) {
