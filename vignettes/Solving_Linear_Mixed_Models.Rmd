@@ -46,12 +46,12 @@ library(ggplot2)
 ```
 
 ## Linear Regression
-We will start with an example, where the true function is linear in variable $x$ :
+We will start with an example, where the true function is linear in variable $x$:
 ```{r linearFun}
   f1 <- function(x) { 0.6 + 0.7*x}
 ```
 
-Using this function we simulate data and adding normal distributed noise:
+Using this function we simulate data and add normal distributed noise:
 
 ```{r linearFunSim}
 set.seed(2016)
@@ -87,7 +87,9 @@ ggplot(data = dat, aes(x = x, y = y)) +
   geom_point(col='black', size=1.5) +
   geom_line(data=pred, aes(y=y_true), color='red', linewidth = 1, linetype='dashed') +
   geom_line(data = pred, aes(y = ypred), color = "blue", linewidth = 1) +
-  geom_ribbon(data=pred, aes(x=x,ymin=ypred-2*se, ymax=ypred+2*se), alpha=0.2, inherit.aes = FALSE) + ggtitle("linear regression") + theme_bw()
+  geom_ribbon(data=pred, aes(x=x,ymin=ypred-2*se, ymax=ypred+2*se),
+              alpha=0.2, inherit.aes = FALSE) + 
+  theme_bw()
 ```
 
 ## Fitting a non-linear function
@@ -130,11 +132,13 @@ ggplot(data = dat, aes(x = x, y = y)) +
   geom_point(col='black', size=1.5) +
   geom_line(data=pred2, aes(y=y_true), color='red', linewidth = 1, linetype='dashed') +
   geom_line(data = pred2, aes(y = ypred), color = "blue", linewidth = 1) +
-  geom_ribbon(data= pred2, aes(x=x, ymin=ypred-2*se, ymax=ypred+2*se), alpha=0.2, inherit.aes = FALSE) + theme_bw() 
+  geom_ribbon(data= pred2, aes(x=x, ymin=ypred-2*se, ymax=ypred+2*se),
+              alpha=0.2, inherit.aes = FALSE) +
+  theme_bw() 
 ```
 
 ## Smoothing combining two experiments
-In this section we will give a bit more complicated example, to show some further options of `LMMsolver`. Suppose there are two experiments, A and B, with the same true unobserved non-linear function `f2` as defined before. 
+In this section we will give a bit more complicated example, to show some further options of `LMMsolver`. Suppose there are two experiments, A and B, with the same true unobserved non-linear function `f2(x)` as defined before. 
 
 The simulated data is given by the following code:
 ```{r twoExperiments}
@@ -191,7 +195,9 @@ ggplot(data = dat, aes(x = x, y = y, colour=Experiment)) +
   geom_point(size=1.5) +
   geom_line(data = pred2, aes(y=y_true), color='red', linewidth = 1, linetype='dashed') +
   geom_line(data = pred2, aes(y = ypred), color = "blue", linewidth = 1) +
-  geom_ribbon(data=pred2, aes(x=x,ymin=ypred-2*se, ymax=ypred+2*se), alpha=0.2, inherit.aes = FALSE) + theme_bw()
+  geom_ribbon(data=pred2, aes(x=x,ymin=ypred-2*se, ymax=ypred+2*se),
+              alpha=0.2, inherit.aes = FALSE) + 
+  theme_bw()
 ```
 
 The `coef` function:
@@ -230,10 +236,19 @@ The summary function gives a table with the effective dimensions and the penalty
 summary(obj3)
 ```
 
-A plot for the smooth trend can be obtained in a similar way as for the one-dimensional examples:
+A plot for the smooth trend can be obtained in a similar way as for the one-dimensional examples, using the `predict()` function. First we make predictions on a regular two-dimensional grid:
+
+```{r pred_USprecip}
+lon_range <- range(USprecip$lon)
+lat_range <- range(USprecip$lat)
+newdat <- expand.grid(lon=seq(lon_range[1], lon_range[2], length=200),
+                      lat=seq(lat_range[1], lat_range[2], length=300))
+plotDat3 <- predict(obj3, newdat = newdat)
+```
+
+For plotting the predictions for USA main land we use the `maps` and `sf` packages: 
 
 ```{r Plot_USprecip}
-plotDat3 <- obtainSmoothTrend(obj3, grid = c(200, 300), includeIntercept = TRUE)
 plotDat3 <- sf::st_as_sf(plotDat3, coords = c("lon", "lat"))
 usa <- sf::st_as_sf(maps::map("usa", regions = "main", plot = FALSE))
 sf::st_crs(usa) <- sf::st_crs(plotDat3)
@@ -251,21 +266,6 @@ ggplot(usa) +
        x = "Longitude", y = "Latitude") +
   coord_sf() +
   theme(panel.grid = element_blank())
-```
-
-Instead of using the `grid` argument, `newdata` can be used to make predictions for locations specified in a `data.frame`:
-
-```{r newdataARG}
-## Predictions for new data, using city coordinates from maps package.
-data(us.cities, package = "maps")
-## Column names have to match column names used for fitting the model.
-colnames(us.cities)[colnames(us.cities) == "long"] <- "lon"
-## Select columns name, lat and lon
-us.cities <- us.cities[, c(1,4,5)]
-head(us.cities)
-
-pred3 <- obtainSmoothTrend(obj3, newdata = us.cities, includeIntercept = TRUE)
-head(pred3)
 ```
 
 ## Sea Surface Temperatures 
@@ -330,7 +330,12 @@ summary(obj)
 The predictions on a grid are shown in the next figure
 
 ```{r predictions_grid}
-pred_grid <- obtainSmoothTrend(obj, grid=c(200, 200), includeIntercept = TRUE)
+lon_range <- BM_box[, "lon"]
+lat_range <- BM_box[, "lat"]
+newdat <- expand.grid(lon=seq(lon_range[1], lon_range[2], length=200),
+                      lat=seq(lat_range[1], lat_range[2], length=200))
+
+pred_grid <- predict(obj, newdata=newdat, se.fit=TRUE)
 pred_grid <- pred_grid[pred_grid$se<5, ]
 
 ## Plot predictions on a grid
@@ -362,10 +367,10 @@ ggplot(pred_grid) +
 ```
 
 
-Predictions for the test set can be obtained using the `newdata` argument
+Predictions for the test set are given by
 ```{r test_set}
-pred_test <- obtainSmoothTrend(obj, newdata=df_test, includeIntercept = TRUE)
-ggplot(pred_test,aes(x=sst,y=ypred)) + geom_point() +
+pred_test <- predict(obj, newdata = df_test)
+ggplot(pred_test, aes(x=sst,y=ypred)) + geom_point() +
      xlab("observed SST (Celsius)") + ylab("predicted SST (Celsius)") +
      geom_abline(intercept=0,slope=1,col='red')
 ```
@@ -380,7 +385,7 @@ round(RMSE, 2)
 
 The RMSPE is in the same range (0.44-0.46) as for the software packages used in @cressie2022. On a standard desktop the calculations using `LMMsolver` take less than 10 seconds, taking advantage of the sparse structure of the P-splines mixed model [@boer2023]. 
 
-# Some applications in quantative genetics
+# Some examples in quantitative genetics
 
 ## Oats field trial
 
