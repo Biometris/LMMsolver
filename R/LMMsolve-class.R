@@ -462,7 +462,7 @@ predict.LMMsolve <- function(object, newdata, se.fit = FALSE) {
   #s1 <-sum(sapply(obj2$ndxCoefficients,
   #                 function(x) {attr(x,which="termType") == "factor"}))
   #if (s1 > 0) stop("predict function for factors not implemented yet")
-  s2 <-sum(sapply(obj2$ndxCoefficients,
+  s2 <-sum(sapply(object$ndxCoefficients,
                    function(x) {attr(x,which="termType") == "grp"}))
   if (s2 > 0) stop("predict function for grp() not implemented yet")
 
