@@ -23,7 +23,9 @@ knitr::opts_chunk$set(
 
 # The LMMsolver package {.unnumbered}
 
-The aim of the `LMMsolver` package is to provide an efficient and flexible system to estimate variance components using restricted maximum likelihood or REML [@Patterson1971], for models where the mixed model equations are sparse [@boer2023]. An example of an application is using splines to model spatial [@Rodriguez-Alvarez2018; @Boer2020] or temporal [@Bustos-Korts2019] trends. Another example is mixed model Quantitative Trait Locus (QTL) analysis for multiparental populations, allowing for heterogeneous residual variance and design matrices with Identity-By-Descent (IBD) probabilities [@Li2021].
+The aim of the `LMMsolver` package is to provide an efficient and flexible system to estimate variance components using restricted maximum likelihood or REML [@Patterson1971], for models where the mixed model equations are sparse. An important feature of the package is smoothing with P-splines [@Eilers1996]. The sparse mixed model P-splines formulation [@boer2023] is used, which makes the computations fast.
+
+<!-- An example of an application is using splines to model spatial [@Rodriguez-Alvarez2018; @Boer2020] or temporal [@Bustos-Korts2019] trends. Another example is mixed model Quantitative Trait Locus (QTL) analysis for multiparental populations, allowing for heterogeneous residual variance and design matrices with Identity-By-Descent (IBD) probabilities [@Li2021]. -->
 
 A Linear Mixed Model (LMM) has the form
 
@@ -59,13 +61,13 @@ n <- 25
 x <- seq(0, 1, length = n)
 sigma2e <- 0.04
 y <- f1(x) + rnorm(n, sd = sqrt(sigma2e))
-dat <- data.frame(x = x, y = y)
+dat1 <- data.frame(x = x, y = y)
 ``` 
 
 We can fit the data using the `LMMsolve` function:
 
 ```{r fit1}
-obj1 <- LMMsolve(y~x, data=dat)
+obj1 <- LMMsolve(fixed = y ~ x, data = dat1)
 ```
 
 We can make predictions using the `predict()` function:
@@ -82,7 +84,7 @@ Note that for this linear model we could have used the standard `lm()` function,
 The following plot gives the simulated data with the predictions, and pointwise standard-error bands. The true value is plotted as dashed red line.
 
 ```{r ggplotLinear}
-ggplot(data = dat, aes(x = x, y = y)) +
+ggplot(data = dat1, aes(x = x, y = y)) +
   geom_point(col = 'black', size = 1.5) +
   geom_line(data = pred1, aes(y=y_true), color = "red", 
             linewidth = 1, linetype = "dashed") +
@@ -106,14 +108,17 @@ n <- 150
 x <- seq(0, 1, length = n)
 sigma2e <- 0.04
 y <- f2(x) + rnorm(n, sd = sqrt(sigma2e))
-dat <- data.frame(x, y)
+dat2 <- data.frame(x, y)
 ``` 
 
-We can use the `spline` argument to fit the non-linear trend, where `nseg` is the number of segments:
+We can use the `spline` argument to fit the non-linear trend:
 
 ```{r nonlinearFit}
-obj2 <- LMMsolve(y~1, spline = ~spl1D(x, nseg = 50), data = dat)
+obj2 <- LMMsolve(fixed = y ~ 1, 
+                 spline = ~spl1D(x, nseg = 50), 
+                 data = dat2)
 ```
+where `spl1D(x, nseg = 50)` defines a mixed model P-splines with 50 segments. 
 
 The model fit can be summarized in terms of effective dimensions:
 ```{r summary_nonlinear}
@@ -128,7 +133,7 @@ newdat <- data.frame(x = seq(0, 1, length = 300))
 pred2 <- predict(obj2, newdata = newdat, se.fit = TRUE)
 pred2$y_true <- f2(pred2$x)
 
-ggplot(data = dat, aes(x = x, y = y)) +
+ggplot(data = dat2, aes(x = x, y = y)) +
   geom_point(col='black', size = 1.5) +
   geom_line(data = pred2, aes(y = y_true), color = "red", 
             linewidth = 1, linetype ="dashed") +
@@ -148,7 +153,7 @@ nA <-  50
 nB <- 100
 mu_A <-  0.10
 mu_B <- -0.10
-sigma2e_A <- 0.05
+sigma2e_A <- 0.04
 sigma2e_B <- 0.10
 
 x1 <- runif(n = nA)
@@ -156,18 +161,18 @@ x2 <- runif(n = nB)
 y1 <- f2(x1) + rnorm(nA, sd = sqrt(sigma2e_A)) + mu_A
 y2 <- f2(x2) + rnorm(nB, sd = sqrt(sigma2e_B)) + mu_B
 Experiment <- as.factor(c(rep("A", nA), rep("B", nB)))
-dat <- data.frame(x = c(x1, x2), y = c(y1,y2), Experiment = Experiment)
+dat3 <- data.frame(x = c(x1, x2), y = c(y1,y2), Experiment = Experiment)
 ```
 
 Before analyzing the data in further detail a boxplot gives some insight:
 
 ```{r boxplot}
-ggplot(dat, aes(x = Experiment, y = y, fill = Experiment)) +  
+ggplot(dat3, aes(x = Experiment, y = y, fill = Experiment)) +  
   geom_boxplot() + 
   geom_point(position = position_jitterdodge(), alpha = 0.3) 
 ```
 
-Comparing the two experiments we see that:
+Comparing the two experiments we can see that:
 
 1.  There is a clear difference in mean/median between the two experiments. This can be corrected for by adding the argument `random = ~Experiment`.
 2.  The variance in experiment A is smaller than in B. This implies that is important to allow for heterogeneous variances which can be modelled by defining `residual = ~Experiment`. 
@@ -175,10 +180,11 @@ Comparing the two experiments we see that:
 The model in `LMMsolve()` is given by:
 
 ```{r twoExpSolve}
-obj3 <- LMMsolve(y~1, spline = ~spl1D(x, nseg = 50),
-                    random = ~Experiment,
-                    residual = ~Experiment,
-                    data = dat)
+obj3 <- LMMsolve(fixed= y ~ 1, 
+                 spline = ~spl1D(x, nseg = 50),
+                 random = ~Experiment,
+                 residual = ~Experiment,
+                 data = dat3)
 ```
 
 The table of effective dimensions is given by:
@@ -191,12 +197,12 @@ And making the predictions:
 newdat <- data.frame(x=seq(0, 1, length = 300))
 pred3 <- predict(obj3, newdata = newdat, se.fit = TRUE)
 pred3$y_true <- f2(pred3$x)
-ggplot(data = dat, aes(x = x, y = y, colour = Experiment)) +
+ggplot(data = dat3, aes(x = x, y = y, colour = Experiment)) +
   geom_point(size = 1.5) +
-  geom_line(data = pred2, aes(y = y_true), color="red", 
+  geom_line(data = pred3, aes(y = y_true), color="red", 
             linewidth = 1, linetype = "dashed") +
-  geom_line(data = pred2, aes(y = ypred), color = "blue", linewidth = 1) +
-  geom_ribbon(data = pred2, aes(x = x,ymin = ypred-2*se, ymax = ypred+2*se),
+  geom_line(data = pred3, aes(y = ypred), color = "blue", linewidth = 1) +
+  geom_ribbon(data = pred3, aes(x = x,ymin = ypred-2*se, ymax = ypred+2*se),
               alpha = 0.2, inherit.aes = FALSE) + 
   theme_bw()
 ```
@@ -287,8 +293,8 @@ First we convert SST from Kelvin to Celsius and split the data in the training a
 df <- SeaSurfaceTemp
 df$sst <- df$sst - 273.15
 ### split in training and test set
-df_train <- df[df$type=="train", ]
-df_test <- df[df$type=="test", ]
+df_train <- df[df$type == "train", ]
+df_test <- df[df$type == "test", ]
 
 ```
 
@@ -322,9 +328,10 @@ ggplot() +
 For this complicated data we need more segments for `spl2D()` as in the previous example, because of the strong local changes in Sea Surface Temperatures in this region. 
 
 ```{r SeaTempAnalysis}
-obj5 <- LMMsolve(sst~1, spline = ~spl2D(lon, lat, nseg = c(70, 70),
-                        x1lim = BM_box[, "lon"], x2lim = BM_box[, "lat"]),
-                        data = df_train, tolerance = 1.0e-1)
+obj5 <- LMMsolve(fixed = sst ~ 1, 
+                 spline = ~spl2D(lon, lat, nseg = c(70, 70),
+                                 x1lim = BM_box[, "lon"], x2lim = BM_box[, "lat"]),
+                 data = df_train, tolerance = 1.0e-1)
 summary(obj5)
 ``` 
 
@@ -388,6 +395,8 @@ The RMSPE is in the same range (0.44-0.46) as for the software packages used in 
 
 # Some examples in quantitative genetics
 
+In this section we will show some example from quantitative genetics, to show some further options of the package. 
+
 ## Oats field trial
 
 As a first example we will use an oats field trial from the `agridat` package. There were 24 varieties in 3 replicates, each consisting of 6 incomplete blocks of 4 plots. The plots were laid out in a single row.
@@ -398,71 +407,8 @@ data(john.alpha, package = "agridat")
 head(john.alpha)
 ```
 
-In the following subsections we will use two methods to correct for spatial trend, to show some of the options of the package.
 
-### Modelling spatial trend using P-splines
-
-In this subsection we will illustrate how the package can be used to fit mixed model P-splines, for details see @Boer2020.
-
-In the following mixed model we include rep and gen as fixed effect, and we use `spl1D` to model a one dimensional P-spline [@Eilers1996] with 100 segments, and the default choice of cubical B-splines and second order differences:
-
-```{r Pspline1D}
-## Fit mixed model with fixed and spline part.
-obj1 <- LMMsolve(fixed = yield ~ rep + gen,
-                 spline = ~spl1D(x = plot, nseg = 100),
-                 data = john.alpha)
-```
-
-A high number of segments can be used for splines in one dimension, as the corresponding mixed model equations are sparse, and therefore can be solved fast [@Smith1995; @Furrer2010].
-
-The absolute deviance is defined by $\text{dev}=-2*logL$ and given by
-```{r deviance}
-round(deviance(obj1, relative=FALSE), 2)
-```
-
-We can obtain a table with effective dimensions (see e.g. @Rodriguez-Alvarez2018) and penalties (the precision parameters $\psi_i$ and $\phi_i$) using the `summary` function:
-
-```{r summaryED}
-summary(obj1)
-```
-
-```{r summaryED2, echo=FALSE}
-tbl <- summary(obj1)
-EDs <- round(tbl$Effective[5], 1)
-```
-
-The effective dimension gives a good balance between model complexity and fit to the data for the random terms in the model. In the table above the first four terms are fixed effects and not penalized, and therefore the effective dimension is equal to the number of parameters in the model. The `splF` is the fixed part of the spline, the linear trend. The term `s(plot)` is a random effect, with effective dimension `r EDs`, indicating that is important to correct for spatial trend.
-
-The estimated genetic effects are given by the `coef` function:
-
-```{r coeff_example}
-genEff <- coef(obj1)$gen
-head(genEff, 4)
-```
-
-The first genotype (G01) is the reference, as genotypes were modelled as fixed effect in the model.
-
-The smooth trend with the standard errors along the field on a dense grid of 1000 points can be obtained as follows:
-
-```{r ObtainSmoothTrend1}
-## Extract smooth trend from mixed model.
-plotDat1 <- obtainSmoothTrend(obj1, grid = 1000, includeIntercept = TRUE)
-head(plotDat1)
-```
-
-The trend can then be plotted.
-
-```{r plot1D}
-## Plot smooth trend.
-ggplot(data = plotDat1, aes(x = plot, y = ypred)) +
-  geom_line(color = "red", linewidth = 1) +
-  labs(title = "Smooth spatial trend oats data", x = "plotnr", y = "yield") +
-  theme(panel.grid = element_blank())
-```
-
-### Modelling spatial trend using `random` and `ginverse` arguments.
-
-Another way to correct for spatial trend is using the Linear Variance (LV) model, which is closely connected to the P-splines model [@Boer2020]. First we need to define the precision matrix for the LV model, see Appendix in @Boer2020 for details:
+We will use the Linear Variance (LV) model, which is closely connected to the P-splines model [@Boer2020]. First we need to define the precision matrix for the LV model, see Appendix in @Boer2020 for details:
 
 ```{r define LVmodel}
 ## Add plot as factor.
@@ -480,24 +426,23 @@ lGinv <- list(plotF = LVinv)
 Given the precision matrix for the LV model we can define the model in LMMsolve using the `random` and `ginverse` arguments:
 
 ```{r modelLV}
-## Fit mixed model with first degree B-splines and first order differences.
-obj2 <- LMMsolve(fixed = yield ~ rep + gen,
+obj6 <- LMMsolve(fixed = yield ~ rep + gen,
                  random = ~plotF, 
                  ginverse = lGinv, 
                  data = john.alpha)
 ```
 
-The absolute deviance for the LV-model is `r round(deviance(obj2, relative=FALSE), 2)` and the variances
+The absolute deviance for the LV-model is `r round(deviance(obj6, relative=FALSE), 2)` and the variances
 
 ```{r summaryVAR}
-summary(obj2, which = "variances")
+summary(obj6, which = "variances")
 ```
 
 as reported in @Boer2020, Table 1.
 
 ## Model biomass as function of time.
 
-In this section we show an example of mixed model P-splines to fit biomass as function of time. As an example we use wheat data simulated with the crop growth model APSIM. This data set is included in the package. For details on this simulated data see @Bustos-Korts2019.
+In this section we show an example of mixed model P-splines to fit biomass as function of time. As an example we use wheat data simulated with the crop growth model APSIM. This data set is included in the package. For details on this simulated data see @Bustos-Korts2019. 
 
 ```{r APSIMdat}
 data(APSIMdat)
@@ -509,7 +454,7 @@ The first column is the environment, Emerald in 1993, the second column the simu
 The model can be fitted with
 
 ```{r APSIMmodel}
-obj2 <- LMMsolve(biomass ~ 1,
+obj7 <- LMMsolve(fixed = biomass ~ 1,
                  spline = ~spl1D(x = das, nseg = 200), 
                  data = APSIMdat)
 ```
@@ -520,31 +465,33 @@ The effective dimensions are:
 summary(obj2)
 ```
 
-The fitted smooth trend can be obtained as explained before, with standard error bands in blue:
+The fitted smooth trend can be obtained as explained before:
+
 
 ```{r APSIMplot}
-plotDat2 <- obtainSmoothTrend(obj2, grid = 1000, includeIntercept = TRUE)
-
+das_range <- range(APSIMdat$das)
+newdat <- data.frame(das=seq(das_range[1], das_range[2], length = 300))
+pred7 <- predict(obj7, newdata = newdat, se.fit = TRUE)
 ggplot(data = APSIMdat, aes(x = das, y = biomass)) +
-  geom_point(size = 1.2) +
-  geom_line(data = plotDat2, aes(y = ypred), color = "red", linewidth = 1) +
-  geom_line(data = plotDat2, aes(y = ypred-2*se), col='blue', linewidth = 1) +
-  geom_line(data = plotDat2, aes(y = ypred+2*se), col='blue', linewidth = 1) +
-  labs(title = "APSIM biomass as function of time", 
+  geom_point(size = 1.0) +
+  geom_line(data = pred7, aes(y = ypred), color = "blue", linewidth = 1) +
+  geom_ribbon(data = pred7, aes(x = das,ymin = ypred-2*se, ymax = ypred+2*se),
+              alpha = 0.2, inherit.aes = FALSE) + 
+    labs(title = "APSIM biomass as function of time", 
        x = "days after sowing", y = "biomass (kg)") +
-  theme(panel.grid = element_blank())
+  theme_bw()
 ```
 
 The growth rate (first derivative) as function of time can be obtained using `deriv = 1` in function `obtainSmoothTrend`:
 
 ```{r APSIMDeriv}
-plotDatDt <- obtainSmoothTrend(obj2, grid = 1000, deriv = 1)
+plotDatDt <- obtainSmoothTrend(obj7, grid = 1000, deriv = 1)
 
 ggplot(data = plotDatDt, aes(x = das, y = ypred)) +
   geom_line(color = "red", linewidth = 1) +
   labs(title = "APSIM growth rate as function of time", 
        x = "days after sowing", y = "growth rate (kg/day)") +
-  theme(panel.grid = element_blank())
+  theme_bw()
 ```
 
 
@@ -562,10 +509,10 @@ The residual (genetic) variances for the two populations can be different. There
 
 ```{r residualARG}
 ## Fit null model.
-obj4 <- LMMsolve(fixed = pheno ~ cross, 
+obj8 <- LMMsolve(fixed = pheno ~ cross, 
                  residual = ~cross, 
                  data = multipop)
-dev4 <- deviance(obj4)
+dev4 <- deviance(obj8)
 ```
 
 The QTL-probabilities are defined by the columns pA, pB, pC, and can be included in the random part of the mixed model by using the `group` argument:
@@ -597,4 +544,4 @@ The estimated QTL effects of the parents A, B, and C are given by:
 coef(obj5)$QTL
 ```
 
-## References
+# References
