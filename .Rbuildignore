@@ -1,6 +1,7 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 examples
+pkgdown
 unused functions
 .gitlab-ci.yml
 data_raw
