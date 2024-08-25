@@ -466,11 +466,6 @@ predict.LMMsolve <- function(object, newdata, se.fit = FALSE) {
                    function(x) {attr(x,which="termType") == "grp"}))
   if (s2 > 0) stop("predict function for grp() not implemented yet")
 
-  # some extra checks for models that are not implemented yet:
-  if (object$family$family != "gaussian") {
-    stop("predict function for non-gaussian data not implemented yet")
-  }
-
   splFixLab <- sapply(object$splRes, function(x) { x$term.labels.f })
   splRanLab <- sapply(object$splRes, function(x) { x$term.labels.r })
 
@@ -542,10 +537,13 @@ predict.LMMsolve <- function(object, newdata, se.fit = FALSE) {
     outDat[[term]] <- rep("Excluded",nRow)
   }
 
-  ypred <- as.vector(U %*% object$coefMME)
-  outDat[["ypred"]] <- ypred
+  eta <- as.vector(U %*% object$coefMME)
+  family <- object$family
+  familyPred <- family$linkinv(eta)
+
+  outDat[["ypred"]] <- familyPred
   if (se.fit) {
-    outDat[["se"]] <- calcStandardErrors(C = object$C, D = U)
+    outDat[["se"]] <- calcStandardErrors(C = object$C, D = U)*abs(family$mu.eta(eta))
   }
 
   return(outDat)
