@@ -85,7 +85,7 @@ The following plot gives the simulated data with the predictions, and pointwise 
 
 ```{r ggplotLinear}
 ggplot(data = dat1, aes(x = x, y = y)) +
-  geom_point(col = 'black', size = 1.5) +
+  geom_point(col = "black", size = 1.5) +
   geom_line(data = pred1, aes(y=y_true), color = "red", 
             linewidth = 1, linetype = "dashed") +
   geom_line(data = pred1, aes(y = ypred), color = "blue", linewidth = 1) +
@@ -134,7 +134,7 @@ pred2 <- predict(obj2, newdata = newdat, se.fit = TRUE)
 pred2$y_true <- f2(pred2$x)
 
 ggplot(data = dat2, aes(x = x, y = y)) +
-  geom_point(col='black', size = 1.5) +
+  geom_point(col = "black", size = 1.5) +
   geom_line(data = pred2, aes(y = y_true), color = "red", 
             linewidth = 1, linetype ="dashed") +
   geom_line(data = pred2, aes(y = ypred), color = "blue", linewidth = 1) +
@@ -253,7 +253,7 @@ pred4 <- predict(obj4, newdata = newdat, se.fit = TRUE)
 pred4$y_true <- fun_lambda(pred4$x)
 
 ggplot(data = dat4, aes(x = x, y = y)) +
-  geom_point(col='black', size = 1.5) +
+  geom_point(col = "black", size = 1.5) +
   geom_line(data = pred4, aes(y = y_true), color = "red", 
             linewidth = 1, linetype ="dashed") +
   geom_line(data = pred4, aes(y = ypred), color = "blue", linewidth = 1) +
