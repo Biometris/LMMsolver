@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# LMMsolver
+# LMMsolver <img src="man/figures/logo.png" align="right" height="139" alt="" />
 
 [![](https://www.r-pkg.org/badges/version/LMMsolver)](https://www.r-pkg.org/pkg/LMMsolver)
 [![CRAN RStudio mirror

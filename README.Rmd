@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-# LMMsolver
+# LMMsolver <img src="man/figures/logo.png" align="right" height="139" alt="" />
 
 [![](https://www.r-pkg.org/badges/version/LMMsolver)](https://www.r-pkg.org/pkg/LMMsolver)
 [![CRAN RStudio mirror downloads](https://cranlogs.r-pkg.org/badges/LMMsolver)](https://www.r-pkg.org/pkg/LMMsolver)
