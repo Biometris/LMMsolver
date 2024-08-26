@@ -1,90 +1,34 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>/404.html</loc>
-  </url>
-  <url>
-    <loc>/articles/Solving_Linear_Mixed_Models.html</loc>
-  </url>
-  <url>
-    <loc>/articles/index.html</loc>
-  </url>
-  <url>
-    <loc>/authors.html</loc>
-  </url>
-  <url>
-    <loc>/index.html</loc>
-  </url>
-  <url>
-    <loc>/news/index.html</loc>
-  </url>
-  <url>
-    <loc>/reference/ADchol.html</loc>
-  </url>
-  <url>
-    <loc>/reference/APSIMdat.html</loc>
-  </url>
-  <url>
-    <loc>/reference/Bsplines.html</loc>
-  </url>
-  <url>
-    <loc>/reference/LMMsolve.html</loc>
-  </url>
-  <url>
-    <loc>/reference/LMMsolveObject.html</loc>
-  </url>
-  <url>
-    <loc>/reference/LMMsolver.html</loc>
-  </url>
-  <url>
-    <loc>/reference/PsplinesKnots.html</loc>
-  </url>
-  <url>
-    <loc>/reference/RowKronecker.html</loc>
-  </url>
-  <url>
-    <loc>/reference/calcStandardErrors.html</loc>
-  </url>
-  <url>
-    <loc>/reference/coef.LMMsolve.html</loc>
-  </url>
-  <url>
-    <loc>/reference/constructRinv.html</loc>
-  </url>
-  <url>
-    <loc>/reference/deviance.LMMsolve.html</loc>
-  </url>
-  <url>
-    <loc>/reference/diagnosticsMME.html</loc>
-  </url>
-  <url>
-    <loc>/reference/displayMME.html</loc>
-  </url>
-  <url>
-    <loc>/reference/fitted.LMMsolve.html</loc>
-  </url>
-  <url>
-    <loc>/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>/reference/logLik.LMMsolve.html</loc>
-  </url>
-  <url>
-    <loc>/reference/multipop.html</loc>
-  </url>
-  <url>
-    <loc>/reference/obtainSmoothTrend.html</loc>
-  </url>
-  <url>
-    <loc>/reference/predictTest.html</loc>
-  </url>
-  <url>
-    <loc>/reference/residuals.LMMsolve.html</loc>
-  </url>
-  <url>
-    <loc>/reference/spl1D.html</loc>
-  </url>
-  <url>
-    <loc>/reference/summary.LMMsolve.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>https://biometris.github.io/LMMsolver/index.html/404.html</loc></url>
+<url><loc>https://biometris.github.io/LMMsolver/index.html/articles/Solving_Linear_Mixed_Models.html</loc></url>
+<url><loc>https://biometris.github.io/LMMsolver/index.html/articles/index.html</loc></url>
+<url><loc>https://biometris.github.io/LMMsolver/index.html/authors.html</loc></url>
+<url><loc>https://biometris.github.io/LMMsolver/index.html/index.html</loc></url>
+<url><loc>https://biometris.github.io/LMMsolver/index.html/news/index.html</loc></url>
+<url><loc>https://biometris.github.io/LMMsolver/index.html/reference/ADchol.html</loc></url>
+<url><loc>https://biometris.github.io/LMMsolver/index.html/reference/APSIMdat.html</loc></url>
+<url><loc>https://biometris.github.io/LMMsolver/index.html/reference/Bsplines.html</loc></url>
+<url><loc>https://biometris.github.io/LMMsolver/index.html/reference/LMMsolve.html</loc></url>
+<url><loc>https://biometris.github.io/LMMsolver/index.html/reference/LMMsolveObject.html</loc></url>
+<url><loc>https://biometris.github.io/LMMsolver/index.html/reference/LMMsolver.html</loc></url>
+<url><loc>https://biometris.github.io/LMMsolver/index.html/reference/PsplinesKnots.html</loc></url>
+<url><loc>https://biometris.github.io/LMMsolver/index.html/reference/RowKronecker.html</loc></url>
+<url><loc>https://biometris.github.io/LMMsolver/index.html/reference/SeaSurfaceTemp.html</loc></url>
+<url><loc>https://biometris.github.io/LMMsolver/index.html/reference/calcStandardErrors.html</loc></url>
+<url><loc>https://biometris.github.io/LMMsolver/index.html/reference/coef.LMMsolve.html</loc></url>
+<url><loc>https://biometris.github.io/LMMsolver/index.html/reference/constructRinv.html</loc></url>
+<url><loc>https://biometris.github.io/LMMsolver/index.html/reference/deviance.LMMsolve.html</loc></url>
+<url><loc>https://biometris.github.io/LMMsolver/index.html/reference/diagnosticsMME.html</loc></url>
+<url><loc>https://biometris.github.io/LMMsolver/index.html/reference/displayMME.html</loc></url>
+<url><loc>https://biometris.github.io/LMMsolver/index.html/reference/fitted.LMMsolve.html</loc></url>
+<url><loc>https://biometris.github.io/LMMsolver/index.html/reference/index.html</loc></url>
+<url><loc>https://biometris.github.io/LMMsolver/index.html/reference/logLik.LMMsolve.html</loc></url>
+<url><loc>https://biometris.github.io/LMMsolver/index.html/reference/multipop.html</loc></url>
+<url><loc>https://biometris.github.io/LMMsolver/index.html/reference/obtainSmoothTrend.html</loc></url>
+<url><loc>https://biometris.github.io/LMMsolver/index.html/reference/predict.LMMsolve.html</loc></url>
+<url><loc>https://biometris.github.io/LMMsolver/index.html/reference/predictTest.html</loc></url>
+<url><loc>https://biometris.github.io/LMMsolver/index.html/reference/residuals.LMMsolve.html</loc></url>
+<url><loc>https://biometris.github.io/LMMsolver/index.html/reference/spl1D.html</loc></url>
+<url><loc>https://biometris.github.io/LMMsolver/index.html/reference/summary.LMMsolve.html</loc></url>
 </urlset>
+
