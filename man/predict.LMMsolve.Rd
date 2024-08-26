@@ -4,10 +4,12 @@
 \alias{predict.LMMsolve}
 \title{Predict function}
 \usage{
-\method{predict}{LMMsolve}(object, newdata, se.fit = FALSE)
+\method{predict}{LMMsolve}(object, ..., newdata, se.fit = FALSE)
 }
 \arguments{
 \item{object}{an object of class LMMsolve.}
+
+\item{...}{Unused.}
 
 \item{newdata}{A data.frame containing new points for which the smooth
 trend should be computed. Column names should include the names used when

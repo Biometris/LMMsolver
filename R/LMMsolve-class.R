@@ -429,6 +429,7 @@ diagnosticsMME <- function(object) {
 #' Predict function
 #'
 #' @param object an object of class LMMsolve.
+#' @param ... Unused.
 #' @param newdata A data.frame containing new points for which the smooth
 #' trend should be computed. Column names should include the names used when
 #' fitting the spline model.
@@ -438,7 +439,10 @@ diagnosticsMME <- function(object) {
 #' grid. The standard errors are saved if `se.fit=TRUE`.
 #'
 #' @export
-predict.LMMsolve <- function(object, newdata, se.fit = FALSE) {
+predict.LMMsolve <- function(object,
+                             ...,
+                             newdata,
+                             se.fit = FALSE) {
   if (!inherits(object, "LMMsolve")) {
     stop("object should be an object of class LMMsolve.\n")
   }
