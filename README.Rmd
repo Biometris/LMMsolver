@@ -72,7 +72,7 @@ obj1 <- LMMsolve(fixed = anomaly ~ 1,
 
 The spatial trend for the precipitation can now be plotted on the map of the USA, using the `predict` function of `LMMsolver`: 
 
-```{r Plot_USprecip}
+```{r Plot_USprecipl, fig.alt="Precipitation anomaly USA"}
 lon_range <- range(USprecip$lon)
 lat_range <- range(USprecip$lat)
 newdat <- expand.grid(lon = seq(lon_range[1], lon_range[2], length = 200),
