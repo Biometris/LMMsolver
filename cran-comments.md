@@ -1,6 +1,6 @@
 ## Major release
 
-Generalizations in some of the functions, increased efficiency and some minor bugfixes
+Addition of predict function. New example and further generalizations.
 
 ----
 

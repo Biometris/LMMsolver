@@ -1,4 +1,4 @@
-# LMMsolver 1.0.7.9000
+# LMMsolver 1.0.8
 
 -   Vignette has been rewritten, with a new introduction section. 
 -   The function `predict.LMMsolve` added.
