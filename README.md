@@ -100,7 +100,7 @@ ggplot(usa) +
   theme(panel.grid = element_blank())
 ```
 
-<img src="man/figures/README-Plot_USprecipl-1.png" alt="Precipitation anomaly USA" width="70%" />
+<img src="man/figures/README-Plot_USprecip-1.png" alt="Precipitation anomaly USA" width="70%" />
 
 Further examples can be found in the vignette.
 
