@@ -480,9 +480,26 @@ predict.LMMsolve <- function(object,
   for (s in seq_len(nGam)) {
     spl <- object$splRes[[s]]
     x <- spl$x
+    for (ii in seq_along(x)) {
+      tmp <- newdata[[names(x)[ii]]]
+      if (!is.numeric(tmp)) {
+        msg <- paste("Variable", names(x), "should be numeric\n")
+        stop(msg)
+      }
+      if (sum(is.na(tmp)) > 0) {
+        msg <- paste("Variable", names(x), "has missing values\n")
+        stop(msg)
+      }
+      xminB <- attr(spl$knots[[ii]], which="xmin")
+      xmaxB <- attr(spl$knots[[ii]], which="xmax")
+      if (min(tmp) < xminB || max(tmp) > xmaxB) {
+        msg <- paste("Variable", names(x),
+              "outside range of B-splines basis\n")
+        stop(msg)
+      }
+    }
     xGrid[[s]] <- lapply(X = seq_along(x), FUN = function(i) {
       newdata[[names(x)[i]]]})
-
     Bx <- mapply(FUN = Bsplines, spl$knots, xGrid[[s]], deriv=0)
     BxTot[[s]] <- Reduce(RowKronecker, Bx)
     G <- lapply(X=spl$knots, FUN = function(x) {
