@@ -231,7 +231,7 @@ The model in `LMMsolve()` is given by:
 
 ```{r twoExpSolve}
 obj4 <- LMMsolve(fixed= y ~ 1, 
-                 spline = ~spl1D(x, nseg = 50),
+                 spline = ~spl1D(x, nseg = 50, xlim = c(0,1)),
                  random = ~Experiment,
                  residual = ~Experiment,
                  data = dat4)

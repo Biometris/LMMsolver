@@ -600,14 +600,11 @@ chkValBsplines <- function(spl, newdata) {
     }
     xminB <- attr(spl$knots[[ii]], which="xmin")
     xmaxB <- attr(spl$knots[[ii]], which="xmax")
-    cat(ii," ",xminB, "  ", xmaxB, "   ", min(tmp),"  ", max(tmp),"\n ")
     if (min(tmp) < xminB || max(tmp) > xmaxB) {
       msg <- paste("Variable", vname,
                    "outside range of B-splines basis\n")
       stop(msg)
     }
   }
-
-
 }
 
