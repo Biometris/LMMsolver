@@ -484,11 +484,16 @@ LMMsolve <- function(fixed,
         cat("Generalized Linear Mixed Model iteration", i, ", tol=", tol, "\n")
       }
       if (tol < tolerance) {
-        dev.residuals <- family$dev.resids(y, mu, w)
-        deviance <- sum(dev.residuals)
         break;
       }
     }
+    if (i == maxit) {
+      warning("No convergence after ", maxit,
+              " iterations of GLMM algorithm\n", call. = FALSE)
+    }
+
+    dev.residuals <- family$dev.resids(y, mu, w)
+    deviance <- sum(dev.residuals)
   }
   ## Add names to ndx of coefficients.
   ndxCf <- seq_along(obj$a)
