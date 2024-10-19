@@ -585,4 +585,29 @@ makeDesignTerm <- function(obj, newdat, term) {
   return(M)
 }
 
+chkValBsplines <- function(spl, newdata) {
+  x <- spl$x
+  for (ii in seq_along(x)) {
+    tmp <- newdata[[names(x)[ii]]]
+    vname <- names(x)[ii]
+    if (!is.numeric(tmp)) {
+      msg <- paste("Variable", vname, "should be numeric\n")
+      stop(msg)
+    }
+    if (sum(is.na(tmp)) > 0) {
+      msg <- paste("Variable", vname, "has missing values\n")
+      stop(msg)
+    }
+    xminB <- attr(spl$knots[[ii]], which="xmin")
+    xmaxB <- attr(spl$knots[[ii]], which="xmax")
+    cat(ii," ",xminB, "  ", xmaxB, "   ", min(tmp),"  ", max(tmp),"\n ")
+    if (min(tmp) < xminB || max(tmp) > xmaxB) {
+      msg <- paste("Variable", vname,
+                   "outside range of B-splines basis\n")
+      stop(msg)
+    }
+  }
+
+
+}
 
