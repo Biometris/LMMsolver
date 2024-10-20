@@ -342,10 +342,6 @@ LMMsolve <- function(fixed,
   }
   nNonSplinesRandom <- length(dim.r)
 
-  ## Convert to spam matrix and cleanup
-  #Xs <- spam::as.spam.dgCMatrix(X)
-  #Xs <- spam::cleanup(Xs)
-
   ## Add spline part.
   splResList <- NULL
   NomEffDimRan <- NULL
@@ -425,7 +421,7 @@ LMMsolve <- function(fixed,
            levelsNoVar, "\n")
     }
   }
-  ## Fit the model.
+  ## set theta
   if (!is.null(theta)) {
     if (length(theta) != length(scFactor)) {
       stop("Argument theta has wrong length \n")
@@ -434,6 +430,7 @@ LMMsolve <- function(fixed,
   } else {
     theta <- 1 / scFactor
   }
+  ## set grpTheta
   if (!is.null(grpTheta)) {
     if (length(grpTheta) != length(scFactor)) {
       stop("Argument grpTheta has wrong length \n")
@@ -441,142 +438,18 @@ LMMsolve <- function(fixed,
   } else {
     grpTheta <- c(1:length(scFactor))
   }
-
-  if (family$family == "gaussian") {
-    obj <- sparseMixedModels(y = y, X = Xs, Z = Z, lGinv = lGinv, lRinv = lRinv,
-                             tolerance = tolerance, trace = trace, maxit = maxit,
-                             theta = theta, grpTheta = grpTheta)
-    dev.residuals <- family$dev.resids(y, obj$yhat, w)
-    deviance <- sum(dev.residuals)
-  } else {
-    ## MB, 23 jan 2023
-    ## binomial needs global weights
-    weights <- w
-    nobs <- length(y)
-    mustart <- etastart <- NULL
-    eval(family$initialize)
-    mu <- mustart
-    eta <- family$linkfun(mustart)
-    nNonRes <- length(theta) - nRes
-    fixedTheta <- c(rep(FALSE, nNonRes), rep(TRUE, nRes))
-    theta[(nNonRes + 1):(nNonRes + nRes)] <- 1
-    trace_GLMM <- NULL
-    for (i in 1:maxit) {
-      deriv <- family$mu.eta(eta)
-      z <- (eta - offset) + (y - mu)/deriv
-      wGLM <- as.vector(deriv^2 / family$variance(mu))
-      wGLM <- wGLM*w
-      lRinv <- constructRinv(df = data, residual = residual, weights = wGLM)
-      obj <- sparseMixedModels(y = z, X = Xs, Z = Z, lGinv = lGinv, lRinv = lRinv,
-                               tolerance = tolerance, trace = trace, maxit = maxit,
-                               theta = theta, fixedTheta = fixedTheta,
-                               grpTheta = grpTheta)
-      eta.old <- eta
-      eta <- obj$yhat + offset
-      mu <- family$linkinv(eta)
-      theta <- obj$theta
-      tol <- sum((eta - eta.old)^2) / sum(eta^2)
-
-      aux.df <- data.frame(itOuter = rep(i, obj$nIter),
-                           tol=c(rep(NA,obj$nIter-1), tol))
-      trace_GLMM <- rbind(trace_GLMM, cbind(aux.df, obj$trace))
-      if (trace) {
-        cat("Generalized Linear Mixed Model iteration", i, ", tol=", tol, "\n")
-      }
-      if (tol < tolerance) {
-        break;
-      }
-    }
-    if (i == maxit) {
-      warning("No convergence after ", maxit,
-              " iterations of GLMM algorithm\n", call. = FALSE)
-    }
-
-    dev.residuals <- family$dev.resids(y, mu, w)
-    deviance <- sum(dev.residuals)
-  }
-  ## Add names to ndx of coefficients.
-  ndxCf <- seq_along(obj$a)
-  ## Fixed terms.
-  ef <- cumsum(dim.f)
-  sf <- ef - dim.f + 1
-  ndxCoefF <- nameCoefs(coefs = ndxCf, desMat = X, termLabels = term.labels.f,
-                        s = sf, e = ef, data = data, type = "fixed")
-  ## Random terms.
-  er <- sum(dim.f) + cumsum(dim.r)
-  sr <- er - dim.r + 1
-  ndxCoefR <- nameCoefs(coefs = ndxCf, termLabels = term.labels.r, s = sr,
-                        e = er, data = data, group = group, type = "random")
-  ## Combine result for fixed and random terms.
-  ndxCoefTot <- c(ndxCoefF, ndxCoefR)
-  names(ndxCoefTot) <- c(term.labels.f, term.labels.r)
-  ## Extract effective dimensions from fitted model.
-  EffDimRes <- attributes(lRinv)$cnt
-  EffDimNamesRes <- attributes(lRinv)$names
-  NomEffDim <- c(NomEffDimRan, EffDimRes)
-  # Calc upper bound for nominal effective dimension:
-  N <- nrow(X)
-  p <- ncol(X)
-  NomEffDim <- pmin(NomEffDim, N - p)
-  ## Make ED table for fixed effects.
-  EDdf1 <- data.frame(Term = term.labels.f,
-                      Effective = dim.f,
-                      Model = dim.f,
-                      Nominal = dim.f,
-                      Ratio = rep(1, length(dim.f)),
-                      Penalty = rep(0, length(dim.f)),
-                      VarComp = rep(NA, length(dim.f)))
-  ## Make ED table for random effects.
-  EDdf2 <- data.frame(Term = obj$EDnames,
-                      Effective = obj$ED,
-                      Model = c(rep(dim.r, varPar), EffDimRes),
-                      Nominal = NomEffDim,
-                      Ratio = obj$ED / NomEffDim,
-                      Penalty = obj$theta,
-                      VarComp = c(rep(term.labels.r, varPar), EffDimNamesRes))
-  ## Make full ED table.
-  EDdf <- rbind(EDdf1, EDdf2)
-  EDdf <- EDdf[-which(colnames(EDdf) == "VarComp")]
-  rownames(EDdf) <- NULL
-  ## Make variance table.
-  varComp <- factor(EDdf2[["VarComp"]], levels = unique(EDdf2[["VarComp"]]))
-  VarDf <- aggregate(x = EDdf2$Penalty, by = list(VarComp = varComp), FUN = sum)
-  VarDf[["Variance"]] = 1 / VarDf[["x"]]
-  VarDf <- VarDf[c("VarComp", "Variance")]
-  ## Compute REML constant.
-  constantREML <- -0.5 * log(2 * pi) * (length(y) - sum(dim.f))
-  dim <- c(dim.f, dim.r)
-  if (family$family == "gaussian") {
-    trace <- obj$trace
-  } else {
-    trace <- trace_GLMM
-  }
-  return(LMMsolveObject(logL = obj$logL,
-                        sigma2e = obj$sigma2e,
-                        tau2e = obj$tau2e,
-                        EDdf = EDdf,
-                        varPar = varPar,
-                        VarDf = VarDf,
-                        theta = obj$theta,
-                        coefMME = obj$a,
-                        ndxCoefficients = ndxCoefTot,
-                        yhat = obj$yhat,
-                        residuals = obj$residuals,
-                        nIter = obj$nIter,
-                        y = y,
-                        X = Xs,  # sparse format
-                        Z = Z,
-                        lGinv = lGinv,
-                        lRinv = lRinv,
-                        C = obj$C,
-                        cholC = obj$cholC,
-                        constantREML = constantREML,
-                        dim = dim,
-                        Nres = length(lRinv),
-                        term.labels.f = term.labels.f,
-                        term.labels.r = term.labels.r,
-                        splRes = splResList,
-                        family = family,
-                        deviance = deviance,
-                        trace = trace))
+  ##
+  ## MB: This needs to be made more clear and checked
+  Xd <- X # the dense matrix, with additional info.
+  X <- Xs # the sparse matrix
+  ##
+  ## Fit the model
+  LMMobj <- fitLMM(y = y, Xd = Xd, X = X, Z = Z, w, lGinv = lGinv, lRinv = lRinv,
+                   tolerance = tolerance, trace = trace, maxit = maxit, theta = theta,
+                   grpTheta = grpTheta, family = family, offset = offset,
+                   dim.f = dim.f, dim.r = dim.r,
+                   term.labels.f = term.labels.f, term.labels.r = term.labels.r,
+                   NomEffDimRan = NomEffDimRan, varPar = varPar, splResList = splResList,
+                   nRes = nRes, residual = residual, group = group, data = data)
+  return(LMMobj)
 }
