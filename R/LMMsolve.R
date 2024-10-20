@@ -400,10 +400,8 @@ LMMsolve <- function(fixed,
   if (attr(mt, "intercept") == 1) {
     term.labels.f <- c("(Intercept)", term.labels.f)
   }
-  ## construct inverse of residual matrix R.
-  lRinv <- constructRinv(df = data, residual = residual, weights = w)
-  nRes <- length(lRinv)
-  scFactor <- c(scFactor, rep(1, nRes))
+
+  ## get the response variable
   y <- model.response(mf)
   ## check whether the variance for response is not zero.
   if (is.null(residual)) {
@@ -421,6 +419,11 @@ LMMsolve <- function(fixed,
            levelsNoVar, "\n")
     }
   }
+
+  ## construct inverse of residual matrix R.
+  lRinv <- constructRinv(df = data, residual = residual, weights = w)
+  nRes <- length(lRinv)
+  scFactor <- c(scFactor, rep(1, nRes))
   ## set theta
   if (!is.null(theta)) {
     if (length(theta) != length(scFactor)) {
@@ -438,6 +441,7 @@ LMMsolve <- function(fixed,
   } else {
     grpTheta <- c(1:length(scFactor))
   }
+
   ##
   ## MB: This needs to be made more clear and checked
   Xd <- X # the dense matrix, with additional info.
