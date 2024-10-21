@@ -13,7 +13,7 @@ before_script:
   - export PATH="/usr/local/lib/R/site-library/littler/examples/:${PATH}"
   - echo "options(Ncpus = $(nproc --all))" >> /usr/local/lib/R/etc/Rprofile.site
   - r -e "install.packages('devtools', method = 'wget')"
-  - r -e 'devtools::install_dev_deps()'
+  - r -e 'devtools::install_dev_deps(upgrade = "never")'
 
 r-release:
   stage: test
