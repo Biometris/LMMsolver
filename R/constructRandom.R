@@ -79,6 +79,7 @@ constructRandom <- function(random, group, condFactor, data) {
   }
   L <- list(Z = Z, lGinv = lGinv, dim.r = dim.r,
             term.labels.r = term.labels.r, scFactor = scFactor,
-            varPar = varPar)
+            varPar = varPar,
+            nNonSplinesRandom = length(dim.r))
   return(L)
 }
