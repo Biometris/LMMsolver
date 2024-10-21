@@ -1,8 +1,36 @@
-fitLMM <- function(y, Xd, X, Z, w, lGinv, lRinv, tolerance, trace, maxit, theta, grpTheta,
-              family, offset, dim.f, dim.r, term.labels.f, term.labels.r, NomEffDimRan,
-              varPar, splResList, nRes, residual, group, data) {
+fitLMM <- function(y, X, Z, w, lGinv, tolerance, trace, maxit,
+              theta, grpTheta, family, offset, dim.f, dim.r,
+              term.labels.f, term.labels.r, NomEffDimRan,
+              varPar, splResList, residual, group,
+              nNonSplinesRandom, scFactor, data) {
+  ## Convert to spam matrix and cleanup
+  Xs <- spam::as.spam.dgCMatrix(X)
+  Xs <- spam::cleanup(Xs)
+
+  ## construct inverse of residual matrix R.
+  lRinv <- constructRinv(df = data, residual = residual, weights = w)
+  nRes <- length(lRinv)
+  scFactor <- c(scFactor, rep(1, nRes))
+  ## set theta
+  if (!is.null(theta)) {
+    if (length(theta) != length(scFactor)) {
+      stop("Argument theta has wrong length \n")
+    }
+    theta <- theta / scFactor
+  } else {
+    theta <- 1 / scFactor
+  }
+  ## set grpTheta
+  if (!is.null(grpTheta)) {
+    if (length(grpTheta) != length(scFactor)) {
+      stop("Argument grpTheta has wrong length \n")
+    }
+  } else {
+    grpTheta <- c(1:length(scFactor))
+  }
+
   if (family$family == "gaussian") {
-    obj <- sparseMixedModels(y = y, X = X, Z = Z, lGinv = lGinv, lRinv = lRinv,
+    obj <- sparseMixedModels(y = y, X = Xs, Z = Z, lGinv = lGinv, lRinv = lRinv,
                              tolerance = tolerance, trace = trace, maxit = maxit,
                              theta = theta, grpTheta = grpTheta)
     dev.residuals <- family$dev.resids(y, obj$yhat, w)
@@ -26,7 +54,7 @@ fitLMM <- function(y, Xd, X, Z, w, lGinv, lRinv, tolerance, trace, maxit, theta,
       wGLM <- as.vector(deriv^2 / family$variance(mu))
       wGLM <- wGLM*w
       lRinv <- constructRinv(df = data, residual = residual, weights = wGLM)
-      obj <- sparseMixedModels(y = z, X = X, Z = Z, lGinv = lGinv, lRinv = lRinv,
+      obj <- sparseMixedModels(y = z, X = Xs, Z = Z, lGinv = lGinv, lRinv = lRinv,
                                tolerance = tolerance, trace = trace, maxit = maxit,
                                theta = theta, fixedTheta = fixedTheta,
                                grpTheta = grpTheta)
@@ -59,7 +87,7 @@ fitLMM <- function(y, Xd, X, Z, w, lGinv, lRinv, tolerance, trace, maxit, theta,
   ## Fixed terms.
   ef <- cumsum(dim.f)
   sf <- ef - dim.f + 1
-  ndxCoefF <- nameCoefs(coefs = ndxCf, desMat = Xd, termLabels = term.labels.f,
+  ndxCoefF <- nameCoefs(coefs = ndxCf, desMat = X, termLabels = term.labels.f,
                         s = sf, e = ef, data = data, type = "fixed")
   ## Random terms.
   er <- sum(dim.f) + cumsum(dim.r)
@@ -69,6 +97,14 @@ fitLMM <- function(y, Xd, X, Z, w, lGinv, lRinv, tolerance, trace, maxit, theta,
   ## Combine result for fixed and random terms.
   ndxCoefTot <- c(ndxCoefF, ndxCoefR)
   names(ndxCoefTot) <- c(term.labels.f, term.labels.r)
+
+  ## Nominal effective dimension for non-spline part
+  if (nNonSplinesRandom > 0) {
+    ## calculate NomEff dimension for non-spline part
+    NomEffDimNonSplines <- calcNomEffDim(Xs, Z, dim.r[c(1:nNonSplinesRandom)], term.labels.r)
+    ## combine with splines part
+    NomEffDimRan <- c(NomEffDimNonSplines, NomEffDimRan)
+  }
   ## Extract effective dimensions from fitted model.
   EffDimRes <- attributes(lRinv)$cnt
   EffDimNamesRes <- attributes(lRinv)$names
@@ -123,7 +159,7 @@ fitLMM <- function(y, Xd, X, Z, w, lGinv, lRinv, tolerance, trace, maxit, theta,
                         residuals = obj$residuals,
                         nIter = obj$nIter,
                         y = y,
-                        X = X,
+                        X = Xs, # save spam format
                         Z = Z,
                         lGinv = lGinv,
                         lRinv = lRinv,

@@ -385,17 +385,6 @@ LMMsolve <- function(fixed,
     }
   }
 
-  ## Convert to spam matrix and cleanup
-  Xs <- spam::as.spam.dgCMatrix(X)
-  Xs <- spam::cleanup(Xs)
-
-  if (nNonSplinesRandom > 0) {
-    ## calculate NomEff dimension for non-spline part
-    NomEffDimNonSplines <- calcNomEffDim(Xs, Z, dim.r[c(1:nNonSplinesRandom)], term.labels.r)
-    ## combine with splines part
-    NomEffDimRan <- c(NomEffDimNonSplines, NomEffDimRan)
-  }
-
   ## Add intercept.
   if (attr(mt, "intercept") == 1) {
     term.labels.f <- c("(Intercept)", term.labels.f)
@@ -420,40 +409,16 @@ LMMsolve <- function(fixed,
     }
   }
 
-  ## construct inverse of residual matrix R.
-  lRinv <- constructRinv(df = data, residual = residual, weights = w)
-  nRes <- length(lRinv)
-  scFactor <- c(scFactor, rep(1, nRes))
-  ## set theta
-  if (!is.null(theta)) {
-    if (length(theta) != length(scFactor)) {
-      stop("Argument theta has wrong length \n")
-    }
-    theta <- theta / scFactor
-  } else {
-    theta <- 1 / scFactor
-  }
-  ## set grpTheta
-  if (!is.null(grpTheta)) {
-    if (length(grpTheta) != length(scFactor)) {
-      stop("Argument grpTheta has wrong length \n")
-    }
-  } else {
-    grpTheta <- c(1:length(scFactor))
-  }
-
-  ##
-  ## MB: This needs to be made more clear and checked
-  Xd <- X # the dense matrix, with additional info.
-  X <- Xs # the sparse matrix
-  ##
   ## Fit the model
-  LMMobj <- fitLMM(y = y, Xd = Xd, X = X, Z = Z, w, lGinv = lGinv, lRinv = lRinv,
-                   tolerance = tolerance, trace = trace, maxit = maxit, theta = theta,
-                   grpTheta = grpTheta, family = family, offset = offset,
-                   dim.f = dim.f, dim.r = dim.r,
-                   term.labels.f = term.labels.f, term.labels.r = term.labels.r,
-                   NomEffDimRan = NomEffDimRan, varPar = varPar, splResList = splResList,
-                   nRes = nRes, residual = residual, group = group, data = data)
+  LMMobj <- fitLMM(y = y, X = X, Z = Z, w = w, lGinv = lGinv,
+              tolerance = tolerance, trace = trace, maxit = maxit,
+              theta = theta, grpTheta = grpTheta,
+              family = family, offset = offset,
+              dim.f = dim.f, dim.r = dim.r,
+              term.labels.f = term.labels.f, term.labels.r = term.labels.r,
+              NomEffDimRan = NomEffDimRan, varPar = varPar,
+              splResList = splResList, residual = residual,
+              group = group, nNonSplinesRandom = nNonSplinesRandom,
+              scFactor = scFactor, data = data)
   return(LMMobj)
 }
