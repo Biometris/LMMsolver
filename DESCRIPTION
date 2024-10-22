@@ -21,13 +21,9 @@ Encoding: UTF-8
 LazyData: true
 Depends: R (>= 3.6)
 Imports: 
-    agridat,
-    ggplot2,
-    maps,
     Matrix,
     methods,
     Rcpp (>= 0.10.4),
-    sf,
     spam,
     splines
 LinkingTo: Rcpp
@@ -35,7 +31,11 @@ RoxygenNote: 7.3.2
 Suggests: 
     rmarkdown,
     knitr,
-    tinytest
+    tinytest,
+    agridat,
+    ggplot2,
+    maps,
+    sf
 VignetteBuilder: knitr
 URL: https://biometris.github.io/LMMsolver/index.html, https://github.com/Biometris/LMMsolver/
 BugReports: https://github.com/Biometris/LMMsolver/issues
