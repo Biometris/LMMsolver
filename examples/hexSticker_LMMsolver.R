@@ -13,6 +13,8 @@ set.seed(12)
 n <- 150
 x <- seq(0, 1, length = n)
 sigma2e <- 0.04
+f2 <- function(x) { 0.3 + 0.4*x + 0.2*sin(20*x) }
+
 y <- f2(x) + rnorm(n, sd = sqrt(sigma2e))
 dat2 <- data.frame(x, y)
 
