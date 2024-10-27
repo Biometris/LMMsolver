@@ -39,13 +39,22 @@
 #' @keywords internal
 calcStandardErrors <- function(C,
                                D) {
-  ## !!! NOT CHANGE THE LINE OF CODE BELOW !!!
+  tD <- spam::t.spam(D)
+  DtD <- tD %*% D
+
   ## It adds extra zeros ("fill-ins") to matrix C, needed
-  ## to calculate the Partial Derivatives of Cholesky, not equal to zero.
-  C <- C + 0 * spam::t.spam(D) %*% D
-  cholC <- spam::chol.spam(C)
+  ## to calculate the Partial Derivatives of Cholesky.
+  iDtD <- DtD
+  iC <- C
+  iC@entries <- rep(2, length(iC@entries))
+  iDtD@entries <- rep(1, length(iDtD@entries))
+  Cwf <- iC + iDtD
+  inC <- which(Cwf@entries==2 | Cwf@entries == 3)
+  Cwf@entries <- rep(0, length(Cwf@entries))
+  Cwf@entries[inC] <- C@entries
+
+  cholC <- spam::chol.spam(Cwf)
   p <- cholC@pivot
-  tD <- t(D)
   tDp <- tD[p, ]
   x <- diagXCinvXt(cholC, tDp)
   se <- sqrt(x)
