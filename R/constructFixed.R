@@ -33,7 +33,6 @@ constructFixed <- function(fixed, data) {
 
   attr(X, "dim.f") <- dim.f
   attr(X, "term.labels.f") <- term.labels.f
-  #attr(X, "mt") <- mt
   attr(X, "mf") <- mf
   return(X)
 }

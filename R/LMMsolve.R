@@ -177,7 +177,6 @@ LMMsolve <- function(fixed,
   X <- constructFixed(fixed, data)
   dim.f <- attr(X, which="dim.f")
   term.labels.f <- attr(X, which="term.labels.f")
-  mt <- attr(X, which="mt")
   mf <- attr(X, which="mf")
 
   ## Add spline part.
