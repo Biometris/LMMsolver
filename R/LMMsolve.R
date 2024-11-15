@@ -227,11 +227,6 @@ LMMsolve <- function(fixed,
     }
   }
 
-  ## Add intercept.
-  if (attr(mt, "intercept") == 1) {
-    term.labels.f <- c("(Intercept)", term.labels.f)
-  }
-
   ## get the response variable
   y <- model.response(mf)
   ## check whether the variance for response is not zero.

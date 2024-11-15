@@ -26,9 +26,14 @@ constructFixed <- function(fixed, data) {
   } else {
     dim.f <- as.numeric(table(attr(X, "assign")))
   }
+  ## Add intercept.
+  if (attr(mt, "intercept") == 1) {
+    term.labels.f <- c("(Intercept)", term.labels.f)
+  }
+
   attr(X, "dim.f") <- dim.f
   attr(X, "term.labels.f") <- term.labels.f
-  attr(X, "mt") <- mt
+  #attr(X, "mt") <- mt
   attr(X, "mf") <- mf
   return(X)
 }
