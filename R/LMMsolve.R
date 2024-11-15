@@ -173,56 +173,21 @@ LMMsolve <- function(fixed,
 
   lGinv <- constructGinv(ginverse, lGinv, dim.r, term.labels.r)
 
-  ## Make fixed part.
-  mf <- model.frame(fixed, data, drop.unused.levels = TRUE)
-  mt <- terms(mf)
-  f.terms <- all.vars(mt)[attr(mt, "dataClasses") == "factor"]
-  X <- Matrix::sparse.model.matrix(mt, data = mf,
-                                   contrasts.arg = lapply(X = mf[, f.terms, drop = FALSE],
-                                                          FUN = contrasts, contrasts = TRUE))
-  term.labels.f <- attr(mt, "term.labels")
-
-  q <- qr(as.matrix(X))
-  if (q$rank != ncol(X)) {
-    remCols <- q$pivot[-seq(q$rank)]
-    ## Compare terms before and after removing extra columns.
-    ## If a complete term is removed, it also has to be removed from the labels.
-    f.terms.orig <- as.numeric(names(table(attr(X, "assign"))))
-
-    dim.f.tab <- table(attr(X, "assign")[-remCols])
-    dim.f <- as.numeric(dim.f.tab)
-    X <- X[ , -remCols, drop = FALSE]
-    f.terms.new <- as.numeric(names(dim.f.tab))
-    if (!setequal(f.terms.orig, f.terms.new)) {
-      term.labels.f <- term.labels.f[-setdiff(f.terms.orig, f.terms.new)]
-    }
-  } else {
-    dim.f <- as.numeric(table(attr(X, "assign")))
-  }
-
-  ## Checks splines part
-  splErr <- paste("spline should be a formula of form \"~ spl1D() + ... + ",
-                  "spl1D()\", \"~ spl2D()\" or \"~spl3D()\"\n")
-  if (!is.null(spline)) {
-    if (!inherits(spline, "formula")) stop(splErr)
-    spline <- formula(paste((gsub(pattern = "LMMsolver::",
-                                  replacement = "",
-                                  as.character(spline))), collapse = ""))
-    splTrms <- terms(spline, specials = c("spl1D", "spl2D", "spl3D"))
-    splSpec <- attr(splTrms, "specials")
-    if (length(terms(splTrms)) != 2 ||
-        ## Spline formula should consist of splxD() terms and nothing else.
-        length(unlist(splSpec)) != length(labels(terms(spline))) ||
-        length(splSpec$spl2D) > 1 ||
-        length(splSpec$spl3D) > 1) {
-      stop(splErr)
-    }
-  }
+  ## construct Fixed part and save
+  X <- constructFixed(fixed, data)
+  dim.f <- attr(X, which="dim.f")
+  term.labels.f <- attr(X, which="term.labels.f")
+  mt <- attr(X, which="mt")
+  mf <- attr(X, which="mf")
 
   ## Add spline part.
   splResList <- NULL
   NomEffDimRan <- NULL
   if (!is.null(spline)) {
+    # check correct formula splines
+    chkSplinesFormula(spline)
+    splTrms <- terms(spline, specials = c("spl1D", "spl2D", "spl3D"))
+    splSpec <- attr(splTrms, "specials")
     splTerms <- labels(splTrms)
     Nterms <- length(splTerms)
     splResList <- list()
