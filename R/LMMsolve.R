@@ -134,6 +134,7 @@ LMMsolve <- function(fixed,
             respVar, ".\n", call. = FALSE)
     data <- data[!respVarNA, ]
   }
+
   ## Check for weights should be done after removing observations with NA for
   ## response var. This prevents error messages when both response var and
   ## weight are NA.
@@ -149,6 +150,7 @@ LMMsolve <- function(fixed,
   }
   ## Drop unused factor levels from data.
   data <- droplevels(data)
+
   ## Check random term for conditional factor
   condFactor <- condFactor(random, data)
   if (!is.null(condFactor)) {
@@ -173,11 +175,10 @@ LMMsolve <- function(fixed,
 
   lGinv <- constructGinv(ginverse, lGinv, dim.r, term.labels.r)
 
-  ## construct Fixed part and save
+  ## construct Fixed part (excluding splines)
   X <- constructFixed(fixed, data)
   dim.f <- attr(X, which="dim.f")
   term.labels.f <- attr(X, which="term.labels.f")
-  mf <- attr(X, which="mf")
 
   ## Add spline part.
   splResList <- NULL
@@ -190,7 +191,7 @@ LMMsolve <- function(fixed,
     splTerms <- labels(splTrms)
     Nterms <- length(splTerms)
     splResList <- list()
-    for (i in 1:Nterms) {
+    for (i in seq_len(Nterms)) {
       splRes <- eval(parse(text = splTerms[i]), envir = data, enclos = parent.frame())
       ## Multiple 1D gam models should have unique x variables.
       if (!is.null(term.labels.f) && !is.null(splRes$term.labels.f) &&
@@ -226,8 +227,8 @@ LMMsolve <- function(fixed,
     }
   }
 
-  ## get the response variable
-  y <- model.response(mf)
+  ## get the response variable, after all filtering has been done
+  y <- data[[respVar]]
   ## check whether the variance for response is not zero.
   chkResponse(y, residual, data)
 
