@@ -24,3 +24,23 @@ grid. The standard errors are saved if `se.fit=TRUE`.
 \description{
 Predict function
 }
+\examples{
+## simulate some data
+f <- function(x) { 0.3 + 0.4*x + 0.2*sin(20*x) }
+set.seed(12)
+n <- 150
+x <- seq(0, 1, length = n)
+sigma2e <- 0.04
+y <- f(x) + rnorm(n, sd = sqrt(sigma2e))
+dat <- data.frame(x, y)
+
+## fit the model
+obj <- LMMsolve(fixed = y ~ 1,
+         spline = ~spl1D(x, nseg = 50), data = dat)
+
+## make predictions on a grid
+newdat <- data.frame(x = seq(0, 1, length = 300))
+pred <- predict(obj, newdata = newdat, se.fit = TRUE)
+head(pred)
+
+}
