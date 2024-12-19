@@ -52,7 +52,7 @@
 #' @param grpTheta a vector to give components the same penalty. Default
 #' \code{NULL}, all components have a separate penalty.
 #'
-#' @return An object of class \code{LMMsolve} representing the fitted model.
+#' @returns An object of class \code{LMMsolve} representing the fitted model.
 #' See \code{\link{LMMsolveObject}} for a full description of the components in
 #' this object.
 #'

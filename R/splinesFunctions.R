@@ -5,7 +5,7 @@
 #' @param X1 A matrix.
 #' @param X2 A matrix.
 #'
-#' @return The row-wise kronecker product of X1 and X2.
+#' @returns The row-wise kronecker product of X1 and X2.
 #'
 #' @keywords internal
 RowKronecker <- function(X1,
@@ -29,7 +29,7 @@ RowKronecker <- function(X1,
 #' @param degree A numerical value.
 #' @param nseg A numerical value.
 #'
-#' @return A numerical vector of knot positions.
+#' @returns A numerical vector of knot positions.
 #'
 #' @keywords internal
 PsplinesKnots <- function(xmin,

@@ -5,7 +5,7 @@
 #' methods for the generic functions coef, fitted, residuals, loglik and
 #' deviance.
 #'
-#' @return
+#' @returns
 #' An object of class \code{LMMsolve} contains the following components:
 #' \item{logL}{The restricted log-likelihood at convergence}
 #' \item{sigma2e}{The residual error}
@@ -111,7 +111,7 @@ LMMsolveObject <- function(logL,
 #' @param \dots Some methods for this generic require additional arguments.
 #' None are used in this method.
 #'
-#' @return A data.frame with either effective dimensions or variances depending
+#' @returns A data.frame with either effective dimensions or variances depending
 #' on which.
 #'
 #' @examples
@@ -181,7 +181,7 @@ print.summary.LMMsolve <- function(x,
 #' @param \dots some methods for this generic require additional arguments.
 #' None are used in this method.
 #'
-#' @return A list of vectors, containing the estimated effects for each fixed
+#' @returns A list of vectors, containing the estimated effects for each fixed
 #' effect and the predictions for each random effect in the defined linear
 #' mixed model.
 #'
@@ -244,7 +244,7 @@ coef.LMMsolve <- function(object,
 #'
 #' @inheritParams coef.LMMsolve
 #'
-#' @return A vector of fitted values.
+#' @returns A vector of fitted values.
 #'
 #' @examples
 #' ## Fit model on john.alpha data from agridat package.
@@ -269,7 +269,7 @@ fitted.LMMsolve <- function(object,
 #'
 #' @inheritParams coef.LMMsolve
 #'
-#' @return A vector of residuals.
+#' @returns A vector of residuals.
 #'
 #' @examples
 #' ## Fit model on john.alpha data from agridat package.
@@ -298,7 +298,7 @@ residuals.LMMsolve <- function(object,
 #' be included. Default is \code{TRUE}, as for example in \code{lme4} and SAS.
 #' In \code{asreml} the constant is omitted.
 #'
-#' @return The restricted maximum log-likelihood of the fitted model.
+#' @returns The restricted maximum log-likelihood of the fitted model.
 #'
 #' @examples
 #' ## Fit model on john.alpha data from agridat package.
@@ -335,7 +335,7 @@ logLik.LMMsolve <- function(object,
 #' @param relative Deviance relative conditional or absolute unconditional
 #' (-2*logLik(object))? Default \code{relative = TRUE}.
 #'
-#' @return The deviance of the fitted model.
+#' @returns The deviance of the fitted model.
 #'
 #' @examples
 #' ## Fit model on john.alpha data from agridat package.
@@ -371,7 +371,7 @@ deviance.LMMsolve <- function(object,
 #' fitting the spline model.
 #' @param se.fit calculate standard errors, default \code{FALSE}.
 #'
-#' @return A data.frame with predictions for the smooth trend on the specified
+#' @returns A data.frame with predictions for the smooth trend on the specified
 #' grid. The standard errors are saved if `se.fit=TRUE`.
 #'
 #' @examples

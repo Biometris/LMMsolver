@@ -75,7 +75,7 @@ gradient.deriv.logdet = function(G,Px,Py)
 #' @param lZ A list of matrices.
 #' @param names A character vector of names.
 #'
-#' @return The index matrix.
+#' @returns The index matrix.
 #'
 #' @keywords internal
 ndxMatrix <- function(df,
@@ -100,7 +100,7 @@ ndxMatrix <- function(df,
 # //' @param q A numeric value.
 # //' @param ord A numeric value.
 # //'
-# //' @return A q x (q-ord) matrix, the spectral decomposition D'D.
+# //' @returns A q x (q-ord) matrix, the spectral decomposition D'D.
 # //'
 # //' @export
 # // [[Rcpp::export]]
@@ -126,7 +126,7 @@ ndxMatrix <- function(df,
 # //' @param X1 A matrix.
 # //' @param X2 A matrix.
 # //'
-# //' @return The row-wise kronecker product of X1 and X2.
+# //' @returns The row-wise kronecker product of X1 and X2.
 # //'
 # //' @export
 # // [[Rcpp::export]]

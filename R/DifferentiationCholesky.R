@@ -23,7 +23,7 @@ setClass("ADchol",
 #' @param lP a list of symmetric matrices of class spam, each of dimension \eqn{q \times q},
 #' and with sum of the matrices assumed to be positive definite.
 #
-#' @return An object of class \code{ADchol}. This object is used to calculate the partial
+#' @returns An object of class \code{ADchol}. This object is used to calculate the partial
 #' partial derivatives of \eqn{log|C|} in an efficient way.
 #'
 #' @references

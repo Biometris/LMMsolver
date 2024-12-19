@@ -270,7 +270,7 @@ void initAD(NumericVector& F, const NumericVector& L, const IntegerVector& colpo
 //' @param ADobj object of class ADchol.
 //' @param theta a vector with precision or penalty parameters
 //'
-//' @return The gradient with partial derivatives of \eqn{log|C|} with respect to
+//' @returns The gradient with partial derivatives of \eqn{log|C|} with respect to
 //' parameters \eqn{\theta_i}. As attribute \code{logdet}, \eqn{log|C|} is returned.
 //'
 //' @references

@@ -20,7 +20,7 @@
 #' @param C a symmetric matrix of class spam
 #' @param D a matrix of class spam
 #'
-#' @return a vector with standard errors for predictions \eqn{D \hat{u}}.
+#' @returns a vector with standard errors for predictions \eqn{D \hat{u}}.
 #'
 #' @references
 #' Welham, S., Cullis, B., Gogel, B., Gilmour, A., & Thompson, R. (2004).

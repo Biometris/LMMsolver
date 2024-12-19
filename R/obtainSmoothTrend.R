@@ -117,7 +117,7 @@ designMatrixPredSplines <- function(object,
 #' @param which An integer, for if there are multiple splxD terms in the model.
 #' Default value is 1.
 #'
-#' @return A data.frame with predictions for the smooth trend on the specified
+#' @returns A data.frame with predictions for the smooth trend on the specified
 #' grid. The standard errors are saved if `deriv` has default value 0.
 #'
 #' @examples

@@ -3,7 +3,7 @@
 #'
 #' @param object an object of class LMMsolve.
 #'
-#' @return A summary of the mixed model coefficient matrix and its choleski
+#' @returns A summary of the mixed model coefficient matrix and its choleski
 #' decomposition.
 #'
 #' @examples

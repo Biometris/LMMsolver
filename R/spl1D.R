@@ -15,7 +15,7 @@
 #' Default \code{NULL}.
 #' @param level The level of the conditional factor. Default \code{NULL}.
 #'
-#' @return A list with the following elements:
+#' @returns A list with the following elements:
 #' \itemize{
 #'   \item \code{X} - design matrix for fixed effect. The intercept is not included.
 #'   \item \code{Z} - design matrix for random effect.

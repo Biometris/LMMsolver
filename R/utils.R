@@ -2,7 +2,7 @@
 #'
 #' @param x a numerical vector.
 #'
-#' @return norm of vector x
+#' @returns norm of vector x
 #'
 #' @noRd
 #' @keywords internal
@@ -17,7 +17,7 @@ normVec <- function(x) {
 #'                                     [0  0]
 #' and              lGinv2 extended to [0  0]
 #'                                     [0 A2]
-#' @return a list of sparse matrices of dimension (d1+d2) x (d1+d2)
+#' @returns a list of sparse matrices of dimension (d1+d2) x (d1+d2)
 #'
 #' @param lGinv1 a list of sparse matrices.
 #' @param lGinv2 a list of sparse matrices.
@@ -71,7 +71,7 @@ calcScaleFactor <- function(knots,
 #' @param pord order of the penalty.
 #' @param dx distance between the knots.
 #'
-#' @return qxq penalty matrix of class spam
+#' @returns qxq penalty matrix of class spam
 #'
 #' @noRd
 #' @keywords internal
@@ -128,7 +128,7 @@ constructG <- function(knots,
 #' @param knots knot positions of B-spline basis.
 #' @param pord order of the penalty matrix (pord=1 or 2).
 #'
-#' @return a q x q matrix of type spam
+#' @returns a q x q matrix of type spam
 #'
 #' @noRd
 #' @keywords internal
@@ -154,7 +154,7 @@ constructCCt <- function(knots,
 #' @param knots list with knot positions for each dimension
 #' @param pord order of the penalty matrix (1 or 2).
 #'
-#' @return a list of symmetric matrices of length of vector q.
+#' @returns a list of symmetric matrices of length of vector q.
 #'
 #' @noRd
 #' @keywords internal
@@ -187,7 +187,7 @@ constructGinvSplines <- function(q,
 #'
 #' @param X design matrix.
 #'
-#' @return a matrix if \code{X} has more than one column, otherwise return NULL
+#' @returns a matrix if \code{X} has more than one column, otherwise return NULL
 #'
 #' @noRd
 #' @keywords internal

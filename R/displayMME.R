@@ -4,7 +4,7 @@
 #' @param cholesky Should the cholesky decomposition of the coefficient matrix
 #' be plotted?
 #'
-#' @return A plot of the sparseness of the mixed model coefficient matrix.
+#' @returns A plot of the sparseness of the mixed model coefficient matrix.
 #'
 #' @examples
 #' ## Fit model on john.alpha data from agridat package.
