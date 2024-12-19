@@ -27,6 +27,7 @@ r-release:
       - "*.Rcheck"
     name: logs
     when: always
+    expire_in: 1 month
 
 r-devel:
   stage: test
@@ -40,6 +41,7 @@ r-devel:
       - "*.Rcheck"
     name: logs
     when: always
+    expire_in: 1 month
 
 coverage:
   stage: deploy
