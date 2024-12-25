@@ -16,9 +16,6 @@ dat$score <- sapply(dat$x, FUN = function(x) {
                                     rbinom(n = 1, size = 1, prob = fun_lambda(x))
                                  })
 dat$scoreF <- as.factor(ifelse(dat$score == 0,"failure","succes"))
-str(dat)
-head(dat)
-dim(dat)
 
 # Option 1 for response, see generic ?family
 
