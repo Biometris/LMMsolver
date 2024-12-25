@@ -126,15 +126,52 @@ LMMsolve <- function(fixed,
 
   ## Check that all variables used in fixed formula are in data.
   data <- checkFormVars(fixed, data, naAllowed = FALSE)
-  ## Remove NA for response variable from data.
-  respVar <- all.vars(fixed)[attr(terms(fixed), "response")]
-  respVarNA <- is.na(data[[respVar]])
-  if (sum(respVarNA) > 0) {
-    warning(sum(respVarNA), " observations removed with missing value for ",
-            respVar, ".\n", call. = FALSE)
-    data <- data[!respVarNA, ]
-  }
 
+  ## check the format lhs
+  mult_col_response <- FALSE
+  if (family$family == "binomial" || family$family == "quasibinomial") {
+    mf <- model.frame(fixed, data, drop.unused.levels = TRUE)
+    YY <- model.response(mf, type = "any")
+    if (inherits(YY, "matrix")) {
+      mult_col_response <- TRUE
+      if (ncol(YY) != 2) {
+        stop("wrong format response")
+      }
+      if (any(is.na(YY))) {
+        stop("missing values not allowed")
+      }
+      if (!is.null(weights)) {
+        stop("weights cannot be used in cbind(succes, failure) format ")
+      }
+      cntYY <- rowSums(YY)
+      y_proportion <- YY[,1]/cntYY
+      weights <- "weights"
+      data$weights <- cntYY
+      data$y_proportion <- y_proportion
+      respVar <- "y_proportion"
+      respVarNA <- rep(FALSE, nrow(data))
+      fixed_txt <- as.character(fixed)
+      fixed <- as.formula(paste0("y_proportion ~ ", fixed_txt[3]))
+    } else {
+      if (inherits(YY, "factor")) {
+        respVar <- all.vars(fixed)[attr(terms(fixed), "response")]
+        Factor <- data[[respVar]]
+        levels <- levels(Factor)
+        sc <- 1.0*(Factor == levels[2])
+        data[[respVar]] <- sc
+      }
+    }
+  }
+  if (!mult_col_response) {
+    respVar <- all.vars(fixed)[attr(terms(fixed), "response")]
+    ## Remove NA for response variable from data.
+    respVarNA <- is.na(data[[respVar]])
+    if (sum(respVarNA) > 0) {
+      warning(sum(respVarNA), " observations removed with missing value for ",
+              respVar, ".\n", call. = FALSE)
+      data <- data[!respVarNA, ]
+    }
+  }
   ## Check for weights should be done after removing observations with NA for
   ## response var. This prevents error messages when both response var and
   ## weight are NA.
