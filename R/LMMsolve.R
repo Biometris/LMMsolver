@@ -130,18 +130,23 @@ LMMsolve <- function(fixed,
   ## check the format lhs
   mult_col_response <- FALSE
   if (family$family == "binomial" || family$family == "quasibinomial") {
-    mf <- model.frame(fixed, data, drop.unused.levels = TRUE)
+    mf <- model.frame(fixed, data, drop.unused.levels = TRUE, na.action = NULL)
     YY <- model.response(mf, type = "any")
     if (inherits(YY, "matrix")) {
       mult_col_response <- TRUE
       if (ncol(YY) != 2) {
-        stop("wrong format response")
+        str1 <- paste("family", family$family, ": response should have two columns.")
+        stop(str1)
       }
       if (any(is.na(YY))) {
-        stop("missing values not allowed")
+        str2 <- paste("family", family$family,
+                      ": NA's not allowed in cbind format.")
+        stop(str2)
       }
       if (!is.null(weights)) {
-        stop("weights cannot be used in cbind(succes, failure) format ")
+        str3 <- paste("family", family$family,
+                      ": weights cannot be used in cbind format.")
+        stop(str3)
       }
       cntYY <- rowSums(YY)
       y_proportion <- YY[,1]/cntYY
