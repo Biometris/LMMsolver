@@ -45,7 +45,8 @@ multinomial <- function() {
 
 #' Solver for multinomial distribution, at the moment only for 1D splines
 #'
-#' @export
+#' @noRd
+#' @keywords internal
 Multinomialsolve <- function(fixed, dat, family = multinomial()) {
 
   family <- multinomial()
