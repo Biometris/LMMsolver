@@ -28,8 +28,66 @@ fitLMM <- function(y, X, Z, w, lGinv, tolerance, trace, maxit,
   } else {
     grpTheta <- c(1:length(scFactor))
   }
+  if (family$family == "multinomial") {
+    YY <- y
+    n <- nrow(YY)
+    nCat <- length(respVar) - 1
+    sY <- rowSums(YY)
+    YY <- YY/sY
+    YY <- YY[,-(nCat+1)] # remove last column
+    y <- as.vector(t(YY))
+    Xs <- Xs %x% spam::diag.spam(nCat)
+    Z <- Z %x% spam::diag.spam(nCat)
+    lGinv <- lapply(lGinv, FUN = function(x) {x %x% spam::diag.spam(nCat)})
 
-  if (family$family == "gaussian") {
+    # remark: We can add some prior information to initial
+    # values based on the scores:
+    eta <- rep(0, n*nCat)
+
+    # Initialize the sparse block structure for W and Dinv
+    W <- diag.spam(1, n) %x% spam(x=1, nrow=nCat, ncol=nCat)
+    Dinv <- diag.spam(1, n) %x% spam(x=1, nrow=nCat, ncol=nCat)
+
+    theta <- c(1,1)                # check this!
+    fixedTheta <- c(FALSE, TRUE)   # check this!
+    for (it in 1:100) {
+      Eta <- matrix(data=eta, ncol=nCat, nrow=n, byrow=TRUE)
+      Pi <- t(apply(X=Eta, MARGIN=1, FUN=h))
+      pi <- as.vector(t(Pi))
+
+      D_list <- lapply(1:n, FUN =
+                         function(r) {
+                           return(Jacobian(Eta[r,]))
+                         } )
+      Dinv_list <- lapply(1:n, FUN= function(r) { solve(D_list[[r]])})
+
+      W_list <- lapply(1:n, FUN =
+                         function(r) {
+                           Sigma <- calcSigma(Pi[r,])
+                           D_list[[r]] %*% solve(Sigma) %*% t(D_list[[r]])
+                         } )
+
+      # Store in the defined sparse format for W and Dinv:
+      Dinv@entries <- unlist(Dinv_list)
+      W@entries <- unlist(W_list)
+
+      z <- eta + Dinv %*% (y - pi)
+      lRinv <- list(W)
+      obj <- sparseMixedModels(z, X = Xs, Z = Z,
+                               lGinv = lGinv, lRinv = lRinv, trace=TRUE,
+                               fixedTheta = fixedTheta, theta = theta)
+      eta_old  <- eta
+      eta <- obj$yhat
+      theta <- obj$theta
+      tol <- sum((eta - eta_old)^2)/sum(eta^2)
+      cat("iter ", it, "     ", tol, "    ", obj$logL, "   ", obj$ED, "\n")
+      if (tol < 1.0e-10) {
+        cat("convergence after", it, "iterations\n")
+        break;
+      }
+    }
+    stop("Still Working on multinomial() implementation!")
+  } else if (family$family == "gaussian") {
     obj <- sparseMixedModels(y = y, X = Xs, Z = Z, lGinv = lGinv, lRinv = lRinv,
                              tolerance = tolerance, trace = trace, maxit = maxit,
                              theta = theta, grpTheta = grpTheta)

@@ -127,8 +127,15 @@ LMMsolve <- function(fixed,
   ## Check that all variables used in fixed formula are in data.
   data <- checkFormVars(fixed, data, naAllowed = FALSE)
 
-  ## check the format lhs
   mult_col_response <- FALSE
+  if (family$family == "multinomial") {
+    # some extra checks needed here
+    mf <- model.frame(fixed, dat, drop.unused.levels = TRUE, na.action = NULL)
+    YY <- model.response(mf, type = "any")
+    respVar <- colnames(YY)
+    respVarNA <- rep(FALSE, nrow(data))
+    mult_col_response <- TRUE
+  }
   if (family$family == "binomial" || family$family == "quasibinomial") {
     mf <- model.frame(fixed, data, drop.unused.levels = TRUE, na.action = NULL)
     respNames <- colnames(mf[[1]])
@@ -276,9 +283,13 @@ LMMsolve <- function(fixed,
   }
 
   ## get the response variable, after all filtering has been done
-  y <- data[[respVar]]
-  ## check whether the variance for response is not zero.
-  chkResponse(y, residual, data)
+  if (family$family != "multinomial") {
+    y <- data[[respVar]]  # vector
+    ## check whether the variance for response is not zero.
+    chkResponse(y, residual, data)
+  } else {
+    y <- YY # matrix
+  }
 
   ## Fit the model
   LMMobj <- fitLMM(y = y, X = X, Z = Z, w = w, lGinv = lGinv,
