@@ -71,4 +71,15 @@ expect_error(LMMsolve(fixed = cbind(succes, failure) ~ 1,
                       data = dat3),
       "family binomial : NA's not allowed in cbind format.")
 
+dat4 <- dat2
+dat4$succes[1] <- "A"
+expect_error(LMMsolve(fixed = cbind(succes, failure) ~ 1,
+                      spline = ~spl1D(x, nseg = 50),
+                      family = binomial(),
+                      data = dat4),
+      "response should be numeric.")
+
+
+
+
 

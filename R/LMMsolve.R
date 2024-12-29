@@ -131,6 +131,12 @@ LMMsolve <- function(fixed,
   mult_col_response <- FALSE
   if (family$family == "binomial" || family$family == "quasibinomial") {
     mf <- model.frame(fixed, data, drop.unused.levels = TRUE, na.action = NULL)
+    respNames <- colnames(mf[[1]])
+    chkFac <- sapply(respNames, function(x) {is.factor(data[[x]])})
+    if (any(chkFac)) {
+      str <- paste("response should be numeric.")
+      stop(str)
+    }
     YY <- model.response(mf, type = "any")
     if (inherits(YY, "matrix")) {
       mult_col_response <- TRUE
