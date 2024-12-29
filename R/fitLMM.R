@@ -1,6 +1,6 @@
 fitLMM <- function(y, X, Z, w, lGinv, tolerance, trace, maxit,
               theta, grpTheta, family, offset, dim.f, dim.r,
-              term.labels.f, term.labels.r, NomEffDimRan,
+              term.labels.f, term.labels.r, respVar, NomEffDimRan,
               varPar, splResList, residual, group,
               nNonSplinesRandom, scFactor, data) {
   ## Convert to spam matrix and cleanup
@@ -170,6 +170,7 @@ fitLMM <- function(y, X, Z, w, lGinv, tolerance, trace, maxit,
                         Nres = length(lRinv),
                         term.labels.f = term.labels.f,
                         term.labels.r = term.labels.r,
+                        respVar = respVar,
                         splRes = splResList,
                         family = family,
                         deviance = deviance,

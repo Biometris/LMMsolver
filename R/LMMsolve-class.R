@@ -31,6 +31,7 @@
 #' mixed model}
 #' \item{term.labels.f}{The names of the fixed terms in the mixed model}
 #' \item{term.labels.r}{The names of the random terms in the mixed model}
+#' \item{respVar}{The name(s) of the response variable(s).}
 #' \item{splRes}{An object with definition of spline argument}
 #' \item{deviance}{The relative deviance}
 #' \item{family}{An object of class family specifying the distribution and link function}
@@ -64,6 +65,7 @@ LMMsolveObject <- function(logL,
                            Nres,
                            term.labels.f,
                            term.labels.r,
+                           respVar,
                            splRes,
                            family,
                            deviance,
@@ -92,6 +94,7 @@ LMMsolveObject <- function(logL,
                  Nres = Nres,
                  term.labels.f = term.labels.f,
                  term.labels.r = term.labels.r,
+                 respVar = respVar,
                  splRes = splRes,
                  family = family,
                  deviance = deviance,
