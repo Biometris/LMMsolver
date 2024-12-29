@@ -77,7 +77,7 @@ expect_error(LMMsolve(fixed = cbind(succes, failure) ~ 1,
                       spline = ~spl1D(x, nseg = 50),
                       family = binomial(),
                       data = dat4),
-      "response should be numeric.")
+      "response cbind(succes, failure) should be numeric.", fixed = TRUE)
 
 
 

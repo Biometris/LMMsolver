@@ -134,7 +134,7 @@ LMMsolve <- function(fixed,
     respNames <- colnames(mf[[1]])
     chkFac <- sapply(respNames, function(x) {is.factor(data[[x]])})
     if (any(chkFac)) {
-      str <- paste("response should be numeric.")
+      str <- paste("response", names(mf)[1], "should be numeric.")
       stop(str)
     }
     YY <- model.response(mf, type = "any")
