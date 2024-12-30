@@ -45,14 +45,17 @@ sRows <- rowSums(multiNom)
 fr <- multiNom/sRows
 dat_fr <- data.frame(x, fr)
 
-fixed <- cbind(A,B,C,D) ~ 1
-
-obj <- LMMsolve(fixed=fixed,spline=~spl1D(x,nseg=50,xlim=c(0,1), scaleX=FALSE),
+obj <- LMMsolve(fixed = cbind(A,B,C,D) ~ 1,
+                spline = ~spl1D(x, nseg=50, xlim=c(0,1), scaleX=FALSE),
                 data=dat, family = multinomial())
-knots <- obj$splRes[[1]]$knots[[1]]
+# not correct:
+summary(obj)
+# not correct:
+obj$ndxCoefficients
 
 x0 <- seq(0, 1, by=0.01)
 X0 <- cbind(1, x0) %x% diag(nc)
+knots <- obj$splRes[[1]]$knots[[1]]
 B0 <- LMMsolver:::Bsplines(knots, x0)
 Z0 <- B0 %x% diag(nc)
 beta <- obj$coefMME
