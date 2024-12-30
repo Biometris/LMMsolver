@@ -127,7 +127,7 @@ fitLMM <- function(y, X, Z, w, lGinv, tolerance, trace, maxit,
       W@entries <- unlist(W_list)
 
       z <- eta + Dinv %*% (y - pi)
-      lRinv <- list(W)
+      lRinv <- list(residual = W)
       attr(lRinv, "cnt") <- n # correct?
       obj <- sparseMixedModels(z, X = Xs, Z = Z,
                                lGinv = lGinv, lRinv = lRinv, trace=trace,
