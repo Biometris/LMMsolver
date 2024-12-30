@@ -28,7 +28,13 @@ fitLMM <- function(y, X, Z, w, lGinv, tolerance, trace, maxit,
   } else {
     grpTheta <- c(1:length(scFactor))
   }
-  if (family$family == "multinomial") {
+  if (family$family == "gaussian") {
+    obj <- sparseMixedModels(y = y, X = Xs, Z = Z, lGinv = lGinv, lRinv = lRinv,
+                             tolerance = tolerance, trace = trace, maxit = maxit,
+                             theta = theta, grpTheta = grpTheta)
+    dev.residuals <- family$dev.resids(y, obj$yhat, w)
+    deviance <- sum(dev.residuals)
+  } else if (family$family == "multinomial") {
     YY <- y
     n <- nrow(YY)
     nCat <- length(respVar) - 1
@@ -50,7 +56,8 @@ fitLMM <- function(y, X, Z, w, lGinv, tolerance, trace, maxit,
 
     theta <- c(1,1)                # check this!
     fixedTheta <- c(FALSE, TRUE)   # check this!
-    for (it in 1:100) {
+    trace_GLMM <- NULL
+    for (i in 1:maxit) {
       Eta <- matrix(data=eta, ncol=nCat, nrow=n, byrow=TRUE)
       Pi <- t(apply(X=Eta, MARGIN=1, FUN=h))
       pi <- as.vector(t(Pi))
@@ -73,6 +80,7 @@ fitLMM <- function(y, X, Z, w, lGinv, tolerance, trace, maxit,
 
       z <- eta + Dinv %*% (y - pi)
       lRinv <- list(W)
+      attr(lRinv, "cnt") <- n # correct?
       obj <- sparseMixedModels(z, X = Xs, Z = Z,
                                lGinv = lGinv, lRinv = lRinv, trace=TRUE,
                                fixedTheta = fixedTheta, theta = theta)
@@ -80,19 +88,21 @@ fitLMM <- function(y, X, Z, w, lGinv, tolerance, trace, maxit,
       eta <- obj$yhat
       theta <- obj$theta
       tol <- sum((eta - eta_old)^2)/sum(eta^2)
-      cat("iter ", it, "     ", tol, "    ", obj$logL, "   ", obj$ED, "\n")
+
+      aux.df <- data.frame(itOuter = rep(i, obj$nIter),
+                           tol=c(rep(NA,obj$nIter-1), tol))
+      trace_GLMM <- rbind(trace_GLMM, cbind(aux.df, obj$trace))
+
+      cat("iter ", i, "     ", tol, "    ", obj$logL, "   ", obj$ED, "\n")
       if (tol < 1.0e-10) {
-        cat("convergence after", it, "iterations\n")
+        cat("convergence after", i, "iterations\n")
         break;
       }
     }
-    stop("Still Working on multinomial() implementation!")
-  } else if (family$family == "gaussian") {
-    obj <- sparseMixedModels(y = y, X = Xs, Z = Z, lGinv = lGinv, lRinv = lRinv,
-                             tolerance = tolerance, trace = trace, maxit = maxit,
-                             theta = theta, grpTheta = grpTheta)
-    dev.residuals <- family$dev.resids(y, obj$yhat, w)
-    deviance <- sum(dev.residuals)
+    dev.residuals <- NULL # check how to calculate this!
+    deviance <- NULL      # check how to calculate this!
+
+    #stop("Still Working on multinomial() implementation!")
   } else {
     ## MB, 23 jan 2023
     ## binomial needs global weights
@@ -141,7 +151,12 @@ fitLMM <- function(y, X, Z, w, lGinv, tolerance, trace, maxit,
     deviance <- sum(dev.residuals)
   }
   ## Add names to ndx of coefficients.
-  ndxCf <- seq_along(obj$a)
+  if (family$family == "multinomial") {
+    ndxCf <- seq_along(1:n)
+  } else {
+    ndxCf <- seq_along(obj$a)
+  }
+
   ## Fixed terms.
   ef <- cumsum(dim.f)
   sf <- ef - dim.f + 1
@@ -152,9 +167,24 @@ fitLMM <- function(y, X, Z, w, lGinv, tolerance, trace, maxit,
   sr <- er - dim.r + 1
   ndxCoefR <- nameCoefs(coefs = ndxCf, termLabels = term.labels.r, s = sr,
                         e = er, data = data, group = group, type = "random")
+
+  if (family$family == "multinomial") {
+    dim.r <- sapply(dim.r, FUN= function(x) {x*nCat})
+    dim.f <- sapply(dim.f, FUN= function(x) {x*nCat})
+
+    #tmp1 <- rep(ndxCoefF, each=nCat)
+    #tmp2 <- rep(respVar[-(nCat+1)], times=n)
+    #ndxCoefF <- paste0(tmp1,"_",tmp2)
+
+    #tmp1 <- rep(ndxCoefR, each=nCat)
+    #tmp2 <- rep(respVar[-(nCat+1)], times=n)
+    #ndxCoefR <- paste0(tmp1,"_",tmp2)
+  }
+
   ## Combine result for fixed and random terms.
   ndxCoefTot <- c(ndxCoefF, ndxCoefR)
   names(ndxCoefTot) <- c(term.labels.f, term.labels.r)
+
 
   ## Nominal effective dimension for non-spline part
   if (nNonSplinesRandom > 0) {
