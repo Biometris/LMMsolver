@@ -5,8 +5,8 @@ library(spam)
 set.seed(1234)
 n <- 250
 
-nc2 <- 3
-nc2 + 1    # total number of categories
+nc <- 3
+nc + 1    # total number of categories
 
 mu <- c(0.1, 0.3, 0.5)
 sc <- c(4, 5, 4)
@@ -34,9 +34,9 @@ sz <- sample(10:30, size=n, replace = TRUE)
 M <- cbind(prob,sz)
 multiNom <- t(apply(M, MARGIN=1, FUN=
                       function(x) {
-                        rmultinom(n=1, size=x[nc2+2], prob=x[1:(nc2+1)])
+                        rmultinom(n=1, size=x[nc+2], prob=x[1:(nc+1)])
                       } ))
-colnames(multiNom) <- paste0(LETTERS[1:(nc2+1)])
+colnames(multiNom) <- paste0(LETTERS[1:(nc+1)])
 
 dat <- data.frame(x, multiNom)
 head(dat)
@@ -52,12 +52,12 @@ obj <- LMMsolve(fixed=fixed,spline=~spl1D(x,nseg=50,xlim=c(0,1), scaleX=FALSE),
 knots <- obj$splRes[[1]]$knots[[1]]
 
 x0 <- seq(0, 1, by=0.01)
-X0 <- cbind(1, x0) %x% diag(nc2)
+X0 <- cbind(1, x0) %x% diag(nc)
 B0 <- LMMsolver:::Bsplines(knots, x0)
-Z0 <- B0 %x% diag(nc2)
+Z0 <- B0 %x% diag(nc)
 beta <- obj$coefMME
 eta0 <- cbind(X0, Z0) %*% beta
-etaM <- matrix(data=eta0,nrow = length(x0), ncol= nc2, byrow=TRUE)
+etaM <- matrix(data=eta0,nrow = length(x0), ncol= nc, byrow=TRUE)
 pi_est <- t(apply(etaM, MARGIN=1, FUN=LMMsolver:::h))
 pi_est <- cbind(pi_est, 1.0 - rowSums(pi_est))
 colnames(pi_est) <- obj$respVar

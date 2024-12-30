@@ -34,7 +34,55 @@ fitLMM <- function(y, X, Z, w, lGinv, tolerance, trace, maxit,
                              theta = theta, grpTheta = grpTheta)
     dev.residuals <- family$dev.resids(y, obj$yhat, w)
     deviance <- sum(dev.residuals)
-  } else if (family$family == "multinomial") {
+  } else if (family$family != "multinomial") {
+    ## MB, 23 jan 202
+    ## binomial needs global weights
+    weights <- w
+    nobs <- length(y)
+    mustart <- etastart <- NULL
+    eval(family$initialize)
+    mu <- mustart
+    eta <- family$linkfun(mustart)
+    nNonRes <- length(theta) - nRes
+    fixedTheta <- c(rep(FALSE, nNonRes), rep(TRUE, nRes))
+    theta[(nNonRes + 1):(nNonRes + nRes)] <- 1
+    trace_GLMM <- NULL
+    for (i in 1:maxit) {
+      deriv <- family$mu.eta(eta)
+      z <- (eta - offset) + (y - mu)/deriv
+      wGLM <- as.vector(deriv^2 / family$variance(mu))
+      wGLM <- wGLM*w
+      lRinv <- constructRinv(df = data, residual = residual, weights = wGLM)
+      obj <- sparseMixedModels(y = z, X = Xs, Z = Z, lGinv = lGinv, lRinv = lRinv,
+                               tolerance = tolerance, trace = trace, maxit = maxit,
+                               theta = theta, fixedTheta = fixedTheta,
+                               grpTheta = grpTheta)
+      eta.old <- eta
+      eta <- obj$yhat + offset
+      mu <- family$linkinv(eta)
+      theta <- obj$theta
+      tol <- sum((eta - eta.old)^2) / sum(eta^2)
+
+      aux.df <- data.frame(itOuter = rep(i, obj$nIter),
+                           tol=c(rep(NA,obj$nIter-1), tol))
+      trace_GLMM <- rbind(trace_GLMM, cbind(aux.df, obj$trace))
+      if (trace) {
+        cat("Generalized Linear Mixed Model iteration", i, ", tol=", tol, "\n")
+      }
+      if (tol < tolerance) {
+        break;
+      }
+    }
+    if (i == maxit) {
+      warning("No convergence after ", maxit,
+              " iterations of GLMM algorithm\n", call. = FALSE)
+    }
+
+    dev.residuals <- family$dev.resids(y, mu, w)
+    deviance <- sum(dev.residuals)
+  } else {
+    ## multinomial family
+    cat("family multinomial() still work in progress!\n")
     YY <- y
     n <- nrow(YY)
     nCat <- length(respVar) - 1
@@ -82,7 +130,7 @@ fitLMM <- function(y, X, Z, w, lGinv, tolerance, trace, maxit,
       lRinv <- list(W)
       attr(lRinv, "cnt") <- n # correct?
       obj <- sparseMixedModels(z, X = Xs, Z = Z,
-                               lGinv = lGinv, lRinv = lRinv, trace=TRUE,
+                               lGinv = lGinv, lRinv = lRinv, trace=trace,
                                fixedTheta = fixedTheta, theta = theta)
       eta_old  <- eta
       eta <- obj$yhat
@@ -92,8 +140,10 @@ fitLMM <- function(y, X, Z, w, lGinv, tolerance, trace, maxit,
       aux.df <- data.frame(itOuter = rep(i, obj$nIter),
                            tol=c(rep(NA,obj$nIter-1), tol))
       trace_GLMM <- rbind(trace_GLMM, cbind(aux.df, obj$trace))
-
-      cat("iter ", i, "     ", tol, "    ", obj$logL, "   ", obj$ED, "\n")
+      if (trace) {
+        cat("Generalized Linear Mixed Model iteration", i, ", tol=", tol, "\n")
+      }
+      #cat("iter ", i, "     ", tol, "    ", obj$logL, "   ", obj$ED, "\n")
       if (tol < 1.0e-10) {
         cat("convergence after", i, "iterations\n")
         break;
@@ -101,54 +151,6 @@ fitLMM <- function(y, X, Z, w, lGinv, tolerance, trace, maxit,
     }
     dev.residuals <- NULL # check how to calculate this!
     deviance <- NULL      # check how to calculate this!
-
-    #stop("Still Working on multinomial() implementation!")
-  } else {
-    ## MB, 23 jan 2023
-    ## binomial needs global weights
-    weights <- w
-    nobs <- length(y)
-    mustart <- etastart <- NULL
-    eval(family$initialize)
-    mu <- mustart
-    eta <- family$linkfun(mustart)
-    nNonRes <- length(theta) - nRes
-    fixedTheta <- c(rep(FALSE, nNonRes), rep(TRUE, nRes))
-    theta[(nNonRes + 1):(nNonRes + nRes)] <- 1
-    trace_GLMM <- NULL
-    for (i in 1:maxit) {
-      deriv <- family$mu.eta(eta)
-      z <- (eta - offset) + (y - mu)/deriv
-      wGLM <- as.vector(deriv^2 / family$variance(mu))
-      wGLM <- wGLM*w
-      lRinv <- constructRinv(df = data, residual = residual, weights = wGLM)
-      obj <- sparseMixedModels(y = z, X = Xs, Z = Z, lGinv = lGinv, lRinv = lRinv,
-                               tolerance = tolerance, trace = trace, maxit = maxit,
-                               theta = theta, fixedTheta = fixedTheta,
-                               grpTheta = grpTheta)
-      eta.old <- eta
-      eta <- obj$yhat + offset
-      mu <- family$linkinv(eta)
-      theta <- obj$theta
-      tol <- sum((eta - eta.old)^2) / sum(eta^2)
-
-      aux.df <- data.frame(itOuter = rep(i, obj$nIter),
-                           tol=c(rep(NA,obj$nIter-1), tol))
-      trace_GLMM <- rbind(trace_GLMM, cbind(aux.df, obj$trace))
-      if (trace) {
-        cat("Generalized Linear Mixed Model iteration", i, ", tol=", tol, "\n")
-      }
-      if (tol < tolerance) {
-        break;
-      }
-    }
-    if (i == maxit) {
-      warning("No convergence after ", maxit,
-              " iterations of GLMM algorithm\n", call. = FALSE)
-    }
-
-    dev.residuals <- family$dev.resids(y, mu, w)
-    deviance <- sum(dev.residuals)
   }
   ## Add names to ndx of coefficients.
   if (family$family == "multinomial") {
