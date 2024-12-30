@@ -135,6 +135,7 @@ LMMsolve <- function(fixed,
     respVar <- colnames(YY)
     respVarNA <- rep(FALSE, nrow(data))
     mult_col_response <- TRUE
+    nCat <- ncol(YY) - 1
   }
   if (family$family == "binomial" || family$family == "quasibinomial") {
     mf <- model.frame(fixed, data, drop.unused.levels = TRUE, na.action = NULL)
@@ -266,7 +267,11 @@ LMMsolve <- function(fixed,
       dim.f <- c(dim.f, splRes$dim.f)
       dim.r <- c(dim.r, splRes$dim.r)
       ## Add nominal ED.
-      NomEffDimRan <- c(NomEffDimRan, splRes$EDnom)
+      if (family$family == "multinomial") {
+        NomEffDimRan <- c(NomEffDimRan, splRes$EDnom*nCat)
+      } else {
+        NomEffDimRan <- c(NomEffDimRan, splRes$EDnom)
+      }
       ## Add labels.
       term.labels.f <- c(term.labels.f, splRes$term.labels.f)
       term.labels.r <- c(term.labels.r, splRes$term.labels.r)

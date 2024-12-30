@@ -46,11 +46,12 @@ fr <- multiNom/sRows
 dat_fr <- data.frame(x, fr)
 
 obj <- LMMsolve(fixed = cbind(A,B,C,D) ~ 1,
-                spline = ~spl1D(x, nseg=50, xlim=c(0,1), scaleX=FALSE),
+                spline = ~spl1D(x, nseg = 17, xlim=c(0,1), scaleX=FALSE),
                 data=dat, family = multinomial())
-# not correct:
+# seems consistent now:
 summary(obj)
-# not correct:
+
+# not correct reference to columns in MME:
 obj$ndxCoefficients
 
 x0 <- seq(0, 1, by=0.01)

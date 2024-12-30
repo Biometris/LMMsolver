@@ -128,7 +128,7 @@ fitLMM <- function(y, X, Z, w, lGinv, tolerance, trace, maxit,
 
       z <- eta + Dinv %*% (y - pi)
       lRinv <- list(residual = W)
-      attr(lRinv, "cnt") <- n # correct?
+      attr(lRinv, "cnt") <- n*nCat # correct?
       obj <- sparseMixedModels(z, X = Xs, Z = Z,
                                lGinv = lGinv, lRinv = lRinv, trace=trace,
                                fixedTheta = fixedTheta, theta = theta)
@@ -200,8 +200,8 @@ fitLMM <- function(y, X, Z, w, lGinv, tolerance, trace, maxit,
   EffDimNamesRes <- attributes(lRinv)$names
   NomEffDim <- c(NomEffDimRan, EffDimRes)
   # Calc upper bound for nominal effective dimension:
-  N <- nrow(X)
-  p <- ncol(X)
+  N <- nrow(Xs)
+  p <- ncol(Xs)
   NomEffDim <- pmin(NomEffDim, N - p)
   ## Make ED table for fixed effects.
   EDdf1 <- data.frame(Term = term.labels.f,
