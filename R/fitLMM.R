@@ -99,16 +99,16 @@ fitLMM <- function(y, X, Z, w, lGinv, tolerance, trace, maxit,
     eta <- rep(0, n*nCat)
 
     # Initialize the sparse block structure for W and Dinv
-    W <- diag.spam(1, n) %x% spam(x=1, nrow=nCat, ncol=nCat)
-    Dinv <- diag.spam(1, n) %x% spam(x=1, nrow=nCat, ncol=nCat)
+    W <- spam::diag.spam(1, n) %x% spam::spam(x=1, nrow=nCat, ncol=nCat)
+    Dinv <- spam::diag.spam(1, n) %x% spam::spam(x=1, nrow=nCat, ncol=nCat)
 
     theta <- c(1,1)                # check this!
     fixedTheta <- c(FALSE, TRUE)   # check this!
     trace_GLMM <- NULL
     for (i in 1:maxit) {
       Eta <- matrix(data=eta, ncol=nCat, nrow=n, byrow=TRUE)
-      Pi <- t(apply(X=Eta, MARGIN=1, FUN=h))
-      pi <- as.vector(t(Pi))
+      Pi <- t(apply(X=Eta, MARGIN=1, FUN = glogit))
+      pi_vec <- as.vector(t(Pi))
 
       D_list <- lapply(1:n, FUN =
                          function(r) {
@@ -126,7 +126,7 @@ fitLMM <- function(y, X, Z, w, lGinv, tolerance, trace, maxit,
       Dinv@entries <- unlist(Dinv_list)
       W@entries <- unlist(W_list)
 
-      z <- eta + Dinv %*% (y - pi)
+      z <- eta + Dinv %*% (y - pi_vec)
       lRinv <- list(residual = W)
       attr(lRinv, "cnt") <- n*nCat # correct?
       obj <- sparseMixedModels(z, X = Xs, Z = Z,

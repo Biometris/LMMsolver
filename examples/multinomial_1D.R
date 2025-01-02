@@ -21,7 +21,7 @@ sim_fun <- function(x, mu, sc) {
   for (i in 1:3) {
     z[i] <- sim_non_linear(x, mu[i], sc[i])
   }
-  hz <- LMMsolver:::h(z)
+  hz <- LMMsolver:::glogit(z)
   d <- c(hz, 1-sum(hz))
   return(d)
 }
@@ -62,7 +62,7 @@ Z0 <- B0 %x% diag(nc)
 beta <- obj$coefMME
 eta0 <- cbind(X0, Z0) %*% beta
 etaM <- matrix(data=eta0,nrow = length(x0), ncol= nc, byrow=TRUE)
-pi_est <- t(apply(etaM, MARGIN=1, FUN=LMMsolver:::h))
+pi_est <- t(apply(etaM, MARGIN=1, FUN=LMMsolver:::glogit))
 pi_est <- cbind(pi_est, 1.0 - rowSums(pi_est))
 colnames(pi_est) <- obj$respVar
 pred <- data.frame(x=x0, pi_est)

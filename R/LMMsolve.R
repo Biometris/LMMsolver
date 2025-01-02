@@ -131,7 +131,7 @@ LMMsolve <- function(fixed,
   mult_col_response <- FALSE
   if (family$family == "multinomial") {
     # some extra checks needed here
-    mf <- model.frame(fixed, dat, drop.unused.levels = TRUE, na.action = NULL)
+    mf <- model.frame(fixed, data, drop.unused.levels = TRUE, na.action = NULL)
     YY <- model.response(mf, type = "any")
     respVar <- colnames(YY)
     respVarNA <- rep(FALSE, nrow(data))
