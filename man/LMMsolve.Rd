@@ -54,8 +54,9 @@ the form "~ pred".}
 \item{family}{An object of class family specifying the distribution
 and link function.}
 
-\item{offset}{An optional numerical vector containing an a priori
-known component to be included in the linear predictor during fitting.}
+\item{offset}{An a priori known component to be included in the linear
+predictor during fitting. \code{Offset} be a numeric vector, or a character
+string identifying the column of data. Default \code{offset = 0}.}
 
 \item{tolerance}{A numerical value. The convergence tolerance for the
 modified Henderson algorithm to estimate the variance components.}

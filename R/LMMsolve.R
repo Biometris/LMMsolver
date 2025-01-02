@@ -39,8 +39,9 @@
 #' the form "~ pred".
 #' @param family An object of class family specifying the distribution
 #' and link function.
-#' @param offset An optional numerical vector containing an a priori
-#' known component to be included in the linear predictor during fitting.
+#' @param offset An a priori known component to be included in the linear
+#' predictor during fitting. \code{Offset} be a numeric vector, or a character
+#' string identifying the column of data. Default \code{offset = 0}.
 #' @param tolerance A numerical value. The convergence tolerance for the
 #' modified Henderson algorithm to estimate the variance components.
 #' @param trace Should the progress of the algorithm be printed? Default
@@ -123,6 +124,17 @@ LMMsolve <- function(fixed,
               data = data, ginverse = ginverse,
               residual = residual, tolerance = tolerance,
               maxit = maxit, grpTheta = grpTheta)
+
+  if (is.character(offset))
+  {
+    if (!hasName(data, offset)) {
+      stop("offset ", offset, " not defined in the data.\n")
+    }
+    offset <- data[[offset]]
+  }
+  if (!is.numeric(offset)) {
+    stop("offset should be numeric")
+  }
 
   ## Check that all variables used in fixed formula are in data.
   data <- checkFormVars(fixed, data, naAllowed = FALSE)
