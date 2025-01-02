@@ -1,6 +1,3 @@
-library(ggplot2)
-library(LMMsolver)
-
 set.seed(1234)
 
 n <- 100
