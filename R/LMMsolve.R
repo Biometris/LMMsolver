@@ -119,22 +119,11 @@ LMMsolve <- function(fixed,
                      maxit = 250,
                      theta = NULL,
                      grpTheta = NULL) {
-  ## Input checks
-  chkInputLMMsolve(fixed = fixed, random = random,
+  ## Input checks, and return numeric value for offset
+  offset <- chkInputLMMsolve(fixed = fixed, random = random,
               data = data, ginverse = ginverse,
               residual = residual, tolerance = tolerance,
-              maxit = maxit, grpTheta = grpTheta)
-
-  if (is.character(offset))
-  {
-    if (!hasName(data, offset)) {
-      stop("offset ", offset, " not defined in the data.\n")
-    }
-    offset <- data[[offset]]
-  }
-  if (!is.numeric(offset)) {
-    stop("offset should be numeric")
-  }
+              maxit = maxit, grpTheta = grpTheta, offset = offset)
 
   ## Check that all variables used in fixed formula are in data.
   data <- checkFormVars(fixed, data, naAllowed = FALSE)

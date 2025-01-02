@@ -4,8 +4,7 @@ lambda <- 5000
 
 nr <- c(0:3)
 d <- 10^(-nr)
-cntM <- sapply(d, FUN = function(x){ rpois(nrep,lambda*x)})
-cnt <- as.vector(cntM)
+cnt <- sapply(d, FUN = function(x){ rpois(n=1, lambda*x)})
 
 dat <- data.frame(cnt = cnt, dilution = d)
 
@@ -14,7 +13,7 @@ obj1 <- LMMsolve(cnt ~ 1, family = poisson(),
                 offset = log(dat$dilution),
                 data = dat)
 
-mu <- coef(obj)$'(Intercept)'  # MB
+mu <- coef(obj1)$'(Intercept)'  # MB
 lambda <- as.numeric(exp(mu))
 
 # analytic solution
@@ -27,7 +26,7 @@ dat$log_dilution <- log(dat$dilution)
 obj2 <- LMMsolve(cnt ~ 1, family = poisson(),
                 offset = "log_dilution",
                 data = dat)
-mu <- coef(obj)$'(Intercept)'  #
+mu <- coef(obj2)$'(Intercept)'  #
 lambda <- as.numeric(exp(mu))
 expect_equal(lambda, ML_lambda)
 

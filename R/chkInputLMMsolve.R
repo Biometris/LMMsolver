@@ -1,6 +1,6 @@
 chkInputLMMsolve <- function(fixed, random, data,
                              ginverse, residual, tolerance, maxit,
-                             grpTheta) {
+                             grpTheta, offset) {
   splTrms <- NULL
   if (!inherits(data, "data.frame")) {
     stop("data should be a data.frame.\n")
@@ -34,4 +34,15 @@ chkInputLMMsolve <- function(fixed, random, data,
        max(grpTheta) != length(unique(grpTheta)))) {
     stop("grpTheta should be integers 1,2,...nGrp")
   }
+  if (is.character(offset))
+  {
+    if (!hasName(data, offset)) {
+      stop("offset ", offset, " not defined in the data.\n")
+    }
+    offset <- data[[offset]]
+  }
+  if (!is.numeric(offset)) {
+    stop("offset should be numeric")
+  }
+  return(offset)
 }
