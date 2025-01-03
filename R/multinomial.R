@@ -36,6 +36,30 @@ calcSigma <- function(pi) {
   return(Sigma)
 }
 
+extend_coef <- function(ndx, respVar) {
+
+  nCat <- length(respVar)-1
+  Cat <- respVar[-c(nCat+1)]
+
+  for (i in seq_along(ndx)) {
+    tType <- attr(ndx[[i]], which="termType")
+    x <- as.numeric(ndx[[i]])
+    y <- as.vector(sapply(x,FUN=function(x) {
+      if (x==0) return(rep(0,nCat))
+      nCat*(x-1) + c(1:nCat)}))
+    namesCoef <- names(ndx[[i]])
+    name_ext <- rep(namesCoef, each=nCat)
+    cat_ext <- rep(Cat, times=length(x))
+    name_ext <- paste0(name_ext, "_", cat_ext)
+    names(y) <- name_ext
+    ndx[[i]] <- y
+    attr(ndx[[i]],"termType") <- tType
+  }
+  ndx
+}
+
+
+
 #' Defines the multinomial model
 #'
 #' @export

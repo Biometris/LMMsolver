@@ -48,12 +48,10 @@ dat_fr <- data.frame(x, fr)
 obj <- LMMsolve(fixed = cbind(A,B,C,D) ~ 1,
                 spline = ~spl1D(x, nseg = 17, xlim=c(0,1), scaleX=FALSE),
                 data=dat, family = multinomial())
-# seems consistent now:
 summary(obj)
+coef(obj)
 
-# not correct reference to columns in MME:
-obj$ndxCoefficients
-
+# make predictions
 x0 <- seq(0, 1, by=0.01)
 X0 <- cbind(1, x0) %x% diag(nc)
 knots <- obj$splRes[[1]]$knots[[1]]
@@ -87,6 +85,5 @@ p1 <- ggplot(df_true, aes(x = x0)) +
   xlab("x") + ylab("prob") +
   geom_hline(yintercept=1.0, linetype='dashed')
 p1
-
 
 

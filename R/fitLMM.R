@@ -187,6 +187,10 @@ fitLMM <- function(y, X, Z, w, lGinv, tolerance, trace, maxit,
   ndxCoefTot <- c(ndxCoefF, ndxCoefR)
   names(ndxCoefTot) <- c(term.labels.f, term.labels.r)
 
+  ## for multinomial extra coefficients and names
+  if (family$family== "multinomial") {
+    ndxCoefTot <- extend_coef(ndxCoefTot, respVar)
+  }
 
   ## Nominal effective dimension for non-spline part
   if (nNonSplinesRandom > 0) {
