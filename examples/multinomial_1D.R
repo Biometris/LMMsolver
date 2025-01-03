@@ -36,7 +36,8 @@ multiNom <- t(apply(M, MARGIN=1, FUN=
                       function(x) {
                         rmultinom(n=1, size=x[nc+2], prob=x[1:(nc+1)])
                       } ))
-colnames(multiNom) <- paste0(LETTERS[1:(nc+1)])
+colNames <- paste0(LETTERS[1:(nc+1)])
+colnames(multiNom) <- colNames
 
 dat <- data.frame(x, multiNom)
 head(dat)
@@ -52,38 +53,27 @@ summary(obj)
 coef(obj)
 
 # make predictions
-x0 <- seq(0, 1, by=0.01)
-X0 <- cbind(1, x0) %x% diag(nc)
-knots <- obj$splRes[[1]]$knots[[1]]
-B0 <- LMMsolver:::Bsplines(knots, x0)
-Z0 <- B0 %x% diag(nc)
-beta <- obj$coefMME
-eta0 <- cbind(X0, Z0) %*% beta
-etaM <- matrix(data=eta0,nrow = length(x0), ncol= nc, byrow=TRUE)
-pi_est <- t(apply(etaM, MARGIN=1, FUN=LMMsolver:::glogit))
-pi_est <- cbind(pi_est, 1.0 - rowSums(pi_est))
-colnames(pi_est) <- obj$respVar
-pred <- data.frame(x=x0, pi_est)
+x0 <- seq(0, 1, by = 0.01)
+newdat <- data.frame(x=x0)
+pred <- predict(obj, newdata=newdat)
+colnames(pred) <- c("x", "category", "y")
+head(pred)
 
 prob_true <- t(sapply(X=x0, FUN=function(x) { sim_fun(x, mu, sc)}))
-colnames(prob_true) <- obj$respVar
+colnames(prob_true) <- colNames
+nCatTot <- length(obj$respVar)
 df_true <- data.frame(x0, prob_true)
+prob_true_lf <- data.frame(category = rep(colNames, each=length(x0)),
+                           x=rep(x0,times=nCatTot),
+                           y = as.vector(prob_true))
 
-p1 <- ggplot(df_true, aes(x = x0)) +
-  geom_line(aes(y = A), color = "darkred", linetype='dashed') +
-  geom_line(aes(y = B), color = "steelblue", linetype='dashed') +
-  geom_line(aes(y = C), color = "green", linetype='dashed') +
-  geom_line(aes(y = D), color = "black", linetype='dashed') +
-  geom_line(data=pred, aes(x=x, y = A), color = "darkred") +
-  geom_line(data=pred, aes(y = B), color = "steelblue") +
-  geom_line(data=pred, aes(y = C), color = "green") +
-  geom_line(data=pred, aes(y = D), color = "black") +
-  geom_point(data=dat_fr, aes(x=x, y= A), color = "darkred") +
-  geom_point(data=dat_fr, aes(x=x, y= B), color = "steelblue") +
-  geom_point(data=dat_fr, aes(x=x, y= C), color = "green") +
-  geom_point(data=dat_fr, aes(x=x, y= D), color = "black") +
-  xlab("x") + ylab("prob") +
-  geom_hline(yintercept=1.0, linetype='dashed')
+dat_fr_lf <- data.frame(category = rep(colNames, each=nrow(fr)),
+                     x=rep(x,times=nCatTot),
+                     y = as.vector(fr))
+
+p1 <- ggplot(prob_true_lf, aes(x = x, y=y,color=category)) +
+  geom_line(linetype='dashed') +
+  geom_line(data=pred) +
+  geom_point(data=dat_fr_lf)
 p1
-
 

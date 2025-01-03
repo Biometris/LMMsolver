@@ -499,10 +499,27 @@ predict.LMMsolve <- function(object,
     term <- ranTerms[[i]]
     outDat[[term]] <- rep("Excluded",nRow)
   }
-
-  eta <- as.vector(U %*% object$coefMME)
-  family <- object$family
-  familyPred <- family$linkinv(eta)
+  if (object$family$family == "multinomial") {
+    nCat <- length(object$respVar) - 1
+    U <- U %x% spam::diag.spam(nCat)
+    eta0 <- as.vector(U %*% object$coefMME)
+    etaM <- matrix(data=eta0,nrow = nRow, ncol= nCat, byrow=TRUE)
+    pi_est <- t(apply(etaM, MARGIN=1, FUN = glogit)) # linkinv
+    pi_est <- cbind(pi_est, 1.0 - rowSums(pi_est))
+    colnames(pi_est) <- object$respVar
+    tmp <- NULL
+    for (i in seq_along(object$respVar)) {
+      tmp2 <- data.frame(outDat, category = object$respVar[i])
+      tmp <- rbind(tmp, tmp2)
+    }
+    outDat <- tmp
+    outDat[["category"]] <- as.factor(rep(object$respVar, each = nRow))
+    familyPred <- as.vector(pi_est)
+  } else {
+    eta <- as.vector(U %*% object$coefMME)
+    family <- object$family
+    familyPred <- family$linkinv(eta)
+  }
 
   outDat[["ypred"]] <- familyPred
   if (se.fit) {
