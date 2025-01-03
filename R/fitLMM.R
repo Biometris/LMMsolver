@@ -107,7 +107,7 @@ fitLMM <- function(y, X, Z, w, lGinv, tolerance, trace, maxit,
     trace_GLMM <- NULL
     for (i in 1:maxit) {
       Eta <- matrix(data=eta, ncol=nCat, nrow=n, byrow=TRUE)
-      Pi <- t(apply(X=Eta, MARGIN=1, FUN = glogit))
+      Pi <- t(apply(X=Eta, MARGIN=1, FUN = family$linkinv))
       pi_vec <- as.vector(t(Pi))
 
       D_list <- lapply(1:n, FUN =

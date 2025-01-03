@@ -1,9 +1,14 @@
-
 # generalized logit, see Fahrmeir et al.
-glogit <- function(eta) {
+glogit <- function(mu) {
+  log(mu/(1-sum(mu)))
+}
+
+# generalized inverse logit, see Fahrmeir et al.
+inv_glogit <- function(eta) {
   v <- exp(eta)
   v/(1+sum(v))
 }
+
 
 Jacobian <- function(eta) {
   nc <- length(eta)
@@ -60,11 +65,27 @@ extend_coef <- function(ndx, respVar) {
 
 
 
-#' Defines the multinomial model
+#' Family Object for Multinomial Model
+#'
+#' The Multinomial model is not part of the standard family. The implementation
+#' is based on Chapter 6 in Fahrmeir et al. (2013).
+#'
+#' @references Fahrmeir, Ludwig, Thomas Kneib, Stefan Lang, Brian Marx, Regression models.
+#' Springer Berlin Heidelberg, 2013.
+#'
+#' @returns
+#' An object of class \code{family} with the following components:
+#' \item{family}{character string with the family name.}
+#' \item{linkfun}{the link function.}
+#' \item{linkinv}{the inverse of the link function.}
 #'
 #' @export
 multinomial <- function() {
   family <- "multinomial"
-  structure(list(family = family), class = "family")
+  link <- glogit
+  linkinv <- inv_glogit
+  structure(list(family = family,
+                 link = link,
+                 linkinv = linkinv), class = "family")
 }
 

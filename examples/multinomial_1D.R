@@ -17,11 +17,13 @@ sim_non_linear <- function(x, mu, sc) {
 }
 
 sim_fun <- function(x, mu, sc) {
-  z <- rep(NA, 3)
-  for (i in 1:3) {
+  nCat <- length(mu)
+  z <- rep(NA, nCat)
+  for (i in seq_len(nCat)) {
     z[i] <- sim_non_linear(x, mu[i], sc[i])
   }
-  hz <- LMMsolver:::glogit(z)
+  fam <- multinomial()
+  hz <- fam$linkinv(z)
   d <- c(hz, 1-sum(hz))
   return(d)
 }

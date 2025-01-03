@@ -410,6 +410,10 @@ predict.LMMsolve <- function(object,
   if (!inherits(newdata, "data.frame")) {
     stop("newdata should be a data.frame.\n")
   }
+  family <- object$family
+  if (family$family == "multinomial" && se.fit) {
+    stop("se.fit=TRUE not implemented yet for multinomial.\n")
+  }
 
   varNames <- unlist(sapply(object$splRes,function(z){names(z$x)}))
   colNames <- colnames(newdata)
@@ -499,12 +503,12 @@ predict.LMMsolve <- function(object,
     term <- ranTerms[[i]]
     outDat[[term]] <- rep("Excluded",nRow)
   }
-  if (object$family$family == "multinomial") {
+  if (family$family == "multinomial") {
     nCat <- length(object$respVar) - 1
     U <- U %x% spam::diag.spam(nCat)
     eta0 <- as.vector(U %*% object$coefMME)
     etaM <- matrix(data=eta0,nrow = nRow, ncol= nCat, byrow=TRUE)
-    pi_est <- t(apply(etaM, MARGIN=1, FUN = glogit)) # linkinv
+    pi_est <- t(apply(etaM, MARGIN=1, FUN = family$linkinv)) # linkinv
     pi_est <- cbind(pi_est, 1.0 - rowSums(pi_est))
     colnames(pi_est) <- object$respVar
     tmp <- NULL
