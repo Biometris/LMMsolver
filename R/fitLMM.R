@@ -115,8 +115,13 @@ fitLMM <- function(y, X, Z, w, lGinv, tolerance, trace, maxit,
     W <- spam::diag.spam(1, n) %x% spam::spam(x=1, nrow=nCat, ncol=nCat)
     Dinv <- spam::diag.spam(1, n) %x% spam::spam(x=1, nrow=nCat, ncol=nCat)
 
-    theta <- c(1,1)                # check this!
-    fixedTheta <- c(FALSE, TRUE)   # check this!
+    #theta <- c(1,1)                # check this!
+    #fixedTheta <- c(FALSE, TRUE)   # check this!
+    nRes <- length(lRinv)
+    nNonRes <- length(theta) - nRes
+    fixedTheta <- c(rep(FALSE, nNonRes), rep(TRUE, nRes))
+    theta[(nNonRes + 1):(nNonRes + nRes)] <- 1
+
     trace_GLMM <- NULL
     for (i in 1:maxit) {
       Eta <- matrix(data=eta, ncol=nCat, nrow=n, byrow=TRUE)
@@ -144,7 +149,8 @@ fitLMM <- function(y, X, Z, w, lGinv, tolerance, trace, maxit,
       attr(lRinv, "cnt") <- n*nCat # correct?
       obj <- sparseMixedModels(z, X = Xs, Z = Z,
                                lGinv = lGinv, lRinv = lRinv, trace=trace,
-                               fixedTheta = fixedTheta, theta = theta)
+                               fixedTheta = fixedTheta, theta = theta,
+                               tolerance = tolerance)
       eta_old  <- eta
       eta <- obj$yhat
       theta <- obj$theta
@@ -162,8 +168,8 @@ fitLMM <- function(y, X, Z, w, lGinv, tolerance, trace, maxit,
         break;
       }
     }
-    dev.residuals <- NULL # check how to calculate this!
-    deviance <- NULL      # check how to calculate this!
+    dev.residuals <- family$dev.resids(y, mu, w)
+    deviance <- sum(dev.residuals)
   }
   ## Add names to ndx of coefficients.
   if (family$family == "multinomial") {
