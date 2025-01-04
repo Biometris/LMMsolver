@@ -6,6 +6,14 @@ fitLMM <- function(y, X, Z, w, lGinv, tolerance, trace, maxit,
   ## Convert to spam matrix and cleanup
   Xs <- spam::as.spam.dgCMatrix(X)
   Xs <- spam::cleanup(Xs)
+  npar <- 0
+  if (!is.null(dim.f)) {
+    npar <- npar + sum(dim.f)
+  }
+  if (!is.null(dim.r)) {
+    npar <- npar + sum(dim.r)
+  }
+
 
   ## construct inverse of residual matrix R.
   lRinv <- constructRinv(df = data, residual = residual, weights = w)
@@ -82,7 +90,6 @@ fitLMM <- function(y, X, Z, w, lGinv, tolerance, trace, maxit,
     deviance <- sum(dev.residuals)
   } else {
     ## multinomial family
-    cat("family multinomial() still work in progress!\n")
     YY <- y
     n <- nrow(YY)
     nCat <- length(respVar) - 1
@@ -105,6 +112,7 @@ fitLMM <- function(y, X, Z, w, lGinv, tolerance, trace, maxit,
     y <- as.vector(t(YY))
     Xs <- Xs %x% spam::diag.spam(nCat)
     Z <- Z %x% spam::diag.spam(nCat)
+    w <- rep(w, nCat)
     lGinv <- lapply(lGinv, FUN = function(x) {x %x% spam::diag.spam(nCat)})
 
     # remark: We can add some prior information to initial
@@ -168,15 +176,11 @@ fitLMM <- function(y, X, Z, w, lGinv, tolerance, trace, maxit,
         break;
       }
     }
+    mu <- pi_vec
     dev.residuals <- family$dev.resids(y, mu, w)
     deviance <- sum(dev.residuals)
   }
-  ## Add names to ndx of coefficients.
-  if (family$family == "multinomial") {
-    ndxCf <- seq_along(1:n)
-  } else {
-    ndxCf <- seq_along(obj$a)
-  }
+  ndxCf <- seq_len(npar)
 
   ## Fixed terms.
   ef <- cumsum(dim.f)
@@ -192,14 +196,6 @@ fitLMM <- function(y, X, Z, w, lGinv, tolerance, trace, maxit,
   if (family$family == "multinomial") {
     dim.r <- sapply(dim.r, FUN= function(x) {x*nCat})
     dim.f <- sapply(dim.f, FUN= function(x) {x*nCat})
-
-    #tmp1 <- rep(ndxCoefF, each=nCat)
-    #tmp2 <- rep(respVar[-(nCat+1)], times=n)
-    #ndxCoefF <- paste0(tmp1,"_",tmp2)
-
-    #tmp1 <- rep(ndxCoefR, each=nCat)
-    #tmp2 <- rep(respVar[-(nCat+1)], times=n)
-    #ndxCoefR <- paste0(tmp1,"_",tmp2)
   }
 
   ## Combine result for fixed and random terms.
