@@ -1,6 +1,7 @@
 constructFixed <- function(fixed, data) {
 
   ## Make fixed part.
+  fixed[[2]] <- NULL
   mf <- model.frame(fixed, data, drop.unused.levels = TRUE)
   mt <- terms(mf)
   f.terms <- all.vars(mt)[attr(mt, "dataClasses") == "factor"]
