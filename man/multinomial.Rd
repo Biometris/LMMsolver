@@ -11,6 +11,7 @@ An object of class \code{familyLMMsolver} with the following components:
 \item{family}{character string with the family name.}
 \item{linkfun}{the link function.}
 \item{linkinv}{the inverse of the link function.}
+\item{dev.resids}{function giving the deviance for each observation as a function of (y, mu, wt)}
 }
 \description{
 The Multinomial model is not part of the standard family. The implementation

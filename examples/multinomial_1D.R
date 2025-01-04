@@ -53,6 +53,7 @@ obj <- LMMsolve(fixed = cbind(A,B,C,D) ~ 1,
                 data=dat, family = multinomial())
 summary(obj)
 coef(obj)
+deviance(obj)
 
 # make predictions
 x0 <- seq(0, 1, by = 0.01)

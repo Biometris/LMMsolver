@@ -9,6 +9,19 @@ inv_glogit <- function(eta) {
   v/(1+sum(v))
 }
 
+x_logx <- function(x) {
+  nonzero <- (x > 1.0e-20)
+  z <- x
+  z[nonzero] <- x[nonzero]*log(x[nonzero])
+  z
+}
+
+multinomial.deviance.residuals <- function(y, mu, wt) {
+  devy <- x_logx(y)
+  devmu <- x_logx(mu)
+  dev <- 2 * wt * (devy - devmu)
+  return(dev)
+}
 
 Jacobian <- function(eta) {
   nc <- length(eta)
@@ -63,8 +76,6 @@ extend_coef <- function(ndx, respVar) {
   ndx
 }
 
-
-
 #' Family Object for Multinomial Model
 #'
 #' The Multinomial model is not part of the standard family. The implementation
@@ -78,14 +89,17 @@ extend_coef <- function(ndx, respVar) {
 #' \item{family}{character string with the family name.}
 #' \item{linkfun}{the link function.}
 #' \item{linkinv}{the inverse of the link function.}
+#' \item{dev.resids}{function giving the deviance for each observation as a function of (y, mu, wt)}
 #'
 #' @export
 multinomial <- function() {
   family <- "multinomial"
   link <- glogit
   linkinv <- inv_glogit
+  dev.resids <- multinomial.deviance.residuals
   structure(list(family = family,
                  link = link,
-                 linkinv = linkinv), class = "familyLMMsolver")
+                 linkinv = linkinv,
+                 dev.resids = dev.resids), class = "familyLMMsolver")
 }
 
