@@ -128,6 +128,10 @@ LMMsolve <- function(fixed,
   ## Check that all variables used in fixed formula are in data.
   data <- checkFormVars(fixed, data, naAllowed = FALSE)
 
+ if (!(class(family) == "family" || class(family) == "familyLMMsolver")) {
+   stop("argument family not correct.\n")
+ }
+
   mult_col_response <- FALSE
   if (family$family == "multinomial") {
     # some extra checks needed here

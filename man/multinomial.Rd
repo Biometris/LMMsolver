@@ -3,8 +3,11 @@
 \name{multinomial}
 \alias{multinomial}
 \title{Family Object for Multinomial Model}
+\usage{
+multinomial()
+}
 \value{
-An object of class \code{family} with the following components:
+An object of class \code{familyLMMsolver} with the following components:
 \item{family}{character string with the family name.}
 \item{linkfun}{the link function.}
 \item{linkinv}{the inverse of the link function.}
