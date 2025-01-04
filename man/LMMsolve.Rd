@@ -51,8 +51,9 @@ all equal to one.}
 \item{residual}{A formula for the residual part of the model. Should be of
 the form "~ pred".}
 
-\item{family}{An object of class family specifying the distribution
-and link function.}
+\item{family}{An object of class \code{family} or \code{familyLMMsolver}
+specifying the distribution and link function. See class \code{\link{family}} and
+and \code{\link{multinomial}} for details.}
 
 \item{offset}{An a priori known component to be included in the linear
 predictor during fitting. \code{Offset} be a numeric vector, or a character
@@ -83,7 +84,7 @@ Solve Linear Mixed Models using REML.
 }
 \details{
 A Linear Mixed Model (LMM) has the form
-\deqn{y = X \beta + Z u + e, u ~ N(0,G), e ~ N(0,R)} where
+\deqn{y = X \beta + Z u + e, u \sim N(0,G), e \sim N(0,R)} where
 \eqn{y} is a vector of observations, \eqn{\beta} is a vector with the fixed
 effects, \eqn{u} is a vector with the random effects, and \eqn{e} a vector of
 random residuals. \eqn{X} and \eqn{Z} are design matrices.
