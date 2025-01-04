@@ -38,6 +38,7 @@ multiNom <- t(apply(M, MARGIN=1, FUN=
                       function(x) {
                         rmultinom(n=1, size=x[nc+2], prob=x[1:(nc+1)])
                       } ))
+
 colNames <- paste0(LETTERS[1:(nc+1)])
 colnames(multiNom) <- colNames
 
@@ -79,4 +80,25 @@ p1 <- ggplot(prob_true_lf, aes(x = x, y=y,color=category)) +
   geom_line(data=pred) +
   geom_point(data=dat_fr_lf)
 p1
+
+
+# some extra tests:
+
+dat$fac <- as.factor(ifelse(dat$x < 0.20, "low","high"))
+obj4 <- LMMsolve(fixed = cbind(A,B,C,D) ~ fac,
+                 spline = ~spl1D(x, nseg = 17),
+                 family = multinomial(),
+                 data = dat, trace=TRUE)
+summary(obj4)
+
+obj5 <- LMMsolve(fixed = cbind(A,B,C,D) ~ 1,
+                 random = ~ fac,
+                 spline = ~spl1D(x, nseg = 17),
+                 family = multinomial(),
+                 data = dat)
+summary(obj5)
+
+
+
+
 
