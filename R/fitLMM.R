@@ -88,6 +88,19 @@ fitLMM <- function(y, X, Z, w, lGinv, tolerance, trace, maxit,
     nCat <- length(respVar) - 1
     sY <- rowSums(YY)
     YY <- YY/sY
+
+    ## allow for incorrect scores, to make the algorithm more stable
+    YY <- t(apply(YY, MARGIN=1, FUN=function(x) {
+      eps <- 1.0e-6
+      ndx_zero <- which(x==0)
+      ndx_pos  <- which(x>0)
+      x[ndx_zero] <- x[ndx_zero] + eps
+      nZeros <- length(ndx_zero)
+      nPos <- length(ndx_pos)
+      x[ndx_pos] <- x[ndx_pos] - (nZeros/nPos)*eps
+      return(x)
+    }))
+
     YY <- YY[,-(nCat+1)] # remove last column
     y <- as.vector(t(YY))
     Xs <- Xs %x% spam::diag.spam(nCat)
