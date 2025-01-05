@@ -76,7 +76,23 @@ expect_error(LMMsolve(fixed = cbind(A,B) ~ 1,
                       data=dat, family = multinomial()),
              "family multinomial two categories, use binomial family.", fixed=TRUE)
 
+set.seed(1234)
+sz <- 10
+n <- 100
+multiNom <- t(rmultinom(n=n,size=sz,prob=c(0.1,0.2,0.3,0.4)))
+colnames(multiNom) <- LETTERS[1:4]
+dat <- data.frame(multiNom)
 
+obj <- LMMsolve(cbind(A,B,C,D)~1, data=dat, family=multinomial())
+cf <- coef(obj)$'(Intercept)'
+fam <- multinomial()
+pr <- fam$linkinv(cf)
+est_D <- sum(1-sum(pr))
+prob <- as.numeric(c(pr, est_D))
+prob_ML <- as.numeric(colSums(multiNom)/(sz*n))
+# there are small differences, LMMsolver uses a small probability
+# that the catagories have wrong labels, to keep algorithm stable
+expect_equal(prob, prob_ML, tolerance = 1.0e-6)
 
 
 
