@@ -129,15 +129,43 @@ LMMsolve <- function(fixed,
   ## Check that all variables used in fixed formula are in data.
   data <- checkFormVars(fixed, data, naAllowed = FALSE)
 
- if (!(inherits(family,"family") || inherits(family,"familyLMMsolver"))) {
-   stop("argument family not correct.\n")
- }
+  if (!(inherits(family, "family") || inherits(family, "familyLMMsolver"))) {
+    stop("argument family not correct.\n")
+  }
 
   mult_col_response <- FALSE
   if (family$family == "multinomial") {
-    # some extra checks needed here
     mf <- model.frame(fixed, data, drop.unused.levels = TRUE, na.action = NULL)
+    respNames <- colnames(mf[[1]])
+    chkFac <- sapply(respNames, function(x) {is.factor(data[[x]])})
+    if (any(chkFac)) {
+      str <- paste("response", names(mf)[1], "should be numeric.")
+      stop(str)
+    }
     YY <- model.response(mf, type = "any")
+    if (!inherits(YY, "matrix")) {
+      str1 <- paste("family", family$family, ": response should be a matrix.")
+      stop(str1)
+    }
+    if (ncol(YY) == 2) {
+      str2 <- paste("family", family$family, "two categories, use binomial family.")
+      stop(str2)
+    }
+    if (any(is.na(YY))) {
+      str3 <- paste("family", family$family,
+                    ": NA's in response variable.")
+      stop(str3)
+    }
+    if (any(YY<0)) {
+      str3 <- paste("family", family$family,
+                    ": negative values in response variable.")
+      stop(str3)
+    }
+    if (!is.null(weights)) {
+      str4 <- paste("family", family$family,
+                    ": weights option cannot be used.")
+      stop(str4)
+    }
     respVar <- colnames(YY)
     respVarNA <- rep(FALSE, nrow(data))
     mult_col_response <- TRUE
