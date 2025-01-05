@@ -163,6 +163,11 @@ LMMsolve <- function(fixed,
                       ": NA's not allowed in cbind format.")
         stop(str2)
       }
+      if (any(YY<0)) {
+        str3 <- paste("family", family$family,
+                      ": negative values in response variable.")
+        stop(str3)
+      }
       if (!is.null(weights)) {
         str3 <- paste("family", family$family,
                       ": weights cannot be used in cbind format.")

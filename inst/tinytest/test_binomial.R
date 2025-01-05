@@ -76,6 +76,15 @@ expect_error(LMMsolve(fixed = cbind(succes, failure) ~ 1,
                       data = dat4),
       "response cbind(succes, failure) should be numeric.", fixed = TRUE)
 
+dat5 <- dat2
+dat5$succes[1] <- -1
+expect_error(LMMsolve(fixed = cbind(succes, failure) ~ 1,
+                      spline = ~spl1D(x, nseg = 50),
+                      family = binomial(),
+                      data = dat5),
+             "family binomial : negative values in response variable.")
+
+
 
 
 
