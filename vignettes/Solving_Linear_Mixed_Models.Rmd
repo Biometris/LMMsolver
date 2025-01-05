@@ -145,11 +145,11 @@ ggplot(data = dat2, aes(x = x, y = y)) +
 
 ## Non-Gaussian data
 
-The `LMMsolver` package can also be used for non-gaussian data, using the `family` argument, with default `family = gaussian`. As an example we use count data using the Poisson distribution, defined by
+The `LMMsolver` package can also be used for non-gaussian data, using the `family` argument, with default `family = gaussian()`. As an example we use count data using the Poisson distribution, defined by
 $$ 
    Pr(X=k) = \frac{\lambda^k e^{-\lambda}}{k!} \;,
 $$
-with parameter $\lambda > 0$ and $k$ is the number of occurrences. More general, the value of the parameter $lambda$ can depend on another variable time $x$, for example time. Here we will assume that $x$ is defined on the interval $[0,1]$ and defined by:
+with parameter $\lambda > 0$ and $k$ is the number of occurrences. More general, the value of the parameter $\lambda$ can depend on another variable time $x$, for example time. Here we will assume that $x$ is defined on the interval $[0,1]$ and defined by:
 
 $$
   \lambda(x) = 4 + 3x + 4 \sin(7 x)
