@@ -172,7 +172,9 @@ fitLMM <- function(y, X, Z, w, lGinv, tolerance, trace, maxit,
       }
       #cat("iter ", i, "     ", tol, "    ", obj$logL, "   ", obj$ED, "\n")
       if (tol < 1.0e-10) {
-        cat("convergence after", i, "iterations\n")
+        if (trace) {
+          cat("convergence after", i, "iterations\n")
+        }
         break;
       }
     }
