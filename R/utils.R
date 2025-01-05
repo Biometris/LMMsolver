@@ -608,3 +608,29 @@ chkValBsplines <- function(spl, newdata) {
   }
 }
 
+checkMultiResponse <- function(YY, family) {
+  if (!inherits(YY, "matrix")) {
+    str <- paste("family", family$family, ": response should be a matrix.")
+    stop(str)
+  }
+  if (ncol(YY) == 2 && family$family == "multinomial") {
+    str <- paste("family", family$family, "two categories, use binomial family.")
+    stop(str)
+  }
+  if (ncol(YY) != 2 && family$family %in% c("binomial", "quasibinomial")) {
+    str <- paste("family", family$family, ": response should have two columns.")
+    stop(str)
+  }
+  if (any(is.na(YY))) {
+    str <- paste("family", family$family,
+                 ": NA's in response variable.")
+    stop(str)
+  }
+  if (any(YY<0)) {
+    str <- paste("family", family$family,
+                 ": negative values in response variable.")
+    stop(str)
+  }
+}
+
+

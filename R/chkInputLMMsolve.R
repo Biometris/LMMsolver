@@ -1,6 +1,6 @@
 chkInputLMMsolve <- function(fixed, random, data,
                              ginverse, residual, tolerance, maxit,
-                             grpTheta, offset) {
+                             grpTheta, offset, family) {
   splTrms <- NULL
   if (!inherits(data, "data.frame")) {
     stop("data should be a data.frame.\n")
@@ -43,6 +43,9 @@ chkInputLMMsolve <- function(fixed, random, data,
   }
   if (!is.numeric(offset)) {
     stop("offset should be numeric")
+  }
+  if (!(inherits(family, "family") || inherits(family, "familyLMMsolver"))) {
+    stop("argument family not correct.\n")
   }
   return(offset)
 }

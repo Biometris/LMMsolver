@@ -124,17 +124,14 @@ LMMsolve <- function(fixed,
   offset <- chkInputLMMsolve(fixed = fixed, random = random,
               data = data, ginverse = ginverse,
               residual = residual, tolerance = tolerance,
-              maxit = maxit, grpTheta = grpTheta, offset = offset)
+              maxit = maxit, grpTheta = grpTheta, offset = offset,
+              family = family)
 
   ## Check that all variables used in fixed formula are in data.
   data <- checkFormVars(fixed, data, naAllowed = FALSE)
 
-  if (!(inherits(family, "family") || inherits(family, "familyLMMsolver"))) {
-    stop("argument family not correct.\n")
-  }
-
   mult_col_response <- FALSE
-  if (family$family == "multinomial") {
+  if (family$family %in% c("multinomial", "binomial", "quasibinomial")) {
     mf <- model.frame(fixed, data, drop.unused.levels = TRUE, na.action = NULL)
     respNames <- colnames(mf[[1]])
     chkFac <- sapply(respNames, function(x) {is.factor(data[[x]])})
@@ -143,80 +140,43 @@ LMMsolve <- function(fixed,
       stop(str)
     }
     YY <- model.response(mf, type = "any")
-    if (!inherits(YY, "matrix")) {
-      str1 <- paste("family", family$family, ": response should be a matrix.")
-      stop(str1)
-    }
-    if (ncol(YY) == 2) {
-      str2 <- paste("family", family$family, "two categories, use binomial family.")
-      stop(str2)
-    }
-    if (any(is.na(YY))) {
-      str3 <- paste("family", family$family,
-                    ": NA's in response variable.")
-      stop(str3)
-    }
-    if (any(YY<0)) {
-      str3 <- paste("family", family$family,
-                    ": negative values in response variable.")
-      stop(str3)
-    }
-    if (!is.null(weights)) {
-      str4 <- paste("family", family$family,
-                    ": weights option cannot be used.")
-      stop(str4)
-    }
-    respVar <- colnames(YY)
-    respVarNA <- rep(FALSE, nrow(data))
-    mult_col_response <- TRUE
-    nCat <- ncol(YY) - 1
-  }
-  if (family$family == "binomial" || family$family == "quasibinomial") {
-    mf <- model.frame(fixed, data, drop.unused.levels = TRUE, na.action = NULL)
-    respNames <- colnames(mf[[1]])
-    chkFac <- sapply(respNames, function(x) {is.factor(data[[x]])})
-    if (any(chkFac)) {
-      str <- paste("response", names(mf)[1], "should be numeric.")
-      stop(str)
-    }
-    YY <- model.response(mf, type = "any")
-    if (inherits(YY, "matrix")) {
-      mult_col_response <- TRUE
-      if (ncol(YY) != 2) {
-        str1 <- paste("family", family$family, ": response should have two columns.")
-        stop(str1)
-      }
-      if (any(is.na(YY))) {
-        str2 <- paste("family", family$family,
-                      ": NA's not allowed in cbind format.")
-        stop(str2)
-      }
-      if (any(YY<0)) {
-        str3 <- paste("family", family$family,
-                      ": negative values in response variable.")
-        stop(str3)
-      }
+    if (family$family == "multinomial") {
       if (!is.null(weights)) {
-        str3 <- paste("family", family$family,
-                      ": weights cannot be used in cbind format.")
-        stop(str3)
+        str <- paste("family", family$family,
+                     ": weights option cannot be used.")
+        stop(str)
       }
-      cntYY <- rowSums(YY)
-      y_proportion <- YY[,1]/cntYY
-      weights <- "weights"
-      data$weights <- cntYY
-      data$y_proportion <- y_proportion
-      respVar <- "y_proportion"
+      checkMultiResponse(YY, family)
+      respVar <- colnames(YY)
       respVarNA <- rep(FALSE, nrow(data))
-      fixed_txt <- as.character(fixed)
-      fixed <- as.formula(paste0("y_proportion ~ ", fixed_txt[3]))
-    } else {
-      if (inherits(YY, "factor")) {
-        respVar <- all.vars(fixed)[attr(terms(fixed), "response")]
-        Factor <- data[[respVar]]
-        levels <- levels(Factor)
-        sc <- 1.0*(Factor == levels[2])
-        data[[respVar]] <- sc
+      mult_col_response <- TRUE
+      nCat <- ncol(YY) - 1
+    } else { # binomial, quasibinomial
+      if (inherits(YY, "matrix")) {
+        mult_col_response <- TRUE
+        checkMultiResponse(YY, family)
+        if (!is.null(weights)) {
+          str <- paste("family", family$family,
+                       ": weights cannot be used in cbind format.")
+          stop(str)
+        }
+        cntYY <- rowSums(YY)
+        y_proportion <- YY[,1]/cntYY
+        weights <- "weights"
+        data$weights <- cntYY
+        data$y_proportion <- y_proportion
+        respVar <- "y_proportion"
+        respVarNA <- rep(FALSE, nrow(data))
+        fixed_txt <- as.character(fixed)
+        fixed <- as.formula(paste0("y_proportion ~ ", fixed_txt[3]))
+      } else {
+        if (inherits(YY, "factor")) {
+          respVar <- all.vars(fixed)[attr(terms(fixed), "response")]
+          Factor <- data[[respVar]]
+          levels <- levels(Factor)
+          sc <- 1.0*(Factor == levels[2])
+          data[[respVar]] <- sc
+        }
       }
     }
   }
