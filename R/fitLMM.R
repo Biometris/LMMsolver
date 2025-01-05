@@ -111,7 +111,9 @@ fitLMM <- function(y, X, Z, w, lGinv, tolerance, trace, maxit,
     YY <- YY[,-(nCat+1)] # remove last column
     y <- as.vector(t(YY))
     Xs <- Xs %x% spam::diag.spam(nCat)
-    Z <- Z %x% spam::diag.spam(nCat)
+    if (!is.null(Z)) {
+      Z <- Z %x% spam::diag.spam(nCat)
+    }
     w <- rep(w, nCat)
     lGinv <- lapply(lGinv, FUN = function(x) {x %x% spam::diag.spam(nCat)})
 
@@ -196,7 +198,9 @@ fitLMM <- function(y, X, Z, w, lGinv, tolerance, trace, maxit,
                         e = er, data = data, group = group, type = "random")
 
   if (family$family == "multinomial") {
-    dim.r <- sapply(dim.r, FUN= function(x) {x*nCat})
+    if (!is.null(dim.r)) {
+      dim.r <- sapply(dim.r, FUN= function(x) {x*nCat})
+    }
     dim.f <- sapply(dim.f, FUN= function(x) {x*nCat})
   }
 
