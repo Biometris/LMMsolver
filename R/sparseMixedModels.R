@@ -65,7 +65,10 @@ sparseMixedModels <- function(y,
     } else {
       xW <- x %*% W
     }
-    MatrixProduct(t(W), xW)
+    # MB: Seems to be problem with MatrixProduct, 9-1-2025,
+    # MB: tmp back to spam
+    spam::crossprod.spam(W, xW)
+    #MatrixProduct(t(W), xW)
   })
   lWtRinvY <- lapply(X = lRinv, FUN = function(x) {
     spam::crossprod.spam(W, x %*% y) })
