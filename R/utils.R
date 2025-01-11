@@ -575,8 +575,11 @@ makeDesignTerm <- function(obj, newdat, term) {
   } else if (type == "variable") {
     v <- newdat[[term]]
     ndx <- as.numeric(coefI)
-    l <- list(i=1:length(v), j=rep(ndx,length(v)), v=v)
-    M <- spam::spam(l, nrow=length(v), ncol=nrow(obj$C))
+    l <- list(i = seq_len(length(ndx)*length(v)),
+              j = rep(ndx, times = length(v)),
+              v = rep(v, each = length(ndx)))
+    #l <- list(i=1:length(v), j=rep(ndx,length(v)), v=v)
+    M <- spam::spam(l, nrow=length(ndx)*length(v), ncol=nrow(obj$C))
 
   } else {
     str <- paste("Make predictions for type", type, "not implemented yet\n" )

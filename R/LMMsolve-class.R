@@ -461,8 +461,14 @@ predict.LMMsolve <- function(object,
   dim <- object$dim
   lU <- list()
   nRow <- nrow(newdata)
+  if (family$family == "multinomial") {
+    nCat <- length(object$respVar) - 1
+  } else {
+    nCat <- 1
+  }
+
   for (i in seq_along(dim)) {
-    lU[[i]] = spam::spam(x = 0, nrow = nRow, ncol = dim[i])
+    lU[[i]] = spam::spam(x = 0, nrow = nRow, ncol = dim[i]/nCat)
   }
   # intercept:
   lU[[1]] = spam::spam(x = 1, nrow = nRow, ncol = 1)
@@ -477,6 +483,9 @@ predict.LMMsolve <- function(object,
     lU[[ndx.r]] <- BxTot[[s]]
   }
   U <- Reduce(spam::cbind.spam, lU)
+  if (family$family == "multinomial") {
+    U <- U %x% spam::diag.spam(nCat)
+  }
 
   tmp <- object$term.labels.f[-1]
   fixTerms <- setdiff(tmp, splFixLab)
@@ -504,8 +513,6 @@ predict.LMMsolve <- function(object,
     outDat[[term]] <- rep("Excluded",nRow)
   }
   if (family$family == "multinomial") {
-    nCat <- length(object$respVar) - 1
-    U <- U %x% spam::diag.spam(nCat)
     eta0 <- as.vector(U %*% object$coefMME)
     etaM <- matrix(data=eta0,nrow = nRow, ncol= nCat, byrow=TRUE)
     pi_est <- t(apply(etaM, MARGIN=1, FUN = family$linkinv)) # linkinv
