@@ -165,6 +165,10 @@ obtainSmoothTrend <- function(object,
     stop("which should be an integer with value at most the number of fitted",
          "spline components.\n")
   }
+  if (object$family$family == "multinomial") {
+    stop("For multinomial response use predict function.\n")
+  }
+
   splRes <- object$splRes[[which]]
   x <- splRes$x
   ## make the design matrix needed for predictions and corresponding

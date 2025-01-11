@@ -1,6 +1,4 @@
 set.seed(1234)
-
-set.seed(1234)
 n <- 250
 
 nc <- 3
@@ -46,6 +44,9 @@ mod1 <- LMMsolve(fixed = cbind(A,B,C,D) ~ 1,
                 spline = ~spl1D(x, nseg = 17, xlim=c(0,1), scaleX=FALSE),
                 data=dat, family = multinomial())
 expect_equivalent_to_reference(mod1, "multinomial1")
+
+expect_error(obtainSmoothTrend(mod1,grid=100),
+             "For multinomial response use predict function.")
 
 dat2 <- dat
 dat2$A[1] <- NA
