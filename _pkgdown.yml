@@ -68,6 +68,7 @@ reference:
   - logLik.LMMsolve
   - deviance.LMMsolve
   - predict.LMMsolve
+  - multinomial
   - diagnosticsMME
   - displayMME
 - title: Spline functions
