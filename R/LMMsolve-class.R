@@ -411,8 +411,15 @@ predict.LMMsolve <- function(object,
     stop("newdata should be a data.frame.\n")
   }
   family <- object$family
-  if (family$family == "multinomial" && se.fit) {
-    stop("se.fit=TRUE not implemented yet for multinomial.\n")
+  if (family$family == "multinomial") {
+    if (se.fit) {
+      stop("se.fit=TRUE not implemented yet for multinomial.\n")
+    }
+    ndxCf <- object$ndxCoefficients
+    IsFactor <- sapply(ndxCf, FUN=function(x) {return(attr(x,"termType")=="factor")})
+    if (any(IsFactor)) {
+      stop("use of factors not implemented yet for multinomial.\n")
+    }
   }
 
   varNames <- unlist(sapply(object$splRes,function(z){names(z$x)}))

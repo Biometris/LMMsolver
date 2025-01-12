@@ -48,6 +48,19 @@ expect_equivalent_to_reference(mod1, "multinomial1")
 expect_error(obtainSmoothTrend(mod1,grid=100),
              "For multinomial response use predict function.")
 
+newdat <- data.frame(x=seq(0,1,by=0.01))
+expect_error(predict(mod1, newdata=newdat, se.fit=TRUE),
+             "se.fit=TRUE not implemented yet for multinomial.")
+
+# example with factor
+dat$Factor <- as.factor(ifelse(dat$x < 0.5, "fA","fB"))
+mod2 <- LMMsolve(fixed = cbind(A,B,C,D) ~ Factor,
+                 spline = ~spl1D(x, nseg = 17, xlim=c(0,1), scaleX=FALSE),
+                 data=dat, family = multinomial())
+newdat$x <- as.factor(ifelse(newdat$x < 0.5, "fA","fB"))
+expect_error(predict(mod2, newdata=newdat),
+             "use of factors not implemented yet for multinomial.")
+
 dat2 <- dat
 dat2$A[1] <- NA
 
