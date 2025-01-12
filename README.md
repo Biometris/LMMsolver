@@ -16,7 +16,8 @@ likelihood or REML (Patterson and Thompson 1971), for models where the
 mixed model equations are sparse. An important feature of the package is
 smoothing with P-splines (Eilers and Marx 1996). The sparse mixed model
 P-splines formulation (Boer 2023) is used, which makes the computations
-fast.
+fast. `LMMsolver` can also be used for Generalized Linear Mixed models,
+see for example Carollo et al. (2024).
 
 <!-- The aim of the `LMMsolver` package is to provide an efficient and flexible system to estimate variance components using restricted maximum likelihood or REML [@Patterson1971], for models where the mixed model equations are sparse [@boer2023]. An example of an application is using splines to model spatial [@Rodriguez-Alvarez2018; @Boer2020] or temporal [@Bustos-Korts2019] trends. Another example is mixed model Quantitative Trait Locus (QTL) analysis for multiparental populations, allowing for heterogeneous residual variance and design matrices with Identity-By-Descent (IBD) probabilities [@Li2021]. -->
 
@@ -119,6 +120,14 @@ entry-spacing="0">
 Boer, Martin P. 2023. “Tensor Product P-Splines Using a Sparse Mixed
 Model Formulation.” *Statistical Modelling* 23 (5-6): 465–79.
 <https://doi.org/10.1177/1471082X231178591>.
+
+</div>
+
+<div id="ref-carollo2024" class="csl-entry">
+
+Carollo, Angela, Paul Eilers, Hein Putter, and Jutta Gampe. 2024.
+“Smooth Hazards with Multiple Time Scales.” *Statistics in Medicine*.
+<https://doi.org/10.1002/sim.10297>.
 
 </div>
 
