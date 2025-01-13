@@ -40,11 +40,12 @@ $$ where $y$ is a vector of observations, $\beta$ is a vector with the fixed eff
 If the matrices $G^{-1}$ and $R^{-1}$ are sparse, the mixed model equations can be solved using efficient sparse matrix algebra implemented in the `spam` package [@Furrer2010]. To calculate the derivatives of the log-likelihood in an efficient way, the automatic differentiation of the Cholesky matrix [@Smith1995;@boer2023] was implemented in C++ using the `Rcpp` package [@Eddelbuettel2018].
 
 # Introduction 
-The purpose of this section is to give users an easy introduction, starting from simple linear regression. Based on simulations we will explain the main functions, the input and the output. First we load the `LMMsolver` and `ggplot2` packages:      
+The purpose of this section is to give users an easy introduction, starting from simple linear regression. Based on simulations we will explain the main functions, the input and the output. First we load the `LMMsolver`,`ggplot2` and `tidyr` packages:      
 
 ```{r setup}
 library(LMMsolver)
 library(ggplot2)
+library(tidyr)
 ```
 
 ## Linear Regression
@@ -405,7 +406,7 @@ In this section we will give three examples. The first example is simulated coun
 ## Modelling count data using Poisson model.
 As an example we use count data using the Poisson distribution, defined by
 $$ 
-   Pr(X=k) = \frac{\lambda^k e^{-\lambda}}{k!} \;,
+   \Pr(X=k) = \frac{\lambda^k e^{-\lambda}}{k!} \;,
 $$
 with parameter $\lambda > 0$ and $k$ is the number of occurrences. More general, the value of the parameter $\lambda$ can depend on another variable $x$, for example time. Here we will assume that $x$ is defined on the interval $[0,1]$ and defined by:
 
@@ -454,7 +455,7 @@ ggplot(data = dat3, aes(x = x, y = y)) +
 ## Binomial distribution
 The binomial distribution is given by:
 $$ 
-   Pr(X=k) = \frac{n!}{k! (n-k)!} p^{n} (1-p)^{n-k} \;,
+   \Pr(X=k) = \frac{n!}{k! (n-k)!} p^{n} (1-p)^{n-k} \;,
 $$
 where $n$ is number of observations, $p$ the probability on succes per observation, and $k$ is the number of successes (and $n-k$ failures).
 
@@ -516,8 +517,80 @@ ggplot(data = dat, aes(x = x, y = y)) +
 ```
 
 
-## Categorical data 
-For details see @fahrmeir2013.
+## Multinomial distribution 
+The multinomial distribution is a generalization of the binomial distribution. The fitting of multinomial responses is more complicated than the standard GLMMs, for details see @fahrmeir2013.
+
+For $k$ categories we have:
+$$ 
+   \Pr(X_1=x_1,X_2=x_2, \ldots, X_k = x_k) = \frac{n!}{x_1! x_2! \cdots x_k!} p_1^{x_1} \cdot p_2^{x_2} \cdots p_k^{x_k} \;,
+$$
+with $\sum_{i=1}^k p_i = 1$ and $\sum_{i=1}^k x_i = n$. 
+
+In the following we will give an example with four categories (A, B, C, D), where probabilities $p_i$ depend on a single variable $x$:
+
+```{r multinomialmodel}
+k <- 4
+mu <- c(0.1, 0.4, 0.6, 0.9)
+names(mu) <- LETTERS[1:k]
+
+nonlinear <- function(x, mu) {
+  z <- sapply(mu, function(mu) { exp(-8*sin(pi*(x-mu))^2)})
+  # normalize to sum equal to one
+  z <- z/sum(z)
+  return(z)
+}
+```
+
+Next we simulate the data:
+
+```{r simMultinomial}
+x <- runif(n, 0, 1)   
+sz <- 10 
+multiNom <- t(sapply(x, FUN=
+                      function(x) {
+                        rmultinom(n=1, size=sz, prob = nonlinear(x,mu))
+                      } ))
+colnames(multiNom) <- names(mu)
+dat <- data.frame(x, multiNom)
+head(dat)
+```
+
+```{r multinomialfit}
+obj <- LMMsolve(fixed = cbind(A,B,C,D) ~ 1,
+                spline = ~spl1D(x, nseg = 17, xlim = c(0,1)),
+                data=dat, family = multinomial())
+summary(obj)
+```
+The predictions are given by: 
+
+```{r makePredictions}
+sRows <- rowSums(multiNom)
+fr <- multiNom/sRows
+dat_fr <- data.frame(x, fr)
+
+x0 <- seq(0, 1, by = 0.01)
+newdat <- data.frame(x = x0)
+pred <- predict(obj, newdata = newdat)
+colnames(pred) <- c("x", "category", "y")
+head(pred)
+
+prob_true <- t(sapply(X=x0, FUN=function(x) { nonlinear(x, mu)}))
+colnames(prob_true) <- names(mu)
+nCatTot <- length(obj$respVar)
+df_true <- data.frame(x=x0, prob_true)
+prob_true_lf <- df_true %>% gather(key = "category",value="y", A:D)
+
+dat_fr_lf <- dat_fr %>% gather(key = "category",value="y", A:D)
+
+p1 <- ggplot(prob_true_lf, aes(x = x, y=y,color=category)) +
+  geom_line(linetype='dashed') +
+  geom_line(data=pred) +
+  geom_point(data=dat_fr_lf)
+p1
+
+```
+
+
 
 # Examples from Quantitative Genetics
 
