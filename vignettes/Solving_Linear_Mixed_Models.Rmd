@@ -143,55 +143,6 @@ ggplot(data = dat2, aes(x = x, y = y)) +
   theme_bw() 
 ```
 
-## Non-Gaussian data
-
-The `LMMsolver` package can also be used for non-gaussian data, using the `family` argument, with default `family = gaussian()`. As an example we use count data using the Poisson distribution, defined by
-$$ 
-   Pr(X=k) = \frac{\lambda^k e^{-\lambda}}{k!} \;,
-$$
-with parameter $\lambda > 0$ and $k$ is the number of occurrences. More general, the value of the parameter $\lambda$ can depend on another variable time $x$, for example time. Here we will assume that $x$ is defined on the interval $[0,1]$ and defined by:
-
-$$
-  \lambda(x) = 4 + 3x + 4 \sin(7 x)
-$$
-Using this function we simulate the following data
-
-```{r poissonSim}
-set.seed(1234)
-n <- 150
-x <- seq(0, 1, length=n)
-fun_lambda <- function(x) { 4 + 3*x + 4*sin(7*x) }
-x <- seq(0, 1, length = n)
-y <- rpois(n = n, lambda = fun_lambda(x)) 
-dat3 <- data.frame(x = x, y = y)
-```
-
-Now we fit the data with the argument `family = poisson()`:
-
-```{r Poisson_LMMsolver}
-obj3 <- LMMsolve(fixed = y ~ 1, 
-                spline = ~spl1D(x, nseg = 50), 
-                family = poisson(), 
-                data = dat3)
-summary(obj3)
-```
-
-Making predictions and plotting the data is similar to the Gaussian data we showed before:
-
-```{r predict_poisson}
-newdat <- data.frame(x = seq(0, 1, length = 300))
-pred3 <- predict(obj3, newdata = newdat, se.fit = TRUE)
-pred3$y_true <- fun_lambda(pred3$x)
-
-ggplot(data = dat3, aes(x = x, y = y)) +
-  geom_point(col = "black", size = 1.5) +
-  geom_line(data = pred3, aes(y = y_true), color = "red", 
-            linewidth = 1, linetype ="dashed") +
-  geom_line(data = pred3, aes(y = ypred), color = "blue", linewidth = 1) +
-  geom_ribbon(data= pred3, aes(x=x, ymin = ypred-2*se, ymax = ypred+2*se),
-              alpha=0.2, inherit.aes = FALSE) +
-  theme_bw() 
-```
 
 ## Smoothing combining two experiments
 In this section we will give a bit more complicated example, to show some further options of `LMMsolver`. Suppose there are two experiments, A and B, with the same true unobserved non-linear function `f2(x)` as defined before. 
@@ -337,6 +288,7 @@ head(SeaSurfaceTemp, 5)
 table(SeaSurfaceTemp$type)
 ``` 
 
+
 First we convert SST from Kelvin to Celsius and split the data in the training and test set:
 
 ```{r convert_and_split}
@@ -442,7 +394,65 @@ RMSE <- sqrt(mean(Y))
 round(RMSE, 2)
 ``` 
 
-The RMSPE is in the same range (0.44-0.46) as for the software packages used in @cressie2022. On a standard desktop the calculations using `LMMsolver` take less than 10 seconds, taking advantage of the sparse structure of the P-splines mixed model [@boer2023]. 
+The RMSPE is in the same range (0.44-0.46) as for the software packages used in @cressie2022. On a standard desktop the calculations using `LMMsolver` take less than 10 seconds, taking advantage of the sparse structure of the P-splines mixed model [@boer2023].
+
+# Generalized Linear Mixed Models
+
+The `LMMsolver` package can also be used for non-gaussian data, using the `family` argument, with default `family = gaussian()`. 
+
+In this section we will give two examples. The first example is simulated count data following a Poisson distribution. The second example is the analysis of categorical data using `family = multinomial()`.  
+
+## Modelling count data using Poisson model.
+As an example we use count data using the Poisson distribution, defined by
+$$ 
+   Pr(X=k) = \frac{\lambda^k e^{-\lambda}}{k!} \;,
+$$
+with parameter $\lambda > 0$ and $k$ is the number of occurrences. More general, the value of the parameter $\lambda$ can depend on another variable time $x$, for example time. Here we will assume that $x$ is defined on the interval $[0,1]$ and defined by:
+
+$$
+  \lambda(x) = 4 + 3x + 4 \sin(7 x)
+$$
+Using this function we simulate the following data
+
+```{r poissonSim}
+set.seed(1234)
+n <- 150
+x <- seq(0, 1, length=n)
+fun_lambda <- function(x) { 4 + 3*x + 4*sin(7*x) }
+x <- seq(0, 1, length = n)
+y <- rpois(n = n, lambda = fun_lambda(x)) 
+dat3 <- data.frame(x = x, y = y)
+```
+
+Now we fit the data with the argument `family = poisson()`:
+
+```{r Poisson_LMMsolver}
+obj3 <- LMMsolve(fixed = y ~ 1, 
+                spline = ~spl1D(x, nseg = 50), 
+                family = poisson(), 
+                data = dat3)
+summary(obj3)
+```
+
+Making predictions and plotting the data is similar to the Gaussian data we showed before:
+
+```{r predict_poisson}
+newdat <- data.frame(x = seq(0, 1, length = 300))
+pred3 <- predict(obj3, newdata = newdat, se.fit = TRUE)
+pred3$y_true <- fun_lambda(pred3$x)
+
+ggplot(data = dat3, aes(x = x, y = y)) +
+  geom_point(col = "black", size = 1.5) +
+  geom_line(data = pred3, aes(y = y_true), color = "red", 
+            linewidth = 1, linetype ="dashed") +
+  geom_line(data = pred3, aes(y = ypred), color = "blue", linewidth = 1) +
+  geom_ribbon(data= pred3, aes(x=x, ymin = ypred-2*se, ymax = ypred+2*se),
+              alpha=0.2, inherit.aes = FALSE) +
+  theme_bw() 
+```
+
+## Categorical data 
+For details see @fahrmeir2013.
 
 # Examples from Quantitative Genetics
 
