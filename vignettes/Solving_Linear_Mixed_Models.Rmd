@@ -407,7 +407,7 @@ As an example we use count data using the Poisson distribution, defined by
 $$ 
    Pr(X=k) = \frac{\lambda^k e^{-\lambda}}{k!} \;,
 $$
-with parameter $\lambda > 0$ and $k$ is the number of occurrences. More general, the value of the parameter $\lambda$ can depend on another variable time $x$, for example time. Here we will assume that $x$ is defined on the interval $[0,1]$ and defined by:
+with parameter $\lambda > 0$ and $k$ is the number of occurrences. More general, the value of the parameter $\lambda$ can depend on another variable $x$, for example time. Here we will assume that $x$ is defined on the interval $[0,1]$ and defined by:
 
 $$
   \lambda(x) = 4 + 3x + 4 \sin(7 x)
@@ -450,6 +450,71 @@ ggplot(data = dat3, aes(x = x, y = y)) +
               alpha=0.2, inherit.aes = FALSE) +
   theme_bw() 
 ```
+
+## Binomial distribution
+The binomial distribution is given by:
+$$ 
+   Pr(X=k) = \frac{n!}{k! (n-k)!} p^{n} (1-p)^{n-k} \;,
+$$
+where $n$ is number of observations, $p$ the probability on succes per observation, and $k$ is the number of successes (and $n-k$ failures).
+
+Similar as in previous section we will assume that the probability $p$ is a non-linear function of $x$ ($x \in [0,1]$)
+$$
+  p(x) = 0.5 + 0.4 \sin(2 \pi x)
+$$
+The following code simulates the data:
+
+```{r binomial_sim}
+set.seed(1234)
+
+n <- 100
+sz <- 10
+
+fun_prob <- function(x) { 0.5 + 0.4*sin(2*pi*x) }
+
+x <- seq(0, 1, length=n)
+
+nsucces <- sapply(x, FUN=function(x){
+                  rbinom(n=1, size = sz, prob = fun_prob(x))
+                })
+dat <- data.frame(x = x, succes = nsucces, 
+                         failure= sz - nsucces)
+head(dat, 5)
+```
+
+Next we can analyse the data using `family = binomial()`, and for the response `cbind(succes, failure)`:
+
+```{r binomial_solve}
+obj3 <- LMMsolve(fixed = cbind(succes, failure) ~ 1,
+                 spline = ~spl1D(x, nseg = 50),
+                 family = binomial(),
+                 data = dat)
+summary(obj3)
+```
+
+Making predictions can be done as shown before in the other examples:
+
+```{r binomial_predict}
+newdat <- data.frame(x = seq(0, 1, by=0.01))
+pred3 <- predict(obj3, newdata = newdat, se.fit=TRUE)
+```
+
+Finally, the next R-chunk generates the figure, where the black points are the fraction of successes, the red dashed curve is the true probability, and the blue curve are the predictions:
+
+```{r binomial_plot}
+pred3$y_true <- fun_prob(pred3$x)
+dat$y <- dat$succes/sz
+
+ggplot(data = dat, aes(x = x, y = y)) +
+  geom_point(col = "black", size = 1.5) +
+  geom_line(data = pred3, aes(y = y_true), color = "red",
+            linewidth = 1, linetype = "dashed") +
+  geom_line(data = pred3, aes(y = ypred), color = "blue", linewidth = 1) +
+  geom_ribbon(data= pred3, aes(x=x, ymin = ypred-2*se, ymax = ypred+2*se),
+              alpha=0.2, inherit.aes = FALSE) +
+  theme_bw()
+```
+
 
 ## Categorical data 
 For details see @fahrmeir2013.
