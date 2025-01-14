@@ -37,15 +37,14 @@ $$ where $y$ is a vector of observations, $\beta$ is a vector with the fixed eff
 <!--   G^{-1} = \sum_{i} \psi_i Q_{G,i} \;, \quad   R^{-1} = \sum_{i} \phi_i Q_{R,i} \;, -->
 <!-- $$ where the precision parameters $\psi_i$ and $\phi_i$ are estimated using REML. For most standard mixed models $1/{\psi_i}$ are the variance components and $1/{\phi_i}$ the residual variances. We use a formulation in terms of precision parameters to allow for non-standard mixed models using tensor product splines introduced in @Rodriguez-Alvarez2015. -->
 
-If the matrices $G^{-1}$ and $R^{-1}$ are sparse, the mixed model equations can be solved using efficient sparse matrix algebra implemented in the `spam` package [@Furrer2010]. To calculate the derivatives of the log-likelihood in an efficient way, the automatic differentiation of the Cholesky matrix [@Smith1995;@boer2023] was implemented in C++ using the `Rcpp` package [@Eddelbuettel2018].
+If the matrices $X$, $Z$, $G^{-1}$ and $R^{-1}$ are sparse, the mixed model equations can be solved using efficient sparse matrix algebra implemented in the `spam` package [@Furrer2010]. To calculate the derivatives of the log-likelihood in an efficient way, the automatic differentiation of the Cholesky matrix [@Smith1995;@boer2023] was implemented in C++ using the `Rcpp` package [@Eddelbuettel2018].
 
 # Introduction 
-The purpose of this section is to give users an easy introduction, starting from simple linear regression. Based on simulations we will explain the main functions, the input and the output. First we load the `LMMsolver`,`ggplot2` and `tidyr` packages:      
+The purpose of this section is to give users an easy introduction, starting from simple linear regression. Based on simulations we will explain the main functions, the input and the output. First we load the `LMMsolver` and `ggplot2` packages:      
 
 ```{r setup}
 library(LMMsolver)
 library(ggplot2)
-library(tidyr)
 ```
 
 ## Linear Regression
@@ -467,14 +466,12 @@ The following code simulates the data:
 
 ```{r binomial_sim}
 set.seed(1234)
-
 n <- 100
 sz <- 10
 
 fun_prob <- function(x) { 0.5 + 0.4*sin(2*pi*x) }
 
 x <- seq(0, 1, length=n)
-
 nsucces <- sapply(x, FUN=function(x) {
                   rbinom(n=1, size = sz, prob = fun_prob(x))
                 })
@@ -552,13 +549,14 @@ multiNom <- t(sapply(x, FUN=
                       } ))
 colnames(multiNom) <- names(mu)
 dat <- data.frame(x, multiNom)
-head(dat)
+head(dat, 4)
 ```
 
 ```{r multinomialfit}
 obj <- LMMsolve(fixed = cbind(A,B,C,D) ~ 1,
                 spline = ~spl1D(x, nseg = 17, xlim = c(0,1)),
-                data=dat, family = multinomial())
+                data = dat, 
+                family = multinomial())
 summary(obj)
 ```
 The predictions are given by: 
@@ -571,18 +569,20 @@ dat_fr <- data.frame(x, fr)
 x0 <- seq(0, 1, by = 0.01)
 newdat <- data.frame(x = x0)
 pred <- predict(obj, newdata = newdat)
-colnames(pred) <- c("x", "category", "y")
 head(pred)
+```
 
-prob_true <- t(sapply(X=x0, FUN=function(x) { nonlinear(x, mu)}))
+The following code generates the plot with prediction, with the points the observed fractions, the dashed curves the true probabilities and the solid curves the predicted values:
+
+```{r makePlot}
+library(tidyr)
+colnames(pred) <- c("x", "category", "y")
+prob_true <- t(sapply(X=x0, FUN = function(x) { nonlinear(x, mu)}))
 colnames(prob_true) <- names(mu)
-nCatTot <- length(obj$respVar)
-df_true <- data.frame(x=x0, prob_true)
+df_true <- data.frame(x = x0, prob_true)
 prob_true_lf <- df_true %>% gather(key = "category",value="y", A:D)
-
 dat_fr_lf <- dat_fr %>% gather(key = "category",value="y", A:D)
-
-p1 <- ggplot(prob_true_lf, aes(x = x, y=y,color=category)) +
+p1 <- ggplot(prob_true_lf, aes(x = x, y=y, color = category)) +
   geom_line(linetype='dashed') +
   geom_line(data=pred) +
   geom_point(data=dat_fr_lf)
