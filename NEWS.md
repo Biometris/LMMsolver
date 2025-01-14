@@ -1,8 +1,8 @@
 # LMMsolver 1.0.9
 
--   Vignette updated, with separate section for GLMM.
--   Categorial response using `family = multinomial()`
 -   Binomial response can now also be modelled as `fixed = cbind(failure, succes)`
+-   Categorial response using `family = multinomial()`
+-   Vignette updated, with separate section for GLMM.
 -   doi-link added for `LMMsolver`. 
 -   argument `offset` can be defined as numeric or (new) as column name in data frame. 
 -   example added to `predict()` function.
