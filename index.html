@@ -14,8 +14,8 @@
 <link rel="apple-touch-icon" type="image/png" sizes="60x60" href="apple-touch-icon-60x60.png">
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
-<link href="deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="An R package for providing an efficient and flexible system to solve sparse mixed model equations">
 <meta name="description" content="An efficient and flexible system to solve sparse mixed model equations. Important applications are the use of splines to model spatial or temporal trends as described in Boer (2023). (&lt;doi:10.1177/1471082X231178591&gt;).">
 <meta property="og:description" content="An efficient and flexible system to solve sparse mixed model equations. Important applications are the use of splines to model spatial or temporal trends as described in Boer (2023). (&lt;doi:10.1177/1471082X231178591&gt;).">
@@ -29,7 +29,7 @@
 
     <a class="navbar-brand me-2" href="index.html">LMMsolver</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.8</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.9</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -69,8 +69,8 @@
 <img src="logo.png" class="logo" alt=""><h1 id="lmmsolver-">LMMsolver <a class="anchor" aria-label="anchor" href="#lmmsolver-"></a>
 </h1>
 </div>
-<p><a href="https://www.r-pkg.org/pkg/LMMsolver" class="external-link"><img src="https://www.r-pkg.org/badges/version/LMMsolver"></a> <a href="https://www.r-pkg.org/pkg/LMMsolver" class="external-link"><img src="https://cranlogs.r-pkg.org/badges/LMMsolver" alt="CRAN RStudio mirror downloads"></a> <a href="https://github.com/Biometris/LMMsolver/actions?workflow=R-CMD-check" class="external-link"><img src="https://github.com/Biometris/LMMsolver/workflows/R-CMD-check/badge.svg" alt="R-CMD-check"></a> <a href="https://app.codecov.io/gh/Biometris/LMMsolver" class="external-link"><img src="https://codecov.io/gh/Biometris/LMMsolver/branch/master/graph/badge.svg" alt="codecov"></a></p>
-<p>The aim of the <code>LMMsolver</code> package is to provide an efficient and flexible system to estimate variance components using restricted maximum likelihood or REML (Patterson and Thompson 1971), for models where the mixed model equations are sparse. An important feature of the package is smoothing with P-splines (Eilers and Marx 1996). The sparse mixed model P-splines formulation (Boer 2023) is used, which makes the computations fast.</p>
+<p><a href="https://www.r-pkg.org/pkg/LMMsolver" class="external-link"><img src="https://www.r-pkg.org/badges/version/LMMsolver"></a> <a href="https://www.r-pkg.org/pkg/LMMsolver" class="external-link"><img src="https://cranlogs.r-pkg.org/badges/LMMsolver" alt="CRAN RStudio mirror downloads"></a> <a href="https://github.com/Biometris/LMMsolver/actions?workflow=R-CMD-check" class="external-link"><img src="https://github.com/Biometris/LMMsolver/workflows/R-CMD-check/badge.svg" alt="R-CMD-check"></a> <a href="https://app.codecov.io/gh/Biometris/LMMsolver" class="external-link"><img src="https://codecov.io/gh/Biometris/LMMsolver/branch/master/graph/badge.svg" alt="codecov"></a> <a href="https://doi.org/10.5281/zenodo.14527380" class="external-link"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.14527380.svg" alt="DOI"></a></p>
+<p>The aim of the <code>LMMsolver</code> package is to provide an efficient and flexible system to estimate variance components using restricted maximum likelihood or REML (Patterson and Thompson 1971), for models where the mixed model equations are sparse. An important feature of the package is smoothing with P-splines (Eilers and Marx 1996). The sparse mixed model P-splines formulation (Boer 2023) is used, which makes the computations fast. The computational advantage of the sparse mixed model formulation is especially clear for two-dimensional smoothing (Boer 2023; Carollo et al. 2024).</p>
 <!-- The aim of the `LMMsolver` package is to provide an efficient and flexible system to estimate variance components using restricted maximum likelihood or REML [@Patterson1971], for models where the mixed model equations are sparse [@boer2023]. An example of an application is using splines to model spatial [@Rodriguez-Alvarez2018; @Boer2020] or temporal [@Bustos-Korts2019] trends. Another example is mixed model Quantitative Trait Locus (QTL) analysis for multiparental populations, allowing for heterogeneous residual variance and design matrices with Identity-By-Descent (IBD) probabilities [@Li2021]. -->
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
@@ -152,6 +152,9 @@
 <div id="ref-boer2023" class="csl-entry">
 Boer, Martin P. 2023. “Tensor Product P-Splines Using a Sparse Mixed Model Formulation.” <em>Statistical Modelling</em> 23 (5-6): 465–79. <a href="https://doi.org/10.1177/1471082X231178591" class="external-link uri">https://doi.org/10.1177/1471082X231178591</a>.
 </div>
+<div id="ref-carollo2024" class="csl-entry">
+Carollo, Angela, Paul Eilers, Hein Putter, and Jutta Gampe. 2024. “Smooth Hazards with Multiple Time Scales.” <em>Statistics in Medicine</em>. <a href="https://doi.org/10.1002/sim.10297" class="external-link uri">https://doi.org/10.1002/sim.10297</a>.
+</div>
 <div id="ref-Eilers1996" class="csl-entry">
 Eilers, PHC, and BD Marx. 1996. “<span class="nocase">Flexible smoothing with B-splines and penalties</span>.” <em>Stat. Sci.</em> <a href="https://www.jstor.org/stable/2246049" class="external-link uri">https://www.jstor.org/stable/2246049</a>.
 </div>
@@ -207,7 +210,7 @@ Patterson, HD, and R Thompson. 1971. “<span class="nocase">Recovery of inter-b
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer>
