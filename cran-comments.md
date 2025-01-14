@@ -1,6 +1,6 @@
 ## Major release
 
-Addition of predict function. New example and further generalizations.
+Addition of options for multinomial. Improved documentation and examples.
 
 ----
 
