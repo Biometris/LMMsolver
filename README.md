@@ -8,7 +8,7 @@
 downloads](https://cranlogs.r-pkg.org/badges/LMMsolver)](https://www.r-pkg.org/pkg/LMMsolver)
 [![R-CMD-check](https://github.com/Biometris/LMMsolver/workflows/R-CMD-check/badge.svg)](https://github.com/Biometris/LMMsolver/actions?workflow=R-CMD-check)
 [![codecov](https://codecov.io/gh/Biometris/LMMsolver/branch/main/graph/badge.svg)](https://app.codecov.io/gh/Biometris/LMMsolver)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14527380.svg)](https://doi.org/10.5281/zenodo.14527380)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14527379.svg)](https://doi.org/10.5281/zenodo.14527379)
 
 The aim of the `LMMsolver` package is to provide an efficient and
 flexible system to estimate variance components using restricted maximum
