@@ -95,31 +95,63 @@ GrevillePoints <- function(knots) {
   sapply(X = c(1:q), FUN = function(j) { sum(knots[(j+1):(j+d)]) / d })
 }
 
+#' calc Marsden coefficients in a recursive way,
+#' see Tom Lyche et al.
+#' @noRd
+#' @keywords internal
+calcMarsden <- function(xmin, xmax, deg, nseg, x, k)
+{
+  q <- nseg+deg
+  if (k == 0) {
+    return(rep(1,q))
+  }
+  xiRec <- calcMarsden(xmin, xmax, deg-1, nseg, x, k-1)
+  knots <- PsplinesKnots(xmin, xmax, degree=deg, nseg=nseg)
+  Bx <- Bsplines(knots, x)
+  h <- attr(knots, which="dx")
+  D <- diff(diag(q), diff=1)
+  M <- as.matrix(rbind((1/h)*D, Bx))
+  b <- c(k*xiRec, x^k)
+  xi <- solve(M, b)
+  xi
+}
+
 #' Construct G, such that BG = X
 #'
 #' @noRd
 #' @keywords internal
 constructG <- function(knots,
-                       scaleX,
-                       pord) {
-  if (pord == 2) {
+                           scaleX,
+                           pord) {
+  degr <- attr(knots,"degree")
+  nKnots <- length(knots)
+  nseg <- nKnots - 2*degr - 1
+  q <- nseg + degr
+  if (scaleX) {
+    ## MB, 1 febr 2025: we calculate here the original scaling as
+    ## used in previous version
     xi <- GrevillePoints(knots)
-    G <- cbind(1, xi)
-    if (scaleX) {
-      q <- length(xi)
-      xi_mn <- mean(xi)
-      alpha <- normVec(xi-xi_mn)
-      K <- matrix(data=c(1/sqrt(q),0,-xi_mn/alpha,1/alpha),nrow=2,ncol=2)
-      G <- G %*% K
-    }
-  } else { # pord==1
-    d <- attr(knots,"degree")
-    q <- length(knots) - (d + 1)
-    G <- matrix(data=1, nrow=q, ncol=1)
-    if (scaleX) {
-      G <- (1/sqrt(q))*G
-    }
+    xi_mn <- mean(xi)
+    alpha <- normVec(xi-xi_mn)
+    xi_sc <- (xi-xi_mn)/alpha
+    h <- xi_sc[2] - xi_sc[1]
+    nKnots <- length(knots)
+    xmax <-  ((nKnots-1)/2)*h-degr*h
+    xmin <- -xmax
+    knots <- PsplinesKnots(xmin=xmin, xmax=xmax, degree=degr, nseg=nseg)
   }
+  xmin <- attr(knots,"xmin")
+  xmax <- attr(knots,"xmax")
+  xmid <- 0.5*(xmin + xmax)
+  G <- NULL
+  for (k in 0:(pord-1)) {
+    xi <- calcMarsden(xmin = xmin,xmax = xmax,deg = degr,nseg = nseg,x = xmid, k = k)
+    G <- cbind(G, xi)
+  }
+  if (scaleX) {
+    G[,1] <- G[,1]/sqrt(q)
+  }
+  dimnames(G) <- NULL
   return(G)
 }
 
