@@ -38,8 +38,8 @@ expect_error(LMMsolve(fixed = y ~ 1, data = simDat,
 # pord
 expect_error(LMMsolve(fixed = y ~ 1, data = simDat,
                       spline = ~spl3D(x1 = x1, x2 = x2, x3 = x3, nseg = c(4, 4, 4),
-                                      pord = 3)),
-             "pord should be either 1 or 2")
+                                      pord = 4)),
+             "pord should be equal to 1, 2 or 3")
 
 # degree
 expect_error(LMMsolve(fixed = y ~ 1, data = simDat,

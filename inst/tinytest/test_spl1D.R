@@ -26,8 +26,8 @@ expect_error(LMMsolve(fixed = yield ~ rep + gen, data = john.alpha,
 
 # pord
 expect_error(LMMsolve(fixed = yield ~ rep + gen, data = john.alpha,
-                      spline = ~spl1D(x = plot, nseg = 10, pord = 3)),
-             "pord should be either 1 or 2")
+                      spline = ~spl1D(x = plot, nseg = 10, pord = 4)),
+             "pord should be equal to 1, 2 or 3")
 
 # degree
 expect_error(LMMsolve(fixed = yield ~ rep + gen, data = john.alpha,

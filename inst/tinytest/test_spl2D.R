@@ -35,8 +35,8 @@ expect_error(LMMsolve(fixed = yield ~ 1, data = durban.rowcol,
 # pord
 expect_error(LMMsolve(fixed = yield ~ 1, data = durban.rowcol,
                       spline = ~spl2D(x1 = bed, x2 = row, nseg = c(10, 10),
-                                      pord = 3)),
-             "pord should be either 1 or 2")
+                                      pord = 4)),
+             "pord should be equal to 1, 2 or 3")
 
 # degree
 expect_error(LMMsolve(fixed = yield ~ 1, data = durban.rowcol,

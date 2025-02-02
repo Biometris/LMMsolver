@@ -1,3 +1,7 @@
+# LMMsolver 1.0.9.9000
+
+-   Third order differences (`pord=3`) added for `splxD()` functions
+
 # LMMsolver 1.0.9
 
 -   Binomial response can now also be modelled as `fixed = cbind(failure, succes)`

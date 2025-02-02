@@ -158,7 +158,7 @@ constructG <- function(knots,
 #' Construct constraint matrix
 #'
 #' @param knots knot positions of B-spline basis.
-#' @param pord order of the penalty matrix (pord=1 or 2).
+#' @param pord order of the penalty matrix
 #'
 #' @returns a q x q matrix of type spam
 #'
@@ -168,12 +168,12 @@ constructCCt <- function(knots,
                          pord) {
   xmin <- attr(knots, which = "xmin")
   xmax <- attr(knots, which = "xmax")
-  # if pord == 1 take point halfway, otherwise the
-  # begin and endpoint of B-spline basis:
+  # if pord == 1 take point halfway, otherwise on
+  # a regular grid including the begin and endpoint
   if (pord == 1) {
     x <- 0.5 * (xmin + xmax)
   } else {
-    x <- c(xmin, xmax)
+    x <- seq(xmin, xmax, length = pord)
   }
   Bx <- Bsplines(knots, x)
   CCt <- spam::crossprod.spam(Bx)
@@ -426,6 +426,7 @@ nameCoefs <- function(coefs,
         names(coefI) <- "(Intercept)"
         attr(coefI, "termType") <- "(Intercept)"
       } else if (startsWith(x = labI, prefix = "lin(") ||
+                 startsWith(x = labI, prefix = "pol(") ||
                  startsWith(x = labI, prefix = "s(") ||
                  startsWith(x = labI, prefix = "cf(")) {
         ## Spline and (cf) terms are just named 1...n.

@@ -12,12 +12,15 @@ spl3D <- function(x1,
                   x2lim = range(x2),
                   x3lim = range(x3)) {
   ## Checks.
-  if (!is.numeric(pord) || length(pord) > 1 || !pord %in% 1:2) {
-    stop("pord should be either 1 or 2.\n")
+  if (!is.numeric(pord) || length(pord) > 1 || !pord %in% 1:3) {
+    stop("pord should be equal to 1, 2 or 3.\n")
   }
   if (!is.numeric(degree) || length(degree) > 1 || degree < 1 ||
       degree != round(degree)) {
     stop("degree should be a positive integer.\n")
+  }
+  if (pord > degree) {
+    stop("pord should be less or equal to degree.\n")
   }
   if (!is.numeric(nseg) || length(nseg) != 3 || any(nseg < 1) ||
       any(nseg != round(nseg))) {
@@ -65,7 +68,12 @@ spl3D <- function(x1,
     term.labels.f <- NULL
   } else {
     dim.f <- ncol(X)
-    term.labels.f <- paste0("lin(", paste(xNames, collapse = ", "), ")")
+    if (pord > 2) {
+      trm <- "pol"
+    } else {
+      trm <- "lin"
+    }
+    term.labels.f <- paste0(trm,"(", paste(xNames, collapse = ", "), ")")
   }
   dim.r <- ncol(B123)
   term.labels.r <- paste0("s(", paste(xNames, collapse = ", "), ")")

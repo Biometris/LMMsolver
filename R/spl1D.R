@@ -71,12 +71,15 @@ spl1D <- function(x,
                   cond = NULL,
                   level = NULL) {
   ## Checks.
-  if (!is.numeric(pord) || length(pord) > 1 || !pord %in% 1:2) {
-    stop("pord should be either 1 or 2.\n")
+  if (!is.numeric(pord) || length(pord) > 1 || !pord %in% 1:3) {
+    stop("pord should be equal to 1, 2 or 3.\n")
   }
   if (!is.numeric(degree) || length(degree) > 1 || degree < 1 ||
       degree != round(degree)) {
     stop("degree should be a positive integer.\n")
+  }
+  if (pord > degree) {
+    stop("pord should be less or equal to degree.\n")
   }
   if (!is.numeric(nseg) || length(nseg) > 1 || nseg < 1 ||
       nseg != round(nseg)) {
@@ -120,7 +123,11 @@ spl1D <- function(x,
     term.labels.f <- NULL
   } else {
     dim.f <- ncol(X)
-    term.labels.f <- paste0("lin(", xName, ")")
+    if (pord > 2) {
+      term.labels.f <- paste0("pol(", xName, ")")
+    } else {
+      term.labels.f <- paste0("lin(", xName, ")")
+    }
   }
   dim.r <- ncol(B)
   term.labels.r <- paste0("s(", xName, ")")
