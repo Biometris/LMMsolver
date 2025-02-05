@@ -241,7 +241,7 @@ LMMsolve <- function(fixed,
   if (!is.null(spline)) {
     # check correct formula splines
     chkSplinesFormula(spline)
-    splTrms <- terms(spline, specials = c("spl1D", "spl2D", "spl3D"))
+    splTrms <- terms(spline, specials = c("spl1D", "spl2D", "spl3D","torus"))
     splSpec <- attr(splTrms, "specials")
     splTerms <- labels(splTrms)
     Nterms <- length(splTerms)

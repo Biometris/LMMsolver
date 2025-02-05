@@ -670,3 +670,25 @@ checkMultiResponse <- function(YY, family) {
 }
 
 
+cBsplines <- function(knots, x) {
+  bdegr <- attr(knots, which="degree")
+  B0 <- Bsplines(knots, x)
+  nseg <- ncol(B0) - bdegr
+  cc <- (1:bdegr) + nseg
+  B <- B0[, 1:nseg]
+  B[, 1:bdegr] <- B[, 1:bdegr] + B0[, cc]
+  B
+}
+
+cDiff <- function(q) {
+  D2 <- spam::spam(x=0, nrow=q, ncol=q+2)
+  p <- c(1, -2 * cos(2 * pi/q), 1)
+  for (k in 1:q) {
+    D2[k, (0:2) + k] <- p
+  }
+  D <- D2[, 2:(q + 1)]
+  D[, 1] <- D[, 1] + D2[, q + 2]
+  D[, q] <- D[, q] + D2[, 1]
+  D
+}
+
