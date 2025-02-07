@@ -1,5 +1,5 @@
 #' ---
-#' title: Smoothing on torus, simulated data
+#' title: Smoothing on a cylinder, simulated data
 #' author: Martin Boer, Biometris, WUR, Wageningen
 #' ---
 
@@ -10,7 +10,7 @@ suppressMessages(library(spam))
 
 set.seed(1234)
 
-cnt.data <- FALSE
+cnt.data <- TRUE
 if (cnt.data) {
   fam <- poisson()
 } else {
