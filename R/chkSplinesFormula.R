@@ -6,7 +6,7 @@ chkSplinesFormula <- function(spline) {
     spline <- formula(paste((gsub(pattern = "LMMsolver::",
                                   replacement = "",
                                   as.character(spline))), collapse = ""))
-    splTrms <- terms(spline, specials = c("spl1D", "spl2D", "spl3D","torus"))
+    splTrms <- terms(spline, specials = c("spl1D", "spl2D", "spl3D","torus","cylinder"))
     splSpec <- attr(splTrms, "specials")
     if (length(terms(splTrms)) != 2 ||
         ## Spline formula should consist of splxD() terms and nothing else.
