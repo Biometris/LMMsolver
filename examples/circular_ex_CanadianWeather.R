@@ -3,16 +3,12 @@
 #' author: Martin Boer, Biometris, WUR, Wageningen
 #' ---
 
-library(JOPS)
-library(circular)
 library(ggplot2)
 library(LMMsolver)
 suppressMessages(library(spam))
-library(fda)
+suppressMessages(library(fda))
 
 data(CanadianWeather)
-
-#head(CanadianWeather)
 
 df <- as.data.frame(CanadianWeather$dailyAv[,,1])
 dim(df)
@@ -24,7 +20,7 @@ y <- df[[city]]
 
 dat <- data.frame(day=x, temp=y)
 
-nseg <- 50
+nseg <- 100
 
 # Prepare basis and penalty
 knots <- LMMsolver:::PsplinesKnots(0, 1, degree = 3, nseg = nseg)
@@ -41,16 +37,15 @@ range(cD %*% u2)
 x1 <- cB %*% u1
 x2 <- cB %*% u2
 
-#' Method 1: von Mises, only fixed part of model
+#' Method 1: Only fixed part (null-space) of model
 #' ==================
 #'
 dat1 <- data.frame(y, x1, x2)
-obj1 <- LMMsolve(fixed = y~x1+x2,
-                 data = dat1)
+obj1 <- LMMsolve(fixed = y~x1+x2, data = dat1)
 summary(obj1)
 
-# make predictions
-x0 <- seq(0,1, by=0.001)
+# make predictions on a grid
+x0 <- seq(0, 1, by=0.001)
 cB0 <- LMMsolver:::cBsplines(knots,x0)
 x1_grid <- cB0 %*% u1
 x2_grid <- cB0 %*% u2
@@ -94,7 +89,7 @@ mu2 <- eta2
 dat3 <- data.frame(as.matrix(cB), y, x1, x2)
 q <- ncol(cB)
 # add additional constraints, see Boer (2023).
-cB_star <- cbase(x = c(0, 0.25), 0, 1, nseg = nseg)
+cB_star <- LMMsolver:::cBsplines(knots, x=c(0,0.25))
 
 P <- as.spam(crossprod(cD) + crossprod(cB_star))
 lGinv <- list(ndx = P)
@@ -121,36 +116,18 @@ mu3 <- eta3
 # should give same results
 range(mu2-mu3)
 
-a3 <- obj3$coefMME
-Z3 <- cbind(1, x1_grid, x2_grid, 0*cB0)
-eta4 <- as.vector(Z3 %*% a3)
-mu4 <- eta4
-
-#' Standard non-circular splines
-#' ==================
-
-obj4 <- LMMsolve(fixed = temp~1,
-                 spline = ~spl1D(day, nseg=nseg,xlim=c(0,1)),
-                 data = dat)
-summary(obj4)
-
-newdat <- data.frame(day=x0)
-pred <- predict(obj4,newdata=newdat)
-
 #' Make plots
 #' ==================
 
-Data <- data.frame(x = x0, mu1 = mu1, mu2=mu2, mu3 = mu3, mu4=mu4)
+Data <- data.frame(x = c(x0,x0), mu=c(mu1,mu3),
+                   model=as.factor(c(rep("fixed", length(x0)),
+                         rep("circ P-splines",length(x0)))))
 
-plt2 <- ggplot(Data, aes(x = x))+
+plt2 <- ggplot(Data, aes(x = x, y=mu, col=model))+
   ggtitle(paste(city, ": January thaw (Ramsay, Silverman 2005, p73)")) +
   xlab("year") + ylab("temperature") +
-  #geom_line(aes(x = x, y = mu1), col = 'red') +
-  geom_line(aes(x = x, y = mu2), col = 'blue') +
-  geom_line(aes(x = x, y = mu4), col ='green') +
-  geom_point(data=dat,aes(x=day,y=temp), inherit.aes = FALSE,size=0.5) +
-  JOPS_theme()
+  geom_line() +
+  geom_point(data=dat,aes(x=day,y=temp), inherit.aes = FALSE,size=0.5)
 
-# Make and save graph
 print(plt2)
 
