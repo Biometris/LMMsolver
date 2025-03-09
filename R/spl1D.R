@@ -72,12 +72,7 @@ spl1D <- function(x,
                   xlim = range(x),
                   cond = NULL,
                   level = NULL) {
-  if (cyclic) {
-    #warning("Cyclic, still first implementation! \n")
-    xlim = c(0,1)
-    scaleX = FALSE
-  }
-  ## Checks.
+  ## Checks
   if (!is.numeric(pord) || length(pord) > 1 || !pord %in% 1:3) {
     stop("pord should be equal to 1, 2 or 3.\n")
   }
@@ -92,6 +87,20 @@ spl1D <- function(x,
       nseg != round(nseg)) {
     stop("nseg should be a positive integer.\n")
   }
+  if (!is.logical(cyclic) || length(cyclic) > 1) {
+    stop("cyclic should be FALSE or TRUE.\n")
+  }
+  if (cyclic) {
+    xlim = c(0,1)
+    scaleX = FALSE
+    if (min(x) < 0 || max(x) > 1) {
+      stop("x should be in the range [0,1] for cyclic data.\n")
+    }
+    if (pord != 2) {
+      stop("pord should be equal to two for cyclic data.\n")
+    }
+  }
+
   ## Save names of the x-variables so they can be used later on in predictions.
   xName <- deparse(substitute(x))
   if (!exists(xName, where = parent.frame(), inherits = FALSE)) {

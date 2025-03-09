@@ -38,10 +38,6 @@ x2 <- X[,3]
 range(x1^2 + x2^2-1)
 plot(x=x1, y=x2)
 
-#dat1 <- data.frame(y, x1, x2)
-#obj0 <- LMMsolve(fixed = y~1, spline=~spl1D(x1, nseg=20), data = dat1)
-
-
 #' Method 1: Only fixed part (null-space) of model
 #' ==================
 #'
@@ -165,4 +161,6 @@ all.equal(spl$Z, cB)
 obj2$nIter
 obj3$nIter
 obj4$nIter
+
+
 
