@@ -10,7 +10,7 @@ suppressMessages(library(spam))
 
 set.seed(1234)
 
-cnt.data <- FALSE
+cnt.data <- TRUE
 if (cnt.data) {
   fam <- poisson()
 } else {
@@ -53,38 +53,15 @@ ggplot() +
 
 nseg <- c(30,25)
 
-obj1 <- LMMsolve(fixed = y~1,
-                 spline = ~cylinder(x1=x1,x2=x2, nseg=nseg),
+obj <- LMMsolve(fixed = y~1,
+                 spline = ~spl2D(x1=x1,x2=x2, nseg=nseg, cyclic=c(FALSE,TRUE)),
                  family = fam,
                  data = dat_train)
-summary(obj1)
-
+summary(obj)
 # prediction by foot, values should be in [0, 1]
-grid <- expand.grid(x1 = seq(0,2,length=100),
-                    x2 = seq(0,1,length=100))
-x1 <- grid$x1
-x2 <- grid$x2
-knots <- obj1$splRes[[1]]$knots
-B1 <- LMMsolver:::Bsplines(knots[[1]], x1)
-B2 <- LMMsolver:::cBsplines(knots[[2]], x2)
-B12 <- LMMsolver:::RowKronecker(B1, B2)
-
-# define fixed part of model X:
-G1 <- LMMsolver:::constructG(knots[[1]],scaleX=FALSE,pord=2)
-z2 <- c(0:(nseg[2]-1))/nseg[2]
-G2 <- cbind(sin(2*pi*z2), cos(2*pi*z2))
-X1 <- B1 %*% G1
-X2 <- B2 %*% G2
-G <- G1[,2] %x% G2
-X12 <- B12 %*% G
-X <- cbind(X1, X2, X12)
-U <- cbind(X, B12)
-
-# make predictions:
-a <- obj1$coefMME
-yhat <- U %*% a
-pred <- dat
-pred$ypred <- fam$linkinv(yhat)
+grid <- expand.grid(x1 = seq(0, 2, length=100),
+                    x2 = seq(0, 1, length=100))
+pred <- predict(obj, newdata = grid)
 
 ggplot() +
   geom_tile(data = pred, aes(x=x1,y=x2, fill = ypred)) +
@@ -92,24 +69,5 @@ ggplot() +
   ggtitle("fitted data LMMsolver cylinder") +
   JOPS_theme()
 
-# 2: the new formulation using spl2D
 
-obj2 <- LMMsolve(fixed = y~1,
-                 spline = ~spl2D(x1=x1,x2=x2, nseg=nseg, cyclic=c(FALSE,TRUE)),
-                 family = fam,
-                 data = dat_train)
-summary(obj2)
-pred2 <- predict(obj2, newdata=grid)
-
-# 3: using spl2D, reversed axes:
-
-obj3 <- LMMsolve(fixed = y~1,
-                 spline = ~spl2D(x1=x2,x2=x1, nseg=rev(nseg), cyclic=c(TRUE,FALSE)),
-                 family = fam,
-                 data = dat_train)
-summary(obj3)
-pred3 <- predict(obj3, newdata=grid)
-
-range(pred$ypred - pred2$ypred)
-range(pred$ypred - pred3$ypred)
 
