@@ -92,7 +92,6 @@ spl1D <- function(x,
   }
   if (cyclic) {
     xlim = c(0,1)
-    scaleX = FALSE
     if (min(x) < 0 || max(x) > 1) {
       stop("x should be in the range [0,1] for cyclic data.\n")
     }

@@ -125,7 +125,7 @@ range(mu2-mu3)
 dat4 <- data.frame(y, x)
 
 obj4 <- LMMsolve(fixed = y~1,
-                 spline = ~spl1D(x=x,nseg=nseg, cyclic=TRUE),
+                 spline = ~spl1D(x=x,nseg=nseg, cyclic=TRUE, scaleX=FALSE),
                  data = dat4,
                  tolerance = tol, trace=TRUE)
 summary(obj4)

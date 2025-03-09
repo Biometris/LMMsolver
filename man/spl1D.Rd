@@ -29,6 +29,7 @@ spl2D(
   nseg,
   pord = 2,
   degree = 3,
+  cyclic = c(FALSE, FALSE),
   scaleX = TRUE,
   x1lim = range(x1),
   x2lim = range(x2),

@@ -176,6 +176,7 @@ constructG <- function(knots,
     G <- fixedpartCircle(knots)
   }
   if (scaleX) {
+    q <- nrow(G)
     G[,1] <- G[,1]/sqrt(q)
   }
   dimnames(G) <- NULL
