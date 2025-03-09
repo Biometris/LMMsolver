@@ -28,6 +28,7 @@ RowKronecker <- function(X1,
 #' @param xmax A numerical value.
 #' @param degree A numerical value.
 #' @param nseg A numerical value.
+#' @param cyclic A boolean, default false
 #'
 #' @returns A numerical vector of knot positions.
 #'
@@ -35,13 +36,15 @@ RowKronecker <- function(X1,
 PsplinesKnots <- function(xmin,
                           xmax,
                           degree,
-                          nseg) {
+                          nseg,
+                          cyclic = FALSE) {
   dx <- (xmax - xmin) / nseg
   knots <- seq(xmin - degree * dx, xmax + degree * dx, by = dx)
   attr(knots, "degree") <- degree
   attr(knots, "xmin") <- xmin
   attr(knots, "xmax") <- xmax
   attr(knots, "dx") <- dx
+  attr(knots, "cyclic") <- cyclic
 
   return(knots)
 }
@@ -61,7 +64,18 @@ Bsplines <- function(knots,
                      x,
                      deriv = 0) {
   degree <- attr(knots, "degree")
+  cyclic <- attr(knots, "cyclic")
   B <- splines::splineDesign(knots = knots, x = x, ord = degree + 1,
                              derivs = deriv, sparse = TRUE, outer.ok = TRUE)
+
+  if (cyclic) {
+    B0 <- B
+    nseg <- ncol(B0) - degree
+    cc <- (1:degree) + nseg
+    B <- B0[, 1:nseg, drop = FALSE]
+    B[, 1:degree] <- B[, 1:degree] + B0[, cc]
+    B
+  }
+
   return(spam::as.spam.dgCMatrix(B))
 }

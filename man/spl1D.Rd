@@ -16,6 +16,7 @@ spl1D(
   nseg,
   pord = 2,
   degree = 3,
+  cyclic = FALSE,
   scaleX = TRUE,
   xlim = range(x),
   cond = NULL,
@@ -59,6 +60,8 @@ torus(x1, x2, nseg, pord = 2, degree = 3)
 
 \item{x, x1, x2, x3}{The variables in the data containing the values of
 the \code{x} covariates.}
+
+\item{cyclic}{Cyclic or linear B-splines; default \code{cyclic=FALSE}}
 
 \item{scaleX}{Should the fixed effects be scaled.}
 

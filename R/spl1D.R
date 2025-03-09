@@ -8,6 +8,7 @@
 #' @param scaleX Should the fixed effects be scaled.
 #' @param pord The order of penalty, default \code{pord = 2}
 #' @param degree The degree of B-spline basis, default \code{degree = 3}
+#' @param cyclic Cyclic or linear B-splines; default \code{cyclic=FALSE}
 #' @param xlim,x1lim,x2lim,x3lim A numerical vector of length 2 containing the
 #' domain of the corresponding x covariate where the knots should be placed.
 #' Default set to \code{NULL}, when the covariate range will be used.
@@ -66,10 +67,16 @@ spl1D <- function(x,
                   nseg,
                   pord = 2,
                   degree = 3,
+                  cyclic = FALSE,
                   scaleX = TRUE,
                   xlim = range(x),
                   cond = NULL,
                   level = NULL) {
+  if (cyclic) {
+    #warning("Cyclic, still first implementation! \n")
+    xlim = c(0,1)
+    scaleX = FALSE
+  }
   ## Checks.
   if (!is.numeric(pord) || length(pord) > 1 || !pord %in% 1:3) {
     stop("pord should be equal to 1, 2 or 3.\n")
@@ -101,7 +108,7 @@ spl1D <- function(x,
   }
   checkLim(lim = xlim, limName = "xlim", x = x, xName = xName)
   knots <- vector(mode = "list", length = 1)
-  knots[[1]] <- PsplinesKnots(xlim[1], xlim[2], degree = degree, nseg = nseg)
+  knots[[1]] <- PsplinesKnots(xlim[1], xlim[2], degree = degree, nseg = nseg, cyclic=cyclic)
   B <- Bsplines(knots[[1]], x)
   q <- ncol(B)
   if (conditional) {

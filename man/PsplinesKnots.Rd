@@ -4,7 +4,7 @@
 \alias{PsplinesKnots}
 \title{Construct equally placed knots}
 \usage{
-PsplinesKnots(xmin, xmax, degree, nseg)
+PsplinesKnots(xmin, xmax, degree, nseg, cyclic = FALSE)
 }
 \arguments{
 \item{xmin}{A numerical value.}
@@ -14,6 +14,8 @@ PsplinesKnots(xmin, xmax, degree, nseg)
 \item{degree}{A numerical value.}
 
 \item{nseg}{A numerical value.}
+
+\item{cyclic}{A boolean, default false}
 }
 \value{
 A numerical vector of knot positions.
