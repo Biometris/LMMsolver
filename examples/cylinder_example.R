@@ -10,7 +10,7 @@ suppressMessages(library(spam))
 
 set.seed(1234)
 
-cnt.data <- TRUE
+cnt.data <- FALSE
 if (cnt.data) {
   fam <- poisson()
 } else {
@@ -91,3 +91,25 @@ ggplot() +
   scale_fill_gradientn(colors = topo.colors(100)) +
   ggtitle("fitted data LMMsolver cylinder") +
   JOPS_theme()
+
+# 2: the new formulation using spl2D
+
+obj2 <- LMMsolve(fixed = y~1,
+                 spline = ~spl2D(x1=x1,x2=x2, nseg=nseg, cyclic=c(FALSE,TRUE)),
+                 family = fam,
+                 data = dat_train)
+summary(obj2)
+pred2 <- predict(obj2, newdata=grid)
+
+# 3: using spl2D, reversed axes:
+
+obj3 <- LMMsolve(fixed = y~1,
+                 spline = ~spl2D(x1=x2,x2=x1, nseg=rev(nseg), cyclic=c(TRUE,FALSE)),
+                 family = fam,
+                 data = dat_train)
+summary(obj3)
+pred3 <- predict(obj3, newdata=grid)
+
+range(pred$ypred - pred2$ypred)
+range(pred$ypred - pred3$ypred)
+

@@ -93,3 +93,15 @@ ggplot() +
   scale_fill_gradientn(colors = topo.colors(100)) +
   coord_fixed() + ggtitle("fitted data LMMsolver torus") +
   JOPS_theme()
+
+# compuaret with torus function:
+obj2 <- LMMsolve(fixed = y~1,
+                 spline = ~spl2D(x1, x2, nseg, cyclic=c(TRUE, TRUE)),
+                 family = fam,
+                 data = dat_train)
+summary(obj2)
+
+pred2 <- predict(obj2, newdata=grid)
+range(pred$ypred - pred2$ypred)
+
+
