@@ -60,6 +60,7 @@ fitLMM <- function(y, X, Z, w, lGinv, tolerance, trace, maxit,
       z <- (eta - offset) + (y - mu)/deriv
       wGLM <- as.vector(deriv^2 / family$variance(mu))
       wGLM <- wGLM*w
+      wGLM <- ifelse(wGLM < 2*.Machine$double.eps, 2*.Machine$double.eps, wGLM)
       lRinv <- constructRinv(df = data, residual = residual, weights = wGLM)
       obj <- sparseMixedModels(y = z, X = Xs, Z = Z, lGinv = lGinv, lRinv = lRinv,
                                tolerance = tolerance, trace = trace, maxit = maxit,
