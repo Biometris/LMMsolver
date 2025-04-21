@@ -1,7 +1,8 @@
 # LMMsolver 1.0.9.9000
 
 -   Cyclic B-splines models added for `spl1D()` and `spl2D()` functions. 
--   Third order differences (`pord=3`) added for `splxD()` functions
+-   Third order differences (`pord=3`) added for `splxD()` functions.
+-   New argument `type = c("response", "link")` for `predict()` function.
 -   bug fixed for GLMM models if weights are close to zero. 
 
 # LMMsolver 1.0.9

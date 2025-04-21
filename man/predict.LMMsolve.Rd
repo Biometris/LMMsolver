@@ -4,18 +4,23 @@
 \alias{predict.LMMsolve}
 \title{Predict function}
 \usage{
-\method{predict}{LMMsolve}(object, ..., newdata, se.fit = FALSE)
+\method{predict}{LMMsolve}(object, newdata, type = c("response", "link"), se.fit = FALSE, ...)
 }
 \arguments{
 \item{object}{an object of class LMMsolve.}
-
-\item{...}{Unused.}
 
 \item{newdata}{A data.frame containing new points for which the smooth
 trend should be computed. Column names should include the names used when
 fitting the spline model.}
 
+\item{type}{When this has the value "link" the linear predictor fitted
+values or predictions (possibly with associated standard errors) are returned.
+When type = "response" (default) fitted values or predictions on the scale of
+the response are returned (possibly with associated standard errors).}
+
 \item{se.fit}{calculate standard errors, default \code{FALSE}.}
+
+\item{...}{other arguments. Not yet implemented.}
 }
 \value{
 A data.frame with predictions for the smooth trend on the specified

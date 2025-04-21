@@ -368,11 +368,15 @@ deviance.LMMsolve <- function(object,
 #' Predict function
 #'
 #' @param object an object of class LMMsolve.
-#' @param ... Unused.
 #' @param newdata A data.frame containing new points for which the smooth
 #' trend should be computed. Column names should include the names used when
 #' fitting the spline model.
+#' @param type When this has the value "link" the linear predictor fitted
+#' values or predictions (possibly with associated standard errors) are returned.
+#' When type = "response" (default) fitted values or predictions on the scale of
+#' the response are returned (possibly with associated standard errors).
 #' @param se.fit calculate standard errors, default \code{FALSE}.
+#' @param ... other arguments. Not yet implemented.
 #'
 #' @returns A data.frame with predictions for the smooth trend on the specified
 #' grid. The standard errors are saved if `se.fit=TRUE`.
@@ -398,9 +402,11 @@ deviance.LMMsolve <- function(object,
 #'
 #' @export
 predict.LMMsolve <- function(object,
-                             ...,
                              newdata,
-                             se.fit = FALSE) {
+                             type = c("response", "link"),
+                             se.fit = FALSE,
+                             ...) {
+  type <- match.arg(type)
   if (!inherits(object, "LMMsolve")) {
     stop("object should be an object of class LMMsolve.\n")
   }
@@ -520,30 +526,42 @@ predict.LMMsolve <- function(object,
     outDat[[term]] <- rep("Excluded",nRow)
   }
   if (family$family == "multinomial") {
-    eta0 <- as.vector(U %*% object$coefMME)
-    etaM <- matrix(data=eta0,nrow = nRow, ncol= nCat, byrow=TRUE)
+    eta <- as.vector(U %*% object$coefMME)
+    etaM <- matrix(data=eta,nrow = nRow, ncol= nCat, byrow=TRUE)
     pi_est <- t(apply(etaM, MARGIN=1, FUN = family$linkinv)) # linkinv
     pi_est <- cbind(pi_est, 1.0 - rowSums(pi_est))
     colnames(pi_est) <- object$respVar
     tmp <- NULL
-    for (i in seq_along(object$respVar)) {
-      tmp2 <- data.frame(outDat, category = object$respVar[i])
+    catNames <- object$respVar
+    if (type == "link") {
+      catNames <- catNames[-length(catNames)] # skip last reference category
+    }
+    for (i in seq_along(catNames)) {
+      tmp2 <- data.frame(outDat, category = catNames[i])
       tmp <- rbind(tmp, tmp2)
     }
     outDat <- tmp
-    outDat[["category"]] <- as.factor(rep(object$respVar, each = nRow))
-    familyPred <- as.vector(pi_est)
+    outDat[["category"]] <- as.factor(rep(catNames, each = nRow))
   } else {
     eta <- as.vector(U %*% object$coefMME)
-    family <- object$family
-    familyPred <- family$linkinv(eta)
   }
-
-  outDat[["ypred"]] <- familyPred
-  if (se.fit) {
-    outDat[["se"]] <- calcStandardErrors(C = object$C, D = U)*abs(family$mu.eta(eta))
+  if (type == "link") {
+    outDat["eta"] <- eta
+    if (se.fit) {
+      outDat[["se"]] <- calcStandardErrors(C = object$C, D = U)
+    }
+  } else { # type = "response"
+    if (family$family == "multinomial") {
+      familyPred <- as.vector(pi_est)
+    } else {
+      family <- object$family
+      familyPred <- family$linkinv(eta)
+    }
+    outDat[["ypred"]] <- familyPred
+    if (se.fit) {
+      outDat[["se"]] <- calcStandardErrors(C = object$C, D = U)*abs(family$mu.eta(eta))
+    }
   }
-
   return(outDat)
 }
 
