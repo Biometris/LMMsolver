@@ -146,6 +146,13 @@ LMMsolve <- function(fixed,
                      ": weights option cannot be used.")
         stop(str)
       }
+      ## if response is factor convert to matrix
+      if (is.factor(YY)) {
+        tmp.df <- data.frame(Fac=YY)
+        M <- as.matrix(model.matrix(~-1+Fac,tmp.df))
+        colnames(M) <- levels(YY)
+        YY <- M
+      }
       checkMultiResponse(YY, family)
       respVar <- colnames(YY)
       respVarNA <- rep(FALSE, nrow(data))
