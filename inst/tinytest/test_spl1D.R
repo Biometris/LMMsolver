@@ -36,6 +36,9 @@ expect_error(LMMsolve(fixed = yield ~ rep + gen, data = john.alpha,
 expect_error(LMMsolve(fixed = yield ~ rep + gen, data = john.alpha,
                       spline = ~spl1D(x = plot, nseg = 10, degree = c(2, 2))),
              "degree should be a positive integer")
+expect_error(LMMsolve(fixed = yield ~ rep + gen, data = john.alpha,
+                      spline = ~spl1D(x = plot, nseg = 10, pord = 3, degree = 2)),
+             "pord should be less or equal to degree")
 
 # xlim
 expect_error(LMMsolve(fixed = yield ~ rep + gen, data = john.alpha,
@@ -47,6 +50,19 @@ expect_error(LMMsolve(fixed = yield ~ rep + gen, data = john.alpha,
 expect_error(LMMsolve(fixed = yield ~ rep + gen, data = john.alpha,
                       spline = ~spl1D(x = plot, nseg = 10, xlim = c(2, 72))),
              "All values of plot should be between the lower and upper value of xlim")
+
+# cyclic
+john.alpha$sc_plot <- john.alpha$plot/72
+expect_error(LMMsolve(fixed = yield ~ rep + gen, data = john.alpha,
+                      spline = ~spl1D(x = plot, nseg = 10, cyclic=4)),
+                      "cyclic should be FALSE or TRUE")
+expect_error(LMMsolve(fixed = yield ~ rep + gen, data = john.alpha,
+                      spline = ~spl1D(x = plot, nseg = 10, cyclic=TRUE)),
+             "x should be in the range [0,1] for cyclic data", fixed = TRUE)
+expect_error(LMMsolve(fixed = yield ~ rep + gen, data = john.alpha,
+                      spline = ~spl1D(x = sc_plot, nseg = 10, pord=3, cyclic=TRUE)),
+             "pord should be equal to two for cyclic data")
+
 
 ## Fit models as described in JABES2020 paper.
 
