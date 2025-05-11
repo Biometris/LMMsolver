@@ -119,4 +119,15 @@ expect_equal(sumObj2[["Ratio"]],
                0.0593138565407634, 0.738710428505654))
 
 
+## Test third order penalty
+obj3 <- LMMsolve(fixed = yield ~ rep + gen,
+                 spline = ~spl1D(x = plot, nseg = 20, pord = 3,
+                                 scaleX = FALSE),
+                 data = john.alpha, tolerance = 1e-5)
+sumObj3 <- summary(obj3)
+expect_equal(sumObj3[["Term"]],
+             c("(Intercept)", "rep", "gen", "pol(plot)", "s(plot)", "residual"))
+expect_equal(sumObj3[["Effective"]],
+             c(1, 2, 23, 2, 1.975041908968, 42.024958091031372))
+
 
