@@ -107,29 +107,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// logdet
-double logdet(Rcpp::S4 obj, NumericVector lambda);
-RcppExport SEXP _LMMsolver_logdet(SEXP objSEXP, SEXP lambdaSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Rcpp::S4 >::type obj(objSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type lambda(lambdaSEXP);
-    rcpp_result_gen = Rcpp::wrap(logdet(obj, lambda));
-    return rcpp_result_gen;
-END_RCPP
-}
-// PrintCholesky
-NumericMatrix PrintCholesky(Rcpp::S4 obj);
-RcppExport SEXP _LMMsolver_PrintCholesky(SEXP objSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Rcpp::S4 >::type obj(objSEXP);
-    rcpp_result_gen = Rcpp::wrap(PrintCholesky(obj));
-    return rcpp_result_gen;
-END_RCPP
-}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_LMMsolver_construct_ADchol_Rcpp", (DL_FUNC) &_LMMsolver_construct_ADchol_Rcpp, 2},
@@ -140,8 +117,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_LMMsolver_RowKron", (DL_FUNC) &_LMMsolver_RowKron, 2},
     {"_LMMsolver_cntProduct", (DL_FUNC) &_LMMsolver_cntProduct, 2},
     {"_LMMsolver_MatrixProduct", (DL_FUNC) &_LMMsolver_MatrixProduct, 2},
-    {"_LMMsolver_logdet", (DL_FUNC) &_LMMsolver_logdet, 2},
-    {"_LMMsolver_PrintCholesky", (DL_FUNC) &_LMMsolver_PrintCholesky, 1},
     {NULL, NULL, 0}
 };
 

@@ -57,11 +57,3 @@ MatrixProduct <- function(sA, sB) {
     .Call(`_LMMsolver_MatrixProduct`, sA, sB)
 }
 
-logdet <- function(obj, lambda) {
-    .Call(`_LMMsolver_logdet`, obj, lambda)
-}
-
-PrintCholesky <- function(obj) {
-    .Call(`_LMMsolver_PrintCholesky`, obj)
-}
-

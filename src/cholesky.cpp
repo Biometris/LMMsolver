@@ -178,38 +178,6 @@ double logdet(const NumericVector& L, const IntegerVector& colpointers)
   return sum;
 }
 
-// [[Rcpp::export]]
-double logdet(Rcpp::S4 obj, NumericVector lambda)
-{
-  //Rcpp::S4 obj(arg);
-  IntegerVector supernodes = obj.slot("supernodes");
-  IntegerVector rowpointers = obj.slot("rowpointers");
-  IntegerVector colpointers = obj.slot("colpointers");
-  IntegerVector rowindices = obj.slot("rowindices");
-  NumericVector L = obj.slot("entries");
-  NumericMatrix P = obj.slot("P");
-  //NumericMatrix P = Rcpp::clone<Rcpp::NumericMatrix>(obj.slot("P"));
-
-  // define matrix L (lower triangle matrix values)
-  const int sz = P.nrow();
-  const int n_prec_mat = P.ncol();
-  //NumericVector L(sz, 0.0);
-  for (int i=0;i<sz;i++)
-  {
-    L[i] = 0.0;
-  }
-  for (int k=0;k<n_prec_mat;k++)
-  {
-    NumericMatrix::Column Pk = P(_, k);
-    double alpha = lambda[k];
-    for (int i=0;i<sz;i++)
-    {
-      L[i] += alpha*Pk[i];
-    }
-  }
-  cholesky(L, supernodes, rowpointers, colpointers, rowindices);
-  return logdet(L, colpointers);
-}
 
 NumericVector forwardCholesky(
     const NumericVector& L,
@@ -302,6 +270,45 @@ NumericVector backwardCholesky(
   return xP;
 }
 
+
+/*
+ *
+// [[Rcpp::export]]
+double logdet(Rcpp::S4 obj, NumericVector lambda)
+{
+  //Rcpp::S4 obj(arg);
+  IntegerVector supernodes = obj.slot("supernodes");
+  IntegerVector rowpointers = obj.slot("rowpointers");
+  IntegerVector colpointers = obj.slot("colpointers");
+  IntegerVector rowindices = obj.slot("rowindices");
+  NumericVector L = obj.slot("entries");
+  NumericMatrix P = obj.slot("P");
+  //NumericMatrix P = Rcpp::clone<Rcpp::NumericMatrix>(obj.slot("P"));
+
+  // define matrix L (lower triangle matrix values)
+  const int sz = P.nrow();
+  const int n_prec_mat = P.ncol();
+  //NumericVector L(sz, 0.0);
+  for (int i=0;i<sz;i++)
+  {
+    L[i] = 0.0;
+  }
+  for (int k=0;k<n_prec_mat;k++)
+  {
+    NumericMatrix::Column Pk = P(_, k);
+    double alpha = lambda[k];
+    for (int i=0;i<sz;i++)
+    {
+      L[i] += alpha*Pk[i];
+    }
+  }
+  cholesky(L, supernodes, rowpointers, colpointers, rowindices);
+  return logdet(L, colpointers);
+}
+
+*/
+
+/*
 // Just to show the structure of the sparse cholesky matrix with supernodes.
 // [[Rcpp::export]]
 NumericMatrix PrintCholesky(Rcpp::S4 obj)
@@ -341,4 +348,4 @@ NumericMatrix PrintCholesky(Rcpp::S4 obj)
   return A;
 }
 
-
+*/
