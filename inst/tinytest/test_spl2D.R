@@ -38,6 +38,13 @@ expect_error(LMMsolve(fixed = yield ~ 1, data = durban.rowcol,
                                       pord = 4)),
              "pord should be equal to 1, 2 or 3")
 
+# pord
+expect_error(LMMsolve(fixed = yield ~ 1, data = durban.rowcol,
+                      spline = ~spl2D(x1 = bed, x2 = row, nseg = c(10, 10),
+                                      pord = 3, degree = 2)),
+             "pord should be less or equal to degree")
+
+
 # degree
 expect_error(LMMsolve(fixed = yield ~ 1, data = durban.rowcol,
                       spline = ~spl2D(x1 = bed, x2 = row, nseg = c(10, 10),
@@ -67,6 +74,23 @@ expect_error(LMMsolve(fixed = yield ~ 1, data = durban.rowcol,
                       spline = ~spl2D(x1 = bed, x2 = row, nseg = c(10, 10),
                                       x2lim = c(2, 72))),
              "All values of row should be between the lower and upper value of x2lim")
+
+# cyclic
+expect_error(LMMsolve(fixed = yield ~ 1, data = durban.rowcol,
+                      spline = ~spl2D(x1 = bed, x2 = row, nseg = c(10, 10),
+                                      x2lim = c(2, 72), cyclic = c(3,4))),
+             "cyclic should be a logical vector of length two", fixed=TRUE)
+
+expect_error(LMMsolve(fixed = yield ~ 1, data = durban.rowcol,
+                      spline = ~spl2D(x1 = bed, x2 = row, nseg = c(10, 10),
+                                      x2lim = c(2, 72), cyclic= c(TRUE,FALSE))),
+             "x1 should be in the range [0,1] for cyclic data", fixed=TRUE)
+
+expect_error(LMMsolve(fixed = yield ~ 1, data = durban.rowcol,
+                      spline = ~spl2D(x1 = bed, x2 = row, nseg = c(10, 10),
+                                      x2lim = c(2, 72), cyclic= c(FALSE,TRUE))),
+             "x2 should be in the range [0,1] for cyclic data", fixed=TRUE)
+
 
 ## Fit simplified (for speed) version of model described in bioRxiv 2021 paper.
 
@@ -100,3 +124,5 @@ expect_equal(sumObj2[["Term"]],
 expect_equal(sumObj2[["Ratio"]],
              c(1, 1, 0.458895940871542, 4.82648592298555e-05,
                0.0821598533833015, 0.458895940885926))
+
+
