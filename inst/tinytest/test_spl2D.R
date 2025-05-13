@@ -152,7 +152,6 @@ nseg <- c(20,20)
 obj3 <- LMMsolve(fixed = y~1,
                 spline = ~spl2D(x1=x1,x2=x2, nseg=nseg,
                                 cyclic=c(FALSE,TRUE)),
-                family = fam,
                 data = dat_train)
 expect_equivalent_to_reference(obj3, "spl2Dcylinder", tolerance = 1e-6)
 
