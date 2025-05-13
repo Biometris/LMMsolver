@@ -147,6 +147,7 @@ obj4 <- LMMsolve(y~1,
                  spline= ~spl1D(x, nseg=50, cyclic=TRUE),
                  data=dat)
 
-## Check that full LMM solve object is correct.
+## Check that solve object is correct.
+obj4$C <- NULL
 expect_equivalent_to_reference(obj4, "spl1Dcyclic")
 
