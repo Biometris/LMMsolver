@@ -134,6 +134,9 @@ fixedpartCircle <- function(knots)
   cB0 <- Bsplines(knots, x=z)
   v1 <- solve(as.matrix(cB0), u1)
   v2 <- solve(as.matrix(cB0), u2)
+  # make sure small values equal to zero:
+  v1 <- ifelse(abs(v1) < .Machine$double.eps*10, 0, v1)
+  v2 <- ifelse(abs(v2) < .Machine$double.eps*10, 0, v2)
   v <- cbind(1, v1, v2)
   v
 }
