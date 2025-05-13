@@ -23,6 +23,17 @@ expect_error(LMMsolve(fixed = pheno ~ cross, random = ~tst, data = testDat),
 expect_error(LMMsolve(fixed = pheno ~ cross, residual = ~tst, data = testDat),
              "The following variables in the residual part of the model are not")
 
+## Test weights
+testDat2 <- testDat
+testDat2$w <- 1.0
+expect_error(LMMsolve(fixed = pheno ~ cross,
+                      data = testDat2, weights="x"),
+             "weights not defined in dataframe data")
+testDat2$w[1] <- -1
+expect_error(LMMsolve(fixed = pheno ~ cross,
+                      data = testDat2, weights="w"),
+             "weights should be a numeric vector with non-negative values")
+
 ## Test ginverse.
 
 ginv <- matrix(1:4, nrow = 2)
