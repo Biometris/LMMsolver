@@ -188,4 +188,17 @@ Rcpp::S4 MatrixProduct(Rcpp::S4 sA, Rcpp::S4 sB)
 }
 
 
+/*
+ * Not used, only for diagnostics
+ *
+ // [[Rcpp::export]]
+ int cntProduct(Rcpp::S4 sA, const Rcpp::S4 sB)
+ {
+ SparseMatrix A(sA);
+ SparseMatrix B(sB);
+ int cnt = cntProduct(A, B);
+ return cnt;
+ }
+
+ */
 
