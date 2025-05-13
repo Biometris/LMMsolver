@@ -114,16 +114,6 @@ int cntProduct(const SparseMatrix& A, const SparseMatrix B)
 
 
 // [[Rcpp::export]]
-int cntProduct(Rcpp::S4 sA, const Rcpp::S4 sB)
-{
-  SparseMatrix A(sA);
-  SparseMatrix B(sB);
-  int cnt = cntProduct(A, B);
-  return cnt;
-}
-
-
-// [[Rcpp::export]]
 Rcpp::S4 MatrixProduct(Rcpp::S4 sA, Rcpp::S4 sB)
 {
   if ((as<std::string>(sA.attr("class")) != "spam") ||

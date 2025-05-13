@@ -83,18 +83,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// cntProduct
-int cntProduct(Rcpp::S4 sA, const Rcpp::S4 sB);
-RcppExport SEXP _LMMsolver_cntProduct(SEXP sASEXP, SEXP sBSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Rcpp::S4 >::type sA(sASEXP);
-    Rcpp::traits::input_parameter< const Rcpp::S4 >::type sB(sBSEXP);
-    rcpp_result_gen = Rcpp::wrap(cntProduct(sA, sB));
-    return rcpp_result_gen;
-END_RCPP
-}
 // MatrixProduct
 Rcpp::S4 MatrixProduct(Rcpp::S4 sA, Rcpp::S4 sB);
 RcppExport SEXP _LMMsolver_MatrixProduct(SEXP sASEXP, SEXP sBSEXP) {
@@ -115,7 +103,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_LMMsolver_diagXCinvXt", (DL_FUNC) &_LMMsolver_diagXCinvXt, 2},
     {"_LMMsolver_GetIntVector", (DL_FUNC) &_LMMsolver_GetIntVector, 3},
     {"_LMMsolver_RowKron", (DL_FUNC) &_LMMsolver_RowKron, 2},
-    {"_LMMsolver_cntProduct", (DL_FUNC) &_LMMsolver_cntProduct, 2},
     {"_LMMsolver_MatrixProduct", (DL_FUNC) &_LMMsolver_MatrixProduct, 2},
     {NULL, NULL, 0}
 };
