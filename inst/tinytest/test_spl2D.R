@@ -125,4 +125,61 @@ expect_equal(sumObj2[["Ratio"]],
              c(1, 1, 0.458895940871542, 4.82648592298555e-05,
                0.0821598533833015, 0.458895940885926))
 
+## cyclic: cylinder
 
+set.seed(1234)
+
+sim_fun <- function(x) {
+  y <- exp(sin(1.25*pi*x[1])) + exp(sin(2*pi*(x[2]-0.1)))
+  y
+}
+
+# simulate data on a grid:
+n1 <- 100
+n2 <- 100
+n <- n1*n2
+dat <- expand.grid(x1=seq(0,2,length=n1),x2=seq(0,1,length=n2))
+dat$ytrue <- apply(dat, MARGIN=1, FUN = sim_fun)
+
+# take subset for training
+Ntraining <- 2500
+k <- sample(x=c(1:n), size = Ntraining)
+dat_train <- dat[k, ]
+dat_train$y <- dat_train$ytrue + rnorm(n=Ntraining)
+
+nseg <- c(20,20)
+
+obj3 <- LMMsolve(fixed = y~1,
+                spline = ~spl2D(x1=x1,x2=x2, nseg=nseg,
+                                cyclic=c(FALSE,TRUE)),
+                family = fam,
+                data = dat_train)
+expect_equivalent_to_reference(obj3, "spl2Dcylinder", tolerance = 1e-6)
+
+## cyclic: torus
+set.seed(1234)
+
+sim_fun <- function(x) {
+  y <- exp(sin(2*pi*x[1])) + exp(cos(2*pi*x[2]))
+  y
+}
+
+# simulate data on a grid:
+n1 <- 100
+n2 <- 100
+n <- n1*n2
+dat <- expand.grid(x1=seq(0,1,length=n1),x2=seq(0,1,length=n2))
+dat$ytrue <- apply(dat, MARGIN=1, FUN = sim_fun)
+
+Ntraining <- 2500
+k <- sample(x=c(1:n), size = Ntraining)
+dat_train <- dat[k, ]
+
+dat_train$y <- dat_train$ytrue + rnorm(n=Ntraining)
+
+nseg <- c(20, 20)
+
+obj4 <- LMMsolve(fixed = y~1,
+                spline = ~spl2D(x1, x2, nseg, cyclic=c(TRUE, TRUE)),
+                data = dat_train)
+expect_equivalent_to_reference(obj4, "spl2Dtorus", tolerance = 1e-6)
