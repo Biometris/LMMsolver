@@ -130,4 +130,23 @@ expect_equal(sumObj3[["Term"]],
 expect_equal(sumObj3[["Effective"]],
              c(1, 2, 23, 2, 1.975041908968, 42.024958091031372))
 
+## example with cyclic data
+
+set.seed(1234)
+n <- 100
+
+fun_sim <- function(x) { 0.5 + 0.4*sin(2*pi*x) }
+
+x <- seq(0, 1, length=n)
+
+eps <- 0.1*rnorm(n)
+y <- fun_sim(x) + eps
+dat <- data.frame(x=x, y=y)
+
+obj4 <- LMMsolve(y~1,
+                 spline= ~spl1D(x, nseg=50, cyclic=TRUE),
+                 data=dat)
+
+## Check that full LMM solve object is correct.
+expect_equivalent_to_reference(obj4, "spl1Dcyclic")
 
