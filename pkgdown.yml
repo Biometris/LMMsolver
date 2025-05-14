@@ -1,9 +1,9 @@
 pandoc: 3.1.11
-pkgdown: 2.1.1
+pkgdown: 2.1.2
 pkgdown_sha: ~
 articles:
   Solving_Linear_Mixed_Models: Solving_Linear_Mixed_Models.html
-last_built: 2025-01-15T08:33Z
+last_built: 2025-05-14T07:40Z
 urls:
   reference: https://biometris.github.io/LMMsolver/index.html/reference
   article: https://biometris.github.io/LMMsolver/index.html/articles
