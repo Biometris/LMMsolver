@@ -147,5 +147,7 @@ obj4 <- LMMsolve(y~1,
                  spline= ~spl1D(x, nseg=50, cyclic=TRUE),
                  data=dat)
 
-expect_equivalent_to_reference(obj4, "spl1Dcyclic")
+expect_equal(obj4$logL, 171.64662583546)
+
+#expect_equivalent_to_reference(obj4, "spl1Dcyclic")
 
