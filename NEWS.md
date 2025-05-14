@@ -1,4 +1,4 @@
-# LMMsolver 1.0.9.9000
+# LMMsolver 1.0.10
 
 -   Cyclic B-splines models added for `spl1D()` and `spl2D()` functions. 
 -   Third order differences (`pord=3`) added for `splxD()` functions.

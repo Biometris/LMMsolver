@@ -1,12 +1,12 @@
 ## Major release
 
-Addition of options for multinomial. Improved documentation and examples.
+Extended functionality for existing functions.
 
 ----
 
 ## Test environments
 
-* local Windows 10 install, R 4.3.3
+* local Windows 10 install, R 4.5.0
 * winbuilder (develop)
 * Ubuntu (on github actions, devel and release)
 * macOS (on github actions, release)
