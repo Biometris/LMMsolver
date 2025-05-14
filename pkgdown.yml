@@ -3,7 +3,7 @@ pkgdown: 2.1.2
 pkgdown_sha: ~
 articles:
   Solving_Linear_Mixed_Models: Solving_Linear_Mixed_Models.html
-last_built: 2025-05-14T08:53Z
+last_built: 2025-05-14T10:04Z
 urls:
   reference: https://biometris.github.io/LMMsolver/index.html/reference
   article: https://biometris.github.io/LMMsolver/index.html/articles
