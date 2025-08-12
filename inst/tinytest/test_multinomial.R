@@ -90,6 +90,14 @@ expect_error(LMMsolve(fixed = cbind(A,B) ~ 1,
                       data=dat, family = multinomial()),
              "family multinomial two categories, use binomial family.", fixed=TRUE)
 
+
+dat <- data.frame(y=c(1,2,3,2,1,2))
+
+expect_error(LMMsolve(y~1, family = multinomial(), data=dat),
+             "family multinomial : response should be a matrix or a factor.", fixed=TRUE)
+
+
+
 set.seed(1234)
 sz <- 10
 n <- 100

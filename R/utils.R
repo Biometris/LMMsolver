@@ -688,7 +688,7 @@ chkValBsplines <- function(spl, newdata) {
 
 checkMultiResponse <- function(YY, family) {
   if (!inherits(YY, "matrix")) {
-    str <- paste("family", family$family, ": response should be a matrix.")
+    str <- paste("family", family$family, ": response should be a matrix or a factor.")
     stop(str)
   }
   if (ncol(YY) == 2 && family$family == "multinomial") {
