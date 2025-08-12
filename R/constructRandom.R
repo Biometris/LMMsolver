@@ -2,6 +2,11 @@ constructRandom <- function(random, group, condFactor, data) {
   ## Make random part.
   if (!is.null(random)) {
     mf <- model.frame(random, data, drop.unused.levels = TRUE, na.action = NULL)
+    names_mf <- names(mf)
+    IsValidName <- names_mf == make.names(names_mf)
+    if (!all(IsValidName)) {
+      stop("Syntactically unvalid name(s): ", paste(names_mf[which(!IsValidName)], collapse=", "), "\n")
+    }
     mt <- terms(mf)
     f.terms <- all.vars(mt)[attr(mt, "dataClasses") == "factor"]
     Z1 <- Matrix::sparse.model.matrix(mt, data = mf,

@@ -3,6 +3,11 @@ constructFixed <- function(fixed, data) {
   ## Make fixed part.
   fixed[[2]] <- NULL
   mf <- model.frame(fixed, data, drop.unused.levels = TRUE)
+  names_mf <- names(mf)
+  IsValidName <- names_mf == make.names(names_mf)
+  if (!all(IsValidName)) {
+    stop("Syntactically unvalid name(s): ", paste(names_mf[which(!IsValidName)], collapse=", "), "\n")
+  }
   mt <- terms(mf)
   f.terms <- all.vars(mt)[attr(mt, "dataClasses") == "factor"]
   X <- Matrix::sparse.model.matrix(mt, data = mf,
