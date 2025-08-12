@@ -79,10 +79,10 @@ expect_error(LMMsolve(fixed = pheno ~ cross, random = ~grp(QTL),
 dat <- data.frame(x = 1:3, `a-b` = 3:1, `a+b` = 1:3, ab = 3:1, check.names = FALSE)
 
 expect_error(LMMsolve(x~`a-b`, data = dat),
-             "Syntactically unvalid name(s): a-b", fixed = TRUE)
+             "Syntactically invalid name(s): a-b", fixed = TRUE)
 
 expect_error(LMMsolve(x~1, random=~`a+b`, data=dat),
-             "Syntactically unvalid name(s): a+b", fixed=TRUE)
+             "Syntactically invalid name(s): a+b", fixed=TRUE)
 
 ## Fit models with different components.
 
