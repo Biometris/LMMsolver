@@ -6,7 +6,7 @@ constructFixed <- function(fixed, data) {
   names_mf <- names(mf)
   IsValidName <- names_mf == make.names(names_mf)
   if (!all(IsValidName)) {
-    stop("Syntactically unvalid name(s): ", paste(names_mf[which(!IsValidName)], collapse=", "), "\n")
+    stop("Syntactically invalid name(s): ", paste(names_mf[which(!IsValidName)], collapse=", "), "\n")
   }
   mt <- terms(mf)
   f.terms <- all.vars(mt)[attr(mt, "dataClasses") == "factor"]
