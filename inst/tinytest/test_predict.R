@@ -70,4 +70,4 @@ expect_error(predict(obj, newdata = newdat, se.fit=TRUE),
              "se.fit=TRUE not implemented yet for multinomial")
 
 pred5 <- predict(obj, newdata = newdat, se.fit=FALSE)
-expect_equivalent_to_reference(pred5, "pred5")
+expect_equivalent_to_reference(pred5, "pred6")
