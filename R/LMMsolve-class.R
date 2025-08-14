@@ -457,7 +457,7 @@ predict.LMMsolve <- function(object,
       stop("Derivatives for non-gaussian data not implemented yet\n")
     }
 
-    isDeriv <- sapply(obj$splRes,FUN= function(spl) {
+    isDeriv <- sapply(object$splRes,FUN= function(spl) {
                                         nameVar <- names(spl$x)
                                         if (length(nameVar) > 1) return(FALSE)
                                         nameVar == deriv})
