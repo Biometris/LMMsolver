@@ -52,9 +52,12 @@ dat <- data.frame(x, y)
 obj <- LMMsolve(fixed = y ~ 1,
          spline = ~spl1D(x, nseg = 50), data = dat)
 
-## make predictions on a grid
-newdat <- data.frame(x = seq(0, 1, length = 300))
+## make predictions
+newdat <- data.frame(x = seq(0, 1, length = 5))
 pred <- predict(obj, newdata = newdat, se.fit = TRUE)
-head(pred)
+pred
 
+## make predictions for derivative of x:
+pred2 <- predict(obj, newdata = newdat, se.fit = TRUE, deriv = "x")
+pred2
 }
