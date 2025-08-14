@@ -1,5 +1,8 @@
 # LMMsolver 1.0.10.9000
 
+-   A new argument `deriv` added to `predict()` to calculate the first derivatives for `spl1D()` functions.
+-   Two examples in vignette updated with predictions of derivatives and corresponding standard errors.
+
 # LMMsolver 1.0.10
 
 -   Cyclic B-splines models added for `spl1D()` and `spl2D()` functions. 
