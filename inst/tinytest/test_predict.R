@@ -25,11 +25,21 @@ pred1 <- predict(obj, newdata = newdat, se.fit = FALSE, type = "response")
 pred2 <- predict(obj, newdata = newdat, se.fit = TRUE, type = "response")
 pred3 <- predict(obj, newdata = newdat, se.fit = FALSE, type = "link")
 pred4 <- predict(obj, newdata = newdat, se.fit = TRUE, type = "link")
+pred5 <- predict(obj, newdata = newdat, se.fit = TRUE, deriv = "x")
 
 expect_equivalent_to_reference(pred1, "pred1")
 expect_equivalent_to_reference(pred2, "pred2")
 expect_equivalent_to_reference(pred3, "pred3")
 expect_equivalent_to_reference(pred4, "pred4")
+expect_equivalent_to_reference(pred4, "pred5")
+
+expect_error(predict(obj, newdata = newdat, se.fit = TRUE, deriv = "z2"),
+             "Cannot find derivative for z2", fixed=TRUE)
+expect_error(predict(obj, newdata = newdat, se.fit = TRUE, deriv = c("a","b")),
+             "Argument deriv should have length one.")
+expect_error(predict(obj, newdata = newdat, se.fit = TRUE, deriv=1),
+             "Argument deriv should be a character string")
+
 
 # multinomial example
 set.seed(1234)
