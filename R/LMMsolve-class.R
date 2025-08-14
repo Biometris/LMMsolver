@@ -465,6 +465,7 @@ predict.LMMsolve <- function(object,
     spl_nr <- which(isDeriv)
 
     spl <- object$splRes[[spl_nr]]
+    chkValBsplines(spl, newdata)
     knots <- spl$knots[[spl_nr]]
     pord <- spl$pord
     scaleX <- spl$scaleX

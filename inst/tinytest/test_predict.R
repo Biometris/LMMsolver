@@ -40,6 +40,9 @@ expect_error(predict(obj, newdata = newdat, se.fit = TRUE, deriv = c("a","b")),
 expect_error(predict(obj, newdata = newdat, se.fit = TRUE, deriv=1),
              "Argument deriv should be a character string")
 
+newdat2 <- data.frame(x= seq(-1,1, length = 10))
+expect_error(predict(obj, newdata = newdat2, se.fit = TRUE, deriv="x"),
+            "Variable x outside range of B-splines basis")
 
 # multinomial example
 set.seed(1234)
