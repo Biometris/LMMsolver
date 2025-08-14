@@ -457,7 +457,7 @@ predict.LMMsolve <- function(object,
     if (all(!isDeriv)) stop("Cannot find derivative for ", deriv, "\n")
     spl_nr <- which(isDeriv)
 
-    spl <- obj$splRes[[spl_nr]]
+    spl <- object$splRes[[spl_nr]]
     knots <- spl$knots[[spl_nr]]
     pord <- spl$pord
     scaleX <- spl$scaleX
