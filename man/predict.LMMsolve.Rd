@@ -4,7 +4,14 @@
 \alias{predict.LMMsolve}
 \title{Predict function}
 \usage{
-\method{predict}{LMMsolve}(object, newdata, type = c("response", "link"), se.fit = FALSE, ...)
+\method{predict}{LMMsolve}(
+  object,
+  newdata,
+  type = c("response", "link"),
+  se.fit = FALSE,
+  deriv = NULL,
+  ...
+)
 }
 \arguments{
 \item{object}{an object of class LMMsolve.}
@@ -19,6 +26,8 @@ When type = "response" (default) fitted values or predictions on the scale of
 the response are returned (possibly with associated standard errors).}
 
 \item{se.fit}{calculate standard errors, default \code{FALSE}.}
+
+\item{deriv}{Character string of variable for which to calculate the first derivative; default \code{NULL}.}
 
 \item{...}{other arguments. Not yet implemented.}
 }
