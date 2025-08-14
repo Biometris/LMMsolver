@@ -376,7 +376,7 @@ deviance.LMMsolve <- function(object,
 #' When type = "response" (default) fitted values or predictions on the scale of
 #' the response are returned (possibly with associated standard errors).
 #' @param se.fit calculate standard errors, default \code{FALSE}.
-#' @param deriv Name of variable for which to calculate the first derivative; default \code{NULL}.
+#' @param deriv Character string of variable for which to calculate the first derivative; default \code{NULL}.
 #' @param ... other arguments. Not yet implemented.
 #'
 #' @returns A data.frame with predictions for the smooth trend on the specified
@@ -447,8 +447,15 @@ predict.LMMsolve <- function(object,
   if (s2 > 0) stop("predict function for grp() not implemented yet")
 
   if (!is.null(deriv)) {
-
-    # add extra checks here: .....
+    if (!is.character(deriv)) {
+      stop("Argument deriv should be a character string\n")
+    }
+    if (length(deriv) != 1) {
+      stop("Argument deriv should have length one.")
+    }
+    if (object$family$family != "gaussian") {
+      stop("Derivatives for non-gaussian data not implemented yet\n")
+    }
 
     isDeriv <- sapply(obj$splRes,FUN= function(spl) {
                                         nameVar <- names(spl$x)
