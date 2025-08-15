@@ -473,12 +473,7 @@ predict.LMMsolve <- function(object,
     pord <- spl$pord
     scaleX <- spl$scaleX
     x <- newdata[[deriv]]
-
-    G <- constructG(knots = knots, scaleX = scaleX, pord = pord)
     dB <- Bsplines(knots, x, deriv = 1)
-    dBG <- dB %*% G
-    dBG <- dBG[,-1]
-
     nRow <- nrow(newdata)
     dim <- object$dim
     lU <- list()
@@ -487,9 +482,14 @@ predict.LMMsolve <- function(object,
     }
 
     labels <- c(object$term.labels.f, object$term.labels.r)
-    ndx.f <- which(spl$term.labels.f == labels)
     ndx.r <- which(spl$term.labels.r == labels)
-    lU[[ndx.f]] <- dBG
+    if (!is.null(spl$term.labels.f)) {
+      ndx.f <- which(spl$term.labels.f == labels)
+      G <- constructG(knots = knots, scaleX = scaleX, pord = pord)
+      dBG <- dB %*% G
+      dBG <- dBG[,-1, drop=FALSE]
+      lU[[ndx.f]] <- dBG
+    }
     lU[[ndx.r]] <- dB
     U <- Reduce(spam::cbind.spam, lU)
     outDat <- newdata
