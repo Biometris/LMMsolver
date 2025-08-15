@@ -478,7 +478,7 @@ predict.LMMsolve <- function(object,
     dim <- object$dim
     lU <- list()
     for (i in seq_along(dim)) {
-      lU[[i]] = spam::spam(x = 0, nrow = nRow, ncol = dim[i])
+      lU[[i]] <- spam::spam(x = 0, nrow = nRow, ncol = dim[i])
     }
 
     labels <- c(object$term.labels.f, object$term.labels.r)
@@ -536,10 +536,10 @@ predict.LMMsolve <- function(object,
   }
 
   for (i in seq_along(dim)) {
-    lU[[i]] = spam::spam(x = 0, nrow = nRow, ncol = dim[i]/nCat)
+    lU[[i]] <- spam::spam(x = 0, nrow = nRow, ncol = dim[i]/nCat)
   }
   # intercept:
-  lU[[1]] = spam::spam(x = 1, nrow = nRow, ncol = 1)
+  lU[[1]] <- spam::spam(x = 1, nrow = nRow, ncol = 1)
 
   labels <- c(object$term.labels.f, object$term.labels.r)
 
