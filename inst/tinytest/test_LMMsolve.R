@@ -75,6 +75,23 @@ expect_error(LMMsolve(fixed = pheno ~ cross, random = ~grp(QTL),
                       group = list(QTL = 3:7), data = testDat),
              "All columns specified in group should be columns in data")
 
+## Tests for argument theta
+
+expect_error(LMMsolve(fixed = pheno ~ cross, random = ~grp(QTL),
+                      group = list(QTL = 3:5), theta=c("a","b"), data = testDat),
+             "theta should be numeric")
+
+expect_error(LMMsolve(fixed = pheno ~ cross, random = ~grp(QTL),
+                      group = list(QTL = 3:5), theta=c(NA,1), data = testDat),
+             "theta has missing values.")
+
+expect_error(LMMsolve(fixed = pheno ~ cross, random = ~grp(QTL),
+                      group = list(QTL = 3:5), theta=c(-1,1), data = testDat),
+             "theta should have positive values.")
+
+
+
+
 ## Test for syntax names:
 dat <- data.frame(x = 1:3, `a-b` = 3:1, `a+b` = 1:3, ab = 3:1, check.names = FALSE)
 

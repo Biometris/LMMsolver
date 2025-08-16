@@ -1,5 +1,5 @@
 chkInputLMMsolve <- function(fixed, random, data,
-                             ginverse, residual, tolerance, maxit,
+                             ginverse, residual, tolerance, maxit,theta,
                              grpTheta, offset, family) {
   splTrms <- NULL
   if (!inherits(data, "data.frame")) {
@@ -28,6 +28,17 @@ chkInputLMMsolve <- function(fixed, random, data,
   }
   if (!is.numeric(maxit) || length(maxit) > 1 || maxit < 0) {
     stop("maxit should be a positive numerical value.")
+  }
+  if (!is.null(theta)) {
+    if (!is.numeric(theta)) {
+      stop("theta should be numeric.")
+    }
+    if (!all(!is.na(theta))) {
+      stop("theta has missing values.")
+    }
+    if (min(theta) <= 0) {
+      stop("theta should have positive values.")
+    }
   }
   if (!is.null(grpTheta) &&
       (!is.numeric(grpTheta) || !isTRUE(all.equal(round(grpTheta),grpTheta)) ||

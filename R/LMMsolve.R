@@ -124,7 +124,7 @@ LMMsolve <- function(fixed,
   offset <- chkInputLMMsolve(fixed = fixed, random = random,
               data = data, ginverse = ginverse,
               residual = residual, tolerance = tolerance,
-              maxit = maxit, grpTheta = grpTheta, offset = offset,
+              maxit = maxit, theta = theta, grpTheta = grpTheta, offset = offset,
               family = family)
 
   ## Check that all variables used in fixed formula are in data.
