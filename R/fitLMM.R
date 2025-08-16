@@ -24,7 +24,6 @@ fitLMM <- function(y, X, Z, w, lGinv, tolerance, trace, maxit,
     if (length(theta) != length(scFactor)) {
       stop("Argument theta has wrong length \n")
     }
-    theta <- theta / scFactor
   } else {
     theta <- 1 / scFactor
   }
