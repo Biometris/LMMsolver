@@ -113,14 +113,6 @@ sparseMixedModels <- function(y,
     fixedThetaRes <- fixedTheta
   }
 
-  if (Nvarcomp > 0) {
-    psi <- theta[1:Nvarcomp]
-    phi <- theta[-(1:Nvarcomp)]
-  } else {
-    psi <- NULL
-    phi <- theta
-  }
-
   ## Check the stucture of Rinv, don't allow for overlapping penalties
   M <- sapply(lRinv, FUN = function(x) {
     abs(spam::diag.spam(x)) > getOption("spam.eps")})
@@ -150,8 +142,8 @@ sparseMixedModels <- function(y,
   traceDf <- NULL
   for (it in seq_len(maxit)) {
     if (Nvarcomp > 0) {
-      psi <- theta[seq_along(psi)]
-      phi <- theta[-(seq_along(psi))]
+      psi <- theta[seq_len(Nvarcomp)]
+      phi <- theta[-(seq_len(Nvarcomp))]
     } else {
       psi <- NULL
       phi <- theta
