@@ -101,7 +101,7 @@ sparseMixedModels <- function(y,
   if (!is.null(grpTheta)) {
     nGrp <- max(grpTheta)
     if (length(fixedTheta) != nGrp) {
-      stop("problem with number of groups defined in grpTheta argument")
+      stop("problem with number of groups defined in grpTheta argument", call. = FALSE)
     }
     conM <- spam::spam(x = 0, nrow = NvarcompTot, ncol = nGrp)
     for (i in seq_len(NvarcompTot)) {
@@ -119,7 +119,7 @@ sparseMixedModels <- function(y,
   rSums <- rowSums(M)
   #if (!isTRUE(all.equal(rSums, rep(1, nrow(M))))) {
   if (max(rSums) > 1) {
-    stop("Overlapping penalties for residual part.\n")
+    stop("Overlapping penalties for residual part.\n", call. = FALSE)
   }
   ## Calculate number of elements per group for residuals.
   nR <- colSums(M)

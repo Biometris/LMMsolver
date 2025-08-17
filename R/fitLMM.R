@@ -22,7 +22,7 @@ fitLMM <- function(y, X, Z, w, lGinv, tolerance, trace, maxit,
   ## set theta
   if (!is.null(theta)) {
     if (length(theta) != length(scFactor)) {
-      stop("Argument theta has wrong length \n")
+      stop("Argument theta has wrong length \n", call. = FALSE)
     }
   } else {
     theta <- 1 / scFactor
@@ -30,7 +30,7 @@ fitLMM <- function(y, X, Z, w, lGinv, tolerance, trace, maxit,
   ## set grpTheta
   if (!is.null(grpTheta)) {
     if (length(grpTheta) != length(scFactor)) {
-      stop("Argument grpTheta has wrong length \n")
+      stop("Argument grpTheta has wrong length \n", call. = FALSE)
     }
   } else {
     grpTheta <- c(1:length(scFactor))

@@ -9,11 +9,11 @@ constructGinv <- function(ginverse, lGinv, dim.r, term.labels.r) {
       ginvMat <- ginverse[[i]]
       k <- which(term.labels.r == ginvVar)
       if (length(k) == 0) {
-        stop("ginverse element ", ginvVar, " not defined in random part.\n")
+        stop("ginverse element ", ginvVar, " not defined in random part.\n", call. = FALSE)
       }
       if (dim.r[k] != nrow(ginvMat)) {
         stop("Dimensions of ", ginvVar, " should match number of levels ",
-             "for corresponding factor in data.\n")
+             "for corresponding factor in data.\n", call. = FALSE)
       }
       ndx <- s[k]:e[k]
       ## as.spam drops row and column names, so only converting to spam

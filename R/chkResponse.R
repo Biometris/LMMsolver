@@ -1,7 +1,7 @@
 chkResponse <- function(y, residual, data)
 if (is.null(residual)) {
   if (var(y) < .Machine$double.eps / 2) {
-    stop("Variance response variable zero or almost zero.\n")
+    stop("Variance response variable zero or almost zero.\n", call. = FALSE)
   }
 } else {
   resVar <- all.vars(residual)
@@ -11,6 +11,6 @@ if (is.null(residual)) {
     levels_f <- levels(data[[resVar]])
     levelsNoVar <- paste(levels_f[ndxVar], collapse = ", ")
     stop("Variance response variable zero or almost zero for levels:\n",
-         levelsNoVar, "\n")
+         levelsNoVar, "\n", call. = FALSE)
   }
 }
