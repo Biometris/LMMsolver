@@ -1,4 +1,5 @@
-logLikelihood <- function(y,
+# aux function
+logLikelihood_aux <- function(y,
                           X,
                           Z,
                           lGinv,
@@ -127,4 +128,15 @@ logLikelihood <- function(y,
                  "logL")
   return(df)
 }
+
+logLikelihood <- function(object, theta) {
+  X <- object$X
+  Z <- object$Z
+  C <- object$C # needed, or rebuild anyway?
+  lGinv <- object$lGinv
+  lRinv <- object$lRinv
+  y <- object$y
+  return(logLikelihood_aux(y,X,Z,lGinv,lRinv, theta))
+}
+
 
