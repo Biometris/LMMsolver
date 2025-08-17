@@ -68,6 +68,7 @@ logLikelihood <- function(y,
   ## Initialize values for loop.
   nRowTheta <- nrow(thetaMatrix)
   logL <- rep(NA, nRowTheta)
+  deriv <- matrix(data=NA, nrow = nRowTheta, ncol = NvarcompTot)
   for (i in seq_len(nRowTheta)) {
     theta <- thetaMatrix[i, ]
     if (Nvarcomp > 0) {
@@ -117,7 +118,13 @@ logLikelihood <- function(y,
 
     ## calculate REMLlogL, see e.g. Smith 1995.
     logL[i] <- -0.5 * (logdetR + logdetG + logdetC + yPy)
+    deriv[i,] <- (1/theta)*ED - SS_all
   }
-  return(logL)
+  df <- cbind(thetaMatrix, deriv, logL)
+  df <- as.data.frame((df))
+  names(df) <- c(paste0("theta",1:NvarcompTot),
+                 paste0("dL_dtheta",1:NvarcompTot),
+                 "logL")
+  return(df)
 }
 
