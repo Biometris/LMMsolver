@@ -64,8 +64,8 @@ obj1$logL
 obj2$logL
 
 # calculate logL on a grid:
-grid1 <- seq(-3,5, by = 0.02)
-grid2 <- seq(-2,2, by = 0.02)
+grid1 <- seq(-3,5, by = 0.05)
+grid2 <- seq(-2,2, by = 0.05)
 theta1 <- 10^grid1
 theta2 <- 10^grid2
 
@@ -81,7 +81,7 @@ C <- object$C # needed, or rebuild anyway?
 lGinv <- object$lGinv
 lRinv <- object$lRinv
 y <- object$y
-logL <- LMMsolver:::logLikelihood(y,X,Z,lGinv,lRinv,thetaMatrix = thetaM)
+logL <- LMMsolver:::logLikelihood(y,X,Z,lGinv,lRinv, theta = thetaM)
 toc()
 df <- cbind(grid, logL)
 

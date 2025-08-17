@@ -3,13 +3,9 @@ logLikelihood <- function(y,
                           Z,
                           lGinv,
                           lRinv,
-                          maxit = 100,
-                          tolerance = 1e-6,
-                          trace = FALSE,
-                          thetaMatrix = NULL,
-                          theta = NULL,
-                          fixedTheta = NULL,
-                          grpTheta = NULL) {
+                          theta)
+{
+  thetaMatrix <- theta
   Ntot <- length(y)
   p <- ncol(X)
   q <- ncol(Z)
@@ -46,34 +42,6 @@ logLikelihood <- function(y,
   lGinv <- lapply(X = lGinv, FUN = spam::cleanup)
   lRinv <- lapply(X = lRinv, FUN = spam::cleanup)
   lC <- lapply(X = lC, FUN = spam::cleanup)
-  if (is.null(theta)) {
-    theta <- rep(1, Nvarcomp + Nres)
-    theta_restr <- theta
-  } else {
-    theta_restr <- theta
-  }
-  if (is.null(fixedTheta)) {
-    ## Fix a penalty theta, if value becomes high.
-    if (!is.null(grpTheta)) {
-      fixedTheta <- rep(FALSE, length = max(grpTheta))
-    } else {
-      fixedTheta <- rep(FALSE, length = NvarcompTot)
-    }
-  }
-  if (!is.null(grpTheta)) {
-    nGrp <- max(grpTheta)
-    if (length(fixedTheta) != nGrp) {
-      stop("problem with number of groups defined in grpTheta argument", call. = FALSE)
-    }
-    conM <- spam::spam(x = 0, nrow = NvarcompTot, ncol = nGrp)
-    for (i in seq_len(NvarcompTot)) {
-      conM[i, grpTheta[i]] <- 1
-    }
-    fixedThetaRes <- fixedTheta
-  } else {
-    conM <- spam::diag(1, NvarcompTot)
-    fixedThetaRes <- fixedTheta
-  }
 
   ## Check the stucture of Rinv, don't allow for overlapping penalties
   M <- sapply(lRinv, FUN = function(x) {
@@ -96,12 +64,8 @@ logLikelihood <- function(y,
     ADcholGinv <- NULL
   }
   ADcholC <- ADchol(lC)
+
   ## Initialize values for loop.
-  logLprev <- Inf
-  if (trace) {
-    cat("iter logLik\n")
-  }
-  traceDf <- NULL
   nRowTheta <- nrow(thetaMatrix)
   logL <- rep(NA, nRowTheta)
   for (i in seq_len(nRowTheta)) {
