@@ -104,7 +104,7 @@ sparseMixedModels <- function(y,
       stop("problem with number of groups defined in grpTheta argument")
     }
     conM <- spam::spam(x = 0, nrow = NvarcompTot, ncol = nGrp)
-    for (i in 1:NvarcompTot) {
+    for (i in seq_len(NvarcompTot)) {
       conM[i, grpTheta[i]] <- 1
     }
     fixedThetaRes <- fixedTheta

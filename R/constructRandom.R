@@ -68,7 +68,7 @@ constructRandom <- function(random, group, condFactor, data) {
     e <- cumsum(dim.r)
     s <- e - dim.r + 1
     lGinv <- list()
-    for (i in 1:length(dim.r)) {
+    for (i in seq_along(dim.r)) {
       tmp <- rep(0, sum(dim.r))
       tmp[s[i]:e[i]] <- 1
       lGinv[[i]] <- spam::cleanup(spam::diag.spam(tmp))

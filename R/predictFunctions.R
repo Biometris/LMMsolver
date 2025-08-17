@@ -72,7 +72,7 @@ auxFun <- function(object, i, nr, nc, Names=NULL)
     ndx <- ndx[-which(ndx==0)]
   }
   if (!is.null(Names)) {
-    for (j in 1:length(ndx)) {
+    for (j in seq_along(ndx)) {
       Dg[,ndx[j]] <- 1*(Names==names(ndx)[j])
     }
   } else { # averaging

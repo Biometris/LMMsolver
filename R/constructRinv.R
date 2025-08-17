@@ -13,7 +13,7 @@ constructRinv <- function(df,
     column <- all.vars(residual)
     levels_f <- unique(df[[column]])
     cnt <- vector(length = length(levels_f))
-    for (i in 1:length(levels_f)) {
+    for (i in seq_along(levels_f)) {
       d <- (df[[column]] == levels_f[i])
       lRinv[[i]] <- spam::cleanup(spam::diag.spam(weights*d))
       cnt[i] <- sum(d)
