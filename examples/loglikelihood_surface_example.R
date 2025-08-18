@@ -8,7 +8,6 @@ alpha <- 0.45
 f <- function(x) { 0.3 + 0.01*x + 0.01*x^2 + alpha*cos(pi*x)}
 
 set.seed(12)
-#set.seed(1234)
 nTimePoints <- 25
 nObsTimePoints <- 4
 n <- nTimePoints*nObsTimePoints
@@ -46,7 +45,7 @@ ggplot(data = dat, aes(x = z, y = y)) +
 theta_init <- c(100,1)
 obj2 <- LMMsolve(fixed = y ~ 1,
                 spline = ~spl1D(x=z, nseg = nseg,xlim=xlim), data = dat,
-                theta=theta_init,trace=FALSE, tolerance = tol)
+                theta=theta_init, tolerance = tol)
 summary(obj2)
 obj2$nIter
 
@@ -64,12 +63,10 @@ ggplot(data = dat, aes(x = z, y = y)) +
   ggtitle(paste("initial value theta smoothing: ", paste(theta_init, collapse=','))) +
   theme_bw()
 
-obj1$logL
-obj2$logL
-
-if (abs(obj1$logL - obj2$logL) < 1.0e-3) {
-  stop("both solutions converge to same optimum \n.")
-}
+# the REML estimates are different:
+#  the 1st is the global maximum, the 2nd is a local maximum
+logLik(obj1, includeConstant = FALSE)
+logLik(obj2, includeConstant = FALSE)
 
 # calculate logL on a grid, use log10 scale!
 grid1 <- seq(-6, 6, length = 200)
@@ -77,11 +74,11 @@ grid2 <- seq(-6, 6, length = 200)
 theta1 <- 10^grid1
 theta2 <- 10^grid2
 
-theta <- as.matrix(expand.grid(theta1=theta1,theta2=theta2))
+theta <- as.matrix(expand.grid(theta1=theta1, theta2=theta2))
 dim(theta)
 
 tic("start loglikelihood")
-df_logL <- LMMsolver:::logLikelihood(obj1, theta = theta)
+df_logL <- logLikelihood(obj1, theta = theta)
 toc()
 
 # filter for values close to the (local) maxima:
@@ -95,8 +92,4 @@ ggplot(df2_logL) +
   xlab("log10(penalty) smoothing") + ylab("log10(penalty) residual") +
   ggtitle("log-likelihood surface for simulated example")
 
-# check the results for (local) maxima:
-theta_max <- matrix(data=c(obj1$theta, obj2$theta), nrow=2, byrow=TRUE)
-log10(theta_max)
-LMMsolver:::logLikelihood(obj1, theta=theta_max)
 
