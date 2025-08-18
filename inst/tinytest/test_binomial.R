@@ -42,6 +42,14 @@ mod3 <- LMMsolve(fixed = cbind(succes, failure) ~ 1,
                  family = binomial(),
                  data = dat2)
 
+# MB, Aug 18 2025
+# set family to NULL, change in r-devel of binomial function:
+# okLinks <- c("logit", "probit", "cloglog", "cauchit", "log")  <- 4.5.1
+# okLinks <- c("logit", "probit", "cloglog", "cauchit", "log", "identity") <- new
+#
+mod1$family <- NULL
+mod2$family <- NULL
+mod3$family <- NULL
 expect_equivalent_to_reference(mod1, "binomial1")
 expect_equivalent_to_reference(mod2, "binomial2")
 expect_equivalent_to_reference(mod3, "binomial3")
