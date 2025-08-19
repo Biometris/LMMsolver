@@ -139,6 +139,13 @@ logLikelihood_aux <- function(y,
 #'
 #' @export
 mLogLik <- function(object, theta) {
+  len <- length(object$theta)
+  if (!is.matrix(theta)) {
+    stop("theta should be matrix")
+  }
+  if (length(object$theta) != ncol(theta)) {
+    stop("theta has wrong number of columns")
+  }
   X <- object$X
   Z <- object$Z
   lGinv <- object$lGinv
