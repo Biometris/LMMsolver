@@ -69,8 +69,8 @@ logLik(obj1, includeConstant = FALSE)
 logLik(obj2, includeConstant = FALSE)
 
 # calculate logL on a grid, use log10 scale!
-grid1 <- seq(-6, 6, length = 200)
-grid2 <- seq(-6, 6, length = 200)
+grid1 <- seq(-8, 8, length = 200)
+grid2 <- seq(-8, 8, length = 200)
 theta1 <- 10^grid1
 theta2 <- 10^grid2
 
@@ -80,6 +80,8 @@ dim(theta)
 tic("start loglikelihood")
 df_logL <- logLikelihood(obj1, theta = theta)
 toc()
+# mv
+sum(is.na(df_logL$logL))
 
 # filter for values close to the (local) maxima:
 thr <- -15

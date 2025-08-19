@@ -98,28 +98,28 @@ logLikelihood_aux <- function(y,
     dlogdetC <- dlogdet(ADcholC, theta, WtRinvY)
     logdetC <- attr(dlogdetC, which = "logdet")
     a <- attr(dlogdetC, which = "x.coef")
+    if (all(!is.na(dlogdetC))) {
+      if (!is.null(ADcholGinv)) {
+        EDmax_psi <- psi * dlogdetGinv
+      } else {
+        EDmax_psi <- NULL
+      }
+      EDmax <- c(EDmax_psi, EDmax_phi)
+      ED <- EDmax - theta * dlogdetC
 
-    ## calculate effective dimensions.
-    if (!is.null(ADcholGinv)) {
-      EDmax_psi <- psi * dlogdetGinv
-    } else {
-      EDmax_psi <- NULL
+      ## to make sure ED is always positive.
+      ED <- pmax(ED, .Machine$double.eps)
+
+      ## calculate Sum of Squares.
+      SS_all <- calcSumSquares(lYtRinvY, lWtRinvY, lWtRinvW, lQ, a, Nvarcomp)
+
+      ## Johnson and Thompson 1995, see below eq [A5]: Py = R^{-1} r.
+      yPy <- YtRinvY - sum(a * WtRinvY)
+
+      ## calculate REMLlogL, see e.g. Smith 1995.
+      logL[i] <- -0.5 * (logdetR + logdetG + logdetC + yPy)
+      deriv[i,] <- (1/theta)*ED - SS_all
     }
-    EDmax <- c(EDmax_psi, EDmax_phi)
-    ED <- EDmax - theta * dlogdetC
-
-    ## to make sure ED is always positive.
-    ED <- pmax(ED, .Machine$double.eps)
-
-    ## calculate Sum of Squares.
-    SS_all <- calcSumSquares(lYtRinvY, lWtRinvY, lWtRinvW, lQ, a, Nvarcomp)
-
-    ## Johnson and Thompson 1995, see below eq [A5]: Py = R^{-1} r.
-    yPy <- YtRinvY - sum(a * WtRinvY)
-
-    ## calculate REMLlogL, see e.g. Smith 1995.
-    logL[i] <- -0.5 * (logdetR + logdetG + logdetC + yPy)
-    deriv[i,] <- (1/theta)*ED - SS_all
   }
   df <- cbind(thetaMatrix, deriv, logL)
   df <- as.data.frame((df))
