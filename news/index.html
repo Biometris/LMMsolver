@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">LMMsolver</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.10</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.11</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -42,7 +42,14 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="1.0.10" id="lmmsolver-1010">LMMsolver 1.0.10<a class="anchor" aria-label="anchor" href="#lmmsolver-1010"></a></h2>
+<h2 class="pkg-version" data-toc-text="1.0.11" id="lmmsolver-1011">LMMsolver 1.0.11<a class="anchor" aria-label="anchor" href="#lmmsolver-1011"></a></h2>
+<ul><li>New function <code><a href="../reference/mLogLik.html">mLogLik()</a></code> for the calculations of the log-likelihood and first derivatives as function of precision parameters <code>theta</code>.</li>
+<li>A new argument <code>deriv</code> added to <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> to calculate the first derivatives for <code><a href="../reference/spl1D.html">spl1D()</a></code> functions.</li>
+<li>Two examples in vignette updated with predictions of derivatives and corresponding standard errors.</li>
+<li>bug fixed for <code>theta</code> argument of <code><a href="../reference/LMMsolve.html">LMMsolve()</a></code>.</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.0.10" id="lmmsolver-1010">LMMsolver 1.0.10<a class="anchor" aria-label="anchor" href="#lmmsolver-1010"></a></h2><p class="text-muted">CRAN release: 2025-05-14</p>
 <ul><li>Cyclic B-splines models added for <code><a href="../reference/spl1D.html">spl1D()</a></code> and <code><a href="../reference/spl1D.html">spl2D()</a></code> functions.</li>
 <li>Third order differences (<code>pord=3</code>) added for <code>splxD()</code> functions.</li>
 <li>New argument <code>type = c("response", "link")</code> for <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> function.</li>
@@ -138,7 +145,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.2.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
     </footer></div>
