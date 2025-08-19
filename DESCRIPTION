@@ -4,8 +4,8 @@ Title: Linear Mixed Model Solver
 Description: An efficient and flexible system to solve sparse mixed model
     equations. Important applications are the use of splines to model spatial or temporal
     trends as described in Boer (2023). (<doi:10.1177/1471082X231178591>).
-Version: 1.0.10.9000
-Date: 2025-05-15
+Version: 1.0.11
+Date: 2025-08-19
 Authors@R: c(person(given = "Martin", 
                     family = "Boer", 
                     email = "martin.boer@wur.nl", 
