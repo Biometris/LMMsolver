@@ -1,9 +1,9 @@
 # LMMsolver 1.0.10.9000
 
--   New function `logLikelihood()` to calculate the log-likelihood as function of precision parameters `theta`. 
+-   New function `mLogLik()` for the calculations of the log-likelihood and first derivatives as function of precision parameters `theta`. 
 -   A new argument `deriv` added to `predict()` to calculate the first derivatives for `spl1D()` functions.
 -   Two examples in vignette updated with predictions of derivatives and corresponding standard errors.
--   A bug in the `theta` argument of `LMMsolve()` fixed.
+-   bug fixed for `theta` argument of `LMMsolve()`.
 
 # LMMsolver 1.0.10
 

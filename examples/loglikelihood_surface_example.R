@@ -78,7 +78,7 @@ theta <- as.matrix(expand.grid(theta1=theta1, theta2=theta2))
 dim(theta)
 
 tic("start loglikelihood")
-df_logL <- logLikelihood(obj1, theta = theta)
+df_logL <- mLogLik(obj1, theta = theta)
 toc()
 # mv
 sum(is.na(df_logL$logL))

@@ -129,15 +129,16 @@ logLikelihood_aux <- function(y,
   return(df)
 }
 
-#' Function to obtain restricted log-likelihood given values for penalty parameter
+#' Function to obtain restricted log-likelihood and the first derivatives of the log-likelihood,
+#' given values for the penalty parameters
 #'
 #' @param object an object of class LMMsolve
 #' @param theta a matrix with values of precision parameters theta.
 
-#' @returns A data.frame with logL and the derivatives.
+#' @returns A data.frame with logL and the first derivatives of log-likelihood
 #'
 #' @export
-logLikelihood <- function(object, theta) {
+mLogLik <- function(object, theta) {
   X <- object$X
   Z <- object$Z
   lGinv <- object$lGinv
