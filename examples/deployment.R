@@ -39,7 +39,8 @@ covr::gitlab(type = "none", code = "tinytest::run_test_dir(at_home = TRUE)")
 library(LMMsolver)
 
 ## Check reverse dependencies. (takes about 45 minutes).
-Sys.setenv(R_BIOC_VERSION = "3.20")
+detach("package:LMMsolver", unload = TRUE)
+revdepcheck::revdep_reset()
 revdepcheck::revdep_check()
 
 
