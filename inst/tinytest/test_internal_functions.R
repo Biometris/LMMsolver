@@ -27,8 +27,13 @@ B <-spam(x = rnorm(30), nrow = 5, ncol = 6)
 expect_error(LMMsolver:::MatrixProduct(A,B),
              "MatrixProduct wrong dimensions")
 
-## tests for GetIntVectors:
+## tests for GetIntVector:
 expect_error(LMMsolver:::GetIntVector(A, "rowpointers", 2),
              "argument ArrayIndex should be 0-based (C/C++) or 1-based (R).",
              fixed=TRUE)
 
+## test for expandGinv
+lGinv1 <- diag.spam(1,4)
+lGinv2 <- NULL
+lGinv3 <- LMMsolver:::expandGinv(lGinv1, lGinv2)
+expect_equal(lGinv1, lGinv3)
