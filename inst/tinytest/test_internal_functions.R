@@ -13,3 +13,7 @@ Z2 <- LMMsolver:::RowKronecker(X1d, X2d)
 
 expect_equal(as.matrix(Z1), Z2)
 
+X3 <- spam(x = rnorm(24), nrow = 6, ncol = 4)
+
+expect_error(LMMsolver:::RowKronecker(X1 = X1, X2 = X3),
+             "X1 and X2 have unequal number of rows.")

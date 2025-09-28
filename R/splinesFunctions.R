@@ -10,6 +10,9 @@
 #' @keywords internal
 RowKronecker <- function(X1,
                          X2) {
+  if (nrow(X1) != nrow(X2)) {
+    stop("X1 and X2 have unequal number of rows.\n")
+  }
   if (inherits(X1, "spam") && inherits(X2, "spam")) {
     rowKron <- RowKron(X1, X2)
   } else {
