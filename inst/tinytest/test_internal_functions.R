@@ -2,6 +2,8 @@ library(spam)
 
 set.seed(1234)
 
+## tests for RowKronecker
+
 X1 <- spam(x = rnorm(20), nrow = 10, ncol = 2)
 X2 <- spam(x = rnorm(40), nrow = 10, ncol = 4)
 
@@ -17,3 +19,10 @@ X3 <- spam(x = rnorm(24), nrow = 6, ncol = 4)
 
 expect_error(LMMsolver:::RowKronecker(X1 = X1, X2 = X3),
              "X1 and X2 have unequal number of rows.")
+
+## tests for MatrixProduct
+
+A <- spam(x = rnorm(20), nrow = 5, ncol = 4)
+B <-spam(x = rnorm(30), nrow = 5, ncol = 6)
+expect_error(LMMsolver:::MatrixProduct(A,B),
+             "MatrixProduct wrong dimensions")
