@@ -26,3 +26,9 @@ A <- spam(x = rnorm(20), nrow = 5, ncol = 4)
 B <-spam(x = rnorm(30), nrow = 5, ncol = 6)
 expect_error(LMMsolver:::MatrixProduct(A,B),
              "MatrixProduct wrong dimensions")
+
+## tests for GetIntVectors:
+expect_error(LMMsolver:::GetIntVector(A, "rowpointers", 2),
+             "argument ArrayIndex should be 0-based (C/C++) or 1-based (R).",
+             fixed=TRUE)
+
