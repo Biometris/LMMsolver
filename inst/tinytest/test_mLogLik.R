@@ -40,3 +40,9 @@ expect_error(mLogLik(obj1, theta = theta[,-1,drop=FALSE]),
 expect_error(mLogLik(obj1, theta = "x"),
              "theta should be matrix")
 
+obj2 <- LMMsolve(fixed = y ~ z, data=dat)
+theta <- matrix(data = obj2$theta, nrow=1,ncol=1)
+r <- mLogLik(obj2, theta = theta)
+expect_equal(obj2$theta, r$theta1)
+expect_equal(0, r$dL_dtheta1)
+expect_equal(obj2$logL, r$logL)
