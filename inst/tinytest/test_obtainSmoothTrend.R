@@ -74,6 +74,9 @@ expect_error(obtainSmoothTrend(obj2, grid = 2),
 expect_warning(obtainSmoothTrend(obj2, grid = c(5, 5), deriv = 1),
                "deriv is ignored for 2-dimensional splines")
 
+expect_error(obtainSmoothTrend(obj2, grid = c(5, 5), which = 3),
+        "which should be an integer with value at most the number of fittedspline components.\n")
+
 obj2Trend1 <- obtainSmoothTrend(obj2, grid = c(5, 5))
 
 ## Trend using newdata.
@@ -110,3 +113,5 @@ expect_equal_to_reference(obj3Trend1, "smooth3D1")
 obj3Trend2 <- obtainSmoothTrend(obj3, newdata = simDat)
 
 expect_equal_to_reference(obj3Trend2, "smooth3D2")
+
+
