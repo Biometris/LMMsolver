@@ -46,5 +46,13 @@ theta <- c(1 , 2)
 expect_error(LMMsolver:::dlogdet(ADobj, theta),
              "wrong length vector theta")
 
-
+# tests for MatrixProduct
+library(Matrix)
+A1 <- matrix(data=c(1:12), nrow=3, ncol=4)
+A2 <- Matrix(data=c(1:12), nrow=3, ncol=4)
+B <- diag.spam(1, 4)
+expect_error(LMMsolver:::MatrixProduct(A1, B),
+             "Not an S4 object")
+expect_error(LMMsolver:::MatrixProduct(A2, B),
+             "Both arguments for MatrixProduct should be of class spam")
 
