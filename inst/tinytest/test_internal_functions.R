@@ -37,3 +37,14 @@ lGinv1 <- diag.spam(1,4)
 lGinv2 <- NULL
 lGinv3 <- LMMsolver:::expandGinv(lGinv1, lGinv2)
 expect_equal(lGinv1, lGinv3)
+
+# test for dlogdet
+lC <- list()
+lC[[1]] <- diag.spam(1, 3)
+ADobj <- LMMsolver:::ADchol(lC)
+theta <- c(1 , 2)
+expect_error(LMMsolver:::dlogdet(ADobj, theta),
+             "wrong length vector theta")
+
+
+

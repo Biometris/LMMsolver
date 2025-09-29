@@ -35,17 +35,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// partialDerivCholesky
-NumericVector partialDerivCholesky(Rcpp::S4 obj);
-RcppExport SEXP _LMMsolver_partialDerivCholesky(SEXP objSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Rcpp::S4 >::type obj(objSEXP);
-    rcpp_result_gen = Rcpp::wrap(partialDerivCholesky(obj));
-    return rcpp_result_gen;
-END_RCPP
-}
 // diagXCinvXt
 NumericVector diagXCinvXt(Rcpp::S4 obj, Rcpp::S4 transposeX);
 RcppExport SEXP _LMMsolver_diagXCinvXt(SEXP objSEXP, SEXP transposeXSEXP) {
@@ -99,7 +88,6 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_LMMsolver_construct_ADchol_Rcpp", (DL_FUNC) &_LMMsolver_construct_ADchol_Rcpp, 2},
     {"_LMMsolver_dlogdet", (DL_FUNC) &_LMMsolver_dlogdet, 3},
-    {"_LMMsolver_partialDerivCholesky", (DL_FUNC) &_LMMsolver_partialDerivCholesky, 1},
     {"_LMMsolver_diagXCinvXt", (DL_FUNC) &_LMMsolver_diagXCinvXt, 2},
     {"_LMMsolver_GetIntVector", (DL_FUNC) &_LMMsolver_GetIntVector, 3},
     {"_LMMsolver_RowKron", (DL_FUNC) &_LMMsolver_RowKron, 2},

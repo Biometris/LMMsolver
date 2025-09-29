@@ -33,10 +33,6 @@ dlogdet <- function(obj, theta, b_ = NULL) {
     .Call(`_LMMsolver_dlogdet`, obj, theta, b_)
 }
 
-partialDerivCholesky <- function(obj) {
-    .Call(`_LMMsolver_partialDerivCholesky`, obj)
-}
-
 diagXCinvXt <- function(obj, transposeX) {
     .Call(`_LMMsolver_diagXCinvXt`, obj, transposeX)
 }

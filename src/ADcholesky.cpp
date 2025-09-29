@@ -356,25 +356,6 @@ NumericVector dlogdet(Rcpp::S4 obj, NumericVector theta,
   return gradient;
 }
 
-// [[Rcpp::export]]
-NumericVector partialDerivCholesky(Rcpp::S4 obj)
-{
-  IntegerVector supernodes = GetIntVector(obj, "supernodes", 0);
-
-  // Exchange row and columns compared to spam object, as in Ng and Peyton 1993
-  IntegerVector colpointers = GetIntVector(obj, "rowpointers", 0);
-  IntegerVector rowpointers = GetIntVector(obj, "colpointers", 0);
-  IntegerVector rowindices = GetIntVector(obj, "colindices", 0);
-
-  NumericVector L = Rcpp::clone<Rcpp::NumericVector>(obj.slot("entries"));
-
-  const int sz = L.size();
-  NumericVector F(sz, 0.0);
-  initAD(F, L, colpointers);
-  ADcholesky(F, L, supernodes, rowpointers, colpointers, rowindices);
-  return F;
-}
-
 void updateH(NumericVector& H, const SparseMatrix& tX, int i, int j, double alpha)
 {
   int s1 = tX.rowpointers[i];
@@ -437,6 +418,25 @@ NumericVector diagXCinvXt(Rcpp::S4 obj, Rcpp::S4 transposeX)
 }
 
 /*
+
+ // [[Rcpp::export]]
+ NumericVector partialDerivCholesky(Rcpp::S4 obj)
+ {
+ IntegerVector supernodes = GetIntVector(obj, "supernodes", 0);
+
+ // Exchange row and columns compared to spam object, as in Ng and Peyton 1993
+ IntegerVector colpointers = GetIntVector(obj, "rowpointers", 0);
+ IntegerVector rowpointers = GetIntVector(obj, "colpointers", 0);
+ IntegerVector rowindices = GetIntVector(obj, "colindices", 0);
+
+ NumericVector L = Rcpp::clone<Rcpp::NumericVector>(obj.slot("entries"));
+
+ const int sz = L.size();
+ NumericVector F(sz, 0.0);
+ initAD(F, L, colpointers);
+ ADcholesky(F, L, supernodes, rowpointers, colpointers, rowindices);
+ return F;
+ }
 
 // [[Rcpp::export]]
 NumericVector ForwardCholesky(SEXP cholC, NumericVector& b)
