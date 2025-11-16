@@ -1,21 +1,21 @@
 ## Use the oats data described in JABES2920 paper for some tests of spl1D.
-data("john.alpha", package = "agridat")
+data("oats.data")
 
 ## Fit models as described in JABES2020 paper.
 
 ## Baseline model, only fixed effects.
 obj0 <- LMMsolve(fixed = yield ~ rep + gen,
-                 data = john.alpha,
+                 data = oats.data,
                  tolerance = 1.0e-10)
 
 ## Number of plots
-N <- nrow(john.alpha)
+N <- nrow(oats.data)
 
 ## Here scaleX is FALSE in spl1D, to be consistent with model in JABES2020 paper.
 obj1 <- LMMsolve(fixed = yield ~ rep + gen,
                  spline = ~spl1D(x = plot, nseg = N - 1, degree = 1, pord = 1,
                                  scaleX = FALSE),
-                 data = john.alpha,
+                 data = oats.data,
                  tolerance = 1.0e-10)
 
 ## Test input checks in obtainSmoothTrend.
@@ -39,27 +39,22 @@ obj1Trend1 <- obtainSmoothTrend(obj1, grid = 72)
 
 ## Trend using newdata.
 
-expect_error(obtainSmoothTrend(obj1, newdata = "john.alpha"),
+expect_error(obtainSmoothTrend(obj1, newdata = "oats.data"),
              "newdata should be a data.frame")
-expect_error(obtainSmoothTrend(obj1, newdata = john.alpha[, -1]),
+expect_error(obtainSmoothTrend(obj1, newdata = oats.data[, -1]),
              "The following smoothing variables are not in newdata")
 
-obj1Trend2 <- obtainSmoothTrend(obj1, newdata = john.alpha)
+obj1Trend2 <- obtainSmoothTrend(obj1, newdata = oats.data)
 
 ## Results should be the same.
 expect_equal(obj1Trend1$ypred, obj1Trend2$ypred)
 
 ## Include intercept.
-obj1Trend3 <- obtainSmoothTrend(obj1, newdata = john.alpha,
+obj1Trend3 <- obtainSmoothTrend(obj1, newdata = oats.data,
                                 includeIntercept = TRUE)
 expect_equivalent(obj1Trend3$ypred - obj1Trend2$ypred,
                   rep(coef(obj1)$`(Intercept)`, N))
 
-
-#data("durban.rowcol", package = "agridat")
-## Restict data to 5 columns and rows for speed of testing.
-#durban.rowcol <- durban.rowcol[durban.rowcol$row < 6 & durban.rowcol$bed < 6, ]
-#durban.rowcol <- droplevels(durban.rowcol)
 
 # part of durban.rowcol experiment, first 5 columns and rows for speed of testing.
 durban.rowcol <- structure(list(row = c(4L, 5L, 3L, 4L, 4L, 4L, 1L, 3L, 2L, 2L,

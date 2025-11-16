@@ -1,5 +1,7 @@
 data("barley.uniformity.trial")
 
+dat <- barley.uniformity.trial
+
 ## Some tests on correct input checking for combinations of splines.
 
 expect_error(LMMsolve(fixed = yield ~ 1,
