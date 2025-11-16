@@ -5,6 +5,12 @@ load("testdata.rda")
 expect_error(LMMsolve(fixed = pheno ~ cross, data = "testDat"),
              "data should be a data.frame")
 
+expect_error(LMMsolve(fixed= pheno~ cross, data=testDat, theta=c(1,1,1)),
+             "Argument theta has wrong length")
+
+expect_error(LMMsolve(fixed= pheno~ cross, data=testDat, grpTheta=c(1,1,1)),
+             "Argument grpTheta has wrong length")
+
 ## Test fixed, random and residual formulas (spline part is tested in spl checks).
 
 expect_error(LMMsolve(fixed = ~ cross, data = testDat),

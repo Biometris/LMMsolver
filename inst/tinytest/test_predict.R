@@ -44,6 +44,10 @@ newdat2 <- data.frame(x= seq(-1,1, length = 10))
 expect_error(predict(obj, newdata = newdat2, se.fit = TRUE, deriv="x"),
             "Variable x outside range of B-splines basis")
 
+newdat3 <- data.frame(z = seq(-1,1, length = 10))
+expect_error(predict(obj, newdata=newdat3),
+             "variables (x) in data.frame newdata missing.", fixed=TRUE)
+
 # multinomial example
 set.seed(1234)
 
@@ -84,3 +88,10 @@ expect_error(predict(obj, newdata = newdat, se.fit=TRUE),
 
 pred5 <- predict(obj, newdata = newdat, se.fit=FALSE)
 expect_equivalent_to_reference(pred5, "pred6")
+
+# test if all fixed effects are defined in newdata:
+data(oats.data)
+obj <- LMMsolve(fixed=yield~rep+gen, random=~block:rep,data=oats.data)
+newdat <- data.frame(gen="G11")
+expect_error(predict(obj, newdata=newdat),
+                     "variables (rep) in data.frame newdata missing.", fixed=TRUE)

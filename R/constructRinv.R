@@ -5,9 +5,9 @@ constructRinv <- function(df,
                           residual,
                           weights) {
   ## If weights not defined, set equal to one.
-  if (is.null(weights)) {
-    weights <- rep(1, nrow(df))
-  }
+  #if (is.null(weights)) {
+  #  weights <- rep(1, nrow(df))
+  #}
   if (!is.null(residual)) {
     lRinv <- list()
     column <- all.vars(residual)

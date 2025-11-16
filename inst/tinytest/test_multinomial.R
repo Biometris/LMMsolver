@@ -116,5 +116,9 @@ prob_ML <- as.numeric(colSums(multiNom)/(sz*n))
 # that the catagories have wrong labels, to keep algorithm stable
 expect_equal(prob, prob_ML, tolerance = 1.0e-6)
 
-
+# check for weight argument
+expect_error(LMMsolve(fixed = cbind(A,B,C,D) ~ 1,
+         spline = ~spl1D(x, nseg = 17, xlim=c(0,1), scaleX=FALSE),
+         data=dat, family = multinomial(), weights=c(1,nrow(dat))),
+         "family multinomial : weights option cannot be used.")
 
