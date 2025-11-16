@@ -34,13 +34,13 @@
 #' }
 #'
 #' @examples
-#' ## Fit model on john.alpha data from agridat package.
-#' data(john.alpha, package = "agridat")
+#' ## Fit model on oats data
+#' data(oats.data)
 #'
 #' ## Fit a model with a 1-dimensional spline at the plot level.
 #' LMM1_spline <- LMMsolve(fixed = yield ~ rep + gen,
 #'                        spline = ~spl1D(x = plot, nseg = 20),
-#'                        data = john.alpha)
+#'                        data = oats.data)
 #'
 #' summary(LMM1_spline)
 #'

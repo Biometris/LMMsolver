@@ -625,12 +625,12 @@ In this section we will show some examples from quantitative genetics, to illust
 
 ## Oats field trial
 
-As a first example we will use an oats field trial from the `agridat` package. There were 24 varieties in 3 replicates, each consisting of 6 incomplete blocks of 4 plots. The plots were laid out in a single row.
+As a first example we will use an oats field trial. There were 24 varieties in 3 replicates, each consisting of 6 incomplete blocks of 4 plots. The plots were laid out in a single row [@john1995; @Boer2020].
 
 ```{r oatsdata}
 ## Load data.
-data(john.alpha, package = "agridat")
-head(john.alpha)
+data(oats.data)
+head(oats.data)
 ```
 
 
@@ -638,9 +638,9 @@ We will use the Linear Variance (LV) model, which is closely connected to the P-
 
 ```{r define LVmodel}
 ## Add plot as factor.
-john.alpha$plotF <- as.factor(john.alpha$plot)
+oats.data$plotF <- as.factor(oats.data$plot)
 ## Define the precision matrix, see eqn (A2) in Boer et al (2020).
-N <- nrow(john.alpha)
+N <- nrow(oats.data)
 cN <- c(1 / sqrt(N - 1), rep(0, N - 2), 1 / sqrt(N - 1))
 D <- diff(diag(N), diff = 1)
 Delta <- 0.5 * crossprod(D)
@@ -655,7 +655,7 @@ Given the precision matrix for the LV model we can define the model in LMMsolve 
 obj7 <- LMMsolve(fixed = yield ~ rep + gen,
                  random = ~plotF, 
                  ginverse = lGinv, 
-                 data = john.alpha)
+                 data = oats.data)
 ```
 
 The absolute deviance ($-2*logL$) and variances for the LV-model are

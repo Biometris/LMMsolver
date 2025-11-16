@@ -33,7 +33,6 @@ Suggests:
     knitr,
     tinytest,
     tidyr,
-    agridat,
     ggplot2,
     maps,
     sf

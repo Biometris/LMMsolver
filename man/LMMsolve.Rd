@@ -99,22 +99,22 @@ in terms of precision parameters to allow for non-standard mixed models using
 tensor product splines.
 }
 \examples{
-## Fit models on john.alpha data from agridat package.
-data(john.alpha, package = "agridat")
+## Fit models on oats.data
+data(oats.data)
 
 ## Fit simple model with only fixed effects.
 LMM1 <- LMMsolve(fixed = yield ~ rep + gen,
-                data = john.alpha)
+                data = oats.data)
 
 ## Fit the same model with genotype as random effect.
 LMM1_rand <- LMMsolve(fixed = yield ~ rep,
                      random = ~gen,
-                     data = john.alpha)
+                     data = oats.data)
 
 ## Fit the model with a 1-dimensional spline at the plot level.
 LMM1_spline <- LMMsolve(fixed = yield ~ rep + gen,
                        spline = ~spl1D(x = plot, nseg = 20),
-                       data = john.alpha)
+                       data = oats.data)
 
 ## Fit models on multipop data included in the package.
 data(multipop)

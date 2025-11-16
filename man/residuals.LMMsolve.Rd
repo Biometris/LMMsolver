@@ -19,12 +19,12 @@ A vector of residuals.
 Obtain the residuals from a mixed model fitted using LMMSolve.
 }
 \examples{
-## Fit model on john.alpha data from agridat package.
-data(john.alpha, package = "agridat")
+## Fit model on oats.data
+data(oats.data)
 
 ## Fit simple model with only fixed effects.
 LMM1 <- LMMsolve(fixed = yield ~ rep + gen,
-                data = john.alpha)
+                data = oats.data)
 
 ## Obtain fitted values.
 residuals1 <- residuals(LMM1)

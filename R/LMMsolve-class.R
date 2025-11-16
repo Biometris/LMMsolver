@@ -118,12 +118,12 @@ LMMsolveObject <- function(logL,
 #' on which.
 #'
 #' @examples
-#' ## Fit model on john.alpha data from agridat package.
-#' data(john.alpha, package = "agridat")
+#' ## Fit model on oats data.
+#' data(oats.data)
 #'
 #' ## Fit simple model with only fixed effects.
 #' LMM1 <- LMMsolve(fixed = yield ~ rep + gen,
-#'                 data = john.alpha)
+#'                 data = oats.data)
 #'
 #' ## Obtain table of effective dimensions.
 #' summ1 <- summary(LMM1)
@@ -189,12 +189,12 @@ print.summary.LMMsolve <- function(x,
 #' mixed model.
 #'
 #' @examples
-#' ## Fit model on john.alpha data from agridat package.
-#' data(john.alpha, package = "agridat")
+#' ## Fit model on oats data
+#' data(oats.data)
 #'
 #' ## Fit simple model with only fixed effects.
 #' LMM1 <- LMMsolve(fixed = yield ~ rep + gen,
-#'                 data = john.alpha)
+#'                 data = oats.data)
 #'
 #' ## Obtain coefficients.
 #' coefs1 <- coef(LMM1)
@@ -250,12 +250,12 @@ coef.LMMsolve <- function(object,
 #' @returns A vector of fitted values.
 #'
 #' @examples
-#' ## Fit model on john.alpha data from agridat package.
-#' data(john.alpha, package = "agridat")
+#' ## Fit model on oats data
+#' data(oats.data)
 #'
 #' ## Fit simple model with only fixed effects.
 #' LMM1 <- LMMsolve(fixed = yield ~ rep + gen,
-#'                 data = john.alpha)
+#'                 data = oats.data)
 #'
 #' ## Obtain fitted values.
 #' fitted1 <- fitted(LMM1)
@@ -275,12 +275,12 @@ fitted.LMMsolve <- function(object,
 #' @returns A vector of residuals.
 #'
 #' @examples
-#' ## Fit model on john.alpha data from agridat package.
-#' data(john.alpha, package = "agridat")
+#' ## Fit model on oats.data
+#' data(oats.data)
 #'
 #' ## Fit simple model with only fixed effects.
 #' LMM1 <- LMMsolve(fixed = yield ~ rep + gen,
-#'                 data = john.alpha)
+#'                 data = oats.data)
 #'
 #' ## Obtain fitted values.
 #' residuals1 <- residuals(LMM1)
@@ -304,12 +304,12 @@ residuals.LMMsolve <- function(object,
 #' @returns The restricted maximum log-likelihood of the fitted model.
 #'
 #' @examples
-#' ## Fit model on john.alpha data from agridat package.
-#' data(john.alpha, package = "agridat")
+#' ## Fit model on oats data
+#' data(oats.data)
 #'
 #' ## Fit simple model with only fixed effects.
 #' LMM1 <- LMMsolve(fixed = yield ~ rep + gen,
-#'                 data = john.alpha)
+#'                 data = oats.data)
 #'
 #' ## Obtain log-likelihood.
 #' logLik(LMM1)
@@ -341,12 +341,12 @@ logLik.LMMsolve <- function(object,
 #' @returns The deviance of the fitted model.
 #'
 #' @examples
-#' ## Fit model on john.alpha data from agridat package.
-#' data(john.alpha, package = "agridat")
+#' ## Fit model on oats.data
+#' data(oats.data)
 #'
 #' ## Fit simple model with only fixed effects.
 #' LMM1 <- LMMsolve(fixed = yield ~ rep + gen,
-#'                 data = john.alpha)
+#'                 data = oats.data)
 #'
 #' ## Obtain deviance.
 #' deviance(LMM1)

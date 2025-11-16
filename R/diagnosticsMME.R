@@ -7,12 +7,12 @@
 #' decomposition.
 #'
 #' @examples
-#' ## Fit model on john.alpha data from agridat package.
-#' data(john.alpha, package = "agridat")
+#' ## Fit model on oats data
+#' data(oats.data)
 #'
 #' ## Fit simple model with only fixed effects.
 #' LMM1 <- LMMsolve(fixed = yield ~ rep + gen,
-#'                 data = john.alpha)
+#'                 data = oats.data)
 #'
 #' ## Obtain deviance.
 #' diagnosticsMME(LMM1)

@@ -41,13 +41,13 @@ grid. The standard errors are saved if `deriv` has default value 0.
 Obtain the smooth trend for models fitted with a spline component.
 }
 \examples{
-## Fit model on john.alpha data from agridat package.
-data(john.alpha, package = "agridat")
+## Fit model on oats data
+data(oats.data)
 
 ## Fit a model with a 1-dimensional spline at the plot level.
 LMM1_spline <- LMMsolve(fixed = yield ~ rep + gen,
                        spline = ~spl1D(x = plot, nseg = 20),
-                       data = john.alpha)
+                       data = oats.data)
 
 ## Obtain the smooth trend for the fitted model on a dense grid.
 smooth1 <- obtainSmoothTrend(LMM1_spline,
