@@ -26,6 +26,11 @@ oats.data
 \description{
 Alpha lattice design of spring oats
 }
+\details{
+The response is grain yield in kg per hectare. The design was an alpha design
+with 24 varieties, three replicates and  six incomplete blocks of size four per replicate.
+The 72 plots were arranged in a single linear array.
+}
 \references{
 Boer, Martin P., Hans-Peter Piepho, and Emlyn R. Williams.
 "Linear variance, P-splines and neighbour differences for spatial adjustment

@@ -67,6 +67,9 @@
 #' \item{row}{row}
 #' \item{col}{column}
 #' }
+#' @details The response is grain yield in kg per hectare. The design was an alpha design
+#' with 24 varieties, three replicates and  six incomplete blocks of size four per replicate.
+#' The 72 plots were arranged in a single linear array.
 #' @source J. A. John & E. R. Williams (1995). Cyclic and computer
 #' generated designs. Chapman and Hall, London. Page 146.
 #' @references Boer, Martin P., Hans-Peter Piepho, and Emlyn R. Williams.
