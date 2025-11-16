@@ -1,8 +1,4 @@
-## Use the barley data from a uniformity field trial.
-data("piepho.barley.uniformity", package = "agridat")
-
-# Remove NA to prevent spurious warnings.
-dat <- piepho.barley.uniformity[!is.na(piepho.barley.uniformity[["yield"]]), ]
+data("barley.uniformity.trial")
 
 ## Some tests on correct input checking for combinations of splines.
 
