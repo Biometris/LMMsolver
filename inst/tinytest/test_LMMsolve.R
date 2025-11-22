@@ -95,8 +95,22 @@ expect_error(LMMsolve(fixed = pheno ~ cross, random = ~grp(QTL),
                       group = list(QTL = 3:5), theta=c(-1,1), data = testDat),
              "theta should have positive values.")
 
+# Test for grpTheta
+expect_error(LMMsolve(fixed = pheno ~ cross, random = ~grp(QTL),
+         group = list(QTL = 3:5), grpTheta=c("a","b"), data = testDat),
+         "grpTheta should be integers 1,2,...nGrp")
 
+# Test for offset to be numeric
+expect_error(LMMsolve(fixed = pheno ~ cross, random = ~grp(QTL),
+                      group = list(QTL = 3:5), offset = "cross", data = testDat),
+             "offset should be numeric")
 
+# Test for family argument
+tst_fam <- function() {return(0) }
+expect_error(LMMsolve(fixed = pheno ~ cross, random = ~grp(QTL),
+                      group = list(QTL = 3:5), data = testDat,
+                      family = tst_fam()),
+             "argument family not correct")
 
 ## Test for syntax names:
 dat <- data.frame(x = 1:3, `a-b` = 3:1, `a+b` = 1:3, ab = 3:1, check.names = FALSE)

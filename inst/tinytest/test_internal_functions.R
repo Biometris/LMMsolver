@@ -56,3 +56,8 @@ expect_error(LMMsolver:::MatrixProduct(A1, B),
 expect_error(LMMsolver:::MatrixProduct(A2, B),
              "Both arguments for MatrixProduct should be of class spam")
 
+expect_error(LMMsolver:::chkSplinesFormula("wrongArg"),
+             "spline should be a formula of form \"~ spl1D() + ... +  spl1D()\", \"~ spl2D()\" or \"~spl3D()\"",
+             fixed=TRUE)
+
+

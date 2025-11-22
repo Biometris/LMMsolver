@@ -89,9 +89,18 @@ expect_error(predict(obj, newdata = newdat, se.fit=TRUE),
 pred5 <- predict(obj, newdata = newdat, se.fit=FALSE)
 expect_equivalent_to_reference(pred5, "pred6")
 
-# test if all fixed effects are defined in newdata:
+# make predictions for oats.data:
 data(oats.data)
-obj <- LMMsolve(fixed=yield~rep+gen, random=~block:rep,data=oats.data)
-newdat <- data.frame(gen="G11")
-expect_error(predict(obj, newdata=newdat),
+obj7 <- LMMsolve(yield ~ rep + gen,
+                 random = ~block:rep,
+                 data = oats.data)
+newdat7 <- data.frame(rep = "R1", gen = levels(oats.data$gen))
+pred7 <- predict(obj7, newdata = newdat7)
+expect_equivalent_to_reference(pred7, "pred7")
+
+# test if all fixed effects are defined in newdata:
+newdat8 <- data.frame(gen = "G11")
+expect_error(predict(obj7, newdata=newdat8),
                      "variables (rep) in data.frame newdata missing.", fixed=TRUE)
+
+
