@@ -1,21 +1,4 @@
-
-# part of durban.rowcol experiment, first 5 columns and rows for speed of testing.
-durban.rowcol <- structure(list(row = c(4L, 5L, 3L, 4L, 4L, 4L, 1L, 3L, 2L, 2L,
-                                        3L, 5L, 3L, 1L, 3L, 4L, 5L, 2L, 1L, 2L, 1L, 1L, 5L, 2L, 5L),
-                                bed = c(4L, 2L, 4L, 5L, 3L, 1L, 5L, 2L, 1L, 4L, 3L, 5L, 5L,
-                                        4L, 1L, 2L, 1L, 5L, 3L, 2L, 1L, 2L, 4L, 3L, 3L),
-                                rep = structure(c(1L,
-                                                  1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L,
-                                                  1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L), levels = c("R1", "R2"
-                                                  ), class = "factor"),
-                                gen = structure(1:25, levels = c("G002", "G005", "G007",
-                                                                 "G008", "G012", "G019", "G039", "G042", "G050", "G099", "G107",
-                                                                 "G125", "G133", "G137", "G144", "G168", "G190", "G191", "G192",
-                                                                 "G194", "G198", "G201", "G232", "G252", "G270"), class = "factor"),
-                                yield = c(5.28, 5.14, 5.77, 4.94, 5.49, 5.54, 5.1, 5.86,
-                                          5.46, 4.83, 6.1, 4.72, 5.88, 5.23, 5.51, 5.87, 5.38, 5.8,
-                                          6.07, 5.81, 5.83, 5.78, 4.88, 5.12, 5.35)),
-                           row.names = c(1:25), class = "data.frame")
+load("testdata.rda")
 
 ## Some tests on correct input checking for spl2D.
 
