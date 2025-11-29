@@ -108,4 +108,4 @@ Further examples can be found in the vignette.
 vignette("Solving_Linear_Mixed_Models")
 ```
 
-# References
+## References

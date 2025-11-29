@@ -110,7 +110,7 @@ Further examples can be found in the vignette.
 vignette("Solving_Linear_Mixed_Models")
 ```
 
-# References
+## References
 
 <div id="refs" class="references csl-bib-body hanging-indent"
 entry-spacing="0">
