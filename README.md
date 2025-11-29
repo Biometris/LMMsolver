@@ -10,17 +10,21 @@ downloads](https://cranlogs.r-pkg.org/badges/LMMsolver)](https://www.r-pkg.org/p
 [![codecov](https://codecov.io/gh/Biometris/LMMsolver/branch/main/graph/badge.svg)](https://app.codecov.io/gh/Biometris/LMMsolver)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14527379.svg)](https://doi.org/10.5281/zenodo.14527379)
 
-The aim of the `LMMsolver` package is to provide an efficient and
-flexible system to estimate variance components using restricted maximum
-likelihood or REML (Patterson and Thompson 1971), for models where the
-mixed model equations are sparse. An important feature of the package is
-smoothing with P-splines (Eilers and Marx 1996). The sparse mixed model
-P-splines formulation (Boer 2023) is used, which makes the computations
-fast. The computational advantage of the sparse mixed model formulation
-is especially clear for two-dimensional smoothing (Boer 2023; Carollo et
-al. 2024).
+The goal of the `LMMsolver` package is to fit (generalized) linear mixed
+models efficiently when the model structure is large or sparse. It
+provides tools for estimating variance components using restricted
+maximum likelihood (REML) and is designed for models that involve many
+random effects or smooth terms.
 
-<!-- The aim of the `LMMsolver` package is to provide an efficient and flexible system to estimate variance components using restricted maximum likelihood or REML [@Patterson1971], for models where the mixed model equations are sparse [@boer2023]. An example of an application is using splines to model spatial [@Rodriguez-Alvarez2018; @Boer2020] or temporal [@Bustos-Korts2019] trends. Another example is mixed model Quantitative Trait Locus (QTL) analysis for multiparental populations, allowing for heterogeneous residual variance and design matrices with Identity-By-Descent (IBD) probabilities [@Li2021]. -->
+A key feature of the package is support for smoothing using P-splines.
+LMMsolver uses a sparse formulation (Boer 2023), which makes
+computations fast and memory efficient, especially for two-dimensional
+smoothing problems such as spatial surfaces or image-like data (Boer
+2023; Carollo et al. 2024).
+
+This makes `LMMsolver` particularly useful for applications involving
+spatial or temporal smoothing, large data sets, and models where
+standard mixed model tools become slow or impractical.
 
 ## Installation
 
@@ -68,11 +72,6 @@ obj1 <- LMMsolve(fixed = anomaly ~ 1,
                  spline = ~spl2D(x1 = lon, x2 = lat, nseg = c(41, 41)),
                  data = USprecip)
 ```
-
-<!-- The summary function gives a table with the effective dimensions and the penalty parameters: -->
-<!-- ```{r ED_USprecip} -->
-<!-- summary(obj1) -->
-<!-- ``` -->
 
 The spatial trend for the precipitation can now be plotted on the map of
 the USA, using the `predict` function of `LMMsolver`:
@@ -132,28 +131,12 @@ Carollo, Angela, Paul Eilers, Hein Putter, and Jutta Gampe. 2024.
 
 </div>
 
-<div id="ref-Eilers1996" class="csl-entry">
-
-Eilers, PHC, and BD Marx. 1996. “<span class="nocase">Flexible smoothing
-with B-splines and penalties</span>.” *Stat. Sci.*
-<https://www.jstor.org/stable/2246049>.
-
-</div>
-
 <div id="ref-Furrer2010" class="csl-entry">
 
 Furrer, R, and SR Sain. 2010. “<span class="nocase">spam: A sparse
 matrix R package with emphasis on MCMC methods for Gaussian Markov
 random fields</span>.” *J. Stat. Softw.*
-<https://core.ac.uk/download/pdf/6340272.pdf>.
-
-</div>
-
-<div id="ref-Patterson1971" class="csl-entry">
-
-Patterson, HD, and R Thompson. 1971. “<span class="nocase">Recovery of
-inter-block information when block sizes are unequal</span>.”
-*Biometrika*. <https://doi.org/10.1093/biomet/58.3.545>.
+<https://doi.org/10.18637/jss.v036.i10>.
 
 </div>
 
