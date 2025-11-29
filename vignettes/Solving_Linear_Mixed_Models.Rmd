@@ -619,11 +619,11 @@ p1
 
 
 
-# Examples from Quantitative Genetics
+# Examples from Agriculture and Quantitative Genetics
 
-In this section we will show some examples from quantitative genetics, to illustrate some further options of the package. 
+In this section we will show some examples from agriculture and quantitative genetics, to illustrate some further options of the package. 
 
-## Oats field trial
+## Oats field trial using the Linear Variance model
 
 As a first example we will use an oats field trial. There were 24 varieties in 3 replicates, each consisting of 6 incomplete blocks of 4 plots. The plots were laid out in a single row [@john1995; @Boer2020].
 
@@ -667,7 +667,34 @@ summary(obj7, which = "variances")
 
 as reported in @Boer2020, Table 1.
 
-## Model biomass as function of time.
+## Generalized Heritability
+
+In this section we use the same oats data set as in the previous section, to illustrate how the generalized heritability [@oakey2006; @Rodriguez-Alvarez2018] can be obtained. 
+
+We use the model as described in @schmidt2019, with genotype random:
+
+```{r schmidtmodeloats}
+obj7b <- LMMsolve(fixed = yield ~ rep,
+                 random = ~gen + rep:block, 
+                 data = oats.data)
+```
+
+The table with effective dimensions can be obtained with the `effDim()` function:
+
+```{r effdim}
+EDdf <- effDim(obj7b)
+EDdf
+```
+
+The generalized heritability for `gen` is given by the ratio of the Effective Dimension, divided by the nominal number of parameters [@oakey2006; @Rodriguez-Alvarez2018]:
+
+```{r genh2}
+round(subset(EDdf, Term == "gen")$Ratio, 3)
+```
+
+and corresponds to the result for the Oakey model in @schmidt2019.
+
+## Modelling biomass for longitudinal data
 
 In this section we show an example of mixed model P-splines to fit biomass as function of time. As an example we use wheat data simulated with the crop growth model APSIM. This data set is included in the package. For details on this simulated data see @Bustos-Korts2019. 
 
@@ -709,7 +736,7 @@ ggplot(data = APSIMdat, aes(x = das, y = biomass)) +
   theme_bw()
 ```
 
-The growth rate (first derivative) as function of time can be obtained using `deriv = das` in the `predict()` function:
+The growth rate (first derivative) as function of time can be obtained using the `deriv` argument in the `predict()` function:
 
 ```{r APSIMDeriv}
 plotDatDt <- predict(obj8, newdata = newdat, se.fit=TRUE, deriv="das")
