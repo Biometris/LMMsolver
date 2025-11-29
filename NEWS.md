@@ -1,3 +1,10 @@
+# LMMsolver 1.0.11.9000
+
+-   function `effDim()` added.
+-   Improved code coverage > 95% using tinytest.
+-   Data sets `barley.uniformity.trial` and `oats.data` added.
+-   All data included needed for tests with tinytest 
+
 # LMMsolver 1.0.11
 
 -   New function `mLogLik()` for the calculations of the log-likelihood and first derivatives as function of precision parameters `theta`. 
