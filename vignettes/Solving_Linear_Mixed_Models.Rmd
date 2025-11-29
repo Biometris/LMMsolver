@@ -28,8 +28,11 @@ the model structure is large or sparse. It provides tools for estimating varianc
 components using restricted maximum likelihood (REML) [@Patterson1971] and is 
 especially useful for models that include many random effects or smooth terms.
 
+LMMsolver is intended for users working with spatial, temporal, or high-dimensional 
+data who need to fit large mixed models efficiently and reliably.
+
 A key feature of the package is support for smoothing using P-splines [@Eilers1996]. 
-`LMMsolver` is based on a sparse formulation of mixed model P-splines [@boer2023], 
+LMMsolver is based on a sparse formulation of mixed model P-splines [@boer2023], 
 which makes computations fast and memory efficient. The performance benefits are 
 particularly noticeable for higher-dimensional smoothing problems such as spatial 
 surfaces or multi-dimensional trends [@boer2023; @carollo2024].
@@ -38,10 +41,9 @@ A Linear Mixed Model (LMM) has the form
 
 $$
   y = X \beta + Z u + e, \quad u \sim N(0,G), \quad e \sim N(0,R) \;,
-$$ where $y$ is a vector of observations, $\beta$ is a vector with the fixed effects, $u$ is a vector with the random effects, and $e$ a vector of random residuals. $X$ and $Z$ are design matrices.
+$$ where $y$ is a vector of observations, $\beta$ is a vector with the fixed effects, $u$ is a vector with the random effects, and $e$ a vector of random residuals. $X$ and $Z$ are design matrices; $G$ and $R$ are covariance matrices; the corresponding inverse matrices $G^{-1}$ and $R^{-1}$ are called *precision* matrices.
 
-In many smoothing and spatial applications, these matrices contain mostly zeros and 
-are therefore *sparse*. `LMMsolver` is designed to exploit this structure to reduce 
+In many smoothing and spatial applications, the design and precision matrices contain mostly zeros and are therefore *sparse*. `LMMsolver` is designed to exploit this structure to reduce 
 both computation time and memory usage.
 
 # Introduction 
@@ -316,7 +318,7 @@ They divided the data within this region into a training and a testing data set,
 
 ```{r SeaSurfaceTemp}
 data(SeaSurfaceTemp)
-head(SeaSurfaceTemp, 5)
+head(SeaSurfaceTemp, 3)
 table(SeaSurfaceTemp$type)
 ``` 
 
@@ -509,7 +511,7 @@ nsucces <- sapply(x, FUN=function(x) {
                 })
 dat <- data.frame(x = x, succes = nsucces, 
                          failure= sz - nsucces)
-head(dat, 5)
+head(dat, 3)
 ```
 
 Next we can analyse the data using `family = binomial()`, and for the response using `cbind(succes, failure)`:
@@ -581,7 +583,7 @@ multiNom <- t(sapply(x, FUN=
                       } ))
 colnames(multiNom) <- names(mu)
 dat <- data.frame(x, multiNom)
-head(dat, 4)
+head(dat, 3)
 ```
 
 ```{r multinomialfit}
@@ -601,7 +603,7 @@ dat_fr <- data.frame(x, fr)
 x0 <- seq(0, 1, by = 0.01)
 newdat <- data.frame(x = x0)
 pred <- predict(obj, newdata = newdat)
-head(pred)
+head(pred, 3)
 ```
 
 The following code generates the plot with prediction, with the points the observed fractions, the dashed curves the true probabilities and the solid curves the predicted values:
@@ -635,7 +637,7 @@ As a first example we will use an oats field trial. There were 24 varieties in 3
 ```{r oatsdata}
 ## Load data.
 data(oats.data)
-head(oats.data)
+head(oats.data, 3)
 ```
 
 
@@ -705,7 +707,7 @@ In this section we show an example of mixed model P-splines to fit biomass as fu
 
 ```{r APSIMdat}
 data(APSIMdat)
-head(APSIMdat)
+head(APSIMdat, 3)
 ```
 
 The first column is the environment, Emerald in 1993, the second column the simulated genotype (g001), the third column is days after sowing (das), and the last column is the simulated biomass with medium measurement error.
@@ -763,7 +765,7 @@ In QTL-mapping for multiparental populations the Identity-By-Descent (IBD) proba
 ```{r multipop}
 ## Load data for multiparental population.
 data(multipop)
-head(multipop)
+head(multipop, 3)
 ```
 
 The residual (genetic) variances for the two populations can be different. Therefore we need to allow for heterogeneous residual variances, which can be defined by using the `residual` argument in `LMMsolve`:
