@@ -7,6 +7,10 @@ data("oats.data")
 expect_error(LMMsolve(fixed = yield ~ rep + gen, data = oats.data,
                       spline = yield ~ spl1D(x = plot, nseg = 10)),
              "spline should be a formula of form")
+expect_error(LMMsolve(fixed = yield ~ plot, data = oats.data,
+                      spline = ~ spl1D(x = plot, nseg = 10)),
+             "singularity problem lin(plot) in spline argument", fixed=TRUE)
+
 expect_error(LMMsolve(fixed = yield ~ rep + gen, data = oats.data,
                       spline = ~spl1D(x = plot, nseg = 10) +
                         spl4D(x = plot, nseg = 20)),

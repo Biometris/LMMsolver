@@ -25,7 +25,8 @@ expect_error(LMMsolve(fixed = yield ~ 1,
                       spline = ~spl1D(x = row, nseg = 36) +
                         spl2D(x1 = col, x2 = row, nseg = c(30, 36)),
                       data = dat),
-             "variables in splines should be unique")
+             "singularity problem lin(col, row) in spline argument", fixed = TRUE)
+
 expect_error(LMMsolve(fixed = yield ~ 1,
                       spline = ~spl1D(x = row, nseg = 36) +
                         spl1D(x = row, nseg = 30),
