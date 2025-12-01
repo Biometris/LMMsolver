@@ -263,10 +263,10 @@ LMMsolve <- function(fixed,
       splResList[[i]] <- splRes
       ## Add to design matrix fixed effect X.
       X <- cbind(X, splRes$X)
+      ## Check whether adding the fixed part gives a singularity.
       if (qr(X)$rank < ncol(X)) {
         stop("singularity problem ", splRes$term.labels.f, " in spline argument\n")
       }
-
       ## Add to design matrix random effect Z.
       Z <- spam::cbind.spam(Z, splRes$Z)
       ## Expand matrices Ginv to the updated Z.
