@@ -1,9 +1,10 @@
 # LMMsolver 1.0.11.9000
 
--   function `effDim()` added.
+-   First derivatives for `predict` using `deriv` argument now also implemented for `spl2D` and `spl3D`. 
+-   function `effDim()` added to get data.frame with effective dimensions.
 -   Improved code coverage > 95% using tinytest.
 -   Data sets `barley.uniformity.trial` and `oats.data` added.
--   All data included needed for tests with tinytest 
+-   All data included in the package that are needed for tests using tinytest 
 
 # LMMsolver 1.0.11
 
