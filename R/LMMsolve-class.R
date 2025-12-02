@@ -470,45 +470,6 @@ predict.LMMsolve <- function(object,
       }
     }
   }
-  #   isDeriv <- sapply(object$splRes,FUN= function(spl) {
-  #                                       nameVar <- names(spl$x)
-  #                                       if (length(nameVar) > 1) return(FALSE)
-  #                                       nameVar == deriv})
-  #   if (all(!isDeriv)) stop("Cannot find derivative for ", deriv, "\n")
-  #   spl_nr <- which(isDeriv)
-  #
-  #   spl <- object$splRes[[spl_nr]]
-  #   chkValBsplines(spl, newdata)
-  #   knots <- spl$knots[[spl_nr]]
-  #   pord <- spl$pord
-  #   scaleX <- spl$scaleX
-  #   x <- newdata[[deriv]]
-  #   dB <- Bsplines(knots, x, deriv = 1)
-  #   nRow <- nrow(newdata)
-  #   dim <- object$dim
-  #   lU <- list()
-  #   for (i in seq_along(dim)) {
-  #     lU[[i]] <- spam::spam(x = 0, nrow = nRow, ncol = dim[i])
-  #   }
-  #
-  #   labels <- c(object$term.labels.f, object$term.labels.r)
-  #   ndx.r <- which(spl$term.labels.r == labels)
-  #   if (!is.null(spl$term.labels.f)) {
-  #     ndx.f <- which(spl$term.labels.f == labels)
-  #     G <- constructG(knots = knots, scaleX = scaleX, pord = pord)
-  #     dBG <- dB %*% G
-  #     dBG <- dBG[,-1, drop=FALSE]
-  #     lU[[ndx.f]] <- dBG
-  #   }
-  #   lU[[ndx.r]] <- dB
-  #   U <- Reduce(spam::cbind.spam, lU)
-  #   outDat <- newdata
-  #   outDat[["ypred"]] <- as.vector(U %*% object$coefMME)
-  #   if (se.fit) {
-  #     outDat[["se"]] <- calcStandardErrors(C = object$C, D = U)
-  #   }
-  #   return(outDat)
-  # }
 
   splFixLab <- sapply(object$splRes, function(x) { x$term.labels.f })
   splRanLab <- sapply(object$splRes, function(x) { x$term.labels.r })
