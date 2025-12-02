@@ -2,6 +2,7 @@
 
 -   First derivatives for `predict` using `deriv` argument now also implemented for `spl2D` and `spl3D`. 
 -   function `effDim()` added to get data.frame with effective dimensions.
+-   In the vignette an example added how the generalized heritability can be calculated.
 -   Improved code coverage > 95% using tinytest.
 -   Data sets `barley.uniformity.trial` and `oats.data` added.
 -   All data included in the package that are needed for tests using tinytest 
