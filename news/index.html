@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">LMMsolver</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.11</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.12</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -42,7 +42,16 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="1.0.11" id="lmmsolver-1011">LMMsolver 1.0.11<a class="anchor" aria-label="anchor" href="#lmmsolver-1011"></a></h2>
+<h2 class="pkg-version" data-toc-text="1.0.12" id="lmmsolver-1012">LMMsolver 1.0.12<a class="anchor" aria-label="anchor" href="#lmmsolver-1012"></a></h2>
+<ul><li>First derivatives for <code>predict</code> using <code>deriv</code> argument now also implemented for <code>spl2D</code> and <code>spl3D</code>.</li>
+<li>function <code><a href="../reference/effDim.html">effDim()</a></code> added to get data.frame with effective dimensions.</li>
+<li>In the vignette, an example added how the generalized heritability can be calculated.</li>
+<li>Improved code coverage &gt; 95%.</li>
+<li>Data sets <code>barley.uniformity.trial</code> and <code>oats.data</code> added.</li>
+<li>All data included in the package that are needed for tests.</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.0.11" id="lmmsolver-1011">LMMsolver 1.0.11<a class="anchor" aria-label="anchor" href="#lmmsolver-1011"></a></h2><p class="text-muted">CRAN release: 2025-08-20</p>
 <ul><li>New function <code><a href="../reference/mLogLik.html">mLogLik()</a></code> for the calculations of the log-likelihood and first derivatives as function of precision parameters <code>theta</code>.</li>
 <li>A new argument <code>deriv</code> added to <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> to calculate the first derivatives for <code><a href="../reference/spl1D.html">spl1D()</a></code> functions.</li>
 <li>Two examples in vignette updated with predictions of derivatives and corresponding standard errors.</li>
@@ -59,7 +68,7 @@
 <h2 class="pkg-version" data-toc-text="1.0.9" id="lmmsolver-109">LMMsolver 1.0.9<a class="anchor" aria-label="anchor" href="#lmmsolver-109"></a></h2><p class="text-muted">CRAN release: 2025-01-14</p>
 <ul><li>Binomial response can now also be modelled as <code>fixed = cbind(failure, succes)</code>
 </li>
-<li>Categorial response using <code>family = multinomial()</code>
+<li>Categorical response using <code>family = multinomial()</code>
 </li>
 <li>Vignette updated, with separate section for GLMM.</li>
 <li>doi-link added for <code>LMMsolver</code>.</li>
@@ -145,7 +154,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">LMMsolver</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.11</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.12</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -67,7 +67,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Mixed Models and Smoothing</h1>
             
-            <h4 data-toc-skip class="date">2025-08-19</h4>
+            <h4 data-toc-skip class="date">2025-12-03</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/Biometris/LMMsolver/blob/main/vignettes/Solving_Linear_Mixed_Models.Rmd" class="external-link"><code>vignettes/Solving_Linear_Mixed_Models.Rmd</code></a></small>
       <div class="d-none name"><code>Solving_Linear_Mixed_Models.Rmd</code></div>
@@ -78,15 +78,24 @@
 <div class="section level2">
 <h2 class="unnumbered" id="the-lmmsolver-package">The LMMsolver package<a class="anchor" aria-label="anchor" href="#the-lmmsolver-package"></a>
 </h2>
-<p>The aim of the <code>LMMsolver</code> package is to provide an
-efficient and flexible system to estimate variance components using
-restricted maximum likelihood or REML <span class="citation">(<a href="#ref-Patterson1971">Patterson and Thompson 1971</a>)</span>, for
-models where the mixed model equations are sparse. An important feature
-of the package is smoothing with P-splines <span class="citation">(<a href="#ref-Eilers1996">Eilers and Marx 1996</a>)</span>. The sparse
-mixed model P-splines formulation <span class="citation">(<a href="#ref-boer2023">Boer 2023</a>)</span> is used, which makes the
-computations fast. The computational advantage of the sparse mixed model
-formulation is especially clear for smoothing in higher dimensions <span class="citation">(<a href="#ref-boer2023">Boer 2023</a>; <a href="#ref-carollo2024">Carollo et al. 2024</a>)</span>.</p>
-<!-- An example of an application is using splines to model spatial [@Rodriguez-Alvarez2018; @Boer2020] or temporal [@Bustos-Korts2019] trends. Another example is mixed model Quantitative Trait Locus (QTL) analysis for multiparental populations, allowing for heterogeneous residual variance and design matrices with Identity-By-Descent (IBD) probabilities [@Li2021]. -->
+<p>The goal of the <code>LMMsolver</code> package is to fit linear mixed
+models efficiently when the model structure is large or sparse. It
+provides tools for estimating variance components using restricted
+maximum likelihood (REML) <span class="citation">(<a href="#ref-Patterson1971">Patterson and Thompson 1971</a>)</span> and is
+especially useful for models that include many random effects or smooth
+terms.</p>
+<p>LMMsolver is intended for users working with spatial, temporal, or
+high-dimensional data who need to fit large mixed models efficiently and
+reliably.</p>
+<p>A key feature of the package is support for smoothing using P-splines
+<span class="citation">(<a href="#ref-Eilers1996">Eilers and Marx
+1996</a>)</span>. LMMsolver is based on a sparse formulation of mixed
+model P-splines <span class="citation">(<a href="#ref-boer2023">Boer
+2023</a>)</span>, which makes computations fast and memory efficient.
+The performance benefits are particularly noticeable for
+higher-dimensional smoothing problems such as spatial surfaces or
+multi-dimensional trends <span class="citation">(<a href="#ref-boer2023">Boer 2023</a>; <a href="#ref-carollo2024">Carollo
+et al. 2024</a>)</span>.</p>
 <p>A Linear Mixed Model (LMM) has the form</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>y</mi><mo>=</mo><mi>X</mi><mi>β</mi><mo>+</mo><mi>Z</mi><mi>u</mi><mo>+</mo><mi>e</mi><mo>,</mo><mspace width="1.0em"></mspace><mi>u</mi><mo>∼</mo><mi>N</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo>,</mo><mi>G</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>,</mo><mspace width="1.0em"></mspace><mi>e</mi><mo>∼</mo><mi>N</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo>,</mo><mi>R</mi><mo stretchy="true" form="postfix">)</mo></mrow><mspace width="0.278em"></mspace><mo>,</mo></mrow><annotation encoding="application/x-tex">
   y = X \beta + Z u + e, \quad u \sim N(0,G), \quad e \sim N(0,R) \;,
@@ -102,23 +111,19 @@ a vector of random residuals.
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>X</mi><annotation encoding="application/x-tex">X</annotation></semantics></math>
 and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>Z</mi><annotation encoding="application/x-tex">Z</annotation></semantics></math>
-are design matrices.</p>
-<!-- The `LMMsolver` package can fit models where the matrices $G^{-1}$ and $R^{-1}$ are a linear combination of precision matrices $Q_{G,i}$ and $Q_{R,i}$: $$ -->
-<!--   G^{-1} = \sum_{i} \psi_i Q_{G,i} \;, \quad   R^{-1} = \sum_{i} \phi_i Q_{R,i} \;, -->
-<!-- $$ where the precision parameters $\psi_i$ and $\phi_i$ are estimated using REML. For most standard mixed models $1/{\psi_i}$ are the variance components and $1/{\phi_i}$ the residual variances. We use a formulation in terms of precision parameters to allow for non-standard mixed models using tensor product splines introduced in @Rodriguez-Alvarez2015. -->
-<p>If the matrices
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>X</mi><annotation encoding="application/x-tex">X</annotation></semantics></math>,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>Z</mi><annotation encoding="application/x-tex">Z</annotation></semantics></math>,
+are design matrices;
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>G</mi><annotation encoding="application/x-tex">G</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>R</mi><annotation encoding="application/x-tex">R</annotation></semantics></math>
+are covariance matrices; the corresponding inverse matrices
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>G</mi><mrow><mo>−</mo><mn>1</mn></mrow></msup><annotation encoding="application/x-tex">G^{-1}</annotation></semantics></math>
 and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>R</mi><mrow><mo>−</mo><mn>1</mn></mrow></msup><annotation encoding="application/x-tex">R^{-1}</annotation></semantics></math>
-are sparse, the mixed model equations can be solved using efficient
-sparse matrix algebra implemented in the <code>spam</code> package <span class="citation">(<a href="#ref-Furrer2010">Furrer and Sain
-2010</a>)</span>. To calculate the derivatives of the log-likelihood in
-an efficient way, the automatic differentiation of the Cholesky matrix
-<span class="citation">(<a href="#ref-Smith1995">Smith 1995</a>; <a href="#ref-boer2023">Boer 2023</a>)</span> was implemented in C++ using
-the <code>Rcpp</code> package <span class="citation">(<a href="#ref-Eddelbuettel2018">Eddelbuettel and Balamuta
-2018</a>)</span>.</p>
+are called <em>precision</em> matrices.</p>
+<p>In many smoothing and spatial applications, the design and precision
+matrices contain mostly zeros and are therefore <em>sparse</em>.
+<code>LMMsolver</code> is designed to exploit this structure to reduce
+both computation time and memory usage.</p>
 </div>
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
@@ -171,7 +176,7 @@ line.</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_ribbon.html" class="external-link">geom_ribbon</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">pred1</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">x</span>,ymin <span class="op">=</span> <span class="va">ypred</span><span class="op">-</span><span class="fl">2</span><span class="op">*</span><span class="va">se</span>, ymax <span class="op">=</span> <span class="va">ypred</span><span class="op">+</span><span class="fl">2</span><span class="op">*</span><span class="va">se</span><span class="op">)</span>,</span>
 <span>              alpha <span class="op">=</span> <span class="fl">0.2</span>, inherit.aes <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">+</span> </span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Solving_Linear_Mixed_Models_files/figure-html/ggplotLinear-1.png" width="672"></p>
+<p><img src="Solving_Linear_Mixed_Models_files/figure-html/ggplotLinear-1.png" class="r-plt" width="672"></p>
 </div>
 <div class="section level3">
 <h3 id="fitting-a-non-linear-function-">Fitting a non-linear function.<a class="anchor" aria-label="anchor" href="#fitting-a-non-linear-function-"></a>
@@ -234,7 +239,7 @@ example:</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_ribbon.html" class="external-link">geom_ribbon</a></span><span class="op">(</span>data<span class="op">=</span> <span class="va">pred2</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">x</span>, ymin <span class="op">=</span> <span class="va">ypred</span><span class="op">-</span><span class="fl">2</span><span class="op">*</span><span class="va">se</span>, ymax <span class="op">=</span> <span class="va">ypred</span><span class="op">+</span><span class="fl">2</span><span class="op">*</span><span class="va">se</span><span class="op">)</span>,</span>
 <span>              alpha<span class="op">=</span><span class="fl">0.2</span>, inherit.aes <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span> </span></code></pre></div>
-<p><img src="Solving_Linear_Mixed_Models_files/figure-html/predict_non-1.png" width="672"></p>
+<p><img src="Solving_Linear_Mixed_Models_files/figure-html/predict_non-1.png" class="r-plt" width="672"></p>
 <p>The derivative of the fitted curve can be calculated using the
 <code>deriv</code> argument in the <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> function:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
@@ -250,7 +255,7 @@ example:</p>
 <span>              alpha<span class="op">=</span><span class="fl">0.2</span>, inherit.aes <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_hline</a></span><span class="op">(</span>yintercept<span class="op">=</span><span class="fl">0.0</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ylab</a></span><span class="op">(</span><span class="st">'dy/dx'</span><span class="op">)</span> <span class="op">+</span> </span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span> </span></code></pre></div>
-<p><img src="Solving_Linear_Mixed_Models_files/figure-html/predict_non_derivative-1.png" width="672"></p>
+<p><img src="Solving_Linear_Mixed_Models_files/figure-html/predict_non_derivative-1.png" class="r-plt" width="672"></p>
 <p>The dashed red curve is the true derivative given by
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>g</mi><mi>′</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">g'(x)</annotation></semantics></math>,
 defined by</p>
@@ -288,7 +293,7 @@ insight:</p>
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">dat4</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">Experiment</span>, y <span class="op">=</span> <span class="va">y</span>, fill <span class="op">=</span> <span class="va">Experiment</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>  </span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_boxplot.html" class="external-link">geom_boxplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>position <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/position_jitterdodge.html" class="external-link">position_jitterdodge</a></span><span class="op">(</span><span class="op">)</span>, alpha <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span> </span></code></pre></div>
-<p><img src="Solving_Linear_Mixed_Models_files/figure-html/boxplot-1.png" width="672"></p>
+<p><img src="Solving_Linear_Mixed_Models_files/figure-html/boxplot-1.png" class="r-plt" width="672"></p>
 <p>Comparing the two experiments we can see that:</p>
 <ol style="list-style-type: decimal">
 <li>There is a clear difference in mean/median between the two
@@ -332,7 +337,7 @@ by defining <code>residual = ~Experiment</code>.</li>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_ribbon.html" class="external-link">geom_ribbon</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">pred4</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">x</span>,ymin <span class="op">=</span> <span class="va">ypred</span><span class="op">-</span><span class="fl">2</span><span class="op">*</span><span class="va">se</span>, ymax <span class="op">=</span> <span class="va">ypred</span><span class="op">+</span><span class="fl">2</span><span class="op">*</span><span class="va">se</span><span class="op">)</span>,</span>
 <span>              alpha <span class="op">=</span> <span class="fl">0.2</span>, inherit.aes <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">+</span> </span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Solving_Linear_Mixed_Models_files/figure-html/twoExpPredict-1.png" width="672"></p>
+<p><img src="Solving_Linear_Mixed_Models_files/figure-html/twoExpPredict-1.png" class="r-plt" width="672"></p>
 <p>The estimated random effects for Experiment can be obtained using the
 <code><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef()</a></code> function:</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
@@ -414,7 +419,7 @@ First we make predictions on a regular two-dimensional grid:</p>
 <span>       x <span class="op">=</span> <span class="st">"Longitude"</span>, y <span class="op">=</span> <span class="st">"Latitude"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsf.html" class="external-link">coord_sf</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>panel.grid <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Solving_Linear_Mixed_Models_files/figure-html/Plot_USprecip-1.png" width="672"></p>
+<p><img src="Solving_Linear_Mixed_Models_files/figure-html/Plot_USprecip-1.png" class="r-plt" width="672"></p>
 </div>
 <div class="section level3">
 <h3 id="sea-surface-temperatures">Sea Surface Temperatures<a class="anchor" aria-label="anchor" href="#sea-surface-temperatures"></a>
@@ -433,13 +438,11 @@ testing data set, each consisting of approximately 8,000
 observations.</p>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">SeaSurfaceTemp</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">SeaSurfaceTemp</span>, <span class="fl">5</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">SeaSurfaceTemp</span>, <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="co">#&gt;        lon      lat    sst  type</span></span>
 <span><span class="co">#&gt; 1 -51.5607 -38.2629 289.94 train</span></span>
 <span><span class="co">#&gt; 2 -55.0255 -49.3163 278.60 train</span></span>
 <span><span class="co">#&gt; 3 -48.4228 -35.7470 291.51 train</span></span>
-<span><span class="co">#&gt; 4 -48.7221 -44.2118 282.78 train</span></span>
-<span><span class="co">#&gt; 5 -54.5217 -47.3870 282.44 train</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">SeaSurfaceTemp</span><span class="op">$</span><span class="va">type</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  test train </span></span>
@@ -478,7 +481,7 @@ training and test set:</p>
 <span>  <span class="va">map_layer</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/lims.html" class="external-link">xlim</a></span><span class="op">(</span><span class="va">BM_box</span><span class="op">[</span>, <span class="st">"lon"</span><span class="op">]</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/lims.html" class="external-link">ylim</a></span><span class="op">(</span><span class="va">BM_box</span><span class="op">[</span>, <span class="st">"lat"</span><span class="op">]</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_fixed.html" class="external-link">coord_fixed</a></span><span class="op">(</span>expand <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">df_train</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">lon</span>, <span class="va">lat</span>, colour <span class="op">=</span> <span class="va">sst</span><span class="op">)</span>, size<span class="op">=</span><span class="fl">0.5</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Solving_Linear_Mixed_Models_files/figure-html/SST_raw_data-1.png" width="672"></p>
+<p><img src="Solving_Linear_Mixed_Models_files/figure-html/SST_raw_data-1.png" class="r-plt" width="672"></p>
 <p>For this complicated data we need more segments for
 <code><a href="../reference/spl1D.html">spl2D()</a></code> as in the previous example, because of the strong
 local changes in Sea Surface Temperatures in this region.</p>
@@ -520,7 +523,7 @@ local changes in Sea Surface Temperatures in this region.</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_fixed.html" class="external-link">coord_fixed</a></span><span class="op">(</span>expand <span class="op">=</span> <span class="cn">FALSE</span>, xlim <span class="op">=</span> <span class="va">BM_box</span><span class="op">[</span>, <span class="st">"lon"</span><span class="op">]</span>, ylim <span class="op">=</span> <span class="va">BM_box</span><span class="op">[</span>, <span class="st">"lat"</span><span class="op">]</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_x_continuous</a></span><span class="op">(</span>breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">58</span>, <span class="op">-</span><span class="fl">54</span>, <span class="op">-</span><span class="fl">50</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Solving_Linear_Mixed_Models_files/figure-html/predictions_grid-1.png" width="672"></p>
+<p><img src="Solving_Linear_Mixed_Models_files/figure-html/predictions_grid-1.png" class="r-plt" width="672"></p>
 <p>The standard errors for the predictions are in the column
 <code>se</code> in the data frame <code>pred_grid</code> and can be
 plotted using the following code:</p>
@@ -534,14 +537,14 @@ plotted using the following code:</p>
 <span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_fixed.html" class="external-link">coord_fixed</a></span><span class="op">(</span>expand <span class="op">=</span> <span class="cn">FALSE</span>, xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">60</span>, <span class="op">-</span><span class="fl">48</span><span class="op">)</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">50</span>, <span class="op">-</span><span class="fl">35</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_x_continuous</a></span><span class="op">(</span>breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">58</span>, <span class="op">-</span><span class="fl">54</span>, <span class="op">-</span><span class="fl">50</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Solving_Linear_Mixed_Models_files/figure-html/seSST-1.png" width="672"></p>
+<p><img src="Solving_Linear_Mixed_Models_files/figure-html/seSST-1.png" class="r-plt" width="672"></p>
 <p>Predictions for the test set are given by</p>
 <div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pred_test</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">obj6</span>, newdata <span class="op">=</span> <span class="va">df_test</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">pred_test</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">sst</span>,y <span class="op">=</span> <span class="va">ypred</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>     <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">xlab</a></span><span class="op">(</span><span class="st">"observed SST (Celsius)"</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ylab</a></span><span class="op">(</span><span class="st">"predicted SST (Celsius)"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>     <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_abline</a></span><span class="op">(</span>intercept<span class="op">=</span><span class="fl">0</span>,slope<span class="op">=</span><span class="fl">1</span>,col<span class="op">=</span><span class="st">'red'</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Solving_Linear_Mixed_Models_files/figure-html/test_set-1.png" width="672"></p>
+<p><img src="Solving_Linear_Mixed_Models_files/figure-html/test_set-1.png" class="r-plt" width="672"></p>
 <p>Calculation of the root mean squared prediction error (RMSPE) for the
 test set:</p>
 <div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
@@ -632,7 +635,7 @@ data we showed before:</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_ribbon.html" class="external-link">geom_ribbon</a></span><span class="op">(</span>data<span class="op">=</span> <span class="va">pred3</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">x</span>, ymin <span class="op">=</span> <span class="va">ypred</span><span class="op">-</span><span class="fl">2</span><span class="op">*</span><span class="va">se</span>, ymax <span class="op">=</span> <span class="va">ypred</span><span class="op">+</span><span class="fl">2</span><span class="op">*</span><span class="va">se</span><span class="op">)</span>,</span>
 <span>              alpha<span class="op">=</span><span class="fl">0.2</span>, inherit.aes <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span> </span></code></pre></div>
-<p><img src="Solving_Linear_Mixed_Models_files/figure-html/predict_poisson-1.png" width="672"></p>
+<p><img src="Solving_Linear_Mixed_Models_files/figure-html/predict_poisson-1.png" class="r-plt" width="672"></p>
 </div>
 <div class="section level3">
 <h3 id="binomial-distribution">Binomial distribution<a class="anchor" aria-label="anchor" href="#binomial-distribution"></a>
@@ -671,13 +674,11 @@ data:</p>
 <span>                <span class="op">}</span><span class="op">)</span></span>
 <span><span class="va">dat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">x</span>, succes <span class="op">=</span> <span class="va">nsucces</span>, </span>
 <span>                         failure<span class="op">=</span> <span class="va">sz</span> <span class="op">-</span> <span class="va">nsucces</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">dat</span>, <span class="fl">5</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">dat</span>, <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="co">#&gt;            x succes failure</span></span>
 <span><span class="co">#&gt; 1 0.00000000      3       7</span></span>
 <span><span class="co">#&gt; 2 0.01010101      5       5</span></span>
-<span><span class="co">#&gt; 3 0.02020202      5       5</span></span>
-<span><span class="co">#&gt; 4 0.03030303      5       5</span></span>
-<span><span class="co">#&gt; 5 0.04040404      4       6</span></span></code></pre></div>
+<span><span class="co">#&gt; 3 0.02020202      5       5</span></span></code></pre></div>
 <p>Next we can analyse the data using <code>family = binomial()</code>,
 and for the response using <code>cbind(succes, failure)</code>:</p>
 <div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
@@ -715,7 +716,7 @@ probability, and the blue curve are the predictions:</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_ribbon.html" class="external-link">geom_ribbon</a></span><span class="op">(</span>data<span class="op">=</span> <span class="va">pred3</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">x</span>, ymin <span class="op">=</span> <span class="va">ypred</span><span class="op">-</span><span class="fl">2</span><span class="op">*</span><span class="va">se</span>, ymax <span class="op">=</span> <span class="va">ypred</span><span class="op">+</span><span class="fl">2</span><span class="op">*</span><span class="va">se</span><span class="op">)</span>,</span>
 <span>              alpha<span class="op">=</span><span class="fl">0.2</span>, inherit.aes <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Solving_Linear_Mixed_Models_files/figure-html/binomial_plot-1.png" width="672"></p>
+<p><img src="Solving_Linear_Mixed_Models_files/figure-html/binomial_plot-1.png" class="r-plt" width="672"></p>
 </div>
 <div class="section level3">
 <h3 id="multinomial-distribution">Multinomial distribution<a class="anchor" aria-label="anchor" href="#multinomial-distribution"></a>
@@ -759,12 +760,11 @@ depend on a single variable
 <span>                      <span class="op">}</span> <span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">multiNom</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">mu</span><span class="op">)</span></span>
 <span><span class="va">dat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">multiNom</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">dat</span>, <span class="fl">4</span><span class="op">)</span></span>
-<span><span class="co">#&gt;            x  A B C D</span></span>
-<span><span class="co">#&gt; 1 0.03545673  7 0 0 3</span></span>
-<span><span class="co">#&gt; 2 0.56507611  0 1 9 0</span></span>
-<span><span class="co">#&gt; 3 0.28025778  2 8 0 0</span></span>
-<span><span class="co">#&gt; 4 0.20419632 10 0 0 0</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">dat</span>, <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="co">#&gt;            x A B C D</span></span>
+<span><span class="co">#&gt; 1 0.03545673 7 0 0 3</span></span>
+<span><span class="co">#&gt; 2 0.56507611 0 1 9 0</span></span>
+<span><span class="co">#&gt; 3 0.28025778 2 8 0 0</span></span></code></pre></div>
 <div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/LMMsolve.html">LMMsolve</a></span><span class="op">(</span>fixed <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">A</span>,<span class="va">B</span>,<span class="va">C</span>,<span class="va">D</span><span class="op">)</span> <span class="op">~</span> <span class="fl">1</span>,</span>
 <span>                spline <span class="op">=</span> <span class="op">~</span><span class="fu"><a href="../reference/spl1D.html">spl1D</a></span><span class="op">(</span><span class="va">x</span>, nseg <span class="op">=</span> <span class="fl">17</span>, xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span><span class="op">)</span><span class="op">)</span>,</span>
@@ -789,14 +789,11 @@ depend on a single variable
 <span><span class="va">x0</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, by <span class="op">=</span> <span class="fl">0.01</span><span class="op">)</span></span>
 <span><span class="va">newdat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">x0</span><span class="op">)</span></span>
 <span><span class="va">pred</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">obj</span>, newdata <span class="op">=</span> <span class="va">newdat</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">pred</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">pred</span>, <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="co">#&gt;      x category     ypred</span></span>
 <span><span class="co">#&gt; 1 0.00        A 0.9051117</span></span>
 <span><span class="co">#&gt; 2 0.01        A 0.9117668</span></span>
-<span><span class="co">#&gt; 3 0.02        A 0.9178041</span></span>
-<span><span class="co">#&gt; 4 0.03        A 0.9231971</span></span>
-<span><span class="co">#&gt; 5 0.04        A 0.9279194</span></span>
-<span><span class="co">#&gt; 6 0.05        A 0.9319405</span></span></code></pre></div>
+<span><span class="co">#&gt; 3 0.02        A 0.9178041</span></span></code></pre></div>
 <p>The following code generates the plot with prediction, with the
 points the observed fractions, the dashed curves the true probabilities
 and the solid curves the predicted values:</p>
@@ -813,41 +810,38 @@ and the solid curves the predicted values:</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">pred</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>data<span class="op">=</span><span class="va">dat_fr_lf</span><span class="op">)</span></span>
 <span><span class="va">p1</span></span></code></pre></div>
-<p><img src="Solving_Linear_Mixed_Models_files/figure-html/makePlot-1.png" width="672"></p>
+<p><img src="Solving_Linear_Mixed_Models_files/figure-html/makePlot-1.png" class="r-plt" width="672"></p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="examples-from-quantitative-genetics">Examples from Quantitative Genetics<a class="anchor" aria-label="anchor" href="#examples-from-quantitative-genetics"></a>
+<h2 id="examples-in-quantitative-genetics-and-agriculture">Examples in Quantitative Genetics and Agriculture<a class="anchor" aria-label="anchor" href="#examples-in-quantitative-genetics-and-agriculture"></a>
 </h2>
-<p>In this section we will show some examples from quantitative
-genetics, to illustrate some further options of the package.</p>
+<p>In this section we will show some examples from agriculture and
+quantitative genetics, to illustrate some further options of the
+package.</p>
 <div class="section level3">
-<h3 id="oats-field-trial">Oats field trial<a class="anchor" aria-label="anchor" href="#oats-field-trial"></a>
+<h3 id="linear-variance-model-oats-data">Linear Variance model oats data<a class="anchor" aria-label="anchor" href="#linear-variance-model-oats-data"></a>
 </h3>
-<p>As a first example we will use an oats field trial from the
-<code>agridat</code> package. There were 24 varieties in 3 replicates,
-each consisting of 6 incomplete blocks of 4 plots. The plots were laid
-out in a single row.</p>
+<p>As a first example we will use an oats field trial. There were 24
+varieties in 3 replicates, each consisting of 6 incomplete blocks of 4
+plots. The plots were laid out in a single row <span class="citation">(<a href="#ref-john1995">John and Williams 1995</a>; <a href="#ref-Boer2020">Boer, Piepho, and Williams 2020</a>)</span>.</p>
 <div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## Load data.</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">john.alpha</span>, package <span class="op">=</span> <span class="st">"agridat"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">john.alpha</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">oats.data</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">oats.data</span>, <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   plot rep block gen  yield row col</span></span>
 <span><span class="co">#&gt; 1    1  R1    B1 G11 4.1172   1   1</span></span>
 <span><span class="co">#&gt; 2    2  R1    B1 G04 4.4461   2   1</span></span>
-<span><span class="co">#&gt; 3    3  R1    B1 G05 5.8757   3   1</span></span>
-<span><span class="co">#&gt; 4    4  R1    B1 G22 4.5784   4   1</span></span>
-<span><span class="co">#&gt; 5    5  R1    B2 G21 4.6540   5   1</span></span>
-<span><span class="co">#&gt; 6    6  R1    B2 G10 4.1736   6   1</span></span></code></pre></div>
+<span><span class="co">#&gt; 3    3  R1    B1 G05 5.8757   3   1</span></span></code></pre></div>
 <p>We will use the Linear Variance (LV) model, which is closely
 connected to the P-splines model <span class="citation">(<a href="#ref-Boer2020">Boer, Piepho, and Williams 2020</a>)</span>. First
 we need to define the precision matrix for the LV model, see Appendix in
 <span class="citation">Boer, Piepho, and Williams (<a href="#ref-Boer2020">2020</a>)</span> for details:</p>
 <div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## Add plot as factor.</span></span>
-<span><span class="va">john.alpha</span><span class="op">$</span><span class="va">plotF</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="va">john.alpha</span><span class="op">$</span><span class="va">plot</span><span class="op">)</span></span>
+<span><span class="va">oats.data</span><span class="op">$</span><span class="va">plotF</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="va">oats.data</span><span class="op">$</span><span class="va">plot</span><span class="op">)</span></span>
 <span><span class="co">## Define the precision matrix, see eqn (A2) in Boer et al (2020).</span></span>
-<span><span class="va">N</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">john.alpha</span><span class="op">)</span></span>
+<span><span class="va">N</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">oats.data</span><span class="op">)</span></span>
 <span><span class="va">cN</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">N</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">N</span> <span class="op">-</span> <span class="fl">2</span><span class="op">)</span>, <span class="fl">1</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">N</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">D</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/diff.html" class="external-link">diff</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="va">N</span><span class="op">)</span>, diff <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">Delta</span> <span class="op">&lt;-</span> <span class="fl">0.5</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/crossprod.html" class="external-link">crossprod</a></span><span class="op">(</span><span class="va">D</span><span class="op">)</span></span>
@@ -861,7 +855,7 @@ arguments:</p>
 <code class="sourceCode R"><span><span class="va">obj7</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/LMMsolve.html">LMMsolve</a></span><span class="op">(</span>fixed <span class="op">=</span> <span class="va">yield</span> <span class="op">~</span> <span class="va">rep</span> <span class="op">+</span> <span class="va">gen</span>,</span>
 <span>                 random <span class="op">=</span> <span class="op">~</span><span class="va">plotF</span>, </span>
 <span>                 ginverse <span class="op">=</span> <span class="va">lGinv</span>, </span>
-<span>                 data <span class="op">=</span> <span class="va">john.alpha</span><span class="op">)</span></span></code></pre></div>
+<span>                 data <span class="op">=</span> <span class="va">oats.data</span><span class="op">)</span></span></code></pre></div>
 <p>The absolute deviance
 (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>−</mo><mn>2</mn><mo>*</mo><mi>l</mi><mi>o</mi><mi>g</mi><mi>L</mi></mrow><annotation encoding="application/x-tex">-2*logL</annotation></semantics></math>)
 and variances for the LV-model are</p>
@@ -877,33 +871,64 @@ and variances for the LV-model are</p>
 <p>as reported in <span class="citation">Boer, Piepho, and Williams (<a href="#ref-Boer2020">2020</a>)</span>, Table 1.</p>
 </div>
 <div class="section level3">
-<h3 id="model-biomass-as-function-of-time-">Model biomass as function of time.<a class="anchor" aria-label="anchor" href="#model-biomass-as-function-of-time-"></a>
+<h3 id="generalized-heritability">Generalized Heritability<a class="anchor" aria-label="anchor" href="#generalized-heritability"></a>
+</h3>
+<p>In this section we use the same oats data set as in the previous
+section, to illustrate how the generalized heritability <span class="citation">(<a href="#ref-oakey2006">Oakey et al. 2006</a>; <a href="#ref-Rodriguez-Alvarez2018">Rodríguez-Álvarez et al.
+2018</a>)</span> can be obtained.</p>
+<p>We use the model as described in <span class="citation">Schmidt et
+al. (<a href="#ref-schmidt2019">2019</a>)</span>, with genotype
+random:</p>
+<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">obj7b</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/LMMsolve.html">LMMsolve</a></span><span class="op">(</span>fixed <span class="op">=</span> <span class="va">yield</span> <span class="op">~</span> <span class="va">rep</span>,</span>
+<span>                 random <span class="op">=</span> <span class="op">~</span><span class="va">gen</span> <span class="op">+</span> <span class="va">rep</span><span class="op">:</span><span class="va">block</span>, </span>
+<span>                 data <span class="op">=</span> <span class="va">oats.data</span><span class="op">)</span></span></code></pre></div>
+<p>The table with effective dimensions can be obtained with the
+<code><a href="../reference/effDim.html">effDim()</a></code> function:</p>
+<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">EDdf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/effDim.html">effDim</a></span><span class="op">(</span><span class="va">obj7b</span><span class="op">)</span></span>
+<span><span class="va">EDdf</span></span>
+<span><span class="co">#&gt;          Term Effective Model Nominal     Ratio   Penalty</span></span>
+<span><span class="co">#&gt; 1 (Intercept)   1.00000     1       1 1.0000000  0.000000</span></span>
+<span><span class="co">#&gt; 2         rep   2.00000     2       2 1.0000000  0.000000</span></span>
+<span><span class="co">#&gt; 3         gen  18.60972    24      23 0.8091184  6.998423</span></span>
+<span><span class="co">#&gt; 4   rep:block  10.62149    18      15 0.7080994 14.239126</span></span>
+<span><span class="co">#&gt; 5    residual  39.76878    72      69 0.5763592 12.252315</span></span></code></pre></div>
+<p>The generalized heritability for <code>gen</code> is given by the
+ratio of the Effective Dimension, divided by the nominal number of
+parameters <span class="citation">(<a href="#ref-oakey2006">Oakey et al.
+2006</a>; <a href="#ref-Rodriguez-Alvarez2018">Rodríguez-Álvarez et al.
+2018</a>)</span>:</p>
+<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">EDdf</span>, <span class="va">Term</span> <span class="op">==</span> <span class="st">"gen"</span><span class="op">)</span><span class="op">$</span><span class="va">Ratio</span>, <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 0.809</span></span></code></pre></div>
+<p>and corresponds to the result for the Oakey model in <span class="citation">Schmidt et al. (<a href="#ref-schmidt2019">2019</a>)</span>.</p>
+</div>
+<div class="section level3">
+<h3 id="modelling-longitudinal-data">Modelling longitudinal data<a class="anchor" aria-label="anchor" href="#modelling-longitudinal-data"></a>
 </h3>
 <p>In this section we show an example of mixed model P-splines to fit
 biomass as function of time. As an example we use wheat data simulated
 with the crop growth model APSIM. This data set is included in the
 package. For details on this simulated data see <span class="citation">Bustos-Korts et al. (<a href="#ref-Bustos-Korts2019">2019</a>)</span>.</p>
-<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">APSIMdat</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">APSIMdat</span><span class="op">)</span></span>
-<span><span class="co">#&gt;            env geno das   biomass</span></span>
-<span><span class="co">#&gt; 1 Emerald_1993 g001  20  65.57075</span></span>
-<span><span class="co">#&gt; 2 Emerald_1993 g001  21  60.70499</span></span>
-<span><span class="co">#&gt; 3 Emerald_1993 g001  22  74.06247</span></span>
-<span><span class="co">#&gt; 4 Emerald_1993 g001  23  63.73951</span></span>
-<span><span class="co">#&gt; 5 Emerald_1993 g001  24 101.88005</span></span>
-<span><span class="co">#&gt; 6 Emerald_1993 g001  25  96.84971</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">APSIMdat</span>, <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="co">#&gt;            env geno das  biomass</span></span>
+<span><span class="co">#&gt; 1 Emerald_1993 g001  20 65.57075</span></span>
+<span><span class="co">#&gt; 2 Emerald_1993 g001  21 60.70499</span></span>
+<span><span class="co">#&gt; 3 Emerald_1993 g001  22 74.06247</span></span></code></pre></div>
 <p>The first column is the environment, Emerald in 1993, the second
 column the simulated genotype (g001), the third column is days after
 sowing (das), and the last column is the simulated biomass with medium
 measurement error.</p>
 <p>The model can be fitted with</p>
-<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">obj8</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/LMMsolve.html">LMMsolve</a></span><span class="op">(</span>fixed <span class="op">=</span> <span class="va">biomass</span> <span class="op">~</span> <span class="fl">1</span>,</span>
 <span>                 spline <span class="op">=</span> <span class="op">~</span><span class="fu"><a href="../reference/spl1D.html">spl1D</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">das</span>, nseg <span class="op">=</span> <span class="fl">50</span><span class="op">)</span>, </span>
 <span>                 data <span class="op">=</span> <span class="va">APSIMdat</span><span class="op">)</span></span></code></pre></div>
 <p>The effective dimensions are:</p>
-<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">obj8</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Table with effective dimensions and penalties: </span></span>
 <span><span class="co">#&gt; </span></span>
@@ -915,7 +940,7 @@ measurement error.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Total Effective Dimension: 121</span></span></code></pre></div>
 <p>The fitted smooth trend can be obtained as explained before:</p>
-<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">das_range</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">APSIMdat</span><span class="op">$</span><span class="va">das</span><span class="op">)</span></span>
 <span><span class="va">newdat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>das<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="va">das_range</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="va">das_range</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>, length <span class="op">=</span> <span class="fl">300</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">pred8</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">obj8</span>, newdata <span class="op">=</span> <span class="va">newdat</span>, se.fit <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
@@ -927,11 +952,11 @@ measurement error.</p>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"APSIM biomass as function of time"</span>, </span>
 <span>       x <span class="op">=</span> <span class="st">"days after sowing"</span>, y <span class="op">=</span> <span class="st">"biomass (kg)"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Solving_Linear_Mixed_Models_files/figure-html/APSIMplot-1.png" width="672"></p>
+<p><img src="Solving_Linear_Mixed_Models_files/figure-html/APSIMplot-1.png" class="r-plt" width="672"></p>
 <p>The growth rate (first derivative) as function of time can be
-obtained using <code>deriv = das</code> in the <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code>
-function:</p>
-<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
+obtained using the <code>deriv</code> argument in the
+<code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> function:</p>
+<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">plotDatDt</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">obj8</span>, newdata <span class="op">=</span> <span class="va">newdat</span>, se.fit<span class="op">=</span><span class="cn">TRUE</span>, deriv<span class="op">=</span><span class="st">"das"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">plotDatDt</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">das</span>, y <span class="op">=</span> <span class="va">ypred</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
@@ -941,10 +966,10 @@ function:</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"APSIM growth rate as function of time"</span>, </span>
 <span>       x <span class="op">=</span> <span class="st">"days after sowing"</span>, y <span class="op">=</span> <span class="st">"growth rate (kg/day)"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Solving_Linear_Mixed_Models_files/figure-html/APSIMDeriv-1.png" width="672"></p>
+<p><img src="Solving_Linear_Mixed_Models_files/figure-html/APSIMDeriv-1.png" class="r-plt" width="672"></p>
 </div>
 <div class="section level3">
-<h3 id="qtl-mapping-with-ibd-probabilities-">QTL mapping with IBD probabilities.<a class="anchor" aria-label="anchor" href="#qtl-mapping-with-ibd-probabilities-"></a>
+<h3 id="qtl-mapping-using-ibds">QTL mapping using IBDs<a class="anchor" aria-label="anchor" href="#qtl-mapping-using-ibds"></a>
 </h3>
 <p>In QTL-mapping for multiparental populations the Identity-By-Descent
 (IBD) probabilities are used as genetic predictors in the mixed model
@@ -955,22 +980,19 @@ AxC. AxB is a population of 100 Doubled Haploids (DH), AxC of 80 DHs.
 The probabilities, pA, pB, and pC, are for a position on the genome
 close to a simulated QTL. This simulated data is included in the
 package.</p>
-<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## Load data for multiparental population.</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">multipop</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">multipop</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   cross     ind         pA         pB pC    pheno</span></span>
-<span><span class="co">#&gt; 1   AxB AxB0001 0.17258816 0.82741184  0 9.890637</span></span>
-<span><span class="co">#&gt; 2   AxB AxB0002 0.82170793 0.17829207  0 6.546568</span></span>
-<span><span class="co">#&gt; 3   AxB AxB0003 0.95968439 0.04031561  0 7.899249</span></span>
-<span><span class="co">#&gt; 4   AxB AxB0004 0.96564081 0.03435919  0 4.462866</span></span>
-<span><span class="co">#&gt; 5   AxB AxB0005 0.04838734 0.95161266  0 5.207757</span></span>
-<span><span class="co">#&gt; 6   AxB AxB0006 0.95968439 0.04031561  0 5.265580</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">multipop</span>, <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   cross     ind        pA         pB pC    pheno</span></span>
+<span><span class="co">#&gt; 1   AxB AxB0001 0.1725882 0.82741184  0 9.890637</span></span>
+<span><span class="co">#&gt; 2   AxB AxB0002 0.8217079 0.17829207  0 6.546568</span></span>
+<span><span class="co">#&gt; 3   AxB AxB0003 0.9596844 0.04031561  0 7.899249</span></span></code></pre></div>
 <p>The residual (genetic) variances for the two populations can be
 different. Therefore we need to allow for heterogeneous residual
 variances, which can be defined by using the <code>residual</code>
 argument in <code>LMMsolve</code>:</p>
-<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## Fit null model.</span></span>
 <span><span class="va">obj9</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/LMMsolve.html">LMMsolve</a></span><span class="op">(</span>fixed <span class="op">=</span> <span class="va">pheno</span> <span class="op">~</span> <span class="va">cross</span>, </span>
 <span>                 residual <span class="op">=</span> <span class="op">~</span><span class="va">cross</span>, </span>
@@ -979,7 +1001,7 @@ argument in <code>LMMsolve</code>:</p>
 <p>The QTL-probabilities are defined by the columns pA, pB, pC, and can
 be included in the random part of the mixed model by using the
 <code>group</code> argument:</p>
-<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## Fit alternative model - include QTL with probabilities defined in columns 3:5 </span></span>
 <span><span class="va">lGrp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>QTL <span class="op">=</span> <span class="fl">3</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span></span>
 <span><span class="va">obj10</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/LMMsolve.html">LMMsolve</a></span><span class="op">(</span>fixed <span class="op">=</span> <span class="va">pheno</span> <span class="op">~</span> <span class="va">cross</span>, </span>
@@ -991,7 +1013,7 @@ be included in the random part of the mixed model by using the
 <p>The approximate
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>−</mo><mi>l</mi><mi>o</mi><mi>g</mi><mn>10</mn><mrow><mo stretchy="true" form="prefix">(</mo><mi>p</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">-log10(p)</annotation></semantics></math>
 value is given by</p>
-<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## Deviance difference between null and alternative model.</span></span>
 <span><span class="va">dev</span> <span class="op">&lt;-</span> <span class="va">dev0</span> <span class="op">-</span> <span class="va">dev1</span></span>
 <span><span class="co">## Calculate approximate p-value. </span></span>
@@ -1000,7 +1022,7 @@ value is given by</p>
 <span><span class="co">#&gt; [1] 8.76</span></span></code></pre></div>
 <p>The estimated QTL effects of the parents A, B, and C are given
 by:</p>
-<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">obj10</span><span class="op">)</span><span class="op">$</span><span class="va">QTL</span></span>
 <span><span class="co">#&gt;     QTL_pA     QTL_pB     QTL_pC </span></span>
 <span><span class="co">#&gt; -1.2676362  0.6829275  0.5847088</span></span></code></pre></div>
@@ -1038,12 +1060,6 @@ Cressie, Noel, Matthew Sainsbury-Dale, and Andrew Zammit-Mangion. 2022.
 <span>“Basis-Function Models in Spatial Statistics.”</span> <em>Annual
 Review of Statistics and Its Application</em> 9 (1): 373–400. <a href="https://doi.org/10.1146/annurev-statistics-040120-020733" class="external-link">https://doi.org/10.1146/annurev-statistics-040120-020733</a>.
 </div>
-<div id="ref-Eddelbuettel2018" class="csl-entry">
-Eddelbuettel, Dirk, and James Joseph Balamuta. 2018. <span>“Extending
-<span>R</span> with <span>C</span>++: A Brief Introduction to
-<span>R</span>cpp.”</span> <em>The American Statistician</em> 72 (1):
-28–36. <a href="https://doi.org/10.1080/00031305.2017.1375990" class="external-link">https://doi.org/10.1080/00031305.2017.1375990</a>.
-</div>
 <div id="ref-Eilers1996" class="csl-entry">
 Eilers, PHC, and BD Marx. 1996. <span>“<span class="nocase">Flexible
 smoothing with B-splines and penalties</span>.”</span> <em>Stat.
@@ -1057,7 +1073,11 @@ Fahrmeir, Thomas Kneib, Stefan Lang, and Brian Marx. 2013.
 <div id="ref-Furrer2010" class="csl-entry">
 Furrer, R, and SR Sain. 2010. <span>“<span class="nocase">spam: A sparse
 matrix R package with emphasis on MCMC methods for Gaussian Markov
-random fields</span>.”</span> <em>J. Stat. Softw.</em> <a href="https://core.ac.uk/download/pdf/6340272.pdf" class="external-link">https://core.ac.uk/download/pdf/6340272.pdf</a>.
+random fields</span>.”</span> <em>J. Stat. Softw.</em> <a href="https://doi.org/10.18637/jss.v036.i10" class="external-link">https://doi.org/10.18637/jss.v036.i10</a>.
+</div>
+<div id="ref-john1995" class="csl-entry">
+John, J. A., and E. R. Williams. 1995. <em>Cyclic and Computer Generated
+Designs</em>. Chapman; Hall, London.
 </div>
 <div id="ref-Li2021" class="csl-entry">
 Li, Wenhao, Martin P. Boer, Chaozhi Zheng, Ronny V. L. Joosen, and Fred
@@ -1066,9 +1086,21 @@ model approach for QTL mapping in multiparental
 populations</span>.”</span> <em>Theor. Appl. Genet. 2021</em> 1
 (August): 1–18. <a href="https://doi.org/10.1007/S00122-021-03919-7" class="external-link">https://doi.org/10.1007/S00122-021-03919-7</a>.
 </div>
+<div id="ref-oakey2006" class="csl-entry">
+Oakey, Helena, Arūnas Verbyla, Wayne Pitchford, Brian Cullis, and Haydn
+Kuchel. 2006. <span>“Joint Modeling of Additive and Non-Additive Genetic
+Line Effects in Single Field Trials.”</span> <em>Theoretical and Applied
+Genetics</em> 113 (5): 809–19. <a href="https://doi.org/10.1007/s00122-006-0333-z" class="external-link">https://doi.org/10.1007/s00122-006-0333-z</a>.
+</div>
 <div id="ref-Patterson1971" class="csl-entry">
 Patterson, HD, and R Thompson. 1971. <span>“<span class="nocase">Recovery of inter-block information when block sizes are
 unequal</span>.”</span> <em>Biometrika</em>. <a href="https://doi.org/10.1093/biomet/58.3.545" class="external-link">https://doi.org/10.1093/biomet/58.3.545</a>.
+</div>
+<div id="ref-Rodriguez-Alvarez2018" class="csl-entry">
+Rodríguez-Álvarez, María Xosé, Martin P. Boer, Fred A. van Eeuwijk, and
+Paul H. C. Eilers. 2018. <span>“<span class="nocase">Correcting for
+spatial heterogeneity in plant breeding experiments with
+P-splines</span>.”</span> <em>Spat. Stat.</em> 23 (March): 52–71. <a href="https://doi.org/10.1016/J.SPASTA.2017.10.003" class="external-link">https://doi.org/10.1016/J.SPASTA.2017.10.003</a>.
 </div>
 <div id="ref-Rodriguez-Alvarez2015" class="csl-entry">
 Rodríguez-Álvarez, María Xosé, Dae Jin Lee, Thomas Kneib, María Durbán,
@@ -1076,10 +1108,10 @@ and Paul Eilers. 2015. <span>“<span class="nocase">Fast smoothing
 parameter separation in multidimensional generalized P-splines: the SAP
 algorithm</span>.”</span> <em>Stat. Comput.</em> 25 (5): 941–57. <a href="https://doi.org/10.1007/S11222-014-9464-2" class="external-link">https://doi.org/10.1007/S11222-014-9464-2</a>.
 </div>
-<div id="ref-Smith1995" class="csl-entry">
-Smith, S. P. 1995. <span>“<span class="nocase">Differentiation of the
-Cholesky Algorithm</span>.”</span> <em>J. Comput. Graph. Stat.</em> 4
-(2): 134. <a href="https://doi.org/10.2307/1390762" class="external-link">https://doi.org/10.2307/1390762</a>.
+<div id="ref-schmidt2019" class="csl-entry">
+Schmidt, Paul, Jens Hartung, Jörn Bennewitz, and Hans-Peter Piepho.
+2019. <span>“Heritability in Plant Breeding on a Genotype-Difference
+Basis.”</span> <em>Genetics</em> 212 (4): 991–1008. <a href="https://doi.org/10.1534/genetics.119.302134" class="external-link">https://doi.org/10.1534/genetics.119.302134</a>.
 </div>
 </div>
 </div>
@@ -1094,7 +1126,7 @@ Cholesky Algorithm</span>.”</span> <em>J. Comput. Graph. Stat.</em> 4
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>

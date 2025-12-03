@@ -16,8 +16,8 @@
 <script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="An R package for providing an efficient and flexible system to solve sparse mixed model equations">
-<meta name="description" content="An efficient and flexible system to solve sparse mixed model equations. Important applications are the use of splines to model spatial or temporal trends as described in Boer (2023). (&lt;doi:10.1177/1471082X231178591&gt;).">
-<meta property="og:description" content="An efficient and flexible system to solve sparse mixed model equations. Important applications are the use of splines to model spatial or temporal trends as described in Boer (2023). (&lt;doi:10.1177/1471082X231178591&gt;).">
+<meta name="description" content="Provides tools for fitting linear mixed models using sparse matrix methods and variance component estimation. Applications include spline-based modeling of spatial and temporal trends using penalized splines (Boer, 2023) &lt;doi:10.1177/1471082X231178591&gt;.">
+<meta property="og:description" content="Provides tools for fitting linear mixed models using sparse matrix methods and variance component estimation. Applications include spline-based modeling of spatial and temporal trends using penalized splines (Boer, 2023) &lt;doi:10.1177/1471082X231178591&gt;.">
 <meta property="og:image" content="https://biometris.github.io/LMMsolver/index.html/reference/figures/README-Plot_USprecip-1.png">
 </head>
 <body>
@@ -28,7 +28,7 @@
 
     <a class="navbar-brand me-2" href="index.html">LMMsolver</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.11</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.12</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -69,8 +69,9 @@
 </h1>
 </div>
 <p><a href="https://www.r-pkg.org/pkg/LMMsolver" class="external-link"><img src="https://www.r-pkg.org/badges/version/LMMsolver"></a> <a href="https://www.r-pkg.org/pkg/LMMsolver" class="external-link"><img src="https://cranlogs.r-pkg.org/badges/LMMsolver" alt="CRAN RStudio mirror downloads"></a> <a href="https://github.com/Biometris/LMMsolver/actions?workflow=R-CMD-check" class="external-link"><img src="https://github.com/Biometris/LMMsolver/workflows/R-CMD-check/badge.svg" alt="R-CMD-check"></a> <a href="https://app.codecov.io/gh/Biometris/LMMsolver" class="external-link"><img src="https://codecov.io/gh/Biometris/LMMsolver/branch/main/graph/badge.svg" alt="codecov"></a> <a href="https://doi.org/10.5281/zenodo.14527379" class="external-link"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.14527379.svg" alt="DOI"></a></p>
-<p>The aim of the <code>LMMsolver</code> package is to provide an efficient and flexible system to estimate variance components using restricted maximum likelihood or REML (Patterson and Thompson 1971), for models where the mixed model equations are sparse. An important feature of the package is smoothing with P-splines (Eilers and Marx 1996). The sparse mixed model P-splines formulation (Boer 2023) is used, which makes the computations fast. The computational advantage of the sparse mixed model formulation is especially clear for two-dimensional smoothing (Boer 2023; Carollo et al. 2024).</p>
-<!-- The aim of the `LMMsolver` package is to provide an efficient and flexible system to estimate variance components using restricted maximum likelihood or REML [@Patterson1971], for models where the mixed model equations are sparse [@boer2023]. An example of an application is using splines to model spatial [@Rodriguez-Alvarez2018; @Boer2020] or temporal [@Bustos-Korts2019] trends. Another example is mixed model Quantitative Trait Locus (QTL) analysis for multiparental populations, allowing for heterogeneous residual variance and design matrices with Identity-By-Descent (IBD) probabilities [@Li2021]. -->
+<p>The goal of the <code>LMMsolver</code> package is to fit (generalized) linear mixed models efficiently when the model structure is large or sparse. It provides tools for estimating variance components using restricted maximum likelihood (REML) and is designed for models that involve many random effects or smooth terms.</p>
+<p>A key feature of the package is support for smoothing using P-splines. LMMsolver uses a sparse formulation (Boer 2023), which makes computations fast and memory efficient, especially for two-dimensional smoothing problems such as spatial surfaces or image-like data (Boer 2023; Carollo et al. 2024).</p>
+<p>This makes <code>LMMsolver</code> particularly useful for applications involving spatial or temporal smoothing, large data sets, and models where standard mixed model tools become slow or impractical.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -109,10 +110,6 @@
 <code class="sourceCode R"><span><span class="va">obj1</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/LMMsolve.html">LMMsolve</a></span><span class="op">(</span>fixed <span class="op">=</span> <span class="va">anomaly</span> <span class="op">~</span> <span class="fl">1</span>,</span>
 <span>                 spline <span class="op">=</span> <span class="op">~</span><span class="fu"><a href="reference/spl1D.html">spl2D</a></span><span class="op">(</span>x1 <span class="op">=</span> <span class="va">lon</span>, x2 <span class="op">=</span> <span class="va">lat</span>, nseg <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">41</span>, <span class="fl">41</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>                 data <span class="op">=</span> <span class="va">USprecip</span><span class="op">)</span></span></code></pre></div>
-<!-- The summary function gives a table with the effective dimensions and the penalty parameters: -->
-<!-- ```{r ED_USprecip} -->
-<!-- summary(obj1) -->
-<!-- ``` -->
 <p>The spatial trend for the precipitation can now be plotted on the map of the USA, using the <code>predict</code> function of <code>LMMsolver</code>:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lon_range</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">USprecip</span><span class="op">$</span><span class="va">lon</span><span class="op">)</span></span>
@@ -143,10 +140,9 @@
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/vignette.html" class="external-link">vignette</a></span><span class="op">(</span><span class="st">"Solving_Linear_Mixed_Models"</span><span class="op">)</span></span></code></pre></div>
 </div>
-</div>
-<div class="section level1">
-<h1 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
-</h1>
+<div class="section level2">
+<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h2>
 <div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
 <div id="ref-boer2023" class="csl-entry">
 Boer, Martin P. 2023. “Tensor Product P-Splines Using a Sparse Mixed Model Formulation.” <em>Statistical Modelling</em> 23 (5-6): 465–79. <a href="https://doi.org/10.1177/1471082X231178591" class="external-link uri">https://doi.org/10.1177/1471082X231178591</a>.
@@ -154,18 +150,12 @@ Boer, Martin P. 2023. “Tensor Product P-Splines Using a Sparse Mixed Model For
 <div id="ref-carollo2024" class="csl-entry">
 Carollo, Angela, Paul Eilers, Hein Putter, and Jutta Gampe. 2024. “Smooth Hazards with Multiple Time Scales.” <em>Statistics in Medicine</em>. <a href="https://doi.org/10.1002/sim.10297" class="external-link uri">https://doi.org/10.1002/sim.10297</a>.
 </div>
-<div id="ref-Eilers1996" class="csl-entry">
-Eilers, PHC, and BD Marx. 1996. “<span class="nocase">Flexible smoothing with B-splines and penalties</span>.” <em>Stat. Sci.</em> <a href="https://www.jstor.org/stable/2246049" class="external-link uri">https://www.jstor.org/stable/2246049</a>.
-</div>
 <div id="ref-Furrer2010" class="csl-entry">
-Furrer, R, and SR Sain. 2010. “<span class="nocase">spam: A sparse matrix R package with emphasis on MCMC methods for Gaussian Markov random fields</span>.” <em>J. Stat. Softw.</em> <a href="https://core.ac.uk/download/pdf/6340272.pdf" class="external-link uri">https://core.ac.uk/download/pdf/6340272.pdf</a>.
-</div>
-<div id="ref-Patterson1971" class="csl-entry">
-Patterson, HD, and R Thompson. 1971. “<span class="nocase">Recovery of inter-block information when block sizes are unequal</span>.” <em>Biometrika</em>. <a href="https://doi.org/10.1093/biomet/58.3.545" class="external-link uri">https://doi.org/10.1093/biomet/58.3.545</a>.
+Furrer, R, and SR Sain. 2010. “<span class="nocase">spam: A sparse matrix R package with emphasis on MCMC methods for Gaussian Markov random fields</span>.” <em>J. Stat. Softw.</em> <a href="https://doi.org/10.18637/jss.v036.i10" class="external-link uri">https://doi.org/10.18637/jss.v036.i10</a>.
 </div>
 </div>
 </div>
-
+</div>
   </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
@@ -209,7 +199,7 @@ Patterson, HD, and R Thompson. 1971. “<span class="nocase">Recovery of inter-b
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>

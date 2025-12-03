@@ -1,0 +1,82 @@
+# Obtain Smooth Trend.
+
+Obtain the smooth trend for models fitted with a spline component.
+
+## Usage
+
+``` r
+obtainSmoothTrend(
+  object,
+  grid = NULL,
+  newdata = NULL,
+  deriv = 0,
+  includeIntercept = FALSE,
+  which = 1
+)
+```
+
+## Arguments
+
+- object:
+
+  An object of class LMMsolve.
+
+- grid:
+
+  A numeric vector having the length of the dimension of the fitted
+  spline component. This represents the number of grid points at which a
+  surface will be computed.
+
+- newdata:
+
+  A data.frame containing new points for which the smooth trend should
+  be computed. Column names should include the names used when fitting
+  the spline model.
+
+- deriv:
+
+  Derivative of B-splines, default 0. At the moment only implemented for
+  spl1D.
+
+- includeIntercept:
+
+  Should the value of the intercept be included in the computed smooth
+  trend? Ignored if deriv \> 0.
+
+- which:
+
+  An integer, for if there are multiple splxD terms in the model.
+  Default value is 1.
+
+## Value
+
+A data.frame with predictions for the smooth trend on the specified
+grid. The standard errors are saved if \`deriv\` has default value 0.
+
+## Examples
+
+``` r
+## Fit model on oats data
+data(oats.data)
+
+## Fit a model with a 1-dimensional spline at the plot level.
+LMM1_spline <- LMMsolve(fixed = yield ~ rep + gen,
+                       spline = ~spl1D(x = plot, nseg = 20),
+                       data = oats.data)
+
+## Obtain the smooth trend for the fitted model on a dense grid.
+smooth1 <- obtainSmoothTrend(LMM1_spline,
+                            grid = 100)
+
+## Obtain the smooth trend on a new data set - plots 10 to 40.
+newdat <- data.frame(plot = 10:40)
+smooth2 <- obtainSmoothTrend(LMM1_spline,
+                            newdata = newdat)
+
+## The first derivative of the smooth trend can be obtained by setting deriv = 1.
+smooth3 <- obtainSmoothTrend(LMM1_spline,
+                            grid = 100,
+                            deriv = 1)
+
+## For examples of higher order splines see the vignette.
+```
