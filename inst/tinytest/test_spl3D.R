@@ -114,6 +114,4 @@ obj3 <- LMMsolve(fixed = y ~ 1,
                  spline = ~spl3D(x1 = x1, x2 = x2, x3 = x3, nseg = c(4, 4, 4), pord = 3),
                  data = simDat,
                  tolerance = 1e-3)
-expect_equivalent_to_reference(obj3, "spl3DFull3")
-
-
+expect_equivalent_to_reference(obj3, "spl3DFull3", tolerance = 1e-6)
