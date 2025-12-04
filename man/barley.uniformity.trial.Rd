@@ -15,7 +15,7 @@ A data.frame with 1076 rows and 3 columns
 \source{
 H. P. Piepho & E. R. Williams (2010). Linear variance models
 for plant breeding trials. Plant Breeding, 129, 1-8.
-\doi{/doi.org/10.1111/j.1439-0523.2009.01654.x}
+\doi{10.1111/j.1439-0523.2009.01654.x}
 }
 \usage{
 barley.uniformity.trial
