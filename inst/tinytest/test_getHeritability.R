@@ -8,29 +8,30 @@ obj <- LMMsolve(
 
 ## --- basic functionality ---
 expect_equal(
-  getHeritability(obj, "gen"),
+  LMMsolver::getHeritability(obj, "gen"),
   0.809,
   tol = 1e-3
 )
 
 ## --- wrong class ---
 expect_error(
-  getHeritability(lm(yield ~ rep, oats.data), "gen"),
-  "gen not defined in the model",
+  LMMsolver::getHeritability(lm(yield ~ rep, oats.data), "gen"),
+  "obj must be an object of class 'LMMsolve'",
   fixed = TRUE
 )
 
 ## --- wrong geno.term type ---
 expect_error(
-  getHeritability(obj, 123),
-  "123 not defined in the model",
+  LMMsolver::getHeritability(obj, 123),
+  "geno.term must be a single character string",
   fixed = TRUE
 )
 
 ## --- geno.term not in model ---
 expect_error(
-  getHeritability(obj, "foo"),
-  "not defined"
+  LMMsolver::getHeritability(obj, "foo"),
+  "foo not defined in the model",
+  fixed = TRUE
 )
 
 ## --- geno.term fixed ---
@@ -41,6 +42,6 @@ obj_fixed <- LMMsolve(
 )
 
 expect_error(
-  getHeritability(obj_fixed, "gen"),
+  LMMsolver::getHeritability(obj_fixed, "gen"),
   "random"
 )
