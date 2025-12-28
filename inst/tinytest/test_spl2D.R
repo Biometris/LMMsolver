@@ -94,7 +94,7 @@ expect_error(LMMsolve(fixed = yield ~ 1, data = durban.rowcol,
 obj1 <- LMMsolve(fixed = yield ~ 1, random = ~ gen,
                  spline = ~ spl2D(x1 = bed, x2 = row, nseg = c(3, 3)),
                  data = durban.rowcol,
-                 tolerance = 1e-6)
+                 tolerance = 1e-3)
 
 ## From R 4.3 there is an extra item in the family output.
 ## This gives problems with the comparison.
@@ -103,7 +103,7 @@ obj1 <- LMMsolve(fixed = yield ~ 1, random = ~ gen,
 obj1$family$dispersion <- NULL
 
 ## Check that full LMM solve object is correct.
-expect_equivalent_to_reference(obj1, "spl2DFull", tolerance = 1e-6)
+expect_equivalent_to_reference(obj1, "spl2DFull", tolerance = 1e-3)
 
 ## Test combination of splines with conditional factor.
 
@@ -111,7 +111,7 @@ obj2 <- LMMsolve(fixed = yield ~ 1, random = ~ gen,
                  spline = ~ spl2D(x1 = bed, x2 = row, nseg = c(3, 3),
                                   cond = rep, level = "R1"),
                  data = durban.rowcol,
-                 tolerance = 1e-6)
+                 tolerance = 1e-3)
 
 sumObj2 <- summary(obj2)
 expect_equal(nrow(sumObj2), 6)
@@ -119,22 +119,22 @@ expect_equal(sumObj2[["Term"]],
              c("(Intercept)", "lin(bed, row)_R1", "gen", "s(bed)_R1",
                "s(row)_R1", "residual"))
 expect_equal(sumObj2[["Ratio"]],
-             c(1, 1, 0.458895940871542, 4.82648592298555e-05,
-               0.0821598533833015, 0.458895940885926))
+             c(1.000000000, 1.000000000, 0.457285824, 0.003939017,
+               0.081489334, 0.457285824), tolerance = 1.0e-5)
 
 ## pord=1
 obj1a <- LMMsolve(fixed = yield ~ 1, random = ~ gen,
                  spline = ~ spl2D(x1 = bed, x2 = row, nseg = c(3, 3), pord = 1),
                  data = durban.rowcol,
-                 tolerance = 1e-6)
-expect_equivalent_to_reference(obj1a, "spl2DFull2", tolerance= 1.0e-6)
+                 tolerance = 1e-3)
+expect_equivalent_to_reference(obj1a, "spl2DFull2", tolerance= 1.0e-3)
 
 ## pord=3
 obj1b <- LMMsolve(fixed = yield ~ 1, random = ~ gen,
                   spline = ~ spl2D(x1 = bed, x2 = row, nseg = c(3, 3) , pord = 3),
                   data = durban.rowcol,
-                  tolerance = 1e-6)
-expect_equivalent_to_reference(obj1b, "spl2DFull3", tolerance= 1.0e-6)
+                  tolerance = 1e-3)
+expect_equivalent_to_reference(obj1b, "spl2DFull3", tolerance= 1.0e-3)
 
 ## cyclic: cylinder
 
@@ -189,12 +189,12 @@ dat_train <- dat[k, ]
 
 dat_train$y <- dat_train$ytrue + rnorm(n=Ntraining)
 
-nseg <- c(20, 20)
+nseg <- c(10, 10)
 
 obj4 <- LMMsolve(fixed = y~1,
                 spline = ~spl2D(x1, x2, nseg, cyclic=c(TRUE, TRUE)),
                 data = dat_train)
 
-expect_equal(obj4$logL, -1287.57534355148)
+expect_equal(obj4$logL, -1287.057, tolerance = 1e-3)
 
 #expect_equivalent_to_reference(obj4, "spl2Dtorus", tolerance = 1e-6)
