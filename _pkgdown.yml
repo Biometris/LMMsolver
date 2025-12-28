@@ -73,6 +73,7 @@ reference:
   - diagnosticsMME
   - displayMME
   - effDim
+  - getHeritability
 - title: Spline functions
 - contents:
   - spl1D

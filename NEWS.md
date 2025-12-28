@@ -1,3 +1,7 @@
+# LMMsolver 1.0.13
+
+-   Function `getHeritability()` added.  
+
 # LMMsolver 1.0.12
 
 -   First derivatives for `predict` using `deriv` argument now also implemented for `spl2D` and `spl3D`. 
