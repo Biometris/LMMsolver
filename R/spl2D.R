@@ -125,33 +125,33 @@ spl2D <- function(x1,
   # below the ANOVA-model, work in progress.
   #
   warning("ANOVA Work in progress...\n")
-  X1 <- B1 %*% G1
-  X2 <- B2 %*% G2
+  X1 <- B1 %*% G1 # make the fixed marginal for x1
+  X2 <- B2 %*% G2 # make the fixed marginal for x2
   X <- cbind(X1[,-1, drop=FALSE], X2[,-1, drop=FALSE])
-  #G <- G1 %x% G2
-  #X <- B12 %*% G
-  ## nominal effective dimension.
   EDnom = rep(ncol(B12) - ncol(X), 3)
-  ## Remove intercept column to avoid singularity problems.
-  #X <- removeIntercept(X)
-  ## Construct list of sparse precision matrices.
   scaleFactor <- calcScaleFactor(knots, pord)
 
-  d <- length(q) # two
+  d <- length(q)
   lCCt <- lapply(X = seq_len(d),
                  FUN = function(i) { constructCCt(knots[[i]], pord)})
   CCt <- Reduce("kronecker", lCCt)
-  lGinv <- list()
   P1 <- scaleFactor[1]*constructPenalty(q[1], pord = pord)
   P2 <- scaleFactor[2]*constructPenalty(q[2], pord = pord)
+
+  # the right length for scalefactor is in fact 2, this is just
+  # a temp trick to get things working.
   scaleFactor <- c(scaleFactor, 1)
-  Id_1 <- diag.spam(q[1])
-  Id_2 <- diag.spam(q[2])
-  lGinv[[1]] <- P1 %x% Id_2 + CCt
-  lGinv[[2]] <- Id_1 %x% P2 + CCt
+  I1 <- diag.spam(q[1])
+  I2 <- diag.spam(q[2])
+
+  # here the ANOVA is constructed (by foot)
+  lGinv <- list()
+  lGinv[[1]] <- P1 %x% I2 + CCt
+  lGinv[[2]] <- I1 %x% P2 + CCt
   lGinv[[3]] <- P1 %x% P2   + CCt
 
-  #lGinv <- constructGinvSplines(q, knots, pord, scaleFactor)
+  # maybe this function needs to be generalized, allowing for ANOVA interactions.
+  # lGinv <- constructGinvSplines(q, knots, pord, scaleFactor)
   xNames <- c(xNames, "inter")
   names(lGinv) <- paste0("s(", xNames, ")")
   if (is.null(X)) {
