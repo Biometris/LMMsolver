@@ -150,7 +150,7 @@ spl2D <- function(x1,
   lGinv <- list()
   lGinv[[1]] <- P1 %x% I2 + CCt
   lGinv[[2]] <- I1 %x% P2 + CCt
-  lGinv[[3]] <- P1 %x% P2   + CCt
+  lGinv[[3]] <- P1 %x% P2 + CCt
 
   # maybe this function needs to be generalized, allowing for ANOVA interactions.
   # lGinv <- constructGinvSplines(q, knots, pord, scaleFactor)
