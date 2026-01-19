@@ -25,6 +25,7 @@ spl2D(
   pord = 2,
   degree = 3,
   cyclic = c(FALSE, FALSE),
+  ANOVA = FALSE,
   scaleX = TRUE,
   x1lim = range(x1),
   x2lim = range(x2),
