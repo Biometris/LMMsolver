@@ -8,6 +8,7 @@
 #' @param scaleX Should the fixed effects be scaled.
 #' @param pord The order of penalty, default \code{pord = 2}
 #' @param degree The degree of B-spline basis, default \code{degree = 3}
+#' @param ANOVA Modelling interactions, default is \code{ANOVA=FALSE}.
 #' @param cyclic Cyclic or linear B-splines; default \code{cyclic=FALSE}
 #' @param xlim,x1lim,x2lim,x3lim A numerical vector of length 2 containing the
 #' domain of the corresponding x covariate where the knots should be placed.

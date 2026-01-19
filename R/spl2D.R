@@ -143,8 +143,8 @@ spl2D <- function(x1,
   # the right length for scalefactor is in fact 2, this is just
   # a temp trick to get things working.
   scaleFactor <- c(scaleFactor, 1)
-  I1 <- diag.spam(q[1])
-  I2 <- diag.spam(q[2])
+  I1 <- spam::diag.spam(q[1])
+  I2 <- spam::diag.spam(q[2])
 
   # here the ANOVA is constructed (by foot)
   lGinv <- list()
