@@ -127,7 +127,9 @@ spl2D <- function(x1,
   warning("ANOVA Work in progress...\n")
   X1 <- B1 %*% G1 # make the fixed marginal for x1
   X2 <- B2 %*% G2 # make the fixed marginal for x2
-  X <- cbind(X1[,-1, drop=FALSE], X2[,-1, drop=FALSE])
+  X1 <- X1[,-1, drop=FALSE]
+  X2 <- X2[,-1, drop=FALSE]
+  X <- cbind(X1, X2)
   EDnom = rep(ncol(B12) - ncol(X), 3)
   scaleFactor <- calcScaleFactor(knots, pord)
 
