@@ -27,14 +27,10 @@
   C <- obj$C
   C_gg <- C[ndx_g, ndx_g]
 
-  if (length(ndx_nuis) > 0) {
-    C_nuis <- C[ndx_nuis, ndx_nuis]
-    C_ng   <- C[ndx_nuis, ndx_g]
-    C_gn   <- C[ndx_g, ndx_nuis]
-    C_gg_abs <- C_gg - C_gn %*% solve(C_nuis, C_ng)
-  } else {
-    C_gg_abs <- C_gg
-  }
+  C_nuis <- C[ndx_nuis, ndx_nuis]
+  C_ng   <- C[ndx_nuis, ndx_g]
+  C_gn   <- C[ndx_g, ndx_nuis]
+  C_gg_abs <- C_gg - C_gn %*% solve(C_nuis, C_ng)
 
   ## --- spectral decomposition (genetic space only) ----------------------------
   m <- ncol(G)

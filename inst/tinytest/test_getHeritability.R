@@ -13,6 +13,33 @@ expect_equal(
   tol = 1e-3
 )
 
+df_spectral <- LMMsolver::getHeritability(obj, "gen", type="spectral")
+
+## --- basic functionality ---
+expect_equal(
+  sum(df_spectral$h2_comp),
+  0.809,
+  tol = 1e-3
+)
+
+## --- only one additional random term
+obj2 <- LMMsolve(
+  fixed  = yield ~ rep,
+  random = ~ gen ,
+  data   = oats.data
+)
+EDdf2 <- effDim(obj2)
+h2_ED <- subset(EDdf2, Term == "gen" )$Ratio
+
+## --- should give same results as h2_ED, as genotypes are independent
+expect_equal(
+  LMMsolver::getHeritability(obj2, "gen"),
+  h2_ED,
+  tol = 1e-5
+)
+
+
+
 ## --- wrong class ---
 expect_error(
   LMMsolver::getHeritability(lm(yield ~ rep, oats.data), "gen"),
