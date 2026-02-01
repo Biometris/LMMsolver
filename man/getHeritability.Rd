@@ -2,70 +2,47 @@
 % Please edit documentation in R/getHeritability.R
 \name{getHeritability}
 \alias{getHeritability}
-\title{Heritability of genotype means}
+\title{Generalized heritability of a random term}
 \usage{
-getHeritability(obj, geno.term)
+getHeritability(obj, geno.term, type = c("scalar", "spectral"), tol = 1e-08)
 }
 \arguments{
 \item{obj}{An object of class \code{"LMMsolve"}.}
 
-\item{geno.term}{A character string giving the name of the genotype term in
-the model. The term must be specified as random.}
+\item{geno.term}{A character string giving the name of the genetic random-effect
+term.}
+
+\item{type}{Character string specifying the output:
+\code{"scalar"} (default) returns a single numeric heritability value;
+\code{"spectral"} returns a data frame with the spectral decomposition.}
+
+\item{tol}{Numerical tolerance used to determine the estimable genetic space.}
 }
 \value{
-A numeric value giving the heritability of genotype means
-  (\eqn{h^2_{M_G}}).
+If \code{type = "scalar"}, a numeric value giving the generalized heritability.
+If \code{type = "spectral"}, a data frame with columns:
+\describe{
+  \item{component}{Index of the spectral component}
+  \item{lambda}{Canonical heritability for the component}
+  \item{w}{Weight of the component (genetic capacity)}
+  \item{h2_comp}{Contribution of the component to total heritability}
+}
+In the spectral case, the scalar generalized heritability is also available as
+the attribute \code{"h2_G"}.
 }
 \description{
-Computes the heritability of genotype means (\eqn{h^2_{M_G}}) from a fitted
-linear mixed model. This measure is equivalent to the SpATS, Cullis, and Oakey
-heritability definitions used in modern mixed-model analyses of field trials.
+Computes the generalized heritability of a random-effect term from a fitted
+linear mixed model. By default, a single scalar heritability value is returned.
+Optionally, a spectral decomposition is provided that reveals how genetic
+signal is distributed across estimable genetic directions.
 }
 \details{
-The heritability is defined as the effective dimension of the genotype term
-divided by the maximum effective dimension of that term, assuming independent
-genotypic effects. It reflects the reliability of predicted genotype means
-rather than a variance ratio of raw phenotypes.
+Generalized heritability is defined as the proportion of estimable genetic signal
+retained by the design relative to the available genetic capacity, accounting
+for the genetic covariance structure.
 
-
-This function returns a single heritability measure. Classical ANOVA-based
-heritability estimates are not provided, as they are generally not meaningful
-for unbalanced, incomplete block, or spatial designs.
-
-The returned value corresponds to
-\deqn{h^2_{M_G} = \mathrm{ED}_g / \mathrm{ED}_{\max},}
-where \eqn{\mathrm{ED}_g} is the effective dimension corresponding to the
-genotypic effects and \eqn{\mathrm{ED}_{\max}} is the maximum effective
-dimension of the genotype term, equal to the number of genotypes minus one.
-}
-\examples{
-\dontrun{
-data(oats.data)
-
-obj <- LMMsolve(
-  fixed  = yield ~ rep,
-  random = ~ gen + rep:block,
-  data   = oats.data
-)
-
-getHeritability(obj, geno.term = "gen")
-}
-
-}
-\references{
-Rodríguez-Álvarez, M. X., Boer, M. P., van Eeuwijk, F. A., & Eilers, P. H. C.
-(2018).
-Correcting for spatial heterogeneity in plant breeding experiments with
-P-splines.
-\emph{Spatial Statistics}, 23, 52–71.
-
-Oakey, H., Verbyla, A., Pitchford, W., Cullis, B., & Kuchel, H. (2006).
-Joint modeling of additive and non-additive genetic line effects in single
-field trials.
-\emph{Theoretical and Applied Genetics}, 113, 809–819.
-
-Cullis, B. R., Smith, A. B., & Coombes, N. E. (2006).
-On the design of early generation variety trials with correlated data.
-\emph{Journal of Agricultural, Biological, and Environmental Statistics}, 11,
-381–393.
+For independent genotypes, this definition reduces to classical generalized
+heritability measures based on effective dimension (Cullis, Oakey,
+Rodríguez-Álvarez). When genotypes are correlated, the spectral decomposition
+reveals anisotropy in information retention across genetic directions.
 }
