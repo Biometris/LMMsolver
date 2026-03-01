@@ -130,7 +130,7 @@ getHeritability <- function(obj,
     stop(paste(geno.term, "not defined in the model"))
   }
 
-  penalty <- subset(EDdf, Term == geno.term)$Penalty
+  penalty <- EDdf$Penalty[EDdf$Term == geno.term]
   if (penalty < 1.0e-15) {
     stop(paste(geno.term, "should be in the random term"))
   }

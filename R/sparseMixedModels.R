@@ -71,6 +71,16 @@ ED_corrections <- function(M, psi) {
   ED
 }
 
+# make the matrix positive definite
+PrecisionMatrix_lifting <- function(C_restrict, lP) {
+  n_constraints <- ncol(C_restrict)
+  lP_lifted <- lP
+  for (i in seq_len(n_constraints)) {
+    lP_lifted[[i]] <- as.spam(lP[[i]] + tcrossprod(C_restrict[,i]))
+  }
+  lP_lifted
+}
+
 #' @importFrom stats update
 #' @keywords internal
 sparseMixedModels <- function(y,
