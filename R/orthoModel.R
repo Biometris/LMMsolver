@@ -1,8 +1,8 @@
 
 basis <- function(x, xmin, xmax, nseg, deg, pord) {
-  
+
   var <- deparse(substitute(x))
-  
+
   structure(
     list(
       var   = var,     # character, e.g. "x1"
@@ -17,28 +17,28 @@ basis <- function(x, xmin, xmax, nseg, deg, pord) {
 }
 
 eval_basis <- function(b, data) {
-  
+
   x <- data[[b$var]]
-  
+
   knots <- LMMsolver:::PsplinesKnots(
     xmin   = b$xmin,
     xmax   = b$xmax,
     degree = b$deg,
     nseg   = b$nseg
   )
-  
+
   B <- LMMsolver:::Bsplines(knots, x)
   q <- ncol(B)
-  
+
   M <- ortho_diff_matrix(p = b$deg, q = q)
-  
+
   D   <- diff(diag(q), diff = b$pord)
   DtD <- crossprod(D)
   P   <- t(M) %*% DtD %*% M
-  
+
   C <- spam::spam(0, nrow = q - 1, ncol = 1)
   C[1, 1] <- C[q - 1, 1] <- 1.0
-  
+
   list(
     B     = B,
     M     = M,
@@ -48,68 +48,83 @@ eval_basis <- function(b, data) {
   )
 }
 
+
 orthoModel <- function(model, bases, data) {
-  
+
   ## ---- 0. Extract response ----
-  response_name <- deparse(model[[2]])
+  response_name <- all.vars(model)[attr(terms(model), "response")]
+
   y <- data[[response_name]]
-  n <- length(y)  
-  
+  n <- length(y)
+
   ## ---- 1. Parse model ----
   tt <- terms(model)
   term_labels <- attr(tt, "term.labels")
-  term_labels <- setdiff(term_labels, "1")  
-  
-  if (!all(term_labels %in% names(bases))) {
-    stop("All model terms must be provided in 'bases'")
-  }
-  
-  ## ---- 2. Evaluate bases and build Z ----
+  term_labels <- setdiff(term_labels, "1")
+
+  main_terms <- term_labels[!grepl(":", term_labels)]
+  interaction_terms <- term_labels[grepl(":", term_labels)]
+
+  X <- spam(x=1, nrow = n, ncol = 1)
   Z_list <- list()
   P_list <- list()
   C_list <- list()
-  
-  for (nm in term_labels) {
-    f_eval <- eval_basis(bases[[nm]], data)
-    
-    BM <- f_eval$B %*% f_eval$M
-    Z_list[[nm]] <- BM
-    P_list[[nm]] <- f_eval$P
-    C_list[[nm]] <- f_eval$C
+
+  df_dim <- NULL
+  for (nm in main_terms) {
+    f <- eval_basis(bases[[nm]], data)
+
+    Z_list[[nm]] <- f$B %*% f$M
+    P_list[[nm]] <- f$P
+    C_list[[nm]] <- f$C
+
+    df_dim <- rbind(df_dim, data.frame(term=nm, dim=ncol(f$M)))
   }
-  
-  Z <- do.call(spam::cbind.spam, unname(Z_list))
-  
-  ## ---- 3. Fixed effects (intercept only) ----
-  X <- spam::spam(1, nrow = n, ncol = 1)  
-  
-  ## ---- 4. Block-diagonal penalty list ----
-  lP <- vector("list", length(P_list))
-  for (i in seq_along(P_list)) {
-    blocks <- vector("list", length(P_list))
-    for (j in seq_along(P_list)) {
-      blocks[[j]] <- if (i == j) P_list[[j]] else 0 * P_list[[j]]
+  if (length(interaction_terms) >0 ) {
+    for (it in interaction_terms) {
+      vars <- strsplit(it, ":")[[1]]
+      f1 <- eval_basis(bases[[vars[1]]], data)
+      f2 <- eval_basis(bases[[vars[2]]], data)
+
+      ## interaction design
+      B12  <- LMMsolver:::RowKronecker(f1$B, f2$B)
+      M12  <- f1$M %x% f2$M
+      BM12 <- B12 %*% M12
+      Z_list[[it]] <- BM12
+
+      ## isotropic penalties
+      P12 <- f1$P %x% (t(f2$M) %*% f2$M) + (t(f1$M) %*% f1$M) %x% f2$P
+      P_list[[it]] <- P12
+
+      ## pure interaction constraint
+      C_list[[it]] <- f1$C %x% f2$C
+      df_dim <- rbind(df_dim, data.frame(term=it, dim=ncol(f1$M)*ncol(f2$M)))
     }
-    lP[[i]] <- do.call(spam::bdiag.spam, blocks)
   }
-  
-  ## ---- 5. Constraint matrix (full coefficient space) ----
-  q <- vapply(Z_list, ncol, 0L)
-  C_restrict <- matrix(0, nrow = sum(q), ncol = length(C_list))
-  
-  r0 <- 0
-  for (j in seq_along(C_list)) {
-    idx <- r0 + seq_len(q[j])
-    C_restrict[idx, j] <- as.vector(as.matrix(C_list[[j]]))
-    r0 <- r0 + q[j]
+  e <- cumsum(df_dim$dim)
+  s <- e - df_dim$dim + 1
+  df_dim$s <- s
+  df_dim$e <- e
+  df_dim
+  nTerms <- nrow(df_dim)
+  TotDim <- sum(df_dim$dim)
+  Z <- do.call(spam::cbind.spam, unname(Z_list))
+
+  lP <- list()
+  C_restrict <- spam(x=0, ncol=length(C_list),nrow=TotDim)
+  for (k in seq_len(nTerms)) {
+    ndx <- c(df_dim$s[k] : df_dim$e[k])
+    A <- spam(x=0,nrow=TotDim, ncol=TotDim)
+    A[ndx,ndx] <- P_list[[k]]
+    lP[[k]] <- A
+    C_restrict[ndx, k] <- C_list[[k]]
   }
-  C_restrict <- spam::as.spam(C_restrict)
-  
-  ## ---- 6. Residual precision ----
+
+  ## ---- 7. Residual precision ----
   lRinv <- list(spam::diag.spam(1, n))
   attr(lRinv, "cnt") <- n
-  
-  ## ---- 7. Fit ----
+
+  ## ---- 8. Fit ----
   fit <- LMMsolver:::sparseMixedModels(
     y          = y,
     X          = X,
@@ -118,7 +133,9 @@ orthoModel <- function(model, bases, data) {
     lRinv      = lRinv,
     C_restrict = C_restrict
   )
-  
   fit
 }
+
+
+
 
