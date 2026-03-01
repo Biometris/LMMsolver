@@ -34,7 +34,9 @@ eval_basis <- function(b, data) {
 
   D   <- diff(diag(q), diff = b$pord)
   DtD <- crossprod(D)
-  P   <- t(M) %*% DtD %*% M
+  dx <- attr(knots, which="dx")
+  sc <- (1 / dx)^(2 * b$pord - 1)
+  P  <- sc * (t(M) %*% DtD %*% M)
 
   C <- spam::spam(0, nrow = q - 1, ncol = 1)
   C[1, 1] <- C[q - 1, 1] <- 1.0
@@ -48,8 +50,7 @@ eval_basis <- function(b, data) {
   )
 }
 
-
-orthoModel <- function(model, bases, data) {
+orthoModel <- function(model, bases, data, trace=FALSE) {
 
   ## ---- 0. Extract response ----
   response_name <- all.vars(model)[attr(terms(model), "response")]
@@ -110,15 +111,33 @@ orthoModel <- function(model, bases, data) {
   TotDim <- sum(df_dim$dim)
   Z <- do.call(spam::cbind.spam, unname(Z_list))
 
-  lP <- list()
+
+  ## ---- build lP efficiently (NO sparse replacement) ----
+
+  lP <- vector("list", nTerms)
+
+  for (k in seq_len(nTerms)) {
+
+    blocks <- vector("list", nTerms)
+
+    for (j in seq_len(nTerms)) {
+      if (j == k) {
+        blocks[[j]] <- P_list[[k]]
+      } else {
+        qj <- df_dim$e[j] - df_dim$s[j] + 1
+        blocks[[j]] <- spam::spam(0, qj, qj)
+      }
+    }
+
+    lP[[k]] <- do.call(spam::bdiag.spam, blocks)
+  }
+
   C_restrict <- spam(x=0, ncol=length(C_list),nrow=TotDim)
   for (k in seq_len(nTerms)) {
     ndx <- c(df_dim$s[k] : df_dim$e[k])
-    A <- spam::spam(x=0,nrow=TotDim, ncol=TotDim)
-    A[ndx,ndx] <- P_list[[k]]
-    lP[[k]] <- A
     C_restrict[ndx, k] <- C_list[[k]]
   }
+  C_restrict <- spam::cleanup(C_restrict)
 
   ## ---- 7. Residual precision ----
   lRinv <- list(spam::diag.spam(1, n))
@@ -131,8 +150,17 @@ orthoModel <- function(model, bases, data) {
     Z          = Z,
     lGinv      = lP,
     lRinv      = lRinv,
-    C_restrict = C_restrict
+    C_restrict = C_restrict,
+    trace      = trace
   )
+  # add extra info
+  df_dim$s <- df_dim$s + 1
+  df_dim$e <- df_dim$e + 1
+  df_dim <- rbind(data.frame(term = "Intercept", dim = 1, s=1, e=1), df_dim)
+
+  fit$dim <- df_dim
+  fit$response_name <- response_name
+  fit$bases <- bases
   fit
 }
 

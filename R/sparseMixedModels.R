@@ -76,7 +76,8 @@ PrecisionMatrix_lifting <- function(C_restrict, lP) {
   n_constraints <- ncol(C_restrict)
   lP_lifted <- lP
   for (i in seq_len(n_constraints)) {
-    lP_lifted[[i]] <- spam::as.spam(lP[[i]] + tcrossprod(C_restrict[,i]))
+    C_i <- C_restrict[, i, drop = FALSE]
+    lP_lifted[[i]] <- lP[[i]] + C_i %*% spam::t.spam(C_i)
   }
   lP_lifted
 }
