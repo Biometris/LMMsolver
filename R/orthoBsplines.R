@@ -10,7 +10,7 @@ bernstein_matrix <- function(p, x) {
   V <- matrix(0, nrow=p+1, ncol=p+1)
   for (i in seq_len(p+1)) {
     for (j in seq_len(p+1)) {
-      V[i,j] <- bernstein(p, x[i],j-1) 
+      V[i,j] <- bernstein(p, x[i],j-1)
     }
   }
   V
@@ -25,65 +25,65 @@ bernstein_gram_coef <- function(p) {
         ((2*p+1)*choose(2 * p , i + j ))
     }
   }
-  
+
   G
 }
 
-# p: degree of B-splines basis 
+# p: degree of B-splines basis
 # q: Number of B-splines
 GramMatrix <- function(p, q) {
-  
+
   ## --- Reference points on one element [0,1]
   x_ref <- seq(0, 1, length = p + 1)
-  
+
   ## --- Basis evaluations on reference points
-  knots <- LMMsolver:::PsplinesKnots(xmin = 0, xmax = 1, degree = p, nseg = 1)
+  knots <- PsplinesKnots(xmin = 0, xmax = 1, degree = p, nseg = 1)
   B_spline_vals <- as.matrix(LMMsolver:::Bsplines(knots, x = x_ref))
   B_bernstein_vals <- bernstein_matrix(p, x_ref)
-  
+
   ## --- Bernstein Gram matrix (analytic)
   G_bernstein <- bernstein_gram_coef(p)
-  
+
   ## --- CHANGE OF BASIS: B-spline -> Bernstein
   ##     B_spline(x) = Bernstein(x) %*% C
   C_bspline_to_bernstein <- solve(B_bernstein_vals, B_spline_vals)
-  
+
   ## --- INTEGRATE in Bernstein basis and TRANSFORM BACK
   ##     M_elem = C^T G C
   M_elem <- t(C_bspline_to_bernstein) %*%
     G_bernstein %*%
     C_bspline_to_bernstein
-  
+
   ## --- Global assembly
-  nseg <- q - p 
+  nseg <- q - p
   M <- matrix(0, q, q)
   for (k in 1:nseg) {
     idx <- k:(k + p)
     M[idx, idx] <- M[idx, idx] + M_elem
   }
-  
+
   M
 }
 
 integrate_bspline <- function(a, p, xmin = 0, xmax = 1) {
-  
+
   q <- length(a)
   nseg <- q - p
   h <- (xmax - xmin) / nseg
-  
+
   ## reference points for degree-p polynomials
   x_ref <- seq(0, 1, length = p + 1)
-  
+
   ## B-spline and Bernstein evaluations on [0,1]
-  knots <- LMMsolver:::PsplinesKnots(
+  knots <- PsplinesKnots(
     xmin = 0, xmax = 1, degree = p, nseg = 1
   )
-  B_spline_vals <- as.matrix(LMMsolver:::Bsplines(knots, x_ref))
+  B_spline_vals <- as.matrix(Bsplines(knots, x_ref))
   B_bernstein_vals <- bernstein_matrix(p, x_ref)
-  
+
   ## change of basis: B-spline -> Bernstein
   C_bspline_to_bernstein <- solve(B_bernstein_vals, B_spline_vals)
-  
+
   ## integral on one segment
   int <- 0
   for (k in 1:nseg) {
@@ -91,7 +91,7 @@ integrate_bspline <- function(a, p, xmin = 0, xmax = 1) {
     c_loc <- C_bspline_to_bernstein %*% a_loc
     int <- int + sum(c_loc)
   }
-  
+
   ## scale
   int * h / (p + 1)
 }
@@ -112,38 +112,38 @@ ortho_int_condition <- function(p, q)
 }
 
 integrate_x_bspline <- function(a, p, xmin = 0, xmax = 1) {
-  
+
   q <- length(a)
   nseg <- q - p
   h <- (xmax - xmin) / nseg
-  
+
   ## reference points for degree-p polynomials
   x_ref <- seq(0, 1, length = p + 1)
-  
+
   ## B-spline and Bernstein evaluations on [0,1]
   knots <- LMMsolver:::PsplinesKnots(
     xmin = 0, xmax = 1, degree = p, nseg = 1
   )
-  B_spline_vals <- as.matrix(LMMsolver:::Bsplines(knots, x_ref))
+  B_spline_vals <- as.matrix(Bsplines(knots, x_ref))
   B_bernstein_vals <- bernstein_matrix(p, x_ref)
-  
+
   ## change of basis: B-spline -> Bernstein
   C_bspline_to_bernstein <- solve(B_bernstein_vals, B_spline_vals)
-  
+
   ## first moment on one segment
   moment <- 0
   for (k in 1:nseg) {
     a_loc <- a[k:(k + p)]
     c_loc <- C_bspline_to_bernstein %*% a_loc
-    
+
     ## ∫_0^1 x b_k^{(p)}(x) dx = (k+1)/((p+1)(p+2))
     bern_moment <- sum(c_loc * (1:(p + 1))) / ((p + 1) * (p + 2))
-    
+
     ## shift from local to global x
     x_left <- xmin + (k - 1) * h
     moment <- moment + h * (x_left * sum(c_loc) / (p + 1) + h * bern_moment)
   }
-  
+
   moment
 }
 
@@ -154,19 +154,17 @@ ortho_x_int_condition <- function(p, q, xmin = 0, xmax = 1) {
   for (i in 1:q) {
     b <- rep(0, q)
     b[i] <- 1
-    x[i] <- integrate_x_bspline(b, p = p,
-                                xmin = xmin, xmax = xmax) / dx
+    x[i] <- integrate_x_bspline(b, p = p, xmin = xmin, xmax = xmax) / dx
   }
   x
 }
 
-
 Gram_analytic <- function(p) {
-  
+
   if (p == 0) {
     # piecewise constant
     M <- matrix(1, nrow = 1, ncol = 1)
-    
+
   } else if (p == 1) {
     # linear B-splines
     M <- (1/6) * matrix(
@@ -176,7 +174,7 @@ Gram_analytic <- function(p) {
       ),
       nrow = 2, byrow = TRUE
     )
-    
+
   } else if (p == 2) {
     # quadratic B-splines
     M <- (1/120) * matrix(
@@ -187,7 +185,7 @@ Gram_analytic <- function(p) {
       ),
       nrow = 3, byrow = TRUE
     )
-    
+
   } else if (p == 3) {
     # cubic P-splines (extended knots)
     M <- matrix(
@@ -199,11 +197,11 @@ Gram_analytic <- function(p) {
       ),
       nrow = 4, byrow = TRUE
     )
-    
+
   } else {
     stop("Analytic Gram matrix implemented only for p = 0,1,2,3")
   }
-  
+
   M
 }
 

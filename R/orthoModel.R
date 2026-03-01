@@ -65,7 +65,7 @@ orthoModel <- function(model, bases, data) {
   main_terms <- term_labels[!grepl(":", term_labels)]
   interaction_terms <- term_labels[grepl(":", term_labels)]
 
-  X <- spam(x=1, nrow = n, ncol = 1)
+  X <- spam::spam(x=1, nrow = n, ncol = 1)
   Z_list <- list()
   P_list <- list()
   C_list <- list()
@@ -87,7 +87,7 @@ orthoModel <- function(model, bases, data) {
       f2 <- eval_basis(bases[[vars[2]]], data)
 
       ## interaction design
-      B12  <- LMMsolver:::RowKronecker(f1$B, f2$B)
+      B12  <- RowKronecker(f1$B, f2$B)
       M12  <- f1$M %x% f2$M
       BM12 <- B12 %*% M12
       Z_list[[it]] <- BM12
@@ -114,7 +114,7 @@ orthoModel <- function(model, bases, data) {
   C_restrict <- spam(x=0, ncol=length(C_list),nrow=TotDim)
   for (k in seq_len(nTerms)) {
     ndx <- c(df_dim$s[k] : df_dim$e[k])
-    A <- spam(x=0,nrow=TotDim, ncol=TotDim)
+    A <- spam::spam(x=0,nrow=TotDim, ncol=TotDim)
     A[ndx,ndx] <- P_list[[k]]
     lP[[k]] <- A
     C_restrict[ndx, k] <- C_list[[k]]
@@ -125,7 +125,7 @@ orthoModel <- function(model, bases, data) {
   attr(lRinv, "cnt") <- n
 
   ## ---- 8. Fit ----
-  fit <- LMMsolver:::sparseMixedModels(
+  fit <- sparseMixedModels(
     y          = y,
     X          = X,
     Z          = Z,
