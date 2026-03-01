@@ -35,6 +35,42 @@ calcSumSquares <- function(lYtRinvY,
   return(SS_all)
 }
 
+# build from the restrictions and the penalties an indicator matrix
+build_restriction_matrix <- function(C_restrict, lP) {
+  n_penalty <- length(lP)
+  n_constraints <- ncol(C_restrict)
+  kappa <- matrix(0, nrow = n_penalty, ncol = n_constraints)
+  for (i in seq_len(n_penalty)) {
+    for (j in seq_len(n_constraints)) {
+      cj <- C_restrict[, j]
+      kappa[i, j] <- as.numeric(t(cj) %*% lP[[i]] %*% cj)
+    }
+  }
+  kappa <- 1*(kappa > 1.0e-12)
+  kappa
+}
+
+## ---- log-det contribution (psi-dependent part) ----
+logdet_correction <- function(M, psi)
+{
+  logdetQ <- 0
+  for (j in seq_len(ncol(M))) {
+    idx <- which(M[, j] == 1)
+    logdetQ <- logdetQ + log(sum(psi[idx]))
+  }
+  logdetQ
+}
+
+## ---- EDs per penalty ----
+ED_corrections <- function(M, psi) {
+  ED <- numeric(length(psi))
+  for (j in seq_len(ncol(M))) {
+    idx <- which(M[, j] == 1)
+    ED[idx] <- ED[idx] + psi[idx] / sum(psi[idx])
+  }
+  ED
+}
+
 #' @importFrom stats update
 #' @keywords internal
 sparseMixedModels <- function(y,
@@ -47,7 +83,8 @@ sparseMixedModels <- function(y,
                               trace = FALSE,
                               theta = NULL,
                               fixedTheta = NULL,
-                              grpTheta = NULL) {
+                              grpTheta = NULL,
+                              C_restrict = NULL) {
   Ntot <- length(y)
   p <- ncol(X)
   q <- ncol(Z)
@@ -81,6 +118,12 @@ sparseMixedModels <- function(y,
   ## Remove some extra zeros.
   lWtRinvW <- lapply(X = lWtRinvW, FUN = spam::cleanup)
   lQ <- lapply(X = lQ, FUN = spam::cleanup)
+
+  if (!is.null(C_restrict)) {
+    kappa <- build_restriction_matrix(C_restrict, lGinv)
+    lGinv <- PrecisionMatrix_lifting(C_restrict, lGinv)
+  }
+
   lGinv <- lapply(X = lGinv, FUN = spam::cleanup)
   lRinv <- lapply(X = lRinv, FUN = spam::cleanup)
   lC <- lapply(X = lC, FUN = spam::cleanup)
@@ -156,6 +199,9 @@ sparseMixedModels <- function(y,
     if (!is.null(ADcholGinv)) {
       dlogdetGinv <- dlogdet(ADcholGinv, psi)
       logdetG <- -attr(dlogdetGinv, which = "logdet")
+      if (!is.null(C_restrict)) {
+        logdetG <- logdetG + logdet_correction(kappa, psi)
+      }
     } else {
       logdetG <- 0
     }
@@ -171,6 +217,9 @@ sparseMixedModels <- function(y,
     ## calculate effective dimensions.
     if (!is.null(ADcholGinv)) {
       EDmax_psi <- psi * dlogdetGinv
+      if (!is.null(C_restrict)) {
+        EDmax_psi <- EDmax_psi - ED_corrections(kappa, psi)
+      }
     } else {
       EDmax_psi <- NULL
     }
