@@ -38,7 +38,7 @@ GramMatrix <- function(p, q) {
 
   ## --- Basis evaluations on reference points
   knots <- PsplinesKnots(xmin = 0, xmax = 1, degree = p, nseg = 1)
-  B_spline_vals <- as.matrix(LMMsolver:::Bsplines(knots, x = x_ref))
+  B_spline_vals <- as.matrix(Bsplines(knots, x = x_ref))
   B_bernstein_vals <- bernstein_matrix(p, x_ref)
 
   ## --- Bernstein Gram matrix (analytic)
@@ -121,7 +121,7 @@ integrate_x_bspline <- function(a, p, xmin = 0, xmax = 1) {
   x_ref <- seq(0, 1, length = p + 1)
 
   ## B-spline and Bernstein evaluations on [0,1]
-  knots <- LMMsolver:::PsplinesKnots(
+  knots <- PsplinesKnots(
     xmin = 0, xmax = 1, degree = p, nseg = 1
   )
   B_spline_vals <- as.matrix(Bsplines(knots, x_ref))
@@ -214,7 +214,7 @@ ortho_diff_matrix <- function(p, q) {
     M[i, i]     <-  w[i + 1]
     M[i+1, i]   <- -w[i]
   }
-  as.spam(M)
+  spam::as.spam(M)
 }
 
 

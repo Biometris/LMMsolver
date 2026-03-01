@@ -20,14 +20,14 @@ eval_basis <- function(b, data) {
 
   x <- data[[b$var]]
 
-  knots <- LMMsolver:::PsplinesKnots(
+  knots <- PsplinesKnots(
     xmin   = b$xmin,
     xmax   = b$xmax,
     degree = b$deg,
     nseg   = b$nseg
   )
 
-  B <- LMMsolver:::Bsplines(knots, x)
+  B <- Bsplines(knots, x)
   q <- ncol(B)
 
   M <- ortho_diff_matrix(p = b$deg, q = q)
@@ -132,7 +132,7 @@ orthoModel <- function(model, bases, data, trace=FALSE) {
     lP[[k]] <- do.call(spam::bdiag.spam, blocks)
   }
 
-  C_restrict <- spam(x=0, ncol=length(C_list),nrow=TotDim)
+  C_restrict <- spam::spam(x=0, ncol=length(C_list),nrow=TotDim)
   for (k in seq_len(nTerms)) {
     ndx <- c(df_dim$s[k] : df_dim$e[k])
     C_restrict[ndx, k] <- C_list[[k]]
