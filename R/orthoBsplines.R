@@ -159,6 +159,37 @@ ortho_x_int_condition <- function(p, q, xmin = 0, xmax = 1) {
   x
 }
 
+# helper
+cross3 <- function(u, v) {
+  c(
+    u[2]*v[3] - u[3]*v[2],
+    u[3]*v[1] - u[1]*v[3],
+    u[1]*v[2] - u[2]*v[1]
+  )
+}
+
+# Returns a q x (q-2) matrix M, orthogonal to
+# int_f(x) and int_x*f(x)
+ortho_x_diff_matrix <- function(p, q) {
+  w0 <- ortho_int_condition(p = p, q = q)
+  w1 <- ortho_x_int_condition(p = p, q = q)
+  M <- matrix(0, nrow = q, ncol = q - 2)
+  nseg <- q - p
+  for (i in 1:(q-2)) {
+    # solve locally a 3x3 model:
+    wloc0 <- c(w0[i],w0[i+1],w0[i+2])
+    wloc1 <- c(w1[i],w1[i+1],w1[i+2])
+    a <- cross3(wloc0, wloc1)
+    M[i,i] <- a[1]
+    M[i+1,i] <- a[2]
+    M[i+2,i] <- a[3]
+  }
+  spam::as.spam(M*nseg)
+}
+
+
+
+
 Gram_analytic <- function(p) {
 
   if (p == 0) {
