@@ -73,11 +73,11 @@ ED_corrections <- function(M, psi) {
 
 # make the matrix positive definite
 PrecisionMatrix_lifting <- function(C_restrict, lP) {
-  n_constraints <- ncol(C_restrict)
+  n_penalties <- length(lP)
   lP_lifted <- lP
-  for (i in seq_len(n_constraints)) {
-    C_i <- C_restrict[, i, drop = FALSE]
-    lP_lifted[[i]] <- lP[[i]] + C_i %*% spam::t.spam(C_i)
+  for (i in seq_len(n_penalties)) {
+    #C_i <- C_restrict[, i, drop = FALSE]
+    lP_lifted[[i]] <- lP[[i]] + C_restrict %*% spam::t.spam(C_restrict)
   }
   lP_lifted
 }
