@@ -17,8 +17,8 @@ data$y <- sin(2*pi*data$x1) + rnorm(n, sd = 0.1)
 ##
 ## Basis specification
 ##
-b1 <- basis(x1, xmin = 0, xmax = 1, nseg = 6, deg = 3, pord = 2)
-b2 <- basis(x2, xmin = 0, xmax = 1, nseg = 5, deg = 3, pord = 2)
+b1 <- LMMsolver:::basis(x1, xmin = 0, xmax = 1, nseg = 6, deg = 3, pord = 2)
+b2 <- LMMsolver:::basis(x2, xmin = 0, xmax = 1, nseg = 5, deg = 3, pord = 2)
 
 bases <- list(
   x1 = b1,
@@ -40,7 +40,7 @@ expect_equal(b1$nseg, 6)
 ##
 ## Test eval_basis structure
 ##
-f <- eval_basis(b1, data)
+f <- LMMsolver:::eval_basis(b1, data)
 
 expect_true(is.list(f))
 
@@ -69,7 +69,7 @@ expect_true(isSymmetric(P_dense))
 ##
 ## Test orthogonality property of M
 ##
-w <- ortho_int_condition(p = b1$deg, q = q)
+w <- LMMsolver:::ortho_int_condition(p = b1$deg, q = q)
 
 expect_equal(drop(w %*% f$M), rep(0, q-1), tolerance = 1e-10)
 
@@ -77,10 +77,10 @@ expect_equal(drop(w %*% f$M), rep(0, q-1), tolerance = 1e-10)
 ##
 ## Test interaction construction
 ##
-f1 <- eval_basis(b1, data)
-f2 <- eval_basis(b2, data)
+f1 <- LMMsolver:::eval_basis(b1, data)
+f2 <- LMMsolver:::eval_basis(b2, data)
 
-B12 <- RowKronecker(f1$B, f2$B)
+B12 <- LMMsolver:::RowKronecker(f1$B, f2$B)
 M12 <- f1$M %x% f2$M
 
 expect_equal(
@@ -94,7 +94,7 @@ expect_equal(
 ##
 model <- y ~ x1 + x2
 
-fit <- orthoModel(
+fit <- LMMsolver:::orthoModel(
   model = model,
   bases = bases,
   data  = data
@@ -143,7 +143,7 @@ expect_true(TotDim > 0)
 ##
 ## Test prediction matrix dimensions
 ##
-f <- eval_basis(b1, data)
+f <- LMMsolver:::eval_basis(b1, data)
 
 Z <- f$B %*% f$M
 

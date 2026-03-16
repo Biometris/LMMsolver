@@ -3,15 +3,15 @@
 ## Bernstein basis tests
 ##
 
-expect_equal(bernstein(2, 0.5, 0), 0.25)
-expect_equal(bernstein(2, 0.5, 1), 0.5)
-expect_equal(bernstein(2, 0.5, 2), 0.25)
+expect_equal(LMMsolver:::bernstein(2, 0.5, 0), 0.25)
+expect_equal(LMMsolver:::bernstein(2, 0.5, 1), 0.5)
+expect_equal(LMMsolver:::bernstein(2, 0.5, 2), 0.25)
 
 # Partition of unity
 p <- 4
 x <- runif(10)
 for (xi in x) {
-  s <- sum(sapply(0:p, function(k) bernstein(p, xi, k)))
+  s <- sum(sapply(0:p, function(k) LMMsolver:::bernstein(p, xi, k)))
   expect_equal(s, 1, tolerance = 1e-12)
 }
 
@@ -21,7 +21,7 @@ for (xi in x) {
 ##
 
 p <- 3
-B <- bernstein_matrix(p, seq(0,1,length=p+1))
+B <- LMMsolver:::bernstein_matrix(p, seq(0,1,length=p+1))
 
 # rows sum to 1 (partition of unity)
 expect_equal(rowSums(B), rep(1, p+1), tolerance = 1e-12)
@@ -32,7 +32,7 @@ expect_equal(rowSums(B), rep(1, p+1), tolerance = 1e-12)
 ##
 
 p <- 4
-G <- bernstein_gram_coef(p)
+G <- LMMsolver:::bernstein_gram_coef(p)
 
 expect_true(isSymmetric(G))
 
@@ -47,8 +47,8 @@ expect_true(all(e > 0))
 
 for (p in 0:3) {
   q <- p + 1
-  G_num <- GramMatrix(p, q)
-  G_ana <- Gram_analytic(p)
+  G_num <- LMMsolver:::GramMatrix(p, q)
+  G_ana <- LMMsolver:::Gram_analytic(p)
 
   expect_equal(G_num, G_ana, tolerance = 1e-10)
 }
@@ -63,7 +63,7 @@ q <- 6
 
 a <- rep(1, q)
 
-int_val <- integrate_bspline(a, p)
+int_val <- LMMsolver:::integrate_bspline(a, p)
 
 expect_equal(int_val, 1, tolerance = 1e-10)
 
@@ -79,8 +79,8 @@ q <- 6
 a <- runif(q)
 
 # integrate twice (should scale linearly)
-I1 <- integrate_bspline(a, p)
-I2 <- integrate_bspline(2*a, p)
+I1 <- LMMsolver:::integrate_bspline(a, p)
+I2 <- LMMsolver:::integrate_bspline(2*a, p)
 
 expect_equal(I2, 2*I1, tolerance = 1e-10)
 
@@ -93,7 +93,7 @@ p <- 3
 q <- 6
 a <- rep(1, q)
 
-moment <- integrate_x_bspline(a, p)
+moment <- LMMsolver:::integrate_x_bspline(a, p)
 
 # integral of x over [0,1]
 expect_equal(moment, 0.5, tolerance = 1e-10)
@@ -106,7 +106,7 @@ expect_equal(moment, 0.5, tolerance = 1e-10)
 p <- 3
 q <- 8
 
-w <- ortho_int_condition(p, q)
+w <- LMMsolver:::ortho_int_condition(p, q)
 
 expect_equal(length(w), q)
 expect_true(all(w > 0))
@@ -119,7 +119,7 @@ expect_true(all(w > 0))
 p <- 3
 q <- 8
 
-M <- ortho_diff_matrix(p, q)
+M <- LMMsolver:::ortho_diff_matrix(p, q)
 
 expect_equal(dim(M), c(q, q-1))
 
@@ -128,7 +128,7 @@ expect_equal(dim(M), c(q, q-1))
 ## Orthogonal x-difference matrix
 ##
 
-M2 <- ortho_x_diff_matrix(p, q)
+M2 <- LMMsolver:::ortho_x_diff_matrix(p, q)
 
 expect_equal(dim(M2), c(q, q-2))
 
@@ -140,7 +140,7 @@ expect_equal(dim(M2), c(q, q-2))
 u <- c(1,2,3)
 v <- c(4,5,6)
 
-w <- cross3(u,v)
+w <- LMMsolver:::cross3(u,v)
 
 expect_equal(w, c(-3,6,-3))
 
@@ -152,10 +152,10 @@ expect_equal(w, c(-3,6,-3))
 p <- 3
 q <- 8
 
-w0 <- ortho_int_condition(p,q)
-w1 <- ortho_x_int_condition(p,q)
+w0 <- LMMsolver:::ortho_int_condition(p,q)
+w1 <- LMMsolver:::ortho_x_int_condition(p,q)
 
-M <- ortho_x_diff_matrix(p,q)
+M <- LMMsolver:::ortho_x_diff_matrix(p,q)
 
 # convert spam -> dense
 M <- as.matrix(M)
