@@ -110,3 +110,53 @@ thetaMat <- LMMsolver:::vec2mat(theta, Mask)
 
 expect_true(isSymmetric(thetaMat))
 expect_true(all(diag(thetaMat) > 0))
+
+# simulate some data
+set.seed(1234)
+
+n <- 100
+x <- runif(n)
+y <- exp(-2*x)*sin(x) + rnorm(n)
+
+n <- length(y)
+
+# as in Eilers and Marx 1996
+xmin <- 0
+xmax <- 1
+nseg <- 20
+deg <- 3
+
+# construction of knots for P-splines amd Phi-splines
+knots <- LMMsolver:::PsplinesKnots(xmin = xmin, xmax = xmax, degree=deg, nseg=nseg)
+B <- LMMsolver:::Bsplines(knots, x)
+G <- LMMsolver:::constructG(knots,scaleX=TRUE,pord=2)
+G[, 1] <- 1
+
+# desigm matrices
+X <- B %*% G
+Z <- B
+
+# Construct Penalty, with built-in boundary constraints:
+q <- ncol(B)
+D <- spam::diff.spam(spam::diag.spam(q), diff=2)
+DtD <- crossprod(D)
+B_ref <- LMMsolver:::Bsplines(knots, x=c(xmin,xmax))
+P <- DtD + crossprod(B_ref)
+lGinv <- list(P)
+
+lRinv <- list(spam::diag.spam(n))
+
+# define the mask
+Mask <- matrix(data=c(1,1, 2,2), nrow=2, ncol=2, byrow=TRUE)
+
+obj_ODE <- LMMsolver:::HarvilleODE(y, X, Z, lGinv, lRinv, Mask, alpha=1.0, maxiter=100, thr=1.e-6)
+
+dat <- data.frame(x=x,y=y)
+obj <- LMMsolve(y~1, spline = ~spl1D(x, nseg=nseg, xlim=c(xmin,xmax), scale=TRUE), data=dat)
+obj$logL
+obj_ODE$logL
+expect_equal(obj_ODE$logL, obj$logL)
+
+
+
+
