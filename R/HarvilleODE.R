@@ -141,16 +141,16 @@ gradient <- function(eta, Mask, y, U, ADC, ADP, ADRinv, lC) {
   L
 }
 
-HarvilleODE <- function(y, X, Z, lGinv, lRinv, alpha, maxiter, thr)
+HarvilleODE <- function(y, X, Z, lGinv, lRinv, Mask, alpha, maxiter, thr)
 {
   p <- ncol(X)
-  U <- as.spam(cbind(X, Z))
+  U <- spam::as.spam(cbind(X, Z))
   UtU <- crossprod(U)
   UtY <- t(U) %*% y
   K <- length(lGinv)
   lC <- list()
   for (k in 1:K) {
-    lC[[k]] <- bdiag.spam(diag.spam(0,p), lGinv[[k]])
+    lC[[k]] <- spam::bdiag.spam(spam::diag.spam(0,p), lGinv[[k]])
   }
   lC[[K+1]] <- UtU
 
