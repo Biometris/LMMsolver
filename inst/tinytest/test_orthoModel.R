@@ -4,15 +4,22 @@
 ##
 set.seed(1)
 
-n <- 50
+n <- 100
 
-data <- data.frame(
+dat <- data.frame(
   x1 = runif(n),
   x2 = runif(n)
 )
 
-data$y <- sin(2*pi*data$x1) + rnorm(n, sd = 0.1)
+sim_fun <- function(data) {
+  y <- sin(2*pi*data$x1)*exp(-data$x1) +
+       sin(2*pi*data$x2)*exp(-2*data$x2) +
+       0.4*(sin(2 * pi * data$x1) * sin(2 * pi * data$x2)) +
+      rnorm(n, sd = 0.1)
+  y
+}
 
+dat$y <- sim_fun(dat)
 
 ##
 ## Basis specification
@@ -40,7 +47,7 @@ expect_equal(b1$nseg, 6)
 ##
 ## Test eval_basis structure
 ##
-f <- LMMsolver:::eval_basis(b1, data)
+f <- LMMsolver:::eval_basis(b1, dat)
 
 expect_true(is.list(f))
 
@@ -77,8 +84,8 @@ expect_equal(drop(w %*% f$M), rep(0, q-1), tolerance = 1e-10)
 ##
 ## Test interaction construction
 ##
-f1 <- LMMsolver:::eval_basis(b1, data)
-f2 <- LMMsolver:::eval_basis(b2, data)
+f1 <- LMMsolver:::eval_basis(b1, dat)
+f2 <- LMMsolver:::eval_basis(b2, dat)
 
 B12 <- LMMsolver:::RowKronecker(f1$B, f2$B)
 M12 <- f1$M %x% f2$M
@@ -94,23 +101,26 @@ expect_equal(
 ##
 model <- y ~ x1 + x2
 
-fit <- LMMsolver:::orthoModel(
+fit1 <- LMMsolver:::orthoModel(
   model = model,
   bases = bases,
-  data  = data
+  data  = dat,
+  trace = FALSE
 )
 
-expect_true(is.list(fit))
+expect_equivalent_to_reference(fit1, "ortho_fit1")
 
-expect_true("dim" %in% names(fit))
+expect_true(is.list(fit1))
 
-expect_true("response_name" %in% names(fit))
+expect_true("dim" %in% names(fit1))
+
+expect_true("response_name" %in% names(fit1))
 
 
 ##
 ## Dimension consistency
 ##
-dimtab <- fit$dim
+dimtab <- fit1$dim
 
 expect_true(all(c("term","dim","s","e") %in% names(dimtab)))
 
@@ -122,20 +132,23 @@ expect_equal(dimtab$term[1], "Intercept")
 ##
 model2 <- y ~ x1 + x2 + x1:x2
 
-#fit2 <- orthoModel(
-#  model = model2,
-#  bases = bases,
-#  data  = data
-#)
+fit2 <- LMMsolver:::orthoModel(
+  model = model2,
+  bases = bases,
+  data  = dat,
+  trace = FALSE
+)
 
-#expect_true(is.list(fit2))
-#expect_true(nrow(fit2$dim) >= 3)
+expect_equivalent_to_reference(fit2, "ortho_fit2")
+
+expect_true(is.list(fit2))
+expect_true(nrow(fit2$dim) >= 3)
 
 
 ##
 ## Check that constraints matrix matches dimension
 ##
-TotDim <- max(fit$dim$e)
+TotDim <- max(fit2$dim$e)
 
 expect_true(TotDim > 0)
 
@@ -143,7 +156,7 @@ expect_true(TotDim > 0)
 ##
 ## Test prediction matrix dimensions
 ##
-f <- LMMsolver:::eval_basis(b1, data)
+f <- LMMsolver:::eval_basis(b1, dat)
 
 Z <- f$B %*% f$M
 
