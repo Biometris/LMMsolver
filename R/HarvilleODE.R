@@ -188,7 +188,8 @@ HarvilleODE <- function(y, X, Z, lGinv, lRinv, Mask, alpha, maxiter, thr)
 
     logPrev <- logL
   }
-  L <- list(theta = z$theta,
+  L <- list(a = a,
+            theta = z$theta,
             niter = it,
             ED = ED,
             logL = logL,
