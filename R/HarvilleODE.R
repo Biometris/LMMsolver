@@ -141,7 +141,7 @@ gradient <- function(eta, Mask, y, U, ADC, ADP, ADRinv, lC) {
   L
 }
 
-HarvilleODE <- function(y, X, Z, lGinv, lRinv, Mask, alpha, maxiter, thr)
+HarvilleODE <- function(y, X, Z, lGinv, lRinv, Mask, alpha, maxiter, thr=1.0e-6, trace=FALSE)
 {
   p <- ncol(X)
   U <- spam::as.spam(cbind(X, Z))
@@ -161,7 +161,7 @@ HarvilleODE <- function(y, X, Z, lGinv, lRinv, Mask, alpha, maxiter, thr)
   eta <- rep(0, K+1)
   logPrev <- Inf
   logL <- 0
-  trace <- NULL
+  df.trace <- NULL
   for (it in seq_len(maxiter)) {
     z <- gradient(eta, Mask, y, U, ADC, ADP, ADRinv, lC)
 
@@ -181,19 +181,24 @@ HarvilleODE <- function(y, X, Z, lGinv, lRinv, Mask, alpha, maxiter, thr)
 
     names(eta) <- paste0("eta", 1:(K+1))
     names(ED) <- paste0("ED", 1:(K+1))
-    trace <- rbind(trace,
+    df.trace <- rbind(df.trace,
                    data.frame(it=it, t(eta), t(ED) , logL = logL))
+    if (trace) {
+      cat("it", it, logL, "\n")
+    }
 
     if (abs(logL-logPrev) < thr) break
 
     logPrev <- logL
   }
+  C <- linearSum(z$theta, lC)
   L <- list(a = a,
             theta = z$theta,
             niter = it,
             ED = ED,
             logL = logL,
-            trace = trace)
+            C = C,
+            trace = df.trace)
   L
 }
 
