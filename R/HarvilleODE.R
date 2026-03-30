@@ -266,7 +266,7 @@ fit_subject_specific <-function(data, nseg, maxiter=250,thr=1.0e-6,trace=FALSE) 
 
   Z_con_geno <- RowKronecker(Z_geno_D_G, Z_spl)
 
-  ran_regr <- RowKronecker(Z_geno, as.spam(time))
+  ran_regr <- RowKronecker(Z_geno, spam::as.spam(time))
 
   Z <- cbind(Z_geno, ran_regr, Z_spl, Z_con_geno)
 
@@ -306,11 +306,14 @@ fit_subject_specific <-function(data, nseg, maxiter=250,thr=1.0e-6,trace=FALSE) 
             Sigma = Sigma,
             Np    = Np,
             q     = q,
+            nGeno = nGeno,
             D_G   = D_G)
   L
 }
 
 predict_subject_specific <- function(object, nGrid) {
+  nGeno <- object$nGeno
+  geno <- 1:nGeno
   obj <- object$model
   knots <- object$knots
   Np <- object$Np
@@ -320,7 +323,7 @@ predict_subject_specific <- function(object, nGrid) {
   xmax <- attr(knots, which="xmax")
 
   time_grid <- seq(xmin, xmax, length=nGrid)
-  Bg <- LMMsolver:::Bsplines(knots, time_grid)
+  Bg <- Bsplines(knots, time_grid)
 
   p <- 2
   beta <- obj$a[1:p]
