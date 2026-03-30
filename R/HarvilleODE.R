@@ -310,6 +310,57 @@ fit_subject_specific <-function(data, nseg, maxiter=250,thr=1.0e-6,trace=FALSE) 
   L
 }
 
+predict_subject_specific <- function(object, nGrid) {
+  obj <- object$model
+  knots <- object$knots
+  Np <- object$Np
+  q <- object$q
+  D_G <- object$D_G
+  xmin <- attr(knots, which="xmin")
+  xmax <- attr(knots, which="xmax")
+
+  time_grid <- seq(xmin, xmax, length=nGrid)
+  Bg <- LMMsolver:::Bsplines(knots, time_grid)
+
+  p <- 2
+  beta <- obj$a[1:p]
+  ndx_mu_ran <- p + geno
+  ndx_beta_ran <- nGeno + p + geno
+  mu_ran <- obj$a[ndx_mu_ran]
+  beta_ran <- obj$a[ndx_beta_ran]
+  non_lin_con <- obj$a[-c(1:(2*nGeno+2+q-2))]
+  coef_mean <- obj$a[(2*nGeno+2+1):(2*nGeno+2+q-2)]
+
+  grid <- expand.grid(
+    time = time_grid,
+    geno = factor(1:nGeno)
+  )
+
+  Bg <- Bsplines(knots, grid$time)
+  BgNp <- Bg %*% Np
+
+  grid$mu_ran   <- mu_ran[as.numeric(grid$geno)]
+  grid$beta_ran <- beta_ran[as.numeric(grid$geno)]
+
+  grid$f_lin <- beta[1] + beta[2]*grid$time +
+    grid$mu_ran + grid$beta_ran * grid$time
+
+  grid$f_mean <- as.vector(BgNp %*% coef_mean)
+  grid$f_mean_tot <- grid$f_mean + beta[1] + beta[2]*grid$time
+
+  coef_dev <- matrix(non_lin_con, nrow = (nGeno-1), byrow = TRUE)
+
+  # Map genotypes to contrasts
+  Dg_mat <- as.matrix(D_G)
+
+  Zg_dev <- Dg_mat[as.numeric(grid$geno), ]
+
+  grid$f_dev <- rowSums((Zg_dev %*% coef_dev) * as.matrix(BgNp))
+
+  grid$fit <- grid$f_lin + grid$f_mean + grid$f_dev
+
+  grid
+}
 
 
 
