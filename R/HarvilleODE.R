@@ -348,6 +348,9 @@ predict_subject_specific <- function(object, nGrid) {
   grid$f_lin <- beta[1] + beta[2]*grid$time +
     grid$mu_ran + grid$beta_ran * grid$time
 
+  grid$f_lin_dev <- grid$mu_ran + grid$beta_ran * grid$time
+
+
   grid$f_mean <- as.vector(BgNp %*% coef_mean)
   grid$f_mean_tot <- grid$f_mean + beta[1] + beta[2]*grid$time
 
