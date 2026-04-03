@@ -14,7 +14,7 @@ before_script:
   - echo "options(Ncpus = $(nproc --all))" >> /usr/local/lib/R/etc/Rprofile.site
   - r -e "update.packages(ask = FALSE, checkBuilt = TRUE)"
   - r -e "install.packages('pak', method = 'wget')"
-  - r -e 'pak::local_install_dev_deps(upgrade = "never")'
+  - r -e 'pak::local_install_dev_deps(upgrade = FALSE)'
 
 r-release:
   stage: test
