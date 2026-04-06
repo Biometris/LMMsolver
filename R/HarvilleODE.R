@@ -143,6 +143,10 @@ gradient <- function(eta, Mask, y, U, ADC, ADP, ADRinv, lC) {
 
 HarvilleODE <- function(y, X, Z, lGinv, lRinv, Mask, alpha, maxiter, thr=1.0e-6, trace=FALSE)
 {
+  if (length(lRinv) > 1) {
+    stop("multiple residual terms not implmented yet \n")
+  }
+
   p <- ncol(X)
   U <- spam::as.spam(cbind(X, Z))
   UtU <- crossprod(U)
@@ -152,7 +156,7 @@ HarvilleODE <- function(y, X, Z, lGinv, lRinv, Mask, alpha, maxiter, thr=1.0e-6,
   for (k in 1:K) {
     lC[[k]] <- spam::bdiag.spam(spam::diag.spam(0,p), lGinv[[k]])
   }
-  lC[[K+1]] <- UtU
+  lC[[K+1]] <- t(U) %*% (lRinv[[1]] %*% U)
 
   # construct ADchol from a list of semi-positive precision matrices
   ADC <- ADchol(lC)
