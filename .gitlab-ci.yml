@@ -12,10 +12,9 @@ before_script:
   - apt-get install -y --no-install-recommends ${APT_PKGS}
   - export PATH="/usr/local/lib/R/site-library/littler/examples/:${PATH}"
   - echo "options(Ncpus = $(nproc --all))" >> /usr/local/lib/R/etc/Rprofile.site
-  - r -e "update.packages(ask = FALSE, checkBuilt = TRUE)"
-  - r -e "install.packages('pak', method = 'wget')"
+  - r -e "install.packages(installed.packages()[,1], type = 'source', ask = FALSE, checkBuilt = TRUE)"
+  - r -e "install.packages('pak', type = 'source')"
   - r -e 'pak::local_install_dev_deps(upgrade = FALSE)'
-
 r-release:
   stage: test
   tags:
