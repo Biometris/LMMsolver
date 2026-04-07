@@ -10,11 +10,11 @@ variables:
 before_script:
   - apt-get update
   - apt-get install -y --no-install-recommends ${APT_PKGS}
-  - export PATH="/usr/local/lib/R/site-library/littler/examples/:${PATH}"
+  - export LD_LIBRARY_PATH="/usr/local/lib/R/lib:${LD_LIBRARY_PATH}"
   - echo "options(Ncpus = $(nproc --all))" >> /usr/local/lib/R/etc/Rprofile.site
-  - r -e "update.packages(ask = FALSE, checkBuilt = TRUE)"
-  - r -e "install.packages('pak', method = 'wget')"
-  - r -e 'pak::local_install_dev_deps(upgrade = FALSE)'
+  - Rscript -e "update.packages(ask = FALSE, checkBuilt = TRUE)"
+  - Rscript -e "install.packages('pak')"
+  - Rscript -e 'pak::local_install_dev_deps(upgrade = FALSE)'
 
 r-release:
   stage: test
@@ -22,7 +22,7 @@ r-release:
     - Docker
   image: rocker/verse:latest
   script:
-    - r -e 'devtools::check(check_dir = ".")'
+    - Rscript -e 'devtools::check(check_dir = ".")'
   artifacts:
     paths:
       - "*.Rcheck"
@@ -38,14 +38,13 @@ r-devel:
   before_script:
     - apt-get update
     - apt-get install -y --no-install-recommends ${APT_PKGS}
-    - export PATH="/usr/local/lib/R/site-library/littler/examples/:${PATH}"
     - export LD_LIBRARY_PATH="/usr/local/lib/R/lib:${LD_LIBRARY_PATH}"
     - echo "options(Ncpus = $(nproc --all))" >> /usr/local/lib/R/etc/Rprofile.site
-    - r -e "remove.packages(setdiff(installed.packages()[,1], rownames(installed.packages(priority='base'))))"
-    - r -e "install.packages(c('devtools', 'pak'), type = 'source', ask = FALSE)"
-    - r -e 'pak::local_install_dev_deps(upgrade = FALSE)'
+    - Rscript -e "remove.packages(setdiff(installed.packages()[,1], rownames(installed.packages(priority='base'))))"
+    - Rscript -e "install.packages(c('devtools', 'pak'), type = 'source', ask = FALSE)"
+    - Rscript -e 'pak::local_install_dev_deps(upgrade = FALSE)'
   script:
-    - r -e 'devtools::check(check_dir = ".")'
+    - Rscript -e 'devtools::check(check_dir = ".")'
   artifacts:
     paths:
       - "*.Rcheck"
