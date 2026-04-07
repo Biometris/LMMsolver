@@ -12,9 +12,10 @@ before_script:
   - apt-get install -y --no-install-recommends ${APT_PKGS}
   - export PATH="/usr/local/lib/R/site-library/littler/examples/:${PATH}"
   - echo "options(Ncpus = $(nproc --all))" >> /usr/local/lib/R/etc/Rprofile.site
-  - r -e "install.packages(installed.packages()[,1], type = 'source', ask = FALSE, checkBuilt = TRUE)"
-  - r -e "install.packages('pak', type = 'source')"
+  - r -e "update.packages(ask = FALSE, checkBuilt = TRUE)"
+  - r -e "install.packages('pak', method = 'wget')"
   - r -e 'pak::local_install_dev_deps(upgrade = FALSE)'
+
 r-release:
   stage: test
   tags:
@@ -34,6 +35,15 @@ r-devel:
   tags:
     - Docker
   image: rocker/verse:devel
+  before_script:
+    - apt-get update
+    - apt-get install -y --no-install-recommends ${APT_PKGS}
+    - export PATH="/usr/local/lib/R/site-library/littler/examples/:${PATH}"
+    - export LD_LIBRARY_PATH="/usr/local/lib/R/lib:${LD_LIBRARY_PATH}"
+    - echo "options(Ncpus = $(nproc --all))" >> /usr/local/lib/R/etc/Rprofile.site
+    - r -e "install.packages(installed.packages()[,1], type = 'source', ask = FALSE, checkBuilt = TRUE)"
+    - r -e "install.packages('pak', type = 'source')"
+    - r -e 'pak::local_install_dev_deps(upgrade = FALSE)'
   script:
     - r -e 'devtools::check(check_dir = ".")'
   artifacts:
@@ -47,7 +57,7 @@ coverage:
   stage: deploy
   tags:
     - Docker
-  image: rocker/r-ver:latest
+  image: rocker/verse:latest
   when: on_success
   script:
     - install2.r covr
