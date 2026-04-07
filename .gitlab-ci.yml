@@ -30,29 +30,6 @@ r-release:
     when: always
     expire_in: 1 month
 
-r-devel:
-  stage: test
-  tags:
-    - Docker
-  image: rocker/verse:devel
-  before_script:
-    - apt-get update
-    - apt-get install -y --no-install-recommends ${APT_PKGS}
-    - export LD_LIBRARY_PATH="/usr/local/lib/R/lib:${LD_LIBRARY_PATH}"
-    - echo "options(Ncpus = $(nproc --all))" >> /usr/local/lib/R/etc/Rprofile.site
-    - Rscript -e "remove.packages(setdiff(installed.packages()[,1], rownames(installed.packages(priority='base'))))"
-    - Rscript -e "install.packages(c('remotes', 'rcmdcheck'), type = 'source', ask = FALSE)"
-    - Rscript -e "remotes::install_deps(dependencies = TRUE, type = 'source', upgrade = 'always')"
-  script:
-    - R CMD build .
-    - R CMD check --as-cran *.tar.gz
-  artifacts:
-    paths:
-      - "*.Rcheck"
-    name: logs
-    when: always
-    expire_in: 1 month
-
 coverage:
   stage: deploy
   tags:
