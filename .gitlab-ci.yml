@@ -41,10 +41,11 @@ r-devel:
     - export LD_LIBRARY_PATH="/usr/local/lib/R/lib:${LD_LIBRARY_PATH}"
     - echo "options(Ncpus = $(nproc --all))" >> /usr/local/lib/R/etc/Rprofile.site
     - Rscript -e "remove.packages(setdiff(installed.packages()[,1], rownames(installed.packages(priority='base'))))"
-    - Rscript -e "install.packages(c('devtools', 'pak'), type = 'source', ask = FALSE)"
-    - Rscript -e 'pak::local_install_dev_deps(upgrade = FALSE)'
+    - Rscript -e "install.packages(c('remotes', 'rcmdcheck'), type = 'source', ask = FALSE)"
+    - Rscript -e "remotes::install_deps(dependencies = TRUE, type = 'source', upgrade = 'always')"
   script:
-    - Rscript -e 'devtools::check(check_dir = ".")'
+    - R CMD build .
+    - R CMD check --as-cran *.tar.gz
   artifacts:
     paths:
       - "*.Rcheck"
@@ -60,6 +61,6 @@ coverage:
   when: on_success
   script:
     - install2.r covr
-    - r -e 'devtools::install()'
-    - r -e 'covr::package_coverage(type = "none", code = "tinytest::run_test_dir(at_home = TRUE)")'
+    - Rscript -e 'devtools::install()'
+    - Rscript -e 'covr::package_coverage(type = "none", code = "tinytest::run_test_dir(at_home = TRUE)")'
   coverage: '/Coverage:\s*(\d+.\d+\%)/'
