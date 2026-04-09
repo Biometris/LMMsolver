@@ -164,6 +164,48 @@ orthoModel <- function(model, bases, data, trace=FALSE) {
   fit
 }
 
+predict_ortho <- function(object, newdat) {
 
+  # helper to extract coefficients
+  get_coef <- function(obj, term) {
+    k <- match(term, obj$dim$term)
+    ndx <- obj$dim$s[k]:obj$dim$e[k]
+    obj$a[ndx]
+  }
+
+  f1_basis <- object$bases$f1
+  f2_basis <- object$bases$f2
+
+  # coefficients
+  mu  <- get_coef(object, "Intercept")
+  u1  <- get_coef(object, "f1")
+  u2  <- get_coef(object, "f2")
+  u12 <- get_coef(object, "f1:f2")
+
+  # evaluate bases
+  eval_f1 <- eval_basis(f1_basis, newdat)
+  eval_f2 <- eval_basis(f2_basis, newdat)
+
+  # marginals
+  g1 <- as.vector(eval_f1$B %*% eval_f1$M %*% u1)
+  g2 <- as.vector(eval_f2$B %*% eval_f2$M %*% u2)
+
+  # interaction
+  B12 <- RowKronecker(eval_f1$B, eval_f2$B)
+  M12 <- eval_f1$M %x% eval_f2$M
+  g12 <- as.vector((B12 %*% M12) %*% u12)
+
+  # total fit
+  fit_total <- as.vector(mu + g1 + g2 + g12)
+
+  # return everything
+  out <- cbind(newdat,
+               g1 = g1,
+               g2 = g2,
+               g12 = g12,
+               fit = fit_total)
+
+  return(as.data.frame(out))
+}
 
 
