@@ -208,4 +208,31 @@ predict_ortho <- function(object, newdat) {
   return(as.data.frame(out))
 }
 
+predict_marginal <- function(object, term, newdat) {
+
+  # helper
+  get_coef <- function(obj, term) {
+    k <- match(term, obj$dim$term)
+    ndx <- obj$dim$s[k]:obj$dim$e[k]
+    obj$a[ndx]
+  }
+
+  # get basis spec
+  basis_spec <- object$bases[[term]]
+
+  # evaluate basis
+  f_eval <- eval_basis(basis_spec, newdat)
+
+  # coefficients
+  u <- get_coef(object, term)
+
+  # marginal effect
+  g <- as.vector(f_eval$B %*% f_eval$M %*% u)
+
+  # return
+  out <- data.frame(newdat, value = g)
+  names(out)[ncol(out)] <- term  # name column as f1 or f2
+
+  return(out)
+}
 
