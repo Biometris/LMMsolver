@@ -76,8 +76,8 @@ PrecisionMatrix_lifting <- function(C_restrict, lP) {
   n_penalties <- length(lP)
   lP_lifted <- lP
   for (i in seq_len(n_penalties)) {
-    #C_i <- C_restrict[, i, drop = FALSE]
-    lP_lifted[[i]] <- lP[[i]] + C_restrict %*% spam::t.spam(C_restrict)
+    C_i <- C_restrict[, i, drop = FALSE]
+    lP_lifted[[i]] <- lP[[i]] + C_i %*% spam::t.spam(C_i)
   }
   lP_lifted
 }
