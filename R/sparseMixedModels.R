@@ -50,6 +50,31 @@ build_restriction_matrix <- function(C_restrict, lP) {
   kappa
 }
 
+PrecisionMatrix_lifting <- function(C_restrict, lP, kappa) {
+  n_penalties <- length(lP)
+  n_constraints <- ncol(C_restrict)
+
+  lP_lifted <- lP
+
+  for (i in seq_len(n_penalties)) {
+
+    # select only constraints relevant for this penalty
+    idx <- which(kappa[i, ] == 1)
+
+    if (length(idx) > 0) {
+      C_i <- C_restrict[, idx, drop = FALSE]
+
+      lP_lifted[[i]] <- lP[[i]] + C_i %*% spam::t.spam(C_i)
+    }
+  }
+
+  lP_lifted
+}
+
+
+
+
+
 ## ---- log-det contribution (psi-dependent part) ----
 logdet_correction <- function(M, psi)
 {
@@ -72,15 +97,15 @@ ED_corrections <- function(M, psi) {
 }
 
 # make the matrix positive definite
-PrecisionMatrix_lifting <- function(C_restrict, lP) {
-  n_penalties <- length(lP)
-  lP_lifted <- lP
-  for (i in seq_len(n_penalties)) {
-    C_i <- C_restrict[, i, drop = FALSE]
-    lP_lifted[[i]] <- lP[[i]] + C_i %*% spam::t.spam(C_i)
-  }
-  lP_lifted
-}
+# PrecisionMatrix_lifting <- function(C_restrict, lP) {
+#   n_penalties <- length(lP)
+#   lP_lifted <- lP
+#   for (i in seq_len(n_penalties)) {
+#     C_i <- C_restrict[, i, drop = FALSE]
+#     lP_lifted[[i]] <- lP[[i]] + C_i %*% spam::t.spam(C_i)
+#   }
+#   lP_lifted
+# }
 
 #' @importFrom stats update
 #' @keywords internal
@@ -132,7 +157,7 @@ sparseMixedModels <- function(y,
 
   if (!is.null(C_restrict)) {
     kappa <- build_restriction_matrix(C_restrict, lGinv)
-    lGinv <- PrecisionMatrix_lifting(C_restrict, lGinv)
+    lGinv <- PrecisionMatrix_lifting(C_restrict, lGinv, kappa)
   }
 
   lGinv <- lapply(X = lGinv, FUN = spam::cleanup)
