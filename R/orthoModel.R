@@ -32,14 +32,20 @@ eval_basis <- function(b, data) {
 
   M <- ortho_diff_matrix(p = b$deg, q = q)
 
-  D   <- diff(diag(q), diff = b$pord)
-  DtD <- crossprod(D)
-  dx <- attr(knots, which="dx")
-  sc <- (1 / dx)^(2 * b$pord - 1)
-  P  <- sc * (t(M) %*% DtD %*% M)
+  if (b$pord == 0) {
+    P <- t(M) %*% M
+  } else {
+    D   <- diff(diag(q), diff = b$pord)
+    DtD <- crossprod(D)
+    dx <- attr(knots, which="dx")
+    sc <- (1 / dx)^(2 * b$pord - 1)
+    P  <- sc * (t(M) %*% DtD %*% M)
+  }
 
   C <- spam::spam(0, nrow = q - 1, ncol = 1)
-  C[1, 1] <- C[q - 1, 1] <- 1.0
+  if (b$pord > 0) {
+    C[1, 1] <- C[q - 1, 1] <- 1.0
+  }
 
   list(
     B     = B,
@@ -137,7 +143,13 @@ orthoModel <- function(model, bases, data, trace=FALSE) {
     ndx <- c(df_dim$s[k] : df_dim$e[k])
     C_restrict[ndx, k] <- C_list[[k]]
   }
-  C_restrict <- spam::cleanup(C_restrict)
+  col_zero <- spam::colSums(C_restrict != 0) == 0
+  if (all(col_zero)) {
+    C_restrict <- NULL
+  } else {
+    C_restrict <- C_restrict[,!col_zero , drop = FALSE]
+    C_restrict <- spam::cleanup(C_restrict)
+  }
 
   ## ---- 7. Residual precision ----
   lRinv <- list(spam::diag.spam(1, n))
