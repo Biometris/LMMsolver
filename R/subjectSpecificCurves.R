@@ -29,7 +29,7 @@ sparse_NP_mat <- function(q) {
 
 
 # simple test function to model genotypic specific curves, including Random Regression
-fit_subject_specific <-function(data, nseg, maxiter=250,thr=1.0e-6,trace=FALSE) {
+fit_subject_specific <-function(data, nseg, nseg.ad, maxiter=250,thr=1.0e-6,trace=FALSE) {
 
   deg <- 3
   pord <- 2
@@ -67,6 +67,12 @@ fit_subject_specific <-function(data, nseg, maxiter=250,thr=1.0e-6,trace=FALSE) 
 
   P_con_geno <- crossprod(D_G) %x% P
 
+  if (nseg.ad > 0) {
+    # adaptive, for ridge penalty :
+    knots.ad <- LMMsolver:::PsplinesKnots(xmin=1,xmax=q,nseg=nseg.ad,degree=1)
+    C.ad <- LMMsolver:::Bsplines(knots.ad, x=1:q)
+  }
+
   lM <- list()
   lM[[1]] <- tcrossprod(c(1, 0))
   lM[[2]] <- tcrossprod(c(0, 1))
@@ -84,9 +90,27 @@ fit_subject_specific <-function(data, nseg, maxiter=250,thr=1.0e-6,trace=FALSE) 
   lGinv[[4]] <- spam::bdiag.spam(spam::diag.spam(0, 2*nGeno), P, spam::diag.spam(0,(nGeno-1)*(q-2)))
   lGinv[[5]] <- spam::bdiag.spam(spam::diag.spam(0, 2*nGeno), spam::diag.spam(0, q-2), P_con_geno)
 
+  if (nseg.ad > 0) {
+    # adaptive part
+    dim_C.ad <- ncol(C.ad)
+    cat("Dim C.ad ", dim(C.ad), "\n")
+    cat("Dim Np   ", dim(Np), "\n")
+    for (i in seq_len(dim_C.ad)) {
+      P_r <- (t(Np) %*% spam::diag.spam(C.ad[,i]) %*% Np)
+      P_ridge <- crossprod(D_G) %x% P_r
+      lGinv[[5+i]] <- spam::bdiag.spam(spam::diag.spam(0, 2*nGeno), spam::diag.spam(0, q-2), P_ridge)
+    }
+  }
+
   lRinv <- list(Rinv = spam::diag.spam(n))
 
   Mask <- matrix(data=c(1,1 , 2,2, 2,1, 3,3, 4,4, 5,5), nrow = 6, ncol = 2, byrow=TRUE)
+  if (nseg.ad > 0) {
+    for (i in seq_len(dim_C.ad)) {
+      Mask <- rbind(Mask, c(5+i,5+i))
+    }
+  }
+
   obj <- HarvilleODE(y, X, Z, lGinv, lRinv, Mask,
                                  alpha=1.0, maxiter = maxiter, thr = thr,
                                  trace=trace)
