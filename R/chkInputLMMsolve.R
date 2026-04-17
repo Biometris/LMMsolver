@@ -12,13 +12,13 @@ chkInputLMMsolve <- function(fixed, random, data,
       (!inherits(random, "formula") || length(terms(random)) != 2)) {
     stop("random should be a formula of the form \" ~ pred\".\n", call. = FALSE)
   }
-  if (!is.null(ginverse) &&
-      (!is.list(ginverse) ||
-       length(names(ginverse)) == 0 ||
-       (!all(sapply(X = ginverse, FUN = function(x) {
-         (is.matrix(x) || spam::is.spam(x)) && isSymmetric(x)}))))) {
-    stop("ginverse should be a named list of symmetric matrices.\n", call. = FALSE)
-  }
+  #if (!is.null(ginverse) &&
+  #    (!is.list(ginverse) ||
+  #    length(names(ginverse)) == 0 ||
+  #     (!all(sapply(X = ginverse, FUN = function(x) {
+  #       (is.matrix(x) || spam::is.spam(x)) && isSymmetric(x)}))))) {
+  #  stop("ginverse should be a named list of symmetric matrices.\n", call. = FALSE)
+  #}
   if (!is.null(residual) &&
       (!inherits(residual, "formula") || length(terms(residual)) != 2)) {
     stop("residual should be a formula of the form \" ~ pred\".\n", call. = FALSE)

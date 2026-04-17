@@ -652,8 +652,13 @@ cN <- c(1 / sqrt(N - 1), rep(0, N - 2), 1 / sqrt(N - 1))
 D <- diff(diag(N), diff = 1)
 Delta <- 0.5 * crossprod(D)
 LVinv <- 0.5 * (2 * Delta + cN %*% t(cN))
-## Add LVinv to list, with name corresponding to random term.
 lGinv <- list(plotF = LVinv)
+
+LVinv <- Matrix::Matrix(LVinv, sparse = TRUE)
+rownames(LVinv) <- colnames(LVinv) <- as.character(seq_len(nrow(LVinv)))
+## Add LVinv to list, with name corresponding to random term.
+lGinv <- LMMsolver:::as.ginverse(list(plotF = LVinv))
+
 ```
 
 Given the precision matrix for the LV model we can define the model in LMMsolve using the `random` and `ginverse` arguments:

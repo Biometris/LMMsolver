@@ -235,6 +235,15 @@ LMMsolve <- function(fixed,
   varPar <- ranPart$varPar
   nNonSplinesRandom <- ranPart$nNonSplinesRandom
 
+  # Align ginverse
+  if (!is.null(ginverse)) {
+    ginverse <- checkGinverseAgainstData(
+      ginverse,
+      data = data,
+      random_terms = term.labels.r
+    )
+  }
+
   lGinv <- constructGinv(ginverse, lGinv, dim.r, term.labels.r)
 
   ## construct Fixed part (excluding splines)

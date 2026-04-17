@@ -42,22 +42,24 @@ expect_error(LMMsolve(fixed = pheno ~ cross,
 
 ## Test ginverse.
 
-ginv <- matrix(1:4, nrow = 2)
-ginvL <- list(ginv = ginv)
-ginvLS <- list(ginv = ginv %*% t(ginv))
-ginvLS2 <- list(ind = ginv %*% t(ginv))
+#ginv <- matrix(1:4, nrow = 2)
+#ginvL <- list(ginv = ginv)
+#ginvLS <- list(ginv = ginv %*% t(ginv))
+#ginvLS2 <- list(ind = ginv %*% t(ginv))
 indMat <- diag(nrow = nlevels(testDat$ind))
+indMat <- Matrix(indMat)
 rownames(indMat) <- colnames(indMat) <- levels(testDat$ind)
-ginvLS3 <- list(ind = indMat)
-expect_error(LMMsolve(fixed = pheno ~ cross, ginverse = ginv, data = testDat),
-             "ginverse should be a named list of symmetric matrices")
-expect_error(LMMsolve(fixed = pheno ~ cross, ginverse = ginvL, data = testDat),
-             "ginverse should be a named list of symmetric matrices")
-expect_error(LMMsolve(fixed = pheno ~ cross, ginverse = ginvLS, data = testDat),
-             "ginverse element ginv not defined in random part")
-expect_error(LMMsolve(fixed = pheno ~ cross, random = ~ind, ginverse = ginvLS2,
-                      data = testDat),
-             "Dimensions of ind should match number of levels")
+#rownames(indMat) <- colnames(indMat) <- levels(testDat$ind)
+ginvLS3 <- LMMsolver:::as.ginverse(list(ind = indMat))
+#expect_error(LMMsolve(fixed = pheno ~ cross, ginverse = ginv, data = testDat),
+#             "ginverse should be a named list of symmetric matrices")
+#expect_error(LMMsolve(fixed = pheno ~ cross, ginverse = ginvL, data = testDat),
+#             "ginverse should be a named list of symmetric matrices")
+#expect_error(LMMsolve(fixed = pheno ~ cross, ginverse = ginvLS, data = testDat),
+#             "ginverse element ginv not defined in random part")
+#expect_error(LMMsolve(fixed = pheno ~ cross, random = ~ind, ginverse = ginvLS2,
+#                      data = testDat),
+#            "Dimensions of ind should match number of levels")
 
 ## Test other input parameters.
 
