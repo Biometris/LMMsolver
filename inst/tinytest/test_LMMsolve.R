@@ -47,7 +47,7 @@ expect_error(LMMsolve(fixed = pheno ~ cross,
 #ginvLS <- list(ginv = ginv %*% t(ginv))
 #ginvLS2 <- list(ind = ginv %*% t(ginv))
 indMat <- diag(nrow = nlevels(testDat$ind))
-indMat <- Matrix(indMat)
+indMat <- Matrix::Matrix(indMat, sparse=TRUE)
 rownames(indMat) <- colnames(indMat) <- levels(testDat$ind)
 #rownames(indMat) <- colnames(indMat) <- levels(testDat$ind)
 ginvLS3 <- LMMsolver:::as.ginverse(list(ind = indMat))

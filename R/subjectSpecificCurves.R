@@ -69,8 +69,8 @@ fit_subject_specific <-function(data, nseg, nseg.ad, maxiter=250,thr=1.0e-6,trac
 
   if (nseg.ad > 0) {
     # adaptive, for ridge penalty :
-    knots.ad <- LMMsolver:::PsplinesKnots(xmin=1,xmax=q,nseg=nseg.ad,degree=1)
-    C.ad <- LMMsolver:::Bsplines(knots.ad, x=1:q)
+    knots.ad <- PsplinesKnots(xmin=1,xmax=q,nseg=nseg.ad,degree=1)
+    C.ad <- Bsplines(knots.ad, x=1:q)
   }
 
   lM <- list()
