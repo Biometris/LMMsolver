@@ -657,7 +657,7 @@ lGinv <- list(plotF = LVinv)
 LVinv <- Matrix::Matrix(LVinv, sparse = TRUE)
 rownames(LVinv) <- colnames(LVinv) <- as.character(seq_len(nrow(LVinv)))
 ## Add LVinv to list, with name corresponding to random term.
-lGinv <- LMMsolver:::as.ginverse(list(plotF = LVinv))
+lGinv <- as.ginverse(list(plotF = LVinv))
 
 ```
 
