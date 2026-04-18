@@ -2,6 +2,7 @@
 .Rhistory
 .RData
 .Ruserdata
+*.tar.gz
 src/*.o
 src/*.so
 src/*.dll
@@ -12,6 +13,8 @@ docs
 src/notused/
 R/unused functions/
 examples/
+LMMsolver.Rcheck/
+vignettes/Solving_Linear_Mixed_Models_files/
 /doc/
 /Meta/
 revdep
