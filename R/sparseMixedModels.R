@@ -72,9 +72,6 @@ PrecisionMatrix_lifting <- function(C_restrict, lP, kappa) {
 }
 
 
-
-
-
 ## ---- log-det contribution (psi-dependent part) ----
 logdet_correction <- function(M, psi)
 {
@@ -106,6 +103,24 @@ ED_corrections <- function(M, psi) {
 #   }
 #   lP_lifted
 # }
+
+compute_alpha_active <- function(x, y, active, lower = -7, upper = 7) {
+  alpha_max <- Inf
+
+  for (i in seq_along(x)) {
+    if (!active[i]) next  # skip fixed variables
+
+    if (y[i] > 0) {
+      alpha_i <- (upper - x[i]) / y[i]
+      alpha_max <- min(alpha_max, alpha_i)
+    } else if (y[i] < 0) {
+      alpha_i <- (lower - x[i]) / y[i]
+      alpha_max <- min(alpha_max, alpha_i)
+    }
+  }
+
+  return(alpha_max)
+}
 
 #' @importFrom stats update
 #' @keywords internal
@@ -284,11 +299,46 @@ sparseMixedModels <- function(y,
     }
     ED_restr <- as.vector(ED %*% conM)
     SS_all_restr <- as.vector(SS_all %*% conM)
-    theta_restr <- ifelse(fixedThetaRes, theta_restr, ED_restr / SS_all_restr)
+
+    # do updat on a log-scale
+    eta <- log10(theta_restr)
+    grad_eta <- log10(ED_restr/theta_restr) - log10(SS_all_restr)
+
+    # freeze gradients
+    grad_eta[fixedThetaRes] <- 0
+
+    alpha_max <- compute_alpha_active(
+      eta, grad_eta, !fixedThetaRes,
+      lower = -6, upper = 6
+    )
+
+    alpha <- min(1, alpha_max)
+
+    eta_new <- eta + alpha * grad_eta
+
+    # detect boundary hits
+    tol <- 1e-10
+    hit_upper <- eta_new >= (6 - tol)
+    hit_lower <- eta_new <= (-6 + tol)
+
+    eta_new[hit_upper] <- 6
+    eta_new[hit_lower] <- -6
+
+    # update active set
+    fixedThetaRes <- fixedThetaRes | hit_upper | hit_lower
+
+    #if (all(fixedThetaRes)) {
+    #  stop("Cannot find solution; all penalties fixed\n")
+    #}
+
+    #cat("eta ", eta, "  eta_new", eta_new, " non-active " , fixedThetaRes, "\n")
+
+    # back-transform
+    theta_restr <- 10^eta_new
     theta <- as.vector(conM %*% theta_restr)
 
-    fixedTheta <- theta > 1.0e6 | fixedTheta
-    fixedThetaRes <- theta_restr > 1.0e6 | fixedThetaRes
+    #fixedTheta <- theta > 1.0e6 | fixedTheta
+    #fixedThetaRes <- theta_restr > 1.0e6 | fixedThetaRes
 
     logLprev <- logL
   }
