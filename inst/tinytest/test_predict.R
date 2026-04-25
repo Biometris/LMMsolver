@@ -137,4 +137,9 @@ obj9 <- LMMsolve(fixed = z ~ 1,
 expect_error(predict(obj9, newdat = newdat8, deriv = "x"),
              "Derivatives for multiple splines not implemented yet")
 
-
+# splines with pord = 1
+obj10 <- LMMsolve(yield ~ rep + gen,
+                 spline = ~spl1D(x=plot, nseg=10, pord=1),
+                 data = oats.data)
+pred10 <- predict(obj10, newdata=oats.data, se.fit=TRUE)
+expect_equivalent_to_reference(pred10, "pred10")

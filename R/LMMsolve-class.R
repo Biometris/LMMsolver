@@ -526,9 +526,11 @@ predict.LMMsolve <- function(object,
 
   for (s in seq_len(nGam)) {
     spl <- object$splRes[[s]]
-    ndx.f <- which(spl$term.labels.f == labels)
+    if (!is.null(spl$term.labels.f)) {
+      ndx.f <- which(spl$term.labels.f == labels)
+      lU[[ndx.f]] <- XTot[[s]]
+    }
     ndx.r <- which(spl$term.labels.r == labels)
-    lU[[ndx.f]] <- XTot[[s]]
     lU[[ndx.r]] <- BxTot[[s]]
   }
   U <- Reduce(spam::cbind.spam, lU)
