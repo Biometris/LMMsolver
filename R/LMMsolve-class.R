@@ -542,8 +542,8 @@ predict.LMMsolve <- function(object,
   }
 
   tmp <- object$term.labels.f[-1]
+  tmp <- tmp[!grepl(":", tmp)]
   fixTerms <- setdiff(tmp, splFixLab)
-
   nFixTerms <- length(fixTerms)
   if (nFixTerms > 0) {
     colNames <- colnames(newdata)
@@ -553,10 +553,28 @@ predict.LMMsolve <- function(object,
       str <- paste0("variables (", missingVar, ") in data.frame newdata missing.\n")
       stop(str)
     }
-    for (i in seq_len(nFixTerms)) {
-      U <- U + makeDesignTerm(object, newdata, fixTerms[i])
-    }
   }
+
+  X_fixed <- constructFixed_pred(
+    spec = object$fix.spec,
+    data = newdata
+  )
+  if (ncol(X_fixed) > 1) {
+    X_fixed <- X_fixed[,-1]
+    X_fixed <- spam::as.spam.dgCMatrix(X_fixed)
+
+    tmp <- object$term.labels.f[-1]
+    fixTerms <- setdiff(tmp, splFixLab)
+    ndx <- unlist(object$ndxCoefficients[fixTerms])
+    ndx <- ndx[ndx != 0]
+    U[, ndx] <- X_fixed
+  }
+
+  #  }
+  #  for (i in seq_len(nFixTerms)) {
+  #    U <- U + makeDesignTerm(object, newdata, fixTerms[i])
+  #  }
+  #}
 
   outDat <- newdata
 
