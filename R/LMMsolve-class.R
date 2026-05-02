@@ -541,20 +541,6 @@ predict.LMMsolve <- function(object,
     U <- U %x% spam::diag.spam(nCat)
   }
 
-  tmp <- object$term.labels.f[-1]
-  tmp <- tmp[!grepl(":", tmp)]
-  fixTerms <- setdiff(tmp, splFixLab)
-  nFixTerms <- length(fixTerms)
-  if (nFixTerms > 0) {
-    colNames <- colnames(newdata)
-    Missing <- !(fixTerms %in% colNames)
-    if (sum(Missing) > 0) {
-      missingVar <- paste(fixTerms[Missing], collapse=",")
-      str <- paste0("variables (", missingVar, ") in data.frame newdata missing.\n")
-      stop(str)
-    }
-  }
-
   X_fixed <- constructFixed_pred(
     spec = object$fix.spec,
     data = newdata

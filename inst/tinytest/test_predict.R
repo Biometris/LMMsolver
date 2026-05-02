@@ -101,7 +101,7 @@ expect_equivalent_to_reference(pred7, "pred7")
 # test if all fixed effects are defined in newdata:
 newdat8 <- data.frame(gen = "G11")
 expect_error(predict(obj7, newdata=newdat8),
-                     "variables (rep) in data.frame newdata missing.", fixed=TRUE)
+             "Variables missing in 'newdata': rep", fixed=TRUE)
 
 # example deriv for two dimensional splines
 

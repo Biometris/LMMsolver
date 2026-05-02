@@ -92,8 +92,26 @@ check_new_levels <- function(data, xlevels) {
   }
 }
 
+check_required_vars <- function(mt, data) {
+
+  vars_needed <- all.vars(mt)
+  vars_data   <- names(data)
+
+  missing_vars <- setdiff(vars_needed, vars_data)
+
+  if (length(missing_vars) > 0) {
+    stop(
+      sprintf("Variables missing in 'newdata': %s",
+              paste(missing_vars, collapse = ", ")),
+      call. = FALSE
+    )
+  }
+}
+
 constructFixed_pred <- function(spec, data) {
   mt <- spec$terms
+
+  check_required_vars(mt, data)
 
   check_new_levels(data, spec$xlevels)
 
