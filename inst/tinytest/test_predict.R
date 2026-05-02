@@ -143,3 +143,20 @@ obj10 <- LMMsolve(yield ~ rep + gen,
                  data = oats.data)
 pred10 <- predict(obj10, newdata=oats.data, se.fit=TRUE)
 expect_equivalent_to_reference(pred10, "pred10")
+
+# test for model including interaction in fixed effecct
+obj11 <- LMMsolve(fixed = yield~rep+block+block:rep, random=~gen, data=oats.data)
+pred11 <- predict(obj11, newdata=oats.data)
+expect_equivalent_to_reference(pred11, "pred11")
+
+# test with new unexpected level
+newdat <- oats.data
+newdat$rep <- as.character(newdat$rep)
+newdat$rep[1] <- "R4"
+newdat$rep <- as.factor(newdat$rep)
+
+expect_error(predict(obj11,newdat), "New levels in 'rep': R4")
+
+
+
+
