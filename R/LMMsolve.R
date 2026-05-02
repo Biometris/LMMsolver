@@ -247,9 +247,11 @@ LMMsolve <- function(fixed,
   lGinv <- constructGinv(ginverse, lGinv, dim.r, term.labels.r)
 
   ## construct Fixed part (excluding splines)
-  X <- constructFixed(fixed, data)
-  dim.f <- attr(X, which="dim.f")
-  term.labels.f <- attr(X, which="term.labels.f")
+  res <- constructFixed_train(fixed, data)
+  X <- res$X
+  spec <- res$spec
+  dim.f <- spec$dim.f
+  term.labels.f <- spec$term.labels.f
 
   ## Add spline part.
   splResList <- NULL
