@@ -79,3 +79,50 @@ constructFixed_train <- function(fix, data) {
   return(list(X = X, spec = spec))
 }
 
+
+check_new_levels <- function(data, xlevels) {
+  for (nm in names(xlevels)) {
+    if (nm %in% names(data)) {
+      new_levels <- setdiff(unique(as.character(data[[nm]])), xlevels[[nm]])
+      if (length(new_levels) > 0) {
+        stop(sprintf("New levels in '%s': %s",
+                     nm, paste(new_levels, collapse = ", ")), call.=FALSE)
+      }
+    }
+  }
+}
+
+constructFixed_pred <- function(spec, data) {
+  mt <- spec$terms
+
+  check_new_levels(data, spec$xlevels)
+
+  mf <- model.frame(
+    mt,
+    data,
+    xlev = spec$xlevels,
+    drop.unused.levels = FALSE
+  )
+
+  f.terms <- all.vars(mt)[attr(mt, "dataClasses") == "factor"]
+
+  contrasts.arg <- spec$contrasts
+
+  X <- Matrix::sparse.model.matrix(
+    mt,
+    data = mf,
+    contrasts.arg = contrasts.arg
+  )
+
+  # enforce identical column structure
+  X <- X[, spec$colnames, drop = FALSE]
+
+  return(X)
+}
+
+
+
+
+
+
+
