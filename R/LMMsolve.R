@@ -249,9 +249,9 @@ LMMsolve <- function(fixed,
   ## construct Fixed part (excluding splines)
   res <- constructFixed_train(fixed, data)
   X <- res$X
-  spec <- res$spec
-  dim.f <- spec$dim.f
-  term.labels.f <- spec$term.labels.f
+  fix.spec <- res$spec
+  dim.f <- fix.spec$dim.f
+  term.labels.f <- fix.spec$term.labels.f
 
   ## Add spline part.
   splResList <- NULL
@@ -324,6 +324,7 @@ LMMsolve <- function(fixed,
               family = family, offset = offset,
               dim.f = dim.f, dim.r = dim.r,
               term.labels.f = term.labels.f, term.labels.r = term.labels.r,
+              fix.spec = fix.spec,
               respVar = respVar,
               NomEffDimRan = NomEffDimRan, varPar = varPar,
               splResList = splResList, residual = residual,
