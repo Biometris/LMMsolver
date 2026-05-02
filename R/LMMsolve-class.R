@@ -546,7 +546,7 @@ predict.LMMsolve <- function(object,
     data = newdata
   )
   if (ncol(X_fixed) > 1) {
-    X_fixed <- X_fixed[,-1]
+    X_fixed <- X_fixed[,-1, drop=FALSE]
     X_fixed <- spam::as.spam.dgCMatrix(X_fixed)
 
     tmp <- object$term.labels.f[-1]
