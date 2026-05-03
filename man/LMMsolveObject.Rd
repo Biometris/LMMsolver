@@ -30,6 +30,7 @@ mixed model}
 \item{term.labels.f}{The names of the fixed terms in the mixed model}
 \item{term.labels.r}{The names of the random terms in the mixed model}
 \item{fix.spec}{Specification of fixed part of mixed model}
+\item{ran.spec}{Specification of random part of mixed model}
 \item{respVar}{The name(s) of the response variable(s).}
 \item{splRes}{An object with definition of spline argument}
 \item{deviance}{The relative deviance}
