@@ -234,6 +234,7 @@ LMMsolve <- function(fixed,
   scFactor <- ranPart$scFactor
   varPar <- ranPart$varPar
   nNonSplinesRandom <- ranPart$nNonSplinesRandom
+  ran.spec <- ranPart$ran.spec
 
   # Align ginverse
   if (!is.null(ginverse)) {
@@ -325,6 +326,7 @@ LMMsolve <- function(fixed,
               dim.f = dim.f, dim.r = dim.r,
               term.labels.f = term.labels.f, term.labels.r = term.labels.r,
               fix.spec = fix.spec,
+              ran.spec = ran.spec,
               respVar = respVar,
               NomEffDimRan = NomEffDimRan, varPar = varPar,
               splResList = splResList, residual = residual,
