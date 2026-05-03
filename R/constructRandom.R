@@ -1,37 +1,83 @@
+build_random_Z1_train <- function(random, data) {
+
+  if (is.null(random)) {
+    return(list(Z = NULL, spec = NULL))
+  }
+
+  mf <- model.frame(random, data, drop.unused.levels = TRUE)
+
+  ## name check
+  names_mf <- names(mf)
+  if (!all(names_mf == make.names(names_mf))) {
+    stop("Syntactically invalid name(s): ",
+         paste(names_mf[names_mf != make.names(names_mf)], collapse=", "),
+         call. = FALSE)
+  }
+
+  mt <- terms(mf)
+
+  f.terms <- all.vars(mt)[attr(mt, "dataClasses") == "factor"]
+
+  contrasts.arg <- lapply(
+    mf[, f.terms, drop = FALSE],
+    contrasts,
+    contrasts = FALSE   # important for random
+  )
+
+  Z1 <- Matrix::sparse.model.matrix(
+    mt,
+    data = mf,
+    contrasts.arg = contrasts.arg
+  )
+
+  dim.r <- table(attr(Z1, "assign"))[-1]
+  term.labels.r <- attr(mt, "term.labels")
+
+  ## remove intercept column
+  if (ncol(Z1) > 1) {
+    Z1 <- Z1[, -1, drop = FALSE]
+    Z1 <- spam::as.spam.dgCMatrix(Z1)
+  } else {
+    Z1 <- NULL
+  }
+
+  if (!is.null(Z1)) {
+    spec <- list(
+      terms        = mt,
+      xlevels      = .getXlevels(mt, mf),
+      contrasts    = contrasts.arg,
+      colnames     = colnames(Z1),
+      dim.r        = dim.r,
+      term.labels  = term.labels.r)
+  } else {
+    spec <- list(
+      terms       = NULL,
+      xlevels     = NULL,
+      constrasts  = NULL,
+      colnames    = NULL,
+      dim.r       = NULL,
+      term.labels = NULL)
+  }
+
+  return(list(Z = Z1, spec = spec))
+}
+
 constructRandom <- function(random, group, condFactor, data) {
-  ## Make random part.
-  if (!is.null(random)) {
-    mf <- model.frame(random, data, drop.unused.levels = TRUE, na.action = NULL)
-    names_mf <- names(mf)
-    IsValidName <- names_mf == make.names(names_mf)
-    if (!all(IsValidName)) {
-      stop("Syntactically invalid name(s): ", paste(names_mf[which(!IsValidName)], collapse=", "), "\n")
-    }
-    mt <- terms(mf)
-    f.terms <- all.vars(mt)[attr(mt, "dataClasses") == "factor"]
-    Z1 <- Matrix::sparse.model.matrix(mt, data = mf,
-                                      contrasts.arg = lapply(X = mf[, f.terms, drop = FALSE],
-                                                             FUN = contrasts,
-                                                             contrasts = FALSE))
-    dim1.r <- table(attr(Z1, "assign"))[-1]
-    term1.labels.r <- attr(mt, "term.labels")
+  res <- build_random_Z1_train(random, data)
+
+  Z1 <- res$Z
+  spec_Z1 <- res$spec
+  dim1.r <- spec_Z1$dim.r
+  term1.labels.r <- spec_Z1$term.labels
+  if (!is.null(Z1)) {
     scFactor1 <- rep(1, length(dim1.r))
     ## Number of variance parameters (see Gilmour 1995) for each variance component
     varPar1 <- rep(1, length(dim1.r))
-    if (ncol(Z1) > 1) {
-      Z1 <- Z1[, -1, drop = FALSE]
-      Z1 <- spam::as.spam.dgCMatrix(Z1)
-    }
-    else {
-      Z1 <- NULL
-    }
   } else {
     scFactor1 <- NULL
-    dim1.r <- NULL
-    term1.labels.r <- NULL
-    Z1 <- NULL
     varPar1 <- NULL
   }
+
   if (!is.null(group)) {
     ndx <- unlist(group)
     dim2.r <- sapply(X = group, FUN = length)
