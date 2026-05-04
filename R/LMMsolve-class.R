@@ -559,6 +559,16 @@ predict.LMMsolve <- function(object,
     U[, ndx] <- X_fixed
   }
 
+  Z1_ran <- build_random_Z1_pred (
+    spec = object$ran.spec,
+    data = newdata
+  )
+  if (!is.null(Z1_ran)) {
+    ranTerms <- setdiff(object$term.labels.r, splRanLab)
+    ndx <- unlist(object$ndxCoefficients[ranTerms])
+    U[, ndx] <- Z1_ran
+  }
+
   #  }
   #  for (i in seq_len(nFixTerms)) {
   #    U <- U + makeDesignTerm(object, newdata, fixTerms[i])
@@ -569,9 +579,12 @@ predict.LMMsolve <- function(object,
 
   ranTerms <- setdiff(object$term.labels.r, splRanLab)
   nRanTerms <- length(ranTerms)
+  excluded_var <- get_missing_vars(object$ran.spec$terms, newdata)
   for (i in seq_len(nRanTerms)) {
     term <- ranTerms[[i]]
-    outDat[[term]] <- rep("Excluded",nRow)
+    if (excluded_var[i]) {
+      outDat[[term]] <- rep("Excluded",nRow)
+    }
   }
   if (family$family == "multinomial") {
     eta <- as.vector(U %*% object$coefMME)

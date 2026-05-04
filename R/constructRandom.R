@@ -137,3 +137,105 @@ constructRandom <- function(random, group, condFactor, data) {
             ran.spec = spec_Z1)
   return(L)
 }
+
+
+#add_na_level <- function(x) {
+#  if (is.factor(x)) {
+#    levels(x) <- c(levels(x), "NA")
+#  }
+#  x
+#}
+
+get_missing_vars <- function(mt, data) {
+
+  vars_needed <- all.vars(mt)
+  vars_data   <- names(data)
+
+  missing <- !(vars_needed %in% vars_data)
+
+  names(missing) <- vars_needed
+
+  return(missing)
+}
+
+fill_missing_vars <- function(mt, data, xlevels) {
+
+  vars_needed <- all.vars(mt)
+  vars_data   <- names(data)
+
+  missing_vars <- setdiff(vars_needed, vars_data)
+
+  for (v in missing_vars) {
+
+    if (v %in% names(xlevels)) {
+      # factor → create with correct levels
+      data[[v]] <- factor(NA, levels = xlevels[[v]])
+    } else {
+      # numeric → NA is fine
+      data[[v]] <- NA
+    }
+  }
+
+  return(data)
+}
+
+build_random_Z1_pred <- function(spec, data) {
+
+  if (is.null(spec)) return(NULL)
+
+  mt <- spec$terms
+
+  ## 1. Ensure required variables exist (inject NA if missing)
+  data <- fill_missing_vars(mt, data, spec$xlevels)
+
+  ## 2. Check for new (invalid) levels, ignoring NA
+  check_new_levels(data, spec$xlevels)
+
+  ## 3. Build model frame (keep NA)
+  mf <- model.frame(
+    mt,
+    data,
+    xlev = spec$xlevels,
+    drop.unused.levels = FALSE,
+    na.action = na.pass
+  )
+
+  ## 4. Construct design matrix
+  Z1 <- Matrix::sparse.model.matrix(
+    mt,
+    data = mf,
+    contrasts.arg = spec$contrasts
+  )
+
+  ## 5. Convert NA → 0 (missing = no contribution)
+  if (anyNA(Z1)) {
+    Z1[is.na(Z1)] <- 0
+  }
+
+  ## 6. Remove intercept column (as in training)
+  if (ncol(Z1) > 1) {
+    Z1 <- Z1[, -1, drop = FALSE]
+  } else {
+    return(NULL)
+  }
+
+  ## 7. Align columns with training spec
+  #missing_cols <- setdiff(spec$colnames, colnames(Z1))
+  #f (length(missing_cols) > 0) {
+  #  zero_mat <- Matrix::Matrix(
+  #    0,
+  #    nrow(Z1),
+  #    length(missing_cols),
+  #    dimnames = list(NULL, missing_cols)
+  #  )
+  #  Z1 <- cbind(Z1, zero_mat)
+  #
+
+  Z1 <- Z1[, spec$colnames, drop = FALSE]
+
+  ## 8. Convert to spam
+  Z1 <- spam::as.spam.dgCMatrix(Z1)
+
+  return(Z1)
+}
+

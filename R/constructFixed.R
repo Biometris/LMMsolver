@@ -81,12 +81,28 @@ constructFixed_train <- function(fix, data) {
 
 
 check_new_levels <- function(data, xlevels) {
+
   for (nm in names(xlevels)) {
+
     if (nm %in% names(data)) {
-      new_levels <- setdiff(unique(as.character(data[[nm]])), xlevels[[nm]])
+
+      vals <- data[[nm]]
+
+      # skip entirely if all NA
+      if (all(is.na(vals))) next
+
+      # drop NA values before checking
+      vals <- vals[!is.na(vals)]
+
+      # only check if something remains
+      if (length(vals) == 0) next
+
+      new_levels <- setdiff(unique(as.character(vals)), xlevels[[nm]])
+
       if (length(new_levels) > 0) {
         stop(sprintf("New levels in '%s': %s",
-                     nm, paste(new_levels, collapse = ", ")), call.=FALSE)
+                     nm, paste(new_levels, collapse = ", ")),
+             call. = FALSE)
       }
     }
   }
