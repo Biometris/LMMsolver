@@ -36,9 +36,11 @@ build_random_Z1_train <- function(random, data) {
   ## remove intercept column
   if (ncol(Z1) > 1) {
     Z1 <- Z1[, -1, drop = FALSE]
+    colnames_Z1 <- colnames(Z1)
     Z1 <- spam::as.spam.dgCMatrix(Z1)
   } else {
     Z1 <- NULL
+    colnames_Z1 <- NULL
   }
 
   if (!is.null(Z1)) {
@@ -46,7 +48,7 @@ build_random_Z1_train <- function(random, data) {
       terms        = mt,
       xlevels      = .getXlevels(mt, mf),
       contrasts    = contrasts.arg,
-      colnames     = colnames(Z1),
+      colnames     = colnames_Z1,
       dim.r        = dim.r,
       term.labels  = term.labels.r)
   } else {
