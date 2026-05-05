@@ -74,6 +74,7 @@ reference:
   - displayMME
   - effDim
   - getHeritability
+  - as.ginverse
 - title: Spline functions
 - contents:
   - spl1D
