@@ -569,12 +569,6 @@ predict.LMMsolve <- function(object,
     U[, ndx] <- Z1_ran
   }
 
-  #  }
-  #  for (i in seq_len(nFixTerms)) {
-  #    U <- U + makeDesignTerm(object, newdata, fixTerms[i])
-  #  }
-  #}
-
   outDat <- newdata
 
   ranTerms <- setdiff(object$term.labels.r, splRanLab)
