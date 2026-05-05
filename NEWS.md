@@ -1,6 +1,10 @@
 # LMMsolver 1.0.13
 
 -   Function `getHeritability()` added.  
+-   Function  `as.ginverse()` added.
+-   Extension of `predict()` function to allow for interactions in fixed and random term.
+-   bug fixed for `predict()` if `pord==1` in splines model. 
+-   improved stability of Harville algorithm to solve mixed model. 
 
 # LMMsolver 1.0.12
 
