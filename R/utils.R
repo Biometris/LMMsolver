@@ -315,6 +315,101 @@ calcNomEffDim <- function(X,
   return(EDnom)
 }
 
+#' Help function for predictions
+#'
+#' @noRd
+#' @keywords internal
+get_missing_vars <- function(mt, data) {
+
+  vars_needed <- all.vars(mt)
+  vars_data   <- names(data)
+
+  missing <- !(vars_needed %in% vars_data)
+
+  names(missing) <- vars_needed
+
+  return(missing)
+}
+
+#' Help function for predictions
+#'
+#' @noRd
+#' @keywords internal
+fill_missing_vars <- function(mt, data, xlevels) {
+
+  vars_needed <- all.vars(mt)
+  vars_data   <- names(data)
+
+  missing_vars <- setdiff(vars_needed, vars_data)
+
+  for (v in missing_vars) {
+
+    if (v %in% names(xlevels)) {
+      # factor → create with correct levels
+      data[[v]] <- factor(NA, levels = xlevels[[v]])
+    } else {
+      # numeric → NA is fine
+      data[[v]] <- NA
+    }
+  }
+
+  return(data)
+}
+
+#' Help function for predictions
+#'
+#' @noRd
+#' @keywords internal
+check_new_levels <- function(data, xlevels) {
+
+  for (nm in names(xlevels)) {
+
+    if (nm %in% names(data)) {
+
+      vals <- data[[nm]]
+
+      # skip entirely if all NA
+      if (all(is.na(vals))) next
+
+      # drop NA values before checking
+      vals <- vals[!is.na(vals)]
+
+      # only check if something remains
+      if (length(vals) == 0) next
+
+      new_levels <- setdiff(unique(as.character(vals)), xlevels[[nm]])
+
+      if (length(new_levels) > 0) {
+        stop(sprintf("New levels in '%s': %s",
+                     nm, paste(new_levels, collapse = ", ")),
+             call. = FALSE)
+      }
+    }
+  }
+}
+
+#' Help function for predictions
+#'
+#' @noRd
+#' @keywords internal
+check_required_vars <- function(mt, data) {
+
+  vars_needed <- all.vars(mt)
+  vars_data   <- names(data)
+
+  missing_vars <- setdiff(vars_needed, vars_data)
+
+  if (length(missing_vars) > 0) {
+    stop(
+      sprintf("Variables missing in 'newdata': %s",
+              paste(missing_vars, collapse = ", ")),
+      call. = FALSE
+    )
+  }
+}
+
+
+
 #' Check variables in formula
 #'
 #' Check that all variables in a formula are present in the data. The variables

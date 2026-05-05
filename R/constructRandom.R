@@ -139,46 +139,6 @@ constructRandom <- function(random, group, condFactor, data) {
 }
 
 
-#add_na_level <- function(x) {
-#  if (is.factor(x)) {
-#    levels(x) <- c(levels(x), "NA")
-#  }
-#  x
-#}
-
-get_missing_vars <- function(mt, data) {
-
-  vars_needed <- all.vars(mt)
-  vars_data   <- names(data)
-
-  missing <- !(vars_needed %in% vars_data)
-
-  names(missing) <- vars_needed
-
-  return(missing)
-}
-
-fill_missing_vars <- function(mt, data, xlevels) {
-
-  vars_needed <- all.vars(mt)
-  vars_data   <- names(data)
-
-  missing_vars <- setdiff(vars_needed, vars_data)
-
-  for (v in missing_vars) {
-
-    if (v %in% names(xlevels)) {
-      # factor → create with correct levels
-      data[[v]] <- factor(NA, levels = xlevels[[v]])
-    } else {
-      # numeric → NA is fine
-      data[[v]] <- NA
-    }
-  }
-
-  return(data)
-}
-
 build_random_Z1_pred <- function(spec, data) {
 
   if (is.null(spec)) return(NULL)
@@ -219,18 +179,7 @@ build_random_Z1_pred <- function(spec, data) {
     return(NULL)
   }
 
-  ## 7. Align columns with training spec
-  #missing_cols <- setdiff(spec$colnames, colnames(Z1))
-  #f (length(missing_cols) > 0) {
-  #  zero_mat <- Matrix::Matrix(
-  #    0,
-  #    nrow(Z1),
-  #    length(missing_cols),
-  #    dimnames = list(NULL, missing_cols)
-  #  )
-  #  Z1 <- cbind(Z1, zero_mat)
-  #
-
+  ## 7. make sure column order is correct
   Z1 <- Z1[, spec$colnames, drop = FALSE]
 
   ## 8. Convert to spam

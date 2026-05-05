@@ -80,50 +80,6 @@ constructFixed_train <- function(fix, data) {
 }
 
 
-check_new_levels <- function(data, xlevels) {
-
-  for (nm in names(xlevels)) {
-
-    if (nm %in% names(data)) {
-
-      vals <- data[[nm]]
-
-      # skip entirely if all NA
-      if (all(is.na(vals))) next
-
-      # drop NA values before checking
-      vals <- vals[!is.na(vals)]
-
-      # only check if something remains
-      if (length(vals) == 0) next
-
-      new_levels <- setdiff(unique(as.character(vals)), xlevels[[nm]])
-
-      if (length(new_levels) > 0) {
-        stop(sprintf("New levels in '%s': %s",
-                     nm, paste(new_levels, collapse = ", ")),
-             call. = FALSE)
-      }
-    }
-  }
-}
-
-check_required_vars <- function(mt, data) {
-
-  vars_needed <- all.vars(mt)
-  vars_data   <- names(data)
-
-  missing_vars <- setdiff(vars_needed, vars_data)
-
-  if (length(missing_vars) > 0) {
-    stop(
-      sprintf("Variables missing in 'newdata': %s",
-              paste(missing_vars, collapse = ", ")),
-      call. = FALSE
-    )
-  }
-}
-
 constructFixed_pred <- function(spec, data) {
   mt <- spec$terms
 
