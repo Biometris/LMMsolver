@@ -101,8 +101,7 @@
 #' @seealso \code{\link{LMMsolveObject}}, \code{\link{spl1D}},
 #' \code{\link{spl2D}}, \code{\link{spl3D}}
 #'
-#' @importFrom stats model.frame terms model.matrix contrasts as.formula
-#' terms.formula aggregate model.response var formula gaussian
+#' @importFrom stats model.frame terms model.matrix contrasts as.formula terms.formula aggregate model.response var formula gaussian
 #'
 #' @export
 LMMsolve <- function(fixed,
