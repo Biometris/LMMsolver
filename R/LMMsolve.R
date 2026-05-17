@@ -276,7 +276,7 @@ LMMsolve <- function(fixed,
       X <- cbind(X, splRes$X)
       ## Check whether adding the fixed part gives a singularity.
       if (qr(X)$rank < ncol(X)) {
-        stop("singularity problem ", splRes$term.labels.f, " in spline argument\n")
+        stop("fixed part of the model is not full rank.\n")
       }
       ## Add to design matrix random effect Z.
       Z <- spam::cbind.spam(Z, splRes$Z)

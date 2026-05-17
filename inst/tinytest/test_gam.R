@@ -25,7 +25,7 @@ expect_error(LMMsolve(fixed = yield ~ 1,
                       spline = ~spl1D(x = row, nseg = 36) +
                         spl2D(x1 = col, x2 = row, nseg = c(30, 36)),
                       data = dat),
-             "singularity problem lin(col, row) in spline argument", fixed = TRUE)
+             "fixed part of the model is not full rank.\n", fixed = TRUE)
 
 expect_error(LMMsolve(fixed = yield ~ 1,
                       spline = ~spl1D(x = row, nseg = 36) +

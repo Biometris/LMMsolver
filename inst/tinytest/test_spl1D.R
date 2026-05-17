@@ -9,7 +9,7 @@ expect_error(LMMsolve(fixed = yield ~ rep + gen, data = oats.data,
              "spline should be a formula of form")
 expect_error(LMMsolve(fixed = yield ~ plot, data = oats.data,
                       spline = ~ spl1D(x = plot, nseg = 10)),
-             "singularity problem lin(plot) in spline argument", fixed=TRUE)
+             "fixed part of the model is not full rank.\n")
 
 expect_error(LMMsolve(fixed = yield ~ rep + gen, data = oats.data,
                       spline = ~spl1D(x = plot, nseg = 10) +
