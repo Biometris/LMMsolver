@@ -129,6 +129,22 @@ expect_equivalent_to_reference(pred8, "pred8")
 pred9 <- predict(obj8, newdata = newdat8, deriv = "y")
 expect_equivalent_to_reference(pred9, "pred9")
 
+## tinytest for makeGrid() error handling using obj8:
+expect_error(
+  makeGrid(obj8, grid = "10"),
+  pattern = "grid should be a numeric vector"
+)
+
+expect_error(
+  makeGrid(obj8, grid = c(10)),
+  pattern = "Argument dim has the wrong length"
+)
+
+expect_error(
+  makeGrid(obj8, grid = c(10, 10, 10)),
+  pattern = "Argument dim has the wrong length"
+)
+
 obj9 <- LMMsolve(fixed = z ~ 1,
                  spline = ~spl1D(x = x, nseg = 20,xlim=c(-1,1)) +
                            spl1D(x = y, nseg = 20,xlim=c(-1,1)),
