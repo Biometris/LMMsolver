@@ -27,7 +27,7 @@ is returned using \code{\link[base]{expand.grid}}.
 }
 \examples{
 \dontrun{
-## Create a 50 x 50 grid for a two-dimensional spline term
+## Create a 200 x 300 grid for a two-dimensional spline term
 grd <- makeGrid(fit, grid = c(200, 300))
 
 head(grd)

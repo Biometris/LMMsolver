@@ -17,7 +17,7 @@
 #'
 #' @examples
 #' \dontrun{
-#' ## Create a 20 x 300 grid for a two-dimensional spline term
+#' ## Create a 200 x 300 grid for a two-dimensional spline term
 #' grd <- makeGrid(fit, grid = c(200, 300))
 #'
 #' head(grd)

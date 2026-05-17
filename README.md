@@ -77,10 +77,7 @@ The spatial trend for the precipitation can now be plotted on the map of
 the USA, using the `predict` function of `LMMsolver`:
 
 ``` r
-lon_range <- range(USprecip$lon)
-lat_range <- range(USprecip$lat)
-newdat <- expand.grid(lon = seq(lon_range[1], lon_range[2], length = 200),
-                      lat = seq(lat_range[1], lat_range[2], length = 300))
+newdat <- makeGrid(obj1, grid = c(200, 300))
 plotDat <- predict(obj1, newdata = newdat)
 
 plotDat <- sf::st_as_sf(plotDat, coords = c("lon", "lat"))
@@ -112,8 +109,7 @@ vignette("Solving_Linear_Mixed_Models")
 
 ## References
 
-<div id="refs" class="references csl-bib-body hanging-indent"
-entry-spacing="0">
+<div id="refs" class="references csl-bib-body hanging-indent">
 
 <div id="ref-boer2023" class="csl-entry">
 
