@@ -17,3 +17,5 @@ public
 ^doc$
 ^Meta$
 ^revdep$
+^\.positai$
+^\.claude$

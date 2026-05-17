@@ -28,7 +28,6 @@ Imports:
     spam,
     splines
 LinkingTo: Rcpp
-RoxygenNote: 7.3.3
 Suggests: 
     rmarkdown,
     knitr,
@@ -40,3 +39,4 @@ Suggests:
 VignetteBuilder: knitr
 URL: https://biometris.github.io/LMMsolver/index.html, https://github.com/Biometris/LMMsolver/
 BugReports: https://github.com/Biometris/LMMsolver/issues
+Config/roxygen2/version: 8.0.0
