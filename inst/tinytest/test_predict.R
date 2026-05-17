@@ -121,8 +121,7 @@ obj8 <- LMMsolve(fixed = z ~ 1,
                                 nseg = c(25, 25)),
                 data = dat)
 
-newdat8 <- expand.grid(x = seq(-1, 1, length = 10),
-                      y = seq(-1, 1, length = 10))
+newdat8 <- makeGrid(obj8, grid=c(10, 10))
 
 pred8 <- predict(obj8, newdata = newdat8, deriv = "x")
 expect_equivalent_to_reference(pred8, "pred8")

@@ -1,6 +1,7 @@
 # LMMsolver 1.0.13
 
--   Function `getHeritability()` added.  
+-   Function `getHeritability()` added. 
+-   Function `makeGrid()` added.
 -   Function  `as.ginverse()` added.
 -   Extension of `predict()` function to allow for interactions in fixed and random term.
 -   bug fixed for `predict()` if `pord==1` in splines model. 
