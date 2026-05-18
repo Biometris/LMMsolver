@@ -1,6 +1,25 @@
 # Changelog
 
+## LMMsolver 1.0.13
+
+- Function
+  [`getHeritability()`](https://biometris.github.io/LMMsolver/index.html/reference/getHeritability.md)
+  added.
+- Function
+  [`makeGrid()`](https://biometris.github.io/LMMsolver/index.html/reference/makeGrid.md)
+  added.
+- Function
+  [`as.ginverse()`](https://biometris.github.io/LMMsolver/index.html/reference/as.ginverse.md)
+  added.
+- Extension of [`predict()`](https://rdrr.io/r/stats/predict.html)
+  function to allow for interactions in fixed and random term.
+- bug fixed for [`predict()`](https://rdrr.io/r/stats/predict.html) if
+  `pord==1` in splines model.
+- improved stability of Harville algorithm to solve mixed model.
+
 ## LMMsolver 1.0.12
+
+CRAN release: 2025-12-05
 
 - First derivatives for `predict` using `deriv` argument now also
   implemented for `spl2D` and `spl3D`.

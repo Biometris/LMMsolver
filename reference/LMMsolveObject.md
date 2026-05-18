@@ -102,6 +102,14 @@ An object of class `LMMsolve` contains the following components:
 
   The names of the random terms in the mixed model
 
+- fix.spec:
+
+  Specification of fixed part of mixed model
+
+- ran.spec:
+
+  Specification of random part of mixed model
+
 - respVar:
 
   The name(s) of the response variable(s).

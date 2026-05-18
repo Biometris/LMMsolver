@@ -12,8 +12,8 @@
 <link rel="icon" sizes="any" href="favicon.ico">
 <link rel="manifest" href="site.webmanifest">
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="An R package for providing an efficient and flexible system to solve sparse mixed model equations">
 <meta name="description" content="Provides tools for fitting linear mixed models using sparse matrix methods and variance component estimation. Applications include spline-based modeling of spatial and temporal trends using penalized splines (Boer, 2023) &lt;doi:10.1177/1471082X231178591&gt;.">
@@ -28,7 +28,7 @@
 
     <a class="navbar-brand me-2" href="index.html">LMMsolver</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.12</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.13</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -112,10 +112,7 @@
 <span>                 data <span class="op">=</span> <span class="va">USprecip</span><span class="op">)</span></span></code></pre></div>
 <p>The spatial trend for the precipitation can now be plotted on the map of the USA, using the <code>predict</code> function of <code>LMMsolver</code>:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">lon_range</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">USprecip</span><span class="op">$</span><span class="va">lon</span><span class="op">)</span></span>
-<span><span class="va">lat_range</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">USprecip</span><span class="op">$</span><span class="va">lat</span><span class="op">)</span></span>
-<span><span class="va">newdat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html" class="external-link">expand.grid</a></span><span class="op">(</span>lon <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="va">lon_range</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="va">lon_range</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>, length <span class="op">=</span> <span class="fl">200</span><span class="op">)</span>,</span>
-<span>                      lat <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="va">lat_range</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="va">lat_range</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>, length <span class="op">=</span> <span class="fl">300</span><span class="op">)</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">newdat</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/makeGrid.html">makeGrid</a></span><span class="op">(</span><span class="va">obj1</span>, grid <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">200</span>, <span class="fl">300</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">plotDat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">obj1</span>, newdata <span class="op">=</span> <span class="va">newdat</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">plotDat</span> <span class="op">&lt;-</span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html" class="external-link">st_as_sf</a></span><span class="op">(</span><span class="va">plotDat</span>, coords <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"lon"</span>, <span class="st">"lat"</span><span class="op">)</span><span class="op">)</span></span>
@@ -143,7 +140,7 @@
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
-<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="refs" class="references csl-bib-body hanging-indent">
 <div id="ref-boer2023" class="csl-entry">
 Boer, Martin P. 2023. “Tensor Product P-Splines Using a Sparse Mixed Model Formulation.” <em>Statistical Modelling</em> 23 (5-6): 465–79. <a href="https://doi.org/10.1177/1471082X231178591" class="external-link uri">https://doi.org/10.1177/1471082X231178591</a>.
 </div>

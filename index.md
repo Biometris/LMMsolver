@@ -28,6 +28,7 @@ standard mixed model tools become slow or impractical.
 - Install from CRAN:
 
 ``` r
+
 install.packages("LMMsolver")
 ```
 
@@ -35,6 +36,7 @@ install.packages("LMMsolver")
   [remotes](https://github.com/r-lib/remotes) package):
 
 ``` r
+
 remotes::install_github("Biometris/LMMsolver", ref = "develop", dependencies = TRUE)
 ```
 
@@ -44,6 +46,7 @@ As an example of the functionality of the package we use the `USprecip`
 data set in the `spam` package (Furrer and Sain 2010).
 
 ``` r
+
 library(LMMsolver)
 library(ggplot2)
 
@@ -66,6 +69,7 @@ function, with longitude and latitude as covariates, and anomaly
 (standardized monthly total precipitation) as response variable:
 
 ``` r
+
 obj1 <- LMMsolve(fixed = anomaly ~ 1,
                  spline = ~spl2D(x1 = lon, x2 = lat, nseg = c(41, 41)),
                  data = USprecip)
@@ -75,10 +79,8 @@ The spatial trend for the precipitation can now be plotted on the map of
 the USA, using the `predict` function of `LMMsolver`:
 
 ``` r
-lon_range <- range(USprecip$lon)
-lat_range <- range(USprecip$lat)
-newdat <- expand.grid(lon = seq(lon_range[1], lon_range[2], length = 200),
-                      lat = seq(lat_range[1], lat_range[2], length = 300))
+
+newdat <- makeGrid(obj1, grid = c(200, 300))
 plotDat <- predict(obj1, newdata = newdat)
 
 plotDat <- sf::st_as_sf(plotDat, coords = c("lon", "lat"))
@@ -106,6 +108,7 @@ USA](reference/figures/README-Plot_USprecip-1.png)
 Further examples can be found in the vignette.
 
 ``` r
+
 vignette("Solving_Linear_Mixed_Models")
 ```
 

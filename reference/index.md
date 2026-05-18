@@ -37,6 +37,12 @@
   : Display the sparseness of the mixed model coefficient matrix
 - [`effDim()`](https://biometris.github.io/LMMsolver/index.html/reference/effDim.md)
   : Function to get the Effective Dimensions.
+- [`getHeritability()`](https://biometris.github.io/LMMsolver/index.html/reference/getHeritability.md)
+  : Generalized heritability of a random term
+- [`as.ginverse()`](https://biometris.github.io/LMMsolver/index.html/reference/as.ginverse.md)
+  : Construct a ginverse Object from Precision Matrices
+- [`makeGrid()`](https://biometris.github.io/LMMsolver/index.html/reference/makeGrid.md)
+  : Create a data frame for use in making predictions.
 
 ## Spline functions
 
