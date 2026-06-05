@@ -47,15 +47,18 @@ expandGinv <- function(lGinv1,
 
 #' Calculate scale factor for precision matrices.
 #'
-#' To make the penalty matrix more stable if there are many knots,
-#' a scaled version is used, \eqn{(1/dx)^(2pord-1) D'D}.
+#' To make the penalty matrix P more stable,
+#' a scaled version is used, \eqn{(nseg/20)^(2pord-1) D'D}, resulting in
+#' in scaling of 1 for nseg=20. If nseg is double (nseg=40) and pord=2, the scalings
+#' factor will be \eqn{2^3=8}, resulting in a similar value of regularization parameter
+#' lambda
 #'
 #' @noRd
 #' @keywords internal
 calcScaleFactor <- function(knots,
                             pord) {
-  dx <- sapply(X = knots, FUN = attr, which = "dx")
-  sc <- (1 / dx)^(2 * pord - 1)
+  nseg <- sapply(X = knots, FUN = attr, which = "nseg")
+  sc <- (nseg/20)^(2 * pord - 1)
   sc <- ifelse(sc < 1e-10, 1e-10, sc)
 
   # no scaling for cyclic

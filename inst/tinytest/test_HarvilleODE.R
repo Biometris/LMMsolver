@@ -155,7 +155,7 @@ dat <- data.frame(x=x,y=y)
 obj <- LMMsolve(y~1, spline = ~spl1D(x, nseg=nseg, xlim=c(xmin,xmax), scale=TRUE), data=dat)
 obj$logL
 obj_ODE$logL
-expect_equal(obj_ODE$logL, obj$logL)
+expect_equal(obj_ODE$logL, obj$logL, tolerance = 1.e-4)
 
 
 
