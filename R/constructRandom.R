@@ -46,7 +46,7 @@ build_random_Z1_train <- function(random, data) {
   if (!is.null(Z1)) {
     spec <- list(
       terms        = mt,
-      xlevels      = .getXlevels(mt, mf),
+      xlevels      = stats::.getXlevels(mt, mf),
       contrasts    = contrasts.arg,
       colnames     = colnames_Z1,
       dim.r        = dim.r,
@@ -157,7 +157,7 @@ build_random_Z1_pred <- function(spec, data) {
     data,
     xlev = spec$xlevels,
     drop.unused.levels = FALSE,
-    na.action = na.pass
+    na.action = stats::na.pass
   )
 
   ## 4. Construct design matrix
