@@ -66,7 +66,7 @@ constructFixed_train <- function(fix, data) {
   spec <- list(
     fix            = fix,
     terms          = mt,
-    xlevels        = .getXlevels(mt, mf),
+    xlevels        = stats::.getXlevels(mt, mf),
     contrasts      = contrasts.arg,
     colnames       = colnames(X),
 
