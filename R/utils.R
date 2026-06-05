@@ -783,13 +783,3 @@ cDiff <- function(q) {
   D[, q] <- D[, q] + D2[, 1]
   D
 }
-
-# cBsplines <- function(knots, x) {
-#   bdegr <- attr(knots, which="degree")
-#   B0 <- Bsplines(knots, x)
-#   nseg <- ncol(B0) - bdegr
-#   cc <- (1:bdegr) + nseg
-#   B <- B0[, 1:nseg, drop = FALSE]
-#   B[, 1:bdegr] <- B[, 1:bdegr] + B0[, cc]
-#   B
-# }
