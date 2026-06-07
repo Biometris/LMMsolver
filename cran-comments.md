@@ -1,12 +1,12 @@
 ## Major release
 
-Extended functionality for existing functions and improved code coverage.
+Added new functions and some bug fixes for edge cases.
 
 ----
 
 ## Test environments
 
-* local Windows 11 install, R 4.5.2
+* local Windows 11 install, R 4.6.0
 * winbuilder (develop)
 * Ubuntu (on github actions, devel and release)
 * macOS (on github actions, release)

@@ -1,5 +1,5 @@
+#' @importFrom stats .getXlevels
 build_random_Z1_train <- function(random, data) {
-
   if (is.null(random)) {
     return(list(Z = NULL, spec = NULL))
   }
@@ -138,7 +138,7 @@ constructRandom <- function(random, group, condFactor, data) {
   return(L)
 }
 
-
+#' @importFrom stats na.pass
 build_random_Z1_pred <- function(spec, data) {
 
   if (is.null(spec)) return(NULL)
