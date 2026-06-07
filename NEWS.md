@@ -1,3 +1,8 @@
+# LMMsolver 1.0.13.9000
+
+-   Improved scaling of penalty for splines, keeping `lambda` in numerical stable range.
+
+
 # LMMsolver 1.0.13
 
 -   Function `getHeritability()` added. 
