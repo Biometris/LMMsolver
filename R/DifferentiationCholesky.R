@@ -8,7 +8,8 @@ setClass("ADchol",
                    invpivot = "numeric",
                    entries = "numeric",
                    ADentries  = "numeric",
-                   P = "matrix"))
+                   P = "ANY",
+                   mode = "character"))
 
 
 #' construct object for Automated Differentiation Cholesky decomposition
@@ -55,6 +56,7 @@ ADchol <- function(lP) {
       invpivot = L$invpivot,
       entries = L$entries,
       ADentries = L$ADentries,
-      P = L$P)
+      P = L$P,
+      mode = "linear")
 }
 
