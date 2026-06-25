@@ -29,6 +29,48 @@
 using namespace Rcpp;
 using namespace std;
 
+// Convert a sparse matrix from spam format to the internal supernodal
+// entry ordering used by the AD-Cholesky routines. The sparsity pattern
+// is assumed to be identical to the symbolic factorization.
+NumericVector convertSparseMatrix(const Rcpp::S4& spam_matrix,
+                                  const IntegerVector& supernodes,
+                                  const IntegerVector& rowpointers,
+                                  const IntegerVector& colpointers,
+                                  const IntegerVector& rowindices)
+{
+  const int Nsupernodes = supernodes.size() - 1;
+  const int N = colpointers.size() - 1;
+  const int size = colpointers[N];
+
+  IntegerVector rowpointers_P = GetIntVector(spam_matrix, "rowpointers", 0);
+  IntegerVector colindices_P  = GetIntVector(spam_matrix, "colindices", 0);
+  NumericVector entries_P     = spam_matrix.slot("entries");
+
+  NumericVector result(size, 0.0);
+  for (int J=0; J<Nsupernodes;J++)
+  {
+    for (int j=supernodes[J]; j<supernodes[J+1]; j++)
+    {
+      int k = rowpointers[J+1]-1;   // start at end/bottom
+      int ndx = colpointers[j+1]-1; // start at end/bottom
+      for (int ll=rowpointers_P[j+1]-1;ll>=rowpointers_P[j];ll--)
+      {
+        int c = colindices_P[ll];
+        if (c < j) break;
+        while( rowindices[k] != c)
+        {
+          k--;
+          ndx--;
+        }
+        result[ndx] = entries_P[ll];
+        if (c == j) break;
+      }
+    }
+  }
+  return result;
+}
+
+
 // U is a cholesky matrix
 // ZtZ is crossproduct design matrix Z
 // P is a precision matrix.
@@ -51,44 +93,20 @@ List construct_ADchol_Rcpp(Rcpp::S4 obj_spam,
   NumericVector entries = Rcpp::clone<Rcpp::NumericVector>(obj_spam.slot("entries"));
   NumericVector ADentries = Rcpp::clone<Rcpp::NumericVector>(obj_spam.slot("entries"));
 
-  const int Nsupernodes = supernodes.size()-1;
+  //const int Nsupernodes = supernodes.size()-1;
   const int N = colpointers.size() - 1;
   const int size = colpointers[N];
   const int n_prec_matrices = P_list.size();
   NumericMatrix P_matrix(size, n_prec_matrices);
-  for (int i=0;i<n_prec_matrices;i++)
+
+  for(int i=0;i<n_prec_matrices;i++)
   {
-    Rcpp::S4 obj(P_list[i]);
-    IntegerVector rowpointers_P = GetIntVector(obj, "rowpointers", 0);
-    IntegerVector colindices_P  = GetIntVector(obj, "colindices", 0);
-    NumericVector entries_P     = obj.slot("entries");
-
-    vector<double> result(size, 0.0);
-    for (int J=0; J<Nsupernodes;J++)
-    {
-      for (int j=supernodes[J]; j<supernodes[J+1]; j++)
-      {
-        int k = rowpointers[J+1]-1;   // start at end/bottom
-        int ndx = colpointers[j+1]-1; // start at end/bottom
-        for (int ll=rowpointers_P[j+1]-1;ll>=rowpointers_P[j];ll--)
-        {
-          int c = colindices_P[ll];
-          if (c < j) break;
-          while( rowindices[k] != c)
-          {
-            k--;
-            ndx--;
-          }
-          result[ndx] = entries_P[ll];
-          if (c == j) break;
-        }
-      }
-    }
-
-    for (int j=0;j<size;j++)
-    {
-      P_matrix(j,i) = result[j];
-    }
+    Rcpp::S4 spam_matrix(P_list[i]);
+    P_matrix(_ , i) = convertSparseMatrix(spam_matrix,
+                                        supernodes,
+                                        rowpointers,
+                                        colpointers,
+                                        rowindices);
   }
 
   List L;
