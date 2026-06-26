@@ -13,6 +13,21 @@ setClass("ADchol",
                    mode = "character"))
 
 
+# Reorder a spam matrix according to the Cholesky pivot.
+#
+# The permutation is applied to both rows and columns. The implementation
+# uses two row permutations (via transpose) because these are much faster
+# than a direct column permutation for spam matrices.
+#
+# @keywords internal
+reorderSpam <- function(x, permutation)
+{
+  z <- x[permutation, ]
+  z <- spam::t(z)
+  z <- z[permutation, ]
+  spam::t(z)
+}
+
 #' construct object for Automated Differentiation Cholesky decomposition
 #'
 #' Construct object for reverse Automated Differentiation of Cholesky decomposition,
@@ -42,11 +57,7 @@ ADchol <- function(lP) {
                                  nnzcolindices = 4 * opt$nnz))
   # reorder the matrices in list lP by double transpose, row-permutations are much faster
   # than column permutations (see help permutation() function in spam library)
-  lQ <- lapply(lP, function(x) {
-    z <- x[cholC@pivot,]
-    tz <- spam::t(z)
-    tz <- tz[cholC@pivot,]
-    return(spam::t(tz)) })
+  lQ <- lapply(lP, reorderSpam, permutation = cholC@pivot)
   L <- construct_ADchol_Rcpp(cholC, lQ)
   new("ADchol",
       supernodes = L$supernodes,
