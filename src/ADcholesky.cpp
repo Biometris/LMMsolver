@@ -274,6 +274,49 @@ void initAD(NumericVector& F, const NumericVector& L, const IntegerVector& colpo
   }
 }
 
+void fillLinearEntries(
+    NumericVector& L,
+    const NumericMatrix& P,
+    const NumericVector& theta)
+{
+  const int sz = P.nrow();
+  const int n_prec_mat = P.ncol();
+
+  std::fill(L.begin(), L.end(), 0.0);
+
+  for(int k=0; k<n_prec_mat; k++)
+  {
+    const NumericMatrix::ConstColumn Pk = P(_, k);
+    const double alpha = theta[k];
+
+    for(int i=0; i<sz; i++)
+      L[i] += alpha * Pk[i];
+  }
+}
+
+NumericVector linearGradient(
+    const NumericVector& F,
+    const NumericMatrix& P)
+{
+  const int p = P.ncol();
+
+  NumericVector gradient(p);
+
+  for(int k=0; k<p; k++)
+  {
+    const NumericMatrix::ConstColumn Pk = P(_,k);
+
+    gradient[k] =
+      std::inner_product(F.begin(),
+                         F.end(),
+                         Pk.begin(),
+                         0.0);
+  }
+
+  return gradient;
+}
+
+
 //' Calculate the partial derivatives of log-determinant.
 //'
 //' This function calculates the partial derivatives of the the log-determinant in an
@@ -310,40 +353,23 @@ NumericVector dlogdet(Rcpp::S4 obj, NumericVector theta,
   NumericVector F = obj.slot("ADentries");
   NumericMatrix P = obj.slot("P");
 
-  // define matrix L (lower triangle matrix values)
-  const int sz = P.nrow();
-
   const int n_prec_mat = P.ncol();
 
   if (n_prec_mat != theta.size()) {
     stop("wrong length vector theta ");
   }
 
-  std::fill(L.begin(), L.end(), 0.0);
   std::fill(F.begin(), F.end(), 0.0);
 
-  for (int k=0;k<n_prec_mat;k++)
-  {
-    NumericMatrix::Column Pk = P(_, k);
-    double alpha = theta[k];
-    for (int i=0;i<sz;i++)
-    {
-      L[i] += alpha*Pk[i];
-    }
-  }
+  fillLinearEntries(L, P, theta);
+
   cholesky(L, supernodes, rowpointers, colpointers, rowindices);
   double logDet = logdet(L, colpointers);
 
-  //NumericVector F(sz, 0.0);
   initAD(F, L, colpointers);
   ADcholesky(F, L, supernodes, rowpointers, colpointers, rowindices);
 
-  NumericVector gradient(n_prec_mat);
-  for (int k=0;k<n_prec_mat;k++)
-  {
-    NumericMatrix::Column Pk = P(_, k);
-    gradient[k] = std::inner_product(F.begin(), F.end(), Pk.begin(), 0.0);
-  }
+  NumericVector gradient = linearGradient(F,P);
 
   // correction, to make sure inner product
   // between theta and gradient equal to N:
