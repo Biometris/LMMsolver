@@ -335,6 +335,29 @@ void normalizeLinearGradient(
   }
 }
 
+void addAttributes_dlogdet(NumericVector& gradient,
+                      Nullable<NumericVector> b_,
+                      Rcpp::S4 obj,
+                      const NumericVector& L,
+                      const IntegerVector& supernodes,
+                      const IntegerVector& rowpointers,
+                      const IntegerVector& colpointers,
+                      const IntegerVector& rowindices)
+{
+  gradient.attr("logdet") = logdet(L, colpointers);
+
+  if (b_.isNotNull()) {
+    NumericVector b(b_);  // casting to underlying type NumericVector
+    IntegerVector pivot = obj.slot("pivot");
+    IntegerVector invpivot = obj.slot("invpivot");
+
+    NumericVector z= forwardCholesky(L, b, supernodes, rowpointers,
+                                   colpointers, rowindices, pivot, invpivot);
+    NumericVector x = backwardCholesky(L, z, supernodes, rowpointers,
+                                     colpointers, rowindices, pivot, invpivot);
+    gradient.attr("x.coef") = x;
+  }
+}
 
 
 
@@ -390,19 +413,11 @@ NumericVector dlogdet(Rcpp::S4 obj, NumericVector theta,
   NumericVector gradient = linearGradient(F,P);
   normalizeLinearGradient(gradient, theta, N);
 
-  gradient.attr("logdet") = logdet(L, colpointers);
+  addAttributes_dlogdet(gradient, b_, obj, L, supernodes,
+                                              rowpointers,
+                                              colpointers,
+                                              rowindices);
 
-  if (b_.isNotNull()) {
-    NumericVector b(b_);        // casting to underlying type NumericVector
-    IntegerVector pivot = obj.slot("pivot");
-    IntegerVector invpivot = obj.slot("invpivot");
-
-    NumericVector z= forwardCholesky(L, b, supernodes, rowpointers,
-                             colpointers, rowindices, pivot, invpivot);
-    NumericVector x = backwardCholesky(L, z, supernodes, rowpointers,
-                     colpointers, rowindices, pivot, invpivot);
-    gradient.attr("x.coef") = x;
-  }
   return gradient;
 }
 
