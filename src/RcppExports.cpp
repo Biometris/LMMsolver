@@ -22,16 +22,16 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// dlogdet_cpp
-NumericVector dlogdet_cpp(Rcpp::S4 obj, NumericVector theta, Nullable<NumericVector> b_);
-RcppExport SEXP _LMMsolver_dlogdet_cpp(SEXP objSEXP, SEXP thetaSEXP, SEXP b_SEXP) {
+// dlogdet_cpp_linear
+NumericVector dlogdet_cpp_linear(Rcpp::S4 obj, NumericVector theta, Nullable<NumericVector> b_);
+RcppExport SEXP _LMMsolver_dlogdet_cpp_linear(SEXP objSEXP, SEXP thetaSEXP, SEXP b_SEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Rcpp::S4 >::type obj(objSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type theta(thetaSEXP);
     Rcpp::traits::input_parameter< Nullable<NumericVector> >::type b_(b_SEXP);
-    rcpp_result_gen = Rcpp::wrap(dlogdet_cpp(obj, theta, b_));
+    rcpp_result_gen = Rcpp::wrap(dlogdet_cpp_linear(obj, theta, b_));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -87,7 +87,7 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_LMMsolver_construct_ADchol_Rcpp", (DL_FUNC) &_LMMsolver_construct_ADchol_Rcpp, 2},
-    {"_LMMsolver_dlogdet_cpp", (DL_FUNC) &_LMMsolver_dlogdet_cpp, 3},
+    {"_LMMsolver_dlogdet_cpp_linear", (DL_FUNC) &_LMMsolver_dlogdet_cpp_linear, 3},
     {"_LMMsolver_diagXCinvXt", (DL_FUNC) &_LMMsolver_diagXCinvXt, 2},
     {"_LMMsolver_GetIntVector", (DL_FUNC) &_LMMsolver_GetIntVector, 3},
     {"_LMMsolver_RowKron", (DL_FUNC) &_LMMsolver_RowKron, 2},

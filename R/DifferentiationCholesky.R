@@ -65,7 +65,7 @@ ADchol <- function(lP) {
 dlogdet <- function(obj, theta, b = NULL)
 {
   if (obj@mode == "linear") {
-    return(dlogdet_cpp(obj, theta, b))
+    return(dlogdet_cpp_linear(obj, theta, b))
   }
 
   stop("mode not yet implemented")

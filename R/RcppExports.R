@@ -29,8 +29,8 @@ construct_ADchol_Rcpp <- function(obj_spam, P_list) {
 #' @noRd
 #' @keywords internal
 #'
-dlogdet_cpp <- function(obj, theta, b_ = NULL) {
-    .Call(`_LMMsolver_dlogdet_cpp`, obj, theta, b_)
+dlogdet_cpp_linear <- function(obj, theta, b_ = NULL) {
+    .Call(`_LMMsolver_dlogdet_cpp_linear`, obj, theta, b_)
 }
 
 diagXCinvXt <- function(obj, transposeX) {
