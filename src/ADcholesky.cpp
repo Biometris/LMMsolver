@@ -266,6 +266,7 @@ void ADcholesky(NumericVector& F,
 
 void initAD(NumericVector& F, const NumericVector& L, const IntegerVector& colpointers)
 {
+  std::fill(F.begin(), F.end(), 0.0);
   const int N = colpointers.size() - 1;
   for (int k=0;k<N;k++)
   {
@@ -316,6 +317,27 @@ NumericVector linearGradient(
   return gradient;
 }
 
+void normalizeLinearGradient(
+    NumericVector& gradient,
+    const NumericVector& theta,
+    int N) {
+  // correction, to make sure inner product
+  // between theta and gradient equal to N:
+  double sum = 0.0;
+  int sz = gradient.size();
+  for (int i=0;i<sz;i++)
+  {
+    sum += theta[i]*gradient[i];
+  }
+  for (int i=0;i<sz;i++)
+  {
+    gradient[i] *= N/sum;
+  }
+}
+
+
+
+
 
 //' Calculate the partial derivatives of log-determinant.
 //'
@@ -354,37 +376,21 @@ NumericVector dlogdet(Rcpp::S4 obj, NumericVector theta,
   NumericMatrix P = obj.slot("P");
 
   const int n_prec_mat = P.ncol();
+  const int N = colpointers.size()-1;
 
   if (n_prec_mat != theta.size()) {
     stop("wrong length vector theta ");
   }
 
-  std::fill(F.begin(), F.end(), 0.0);
-
   fillLinearEntries(L, P, theta);
-
   cholesky(L, supernodes, rowpointers, colpointers, rowindices);
-  double logDet = logdet(L, colpointers);
-
   initAD(F, L, colpointers);
   ADcholesky(F, L, supernodes, rowpointers, colpointers, rowindices);
 
   NumericVector gradient = linearGradient(F,P);
+  normalizeLinearGradient(gradient, theta, N);
 
-  // correction, to make sure inner product
-  // between theta and gradient equal to N:
-  double sum = 0.0;
-  const int N = colpointers.size()-1;
-  for (int i=0;i<n_prec_mat;i++)
-  {
-    sum += theta[i]*gradient[i];
-  }
-  for (int i=0;i<n_prec_mat;i++)
-  {
-    gradient[i] *= N/sum;
-  }
-
-  gradient.attr("logdet") = logDet;
+  gradient.attr("logdet") = logdet(L, colpointers);
 
   if (b_.isNotNull()) {
     NumericVector b(b_);        // casting to underlying type NumericVector
