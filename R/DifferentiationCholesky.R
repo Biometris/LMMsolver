@@ -9,6 +9,7 @@ setClass("ADchol",
                    entries = "numeric",
                    ADentries  = "numeric",
                    P = "ANY",
+                   user_def = "ANY",
                    mode = "character"))
 
 
@@ -57,6 +58,18 @@ ADchol <- function(lP) {
       entries = L$entries,
       ADentries = L$ADentries,
       P = L$P,
-      mode = "linear")
+      mode = "linear",
+      user_def = function(theta) NULL)
 }
+
+dlogdet <- function(obj, theta, b = NULL)
+{
+  if (obj@mode == "linear") {
+    return(dlogdet_cpp(obj, theta, b))
+  }
+
+  stop("mode not yet implemented")
+}
+
+
 

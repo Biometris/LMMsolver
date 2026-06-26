@@ -387,7 +387,7 @@ void addAttributes_dlogdet(NumericVector& gradient,
 //' @keywords internal
 //'
 // [[Rcpp::export]]
-NumericVector dlogdet(Rcpp::S4 obj, NumericVector theta,
+NumericVector dlogdet_cpp(Rcpp::S4 obj, NumericVector theta,
                       Nullable<NumericVector> b_ = R_NilValue)
 {
   IntegerVector supernodes = obj.slot("supernodes");
