@@ -295,22 +295,23 @@ void fillLinearEntries(
   }
 }
 
-NumericVector linearGradient(
+
+NumericVector computeGradient(
     const NumericVector& F,
-    const NumericMatrix& P)
+    const NumericMatrix& derivatives)
 {
-  const int p = P.ncol();
+  const int p = derivatives.ncol();
 
   NumericVector gradient(p);
 
   for(int k=0; k<p; k++)
   {
-    const NumericMatrix::ConstColumn Pk = P(_,k);
+    const NumericMatrix::ConstColumn deriv_k = derivatives(_,k);
 
     gradient[k] =
       std::inner_product(F.begin(),
                          F.end(),
-                         Pk.begin(),
+                         deriv_k.begin(),
                          0.0);
   }
 
@@ -410,7 +411,7 @@ NumericVector dlogdet_cpp(Rcpp::S4 obj, NumericVector theta,
   initAD(F, L, colpointers);
   ADcholesky(F, L, supernodes, rowpointers, colpointers, rowindices);
 
-  NumericVector gradient = linearGradient(F,P);
+  NumericVector gradient = computeGradient(F,P);
   normalizeLinearGradient(gradient, theta, N);
 
   addAttributes_dlogdet(gradient, b_, obj, L, supernodes,
