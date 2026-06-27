@@ -35,6 +35,20 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// dlogdet_cpp_general
+NumericVector dlogdet_cpp_general(Rcpp::S4 obj, NumericVector entries, NumericMatrix dC, Nullable<NumericVector> b_);
+RcppExport SEXP _LMMsolver_dlogdet_cpp_general(SEXP objSEXP, SEXP entriesSEXP, SEXP dCSEXP, SEXP b_SEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::S4 >::type obj(objSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type entries(entriesSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type dC(dCSEXP);
+    Rcpp::traits::input_parameter< Nullable<NumericVector> >::type b_(b_SEXP);
+    rcpp_result_gen = Rcpp::wrap(dlogdet_cpp_general(obj, entries, dC, b_));
+    return rcpp_result_gen;
+END_RCPP
+}
 // diagXCinvXt
 NumericVector diagXCinvXt(Rcpp::S4 obj, Rcpp::S4 transposeX);
 RcppExport SEXP _LMMsolver_diagXCinvXt(SEXP objSEXP, SEXP transposeXSEXP) {
@@ -88,6 +102,7 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_LMMsolver_construct_ADchol_Rcpp", (DL_FUNC) &_LMMsolver_construct_ADchol_Rcpp, 2},
     {"_LMMsolver_dlogdet_cpp_linear", (DL_FUNC) &_LMMsolver_dlogdet_cpp_linear, 3},
+    {"_LMMsolver_dlogdet_cpp_general", (DL_FUNC) &_LMMsolver_dlogdet_cpp_general, 4},
     {"_LMMsolver_diagXCinvXt", (DL_FUNC) &_LMMsolver_diagXCinvXt, 2},
     {"_LMMsolver_GetIntVector", (DL_FUNC) &_LMMsolver_GetIntVector, 3},
     {"_LMMsolver_RowKron", (DL_FUNC) &_LMMsolver_RowKron, 2},

@@ -422,6 +422,43 @@ NumericVector dlogdet_cpp_linear(Rcpp::S4 obj, NumericVector theta,
   return gradient;
 }
 
+//' @noRd
+//' @keywords internal
+//'
+// [[Rcpp::export]]
+NumericVector dlogdet_cpp_general(
+    Rcpp::S4 obj,
+    NumericVector entries,
+    NumericMatrix dC,
+    Nullable<NumericVector> b_ = R_NilValue)
+{
+  IntegerVector supernodes = obj.slot("supernodes");
+  IntegerVector rowpointers = obj.slot("rowpointers");
+  IntegerVector colpointers = obj.slot("colpointers");
+  IntegerVector rowindices = obj.slot("rowindices");
+
+  NumericVector L = obj.slot("entries");
+  NumericVector F = obj.slot("ADentries");
+
+  L = clone(entries);
+
+  cholesky(L, supernodes, rowpointers, colpointers, rowindices);
+
+  initAD(F, L, colpointers);
+
+  ADcholesky(F, L, supernodes, rowpointers,
+             colpointers, rowindices);
+
+  NumericVector gradient = computeGradient(F, dC);
+
+  addAttributes_dlogdet(gradient, b_, obj, L, supernodes,
+                        rowpointers,
+                        colpointers,
+                        rowindices);
+
+  return gradient;
+}
+
 void updateH(NumericVector& H, const SparseMatrix& tX, int i, int j, double alpha)
 {
   int s1 = tX.rowpointers[i];

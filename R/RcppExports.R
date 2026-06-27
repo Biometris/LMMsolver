@@ -33,6 +33,13 @@ dlogdet_cpp_linear <- function(obj, theta, b_ = NULL) {
     .Call(`_LMMsolver_dlogdet_cpp_linear`, obj, theta, b_)
 }
 
+#' @noRd
+#' @keywords internal
+#'
+dlogdet_cpp_general <- function(obj, entries, dC, b_ = NULL) {
+    .Call(`_LMMsolver_dlogdet_cpp_general`, obj, entries, dC, b_)
+}
+
 diagXCinvXt <- function(obj, transposeX) {
     .Call(`_LMMsolver_diagXCinvXt`, obj, transposeX)
 }

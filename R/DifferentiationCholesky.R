@@ -70,7 +70,31 @@ ADchol <- function(lP) {
       ADentries = L$ADentries,
       P = L$P,
       mode = "linear",
-      user_def = function(theta) NULL)
+      user_def = NULL)
+}
+
+ADchol_nl <- function(user_def, theta0) {
+  model_eval <- user_def(theta0)
+  ## TODO:
+  ## Replace C by the structural union of C and all dC matrices.
+  C <- model_eval$C
+  opt <- summary(C)
+  cholC <- chol(C, memory = list(nnzR = 8 * opt$nnz,
+                                 nnzcolindices = 4 * opt$nnz))
+  lQ <- lapply(model_eval$dC, reorderSpam, permutation = cholC@pivot)
+  L <- construct_ADchol_Rcpp(cholC, lQ)
+  new("ADchol",
+      supernodes = L$supernodes,
+      rowpointers = L$rowpointers,
+      colpointers = L$colpointers,
+      rowindices = L$rowindices,
+      pivot = L$pivot,
+      invpivot = L$invpivot,
+      entries = L$entries,
+      ADentries = L$ADentries,
+      P = L$P,
+      mode = "nonlinear",
+      user_def = user_def)
 }
 
 dlogdet <- function(obj, theta, b = NULL)
@@ -79,8 +103,27 @@ dlogdet <- function(obj, theta, b = NULL)
     return(dlogdet_cpp_linear(obj, theta, b))
   }
 
-  stop("mode not yet implemented")
-}
+  if (obj@mode == "nonlinear") {
 
+    model_eval <- obj@user_def(theta)
+
+    ## reorder C and derivatives
+    C <- reorderSpam(model_eval$C, obj@pivot)
+    dC <- lapply(model_eval$dC,
+                 reorderSpam,
+                 permutation = obj@pivot)
+
+    ## convert to compact representation
+    entries <- convertSparseMatrix(C, obj)
+    derivatives <- convertSparseMatrices(dC, obj)
+
+    return(dlogdet_cpp_general(obj,
+                               entries,
+                               derivatives,
+                               b))
+  }
+
+  stop("Unknown ADchol mode.")
+}
 
 
