@@ -97,6 +97,14 @@ ADchol_nl <- function(user_def, theta0) {
       user_def = user_def)
 }
 
+convertSparseMatrices <- function(lX, obj)
+{
+  do.call(cbind,
+          lapply(lX,
+                 convertSparseMatrix_Rcpp,
+                 ADobj = obj))
+}
+
 dlogdet <- function(obj, theta, b = NULL)
 {
   if (obj@mode == "linear") {
@@ -113,13 +121,19 @@ dlogdet <- function(obj, theta, b = NULL)
                  reorderSpam,
                  permutation = obj@pivot)
 
+    prep <- prepareModel_Rcpp(obj, C, dC)
+
+    ##dlogdet_cpp_general(obj,
+    ##                    prep$entries,
+    ##                    prep$dC,
+    ##                    b)
     ## convert to compact representation
-    entries <- convertSparseMatrix(C, obj)
-    derivatives <- convertSparseMatrices(dC, obj)
+    #entries <- convertSparseMatrix_Rcpp(C, obj)
+    #derivatives <- convertSparseMatrices(dC, obj)
 
     return(dlogdet_cpp_general(obj,
-                               entries,
-                               derivatives,
+                               prep$entries,
+                               prep$dC,
                                b))
   }
 

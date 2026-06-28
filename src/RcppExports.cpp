@@ -10,6 +10,31 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// convertSparseMatrix_Rcpp
+NumericVector convertSparseMatrix_Rcpp(const Rcpp::S4& spam_matrix, const Rcpp::S4& ADobj);
+RcppExport SEXP _LMMsolver_convertSparseMatrix_Rcpp(SEXP spam_matrixSEXP, SEXP ADobjSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Rcpp::S4& >::type spam_matrix(spam_matrixSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::S4& >::type ADobj(ADobjSEXP);
+    rcpp_result_gen = Rcpp::wrap(convertSparseMatrix_Rcpp(spam_matrix, ADobj));
+    return rcpp_result_gen;
+END_RCPP
+}
+// prepareModel_Rcpp
+List prepareModel_Rcpp(Rcpp::S4 ADobj, Rcpp::S4 C, const List& dC);
+RcppExport SEXP _LMMsolver_prepareModel_Rcpp(SEXP ADobjSEXP, SEXP CSEXP, SEXP dCSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::S4 >::type ADobj(ADobjSEXP);
+    Rcpp::traits::input_parameter< Rcpp::S4 >::type C(CSEXP);
+    Rcpp::traits::input_parameter< const List& >::type dC(dCSEXP);
+    rcpp_result_gen = Rcpp::wrap(prepareModel_Rcpp(ADobj, C, dC));
+    return rcpp_result_gen;
+END_RCPP
+}
 // construct_ADchol_Rcpp
 List construct_ADchol_Rcpp(Rcpp::S4 obj_spam, const List& P_list);
 RcppExport SEXP _LMMsolver_construct_ADchol_Rcpp(SEXP obj_spamSEXP, SEXP P_listSEXP) {
@@ -100,6 +125,8 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_LMMsolver_convertSparseMatrix_Rcpp", (DL_FUNC) &_LMMsolver_convertSparseMatrix_Rcpp, 2},
+    {"_LMMsolver_prepareModel_Rcpp", (DL_FUNC) &_LMMsolver_prepareModel_Rcpp, 3},
     {"_LMMsolver_construct_ADchol_Rcpp", (DL_FUNC) &_LMMsolver_construct_ADchol_Rcpp, 2},
     {"_LMMsolver_dlogdet_cpp_linear", (DL_FUNC) &_LMMsolver_dlogdet_cpp_linear, 3},
     {"_LMMsolver_dlogdet_cpp_general", (DL_FUNC) &_LMMsolver_dlogdet_cpp_general, 4},
