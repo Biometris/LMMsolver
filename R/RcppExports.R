@@ -5,10 +5,6 @@ convertSparseMatrix_Rcpp <- function(spam_matrix, ADobj) {
     .Call(`_LMMsolver_convertSparseMatrix_Rcpp`, spam_matrix, ADobj)
 }
 
-prepareModel_Rcpp <- function(ADobj, C, dC) {
-    .Call(`_LMMsolver_prepareModel_Rcpp`, ADobj, C, dC)
-}
-
 construct_ADchol_Rcpp <- function(obj_spam, P_list) {
     .Call(`_LMMsolver_construct_ADchol_Rcpp`, obj_spam, P_list)
 }

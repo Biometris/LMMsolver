@@ -115,25 +115,22 @@ dlogdet <- function(obj, theta, b = NULL)
 
     model_eval <- obj@user_def(theta)
 
+    # use R-indexed pivot:
+    pivot_R <- obj@pivot + 1
     ## reorder C and derivatives
-    C <- reorderSpam(model_eval$C, obj@pivot)
+    C <- reorderSpam(model_eval$C, pivot_R)
     dC <- lapply(model_eval$dC,
                  reorderSpam,
-                 permutation = obj@pivot)
+                 permutation = pivot_R)
 
-    prep <- prepareModel_Rcpp(obj, C, dC)
+    entries <- convertSparseMatrix_Rcpp(C, obj)
+    derivatives <- convertSparseMatrices(dC, obj)
 
-    ##dlogdet_cpp_general(obj,
-    ##                    prep$entries,
-    ##                    prep$dC,
-    ##                    b)
-    ## convert to compact representation
-    #entries <- convertSparseMatrix_Rcpp(C, obj)
-    #derivatives <- convertSparseMatrices(dC, obj)
+    #stop("Need entries(C)")
 
     return(dlogdet_cpp_general(obj,
-                               prep$entries,
-                               prep$dC,
+                               entries,
+                               derivatives,
                                b))
   }
 

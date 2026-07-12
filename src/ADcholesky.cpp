@@ -62,6 +62,26 @@ NumericVector convertSparseMatrix(const Rcpp::S4& spam_matrix,
           k--;
           ndx--;
         }
+        if(k < 0)
+        {
+          Rcpp::Rcout << "\nPattern mismatch\n";
+          Rcpp::Rcout << "Column j = " << j
+                      << ", searching for row c = " << c << "\n";
+
+          Rcpp::Rcout << "\nspam column rows: ";
+          for(int ll = rowpointers_P[j]; ll < rowpointers_P[j+1]; ll++)
+            Rcpp::Rcout << colindices_P[ll] << " ";
+
+          Rcpp::Rcout << "\n";
+
+          Rcpp::Rcout << "AD column rows:   ";
+          for(int kk = colpointers[j]; kk < colpointers[j+1]; kk++)
+            Rcpp::Rcout << rowindices[kk] << " ";
+
+          Rcpp::Rcout << "\n";
+
+          Rcpp::stop("Pattern mismatch");
+        }
         result[ndx] = entries_P[ll];
         if (c == j) break;
       }
@@ -81,50 +101,6 @@ NumericVector convertSparseMatrix_Rcpp(const Rcpp::S4& spam_matrix,
     ADobj.slot("rowpointers"),
     ADobj.slot("colpointers"),
     ADobj.slot("rowindices"));
-}
-
-// Prepare the current model evaluation for dlogdet_cpp_general().
-// Converts C and its derivative matrices from spam format to the
-// compact supernodal ordering used by the AD-Cholesky routines.
-//
-// [[Rcpp::export]]
-List prepareModel_Rcpp(Rcpp::S4 ADobj,
-                       Rcpp::S4 C,
-                       const List& dC)
-{
-  IntegerVector supernodes  = ADobj.slot("supernodes");
-  IntegerVector rowpointers = ADobj.slot("rowpointers");
-  IntegerVector colpointers = ADobj.slot("colpointers");
-  IntegerVector rowindices  = ADobj.slot("rowindices");
-
-  const int size = colpointers[colpointers.size() - 1];
-  const int nDeriv = dC.size();
-
-  // Convert C
-  NumericVector entries =
-    convertSparseMatrix(C,
-                        supernodes,
-                        rowpointers,
-                        colpointers,
-                        rowindices);
-
-  // Convert derivative matrices
-  NumericMatrix derivatives(size, nDeriv);
-
-  for(int k = 0; k < nDeriv; k++)
-  {
-    derivatives(_, k) =
-      convertSparseMatrix(Rcpp::as<Rcpp::S4>(dC[k]),
-                          supernodes,
-                          rowpointers,
-                          colpointers,
-                          rowindices);
-  }
-
-  return List::create(
-    _["entries"] = entries,
-    _["dC"]      = derivatives
-  );
 }
 
 // U is a cholesky matrix
@@ -177,7 +153,6 @@ List construct_ADchol_Rcpp(Rcpp::S4 obj_spam,
   L["P"] = P_matrix;
   return L;
 }
-
 
 // j is current column in Supernode J
 void ADcmod1(NumericVector& F,
