@@ -4,7 +4,13 @@
 \alias{getHeritability}
 \title{Generalized heritability of a random term}
 \usage{
-getHeritability(obj, geno.term, type = c("scalar", "spectral"), tol = 1e-08)
+getHeritability(
+  obj,
+  geno.term,
+  type = c("scalar", "spectral"),
+  tol = 1e-08,
+  new_version = TRUE
+)
 }
 \arguments{
 \item{obj}{An object of class \code{"LMMsolve"}.}
