@@ -1,78 +1,3 @@
-## old version, just for compatison
-.spectralHeritability_old <- function(obj, geno.term, tol = 1e-8) {
-
-  ## --- indices ---------------------------------------------------------------
-  p <- ncol(obj$X)
-
-  ndx_fix  <- seq_len(p)
-  ndx_rand <- unlist(obj$ndxCoefficients)
-  ndx_rand <- ndx_rand[ndx_rand > 0]
-
-  ndx_all  <- unique(c(ndx_fix, ndx_rand))
-  ndx_g    <- as.numeric(obj$ndxCoefficients[[geno.term]])
-  ndx_g    <- ndx_g[ndx_g > 0]
-  ndx_nuis <- setdiff(ndx_all, ndx_g)
-
-  ## --- genetic covariance ----------------------------------------------------
-  i <- which(obj$term.labels.r == geno.term)
-  sigma2_g <- 1 / obj$theta[i]
-
-  Ginv_all <- obj$lGinv[[geno.term]]
-  ndx_loc  <- ndx_g - p          # ONLY needed here
-  Ginv <- Ginv_all[ndx_loc, ndx_loc]
-  G <- sigma2_g * solve(Ginv)
-
-  ## --- absorb nuisance effects (Johnson & Thompson) ---------------------------
-  C <- obj$C
-  C_gg <- C[ndx_g, ndx_g]
-
-  C_nuis <- C[ndx_nuis, ndx_nuis]
-  C_ng   <- C[ndx_nuis, ndx_g]
-  C_gn   <- C[ndx_g, ndx_nuis]
-  C_gg_abs <- C_gg - C_gn %*% solve(C_nuis, C_ng)
-
-  ## --- spectral decomposition (genetic space only) ----------------------------
-  m <- ncol(G)
-
-  one <- rep(1, m)
-  dG <- solve(G, one)
-
-  PG <- diag(m) - tcrossprod(dG) / drop(t(dG) %*% dG)
-  eig_PG <- eigen(PG, symmetric = TRUE)
-  U <- eig_PG$vectors[, eig_PG$values > tol, drop = FALSE]
-
-  GZtPZG <- G - solve(C_gg_abs)
-
-  A <- t(U) %*% GZtPZG %*% U
-  B <- t(U) %*% G %*% U
-
-  eigB <- eigen(B, symmetric = TRUE)
-  B_inv_sqrt <- eigB$vectors %*%
-    diag(1 / sqrt(eigB$values)) %*%
-    t(eigB$vectors)
-
-  S <- B_inv_sqrt %*% A %*% B_inv_sqrt
-  eigS <- eigen(S, symmetric = TRUE)
-
-  lambda <- eigS$values
-  Q <- eigS$vectors
-
-  rho <- diag(t(Q) %*% B %*% Q)
-  w <- rho / sum(rho)
-
-  out <- data.frame(
-    component = seq_along(lambda),
-    lambda    = lambda,
-    w         = w,
-    h2_comp   = w * lambda
-  )
-
-  attr(out, "h2_G") <- sum(out$h2_comp)
-  out
-}
-
-
-
 ## Internal: spectral generalized heritability for a random term
 ## Returns full spectral decomposition with attribute "h2_G"
 .spectralHeritability <- function(obj, geno.term, tol = 1e-8) {
@@ -207,8 +132,7 @@
 getHeritability <- function(obj,
                             geno.term,
                             type = c("scalar", "spectral"),
-                            tol = 1e-8,
-                            new_version = TRUE)
+                            tol = 1e-8)
 {
 
   ## --- existing checks (unchanged, for tinytest compatibility) ----------------
@@ -234,10 +158,6 @@ getHeritability <- function(obj,
   ## --- new spectral implementation -------------------------------------------
   type <- match.arg(type)
 
-  if (!new_version) {
-    result <- .spectralHeritability_old(obj, geno.term, tol = tol)
-    return(result)
-  }
   L <- .spectralHeritability(obj, geno.term, tol = tol)
 
   if (type == "scalar") {
@@ -246,4 +166,77 @@ getHeritability <- function(obj,
     return(L)
   }
 }
+
+# ## old version, just for compatison
+# .spectralHeritability_old <- function(obj, geno.term, tol = 1e-8) {
+#
+#   ## --- indices ---------------------------------------------------------------
+#   p <- ncol(obj$X)
+#
+#   ndx_fix  <- seq_len(p)
+#   ndx_rand <- unlist(obj$ndxCoefficients)
+#   ndx_rand <- ndx_rand[ndx_rand > 0]
+#
+#   ndx_all  <- unique(c(ndx_fix, ndx_rand))
+#   ndx_g    <- as.numeric(obj$ndxCoefficients[[geno.term]])
+#   ndx_g    <- ndx_g[ndx_g > 0]
+#   ndx_nuis <- setdiff(ndx_all, ndx_g)
+#
+#   ## --- genetic covariance ----------------------------------------------------
+#   i <- which(obj$term.labels.r == geno.term)
+#   sigma2_g <- 1 / obj$theta[i]
+#
+#   Ginv_all <- obj$lGinv[[geno.term]]
+#   ndx_loc  <- ndx_g - p          # ONLY needed here
+#   Ginv <- Ginv_all[ndx_loc, ndx_loc]
+#   G <- sigma2_g * solve(Ginv)
+#
+#   ## --- absorb nuisance effects (Johnson & Thompson) ---------------------------
+#   C <- obj$C
+#   C_gg <- C[ndx_g, ndx_g]
+#
+#   C_nuis <- C[ndx_nuis, ndx_nuis]
+#   C_ng   <- C[ndx_nuis, ndx_g]
+#   C_gn   <- C[ndx_g, ndx_nuis]
+#   C_gg_abs <- C_gg - C_gn %*% solve(C_nuis, C_ng)
+#
+#   ## --- spectral decomposition (genetic space only) ----------------------------
+#   m <- ncol(G)
+#
+#   one <- rep(1, m)
+#   dG <- solve(G, one)
+#
+#   PG <- diag(m) - tcrossprod(dG) / drop(t(dG) %*% dG)
+#   eig_PG <- eigen(PG, symmetric = TRUE)
+#   U <- eig_PG$vectors[, eig_PG$values > tol, drop = FALSE]
+#
+#   GZtPZG <- G - solve(C_gg_abs)
+#
+#   A <- t(U) %*% GZtPZG %*% U
+#   B <- t(U) %*% G %*% U
+#
+#   eigB <- eigen(B, symmetric = TRUE)
+#   B_inv_sqrt <- eigB$vectors %*%
+#     diag(1 / sqrt(eigB$values)) %*%
+#     t(eigB$vectors)
+#
+#   S <- B_inv_sqrt %*% A %*% B_inv_sqrt
+#   eigS <- eigen(S, symmetric = TRUE)
+#
+#   lambda <- eigS$values
+#   Q <- eigS$vectors
+#
+#   rho <- diag(t(Q) %*% B %*% Q)
+#   w <- rho / sum(rho)
+#
+#   out <- data.frame(
+#     component = seq_along(lambda),
+#     lambda    = lambda,
+#     w         = w,
+#     h2_comp   = w * lambda
+#   )
+#
+#   attr(out, "h2_G") <- sum(out$h2_comp)
+#   out
+# }
 
