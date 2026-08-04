@@ -13,11 +13,11 @@ expect_equal(
   tol = 1e-3
 )
 
-df_spectral <- LMMsolver::getHeritability(obj, "gen", type="spectral")
+spectral <- LMMsolver::getHeritability(obj, "gen", type="spectral")
 
 ## --- basic functionality ---
 expect_equal(
-  sum(df_spectral$h2_comp),
+  spectral$h2_G,
   0.809,
   tol = 1e-3
 )
