@@ -135,7 +135,7 @@ dlogdet <- function(obj, theta, b = NULL)
   stop("Unknown ADchol mode.")
 }
 
-dlogdetGradient <- function(obj, C) {
+logdetGradient <- function(obj, C) {
   if (obj@mode == "nonlinear") {
     # use R-indexed pivot:
     pivot_R <- obj@pivot + 1
