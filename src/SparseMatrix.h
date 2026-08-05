@@ -8,11 +8,17 @@ using namespace std;
 
 class SparseMatrix {
 public:
+  SparseMatrix() {} // empty constructor
   SparseMatrix(Rcpp::S4 obj);
   NumericVector entries;
   IntegerVector colindices;
   IntegerVector rowpointers;
   IntegerVector dim;
 };
+
+SparseMatrix permuteSymmetric(
+    const SparseMatrix& A,
+    const IntegerVector& p);
+
 
 #endif

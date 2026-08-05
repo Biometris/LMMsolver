@@ -188,6 +188,104 @@ Rcpp::S4 MatrixProduct(Rcpp::S4 sA, Rcpp::S4 sB)
   return L;
 }
 
+SparseMatrix transpose(const SparseMatrix& A)
+{
+  const int nrow = A.dim[0];
+  const int ncol = A.dim[1];
+  const int nnz  = A.entries.size();
+
+  SparseMatrix AT;
+
+  AT.dim = IntegerVector::create(ncol, nrow);
+
+  AT.entries    = NumericVector(nnz);
+  AT.colindices = IntegerVector(nnz);
+  AT.rowpointers = IntegerVector(ncol + 1);
+
+  //
+  // Count entries per column
+  //
+  for(int k=0;k<nnz;k++)
+    AT.rowpointers[A.colindices[k]+1]++;
+
+  //
+  // Prefix sums
+  //
+  for(int i=0;i<ncol;i++)
+    AT.rowpointers[i+1] += AT.rowpointers[i];
+
+  //
+  // Working copy
+  //
+  IntegerVector next = clone(AT.rowpointers);
+
+  //
+  // Fill transpose
+  //
+  for(int i=0;i<nrow;i++)
+  {
+    for(int k=A.rowpointers[i];
+        k<A.rowpointers[i+1];
+        k++)
+    {
+      int j   = A.colindices[k];
+      int pos = next[j]++;
+
+      AT.entries[pos]    = A.entries[k];
+      AT.colindices[pos] = i;
+    }
+  }
+
+  return AT;
+}
+
+SparseMatrix permuteRows(
+    const SparseMatrix& A,
+    const IntegerVector& p)
+{
+  const int n = A.dim[0];
+  const int nnz = A.entries.size();
+
+  SparseMatrix B;
+
+  B.dim = clone(A.dim);
+
+  B.entries     = NumericVector(nnz);
+  B.colindices  = IntegerVector(nnz);
+  B.rowpointers = IntegerVector(n+1);
+
+  int pos = 0;
+
+  for(int i=0;i<n;i++)
+  {
+    B.rowpointers[i] = pos;
+
+    int oldrow = p[i];
+
+    for(int k=A.rowpointers[oldrow];
+        k<A.rowpointers[oldrow+1];
+        k++)
+    {
+      B.entries[pos]    = A.entries[k];
+      B.colindices[pos] = A.colindices[k];
+      pos++;
+    }
+  }
+
+  B.rowpointers[n] = pos;
+
+  return B;
+}
+
+SparseMatrix permuteSymmetric(
+    const SparseMatrix& A,
+    const IntegerVector& p)
+{
+  SparseMatrix B = permuteRows(A,p);
+  B = transpose(B);
+  B = permuteRows(B,p);
+  return transpose(B);
+}
 
 /*
  * Not used, only for diagnostics
