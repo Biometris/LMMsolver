@@ -73,11 +73,10 @@ ADchol <- function(lP) {
       user_def = NULL)
 }
 
-SparseCholesky <- function(user_def, theta0) {
+SparseCholesky <- function(C) {
   #model_eval <- user_def(theta0)
   ## TODO:
   ## Replace C by the structural union of C and all dC matrices.
-  C <- user_def(theta0)
   opt <- summary(C)
   cholC <- chol(C, memory = list(nnzR = 8 * opt$nnz,
                                  nnzcolindices = 4 * opt$nnz))
@@ -93,7 +92,7 @@ SparseCholesky <- function(user_def, theta0) {
       ADentries = L$ADentries,
       P = L$P,
       mode = "nonlinear",
-      user_def = user_def)
+      user_def = NULL)
 }
 
 convertSparseMatrices <- function(lX, obj)
@@ -136,9 +135,8 @@ dlogdet <- function(obj, theta, b = NULL)
   stop("Unknown ADchol mode.")
 }
 
-dlogdetGradient <- function(obj, theta) {
+dlogdetGradient <- function(obj, C) {
   if (obj@mode == "nonlinear") {
-    C <- obj@user_def(theta)
     # use R-indexed pivot:
     pivot_R <- obj@pivot + 1
     ## reorder C and derivatives
