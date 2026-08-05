@@ -9,6 +9,14 @@ construct_ADchol_Rcpp <- function(obj_spam, P_list) {
     .Call(`_LMMsolver_construct_ADchol_Rcpp`, obj_spam, P_list)
 }
 
+convert_ADchol_Rcpp <- function(obj_spam) {
+    .Call(`_LMMsolver_convert_ADchol_Rcpp`, obj_spam)
+}
+
+align <- function(ADobj, spam_matrix) {
+    .Call(`_LMMsolver_align`, ADobj, spam_matrix)
+}
+
 #' Calculate the partial derivatives of log-determinant.
 #'
 #' This function calculates the partial derivatives of the the log-determinant in an
@@ -42,6 +50,13 @@ dlogdet_cpp_linear <- function(obj, theta, b_ = NULL) {
 #'
 dlogdet_cpp_general <- function(obj, entries, dC, b_ = NULL) {
     .Call(`_LMMsolver_dlogdet_cpp_general`, obj, entries, dC, b_)
+}
+
+#' @noRd
+#' @keywords internal
+#'
+dlogdetVector_Rcpp <- function(obj, entries) {
+    .Call(`_LMMsolver_dlogdetVector_Rcpp`, obj, entries)
 }
 
 diagXCinvXt <- function(obj, transposeX) {

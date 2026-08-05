@@ -74,15 +74,14 @@ ADchol <- function(lP) {
 }
 
 ADchol_nl <- function(user_def, theta0) {
-  model_eval <- user_def(theta0)
+  #model_eval <- user_def(theta0)
   ## TODO:
   ## Replace C by the structural union of C and all dC matrices.
-  C <- model_eval$C
+  C <- user_def(theta0)
   opt <- summary(C)
   cholC <- chol(C, memory = list(nnzR = 8 * opt$nnz,
                                  nnzcolindices = 4 * opt$nnz))
-  lQ <- lapply(model_eval$dC, reorderSpam, permutation = cholC@pivot)
-  L <- construct_ADchol_Rcpp(cholC, lQ)
+  L <- convert_ADchol_Rcpp(cholC)
   new("ADchol",
       supernodes = L$supernodes,
       rowpointers = L$rowpointers,
@@ -137,4 +136,17 @@ dlogdet <- function(obj, theta, b = NULL)
   stop("Unknown ADchol mode.")
 }
 
+dlogdetVector <- function(obj, theta) {
+  if (obj@mode == "nonlinear") {
+    C <- obj@user_def(theta)
+    # use R-indexed pivot:
+    pivot_R <- obj@pivot + 1
+    ## reorder C and derivatives
+    C <- reorderSpam(C, pivot_R)
+
+    entries <- convertSparseMatrix_Rcpp(C, obj)
+    return(dlogdetVector_Rcpp(obj, entries))
+  }
+  stop("Not supporde ADchol mode")
+}
 

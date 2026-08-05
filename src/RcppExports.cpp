@@ -34,6 +34,29 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// convert_ADchol_Rcpp
+List convert_ADchol_Rcpp(Rcpp::S4 obj_spam);
+RcppExport SEXP _LMMsolver_convert_ADchol_Rcpp(SEXP obj_spamSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::S4 >::type obj_spam(obj_spamSEXP);
+    rcpp_result_gen = Rcpp::wrap(convert_ADchol_Rcpp(obj_spam));
+    return rcpp_result_gen;
+END_RCPP
+}
+// align
+NumericVector align(Rcpp::S4 ADobj, Rcpp::S4 spam_matrix);
+RcppExport SEXP _LMMsolver_align(SEXP ADobjSEXP, SEXP spam_matrixSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::S4 >::type ADobj(ADobjSEXP);
+    Rcpp::traits::input_parameter< Rcpp::S4 >::type spam_matrix(spam_matrixSEXP);
+    rcpp_result_gen = Rcpp::wrap(align(ADobj, spam_matrix));
+    return rcpp_result_gen;
+END_RCPP
+}
 // dlogdet_cpp_linear
 NumericVector dlogdet_cpp_linear(Rcpp::S4 obj, NumericVector theta, Nullable<NumericVector> b_);
 RcppExport SEXP _LMMsolver_dlogdet_cpp_linear(SEXP objSEXP, SEXP thetaSEXP, SEXP b_SEXP) {
@@ -58,6 +81,18 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< NumericMatrix >::type dC(dCSEXP);
     Rcpp::traits::input_parameter< Nullable<NumericVector> >::type b_(b_SEXP);
     rcpp_result_gen = Rcpp::wrap(dlogdet_cpp_general(obj, entries, dC, b_));
+    return rcpp_result_gen;
+END_RCPP
+}
+// dlogdetVector_Rcpp
+NumericVector dlogdetVector_Rcpp(Rcpp::S4 obj, const NumericVector& entries);
+RcppExport SEXP _LMMsolver_dlogdetVector_Rcpp(SEXP objSEXP, SEXP entriesSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::S4 >::type obj(objSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type entries(entriesSEXP);
+    rcpp_result_gen = Rcpp::wrap(dlogdetVector_Rcpp(obj, entries));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -114,8 +149,11 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_LMMsolver_convertSparseMatrix_Rcpp", (DL_FUNC) &_LMMsolver_convertSparseMatrix_Rcpp, 2},
     {"_LMMsolver_construct_ADchol_Rcpp", (DL_FUNC) &_LMMsolver_construct_ADchol_Rcpp, 2},
+    {"_LMMsolver_convert_ADchol_Rcpp", (DL_FUNC) &_LMMsolver_convert_ADchol_Rcpp, 1},
+    {"_LMMsolver_align", (DL_FUNC) &_LMMsolver_align, 2},
     {"_LMMsolver_dlogdet_cpp_linear", (DL_FUNC) &_LMMsolver_dlogdet_cpp_linear, 3},
     {"_LMMsolver_dlogdet_cpp_general", (DL_FUNC) &_LMMsolver_dlogdet_cpp_general, 4},
+    {"_LMMsolver_dlogdetVector_Rcpp", (DL_FUNC) &_LMMsolver_dlogdetVector_Rcpp, 2},
     {"_LMMsolver_diagXCinvXt", (DL_FUNC) &_LMMsolver_diagXCinvXt, 2},
     {"_LMMsolver_GetIntVector", (DL_FUNC) &_LMMsolver_GetIntVector, 3},
     {"_LMMsolver_RowKron", (DL_FUNC) &_LMMsolver_RowKron, 2},

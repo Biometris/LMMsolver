@@ -29,6 +29,69 @@
 using namespace Rcpp;
 using namespace std;
 
+// Convert a SparseMatrix to the internal AD-Cholesky ordering.
+NumericVector convertSparseMatrix(const SparseMatrix& A,
+                                  const IntegerVector& supernodes,
+                                  const IntegerVector& rowpointers,
+                                  const IntegerVector& colpointers,
+                                  const IntegerVector& rowindices)
+{
+  const int Nsupernodes = supernodes.size() - 1;
+  const int N = colpointers.size() - 1;
+  const int size = colpointers[N];
+
+  NumericVector result(size, 0.0);
+
+  for (int J = 0; J < Nsupernodes; J++)
+  {
+    for (int j = supernodes[J]; j < supernodes[J + 1]; j++)
+    {
+      int k   = rowpointers[J + 1] - 1;
+      int ndx = colpointers[j + 1] - 1;
+
+      for (int ll = A.rowpointers[j + 1] - 1; ll >= A.rowpointers[j]; ll--)
+      {
+        int c = A.colindices[ll];
+
+        if (c < j)
+          break;
+
+        while (rowindices[k] != c)
+        {
+          k--;
+          ndx--;
+        }
+
+        if (k < 0)
+        {
+          Rcpp::Rcout << "\nPattern mismatch\n";
+          Rcpp::Rcout << "Column j = " << j
+                      << ", searching for row c = " << c << "\n";
+
+          Rcpp::Rcout << "\nSparseMatrix column rows: ";
+          for (int t = A.rowpointers[j]; t < A.rowpointers[j + 1]; t++)
+            Rcpp::Rcout << A.colindices[t] << " ";
+
+          Rcpp::Rcout << "\nAD column rows: ";
+          for (int t = colpointers[j]; t < colpointers[j + 1]; t++)
+            Rcpp::Rcout << rowindices[t] << " ";
+
+          Rcpp::Rcout << "\n";
+
+          Rcpp::stop("Pattern mismatch");
+        }
+
+        result[ndx] = A.entries[ll];
+
+        if (c == j)
+          break;
+      }
+    }
+  }
+
+  return result;
+}
+
 // Convert a sparse matrix from spam format to the internal supernodal
 // entry ordering used by the AD-Cholesky routines. The sparsity pattern
 // is assumed to be identical to the symbolic factorization.
@@ -152,6 +215,66 @@ List construct_ADchol_Rcpp(Rcpp::S4 obj_spam,
   L["ADentries"] = ADentries;
   L["P"] = P_matrix;
   return L;
+}
+
+// [[Rcpp::export]]
+List convert_ADchol_Rcpp(Rcpp::S4 obj_spam) {
+  IntegerVector supernodes = GetIntVector(obj_spam, "supernodes", 0);
+
+  // Exchange row and columns compared to spam object, as in Ng and Peyton 1993
+  IntegerVector colpointers = GetIntVector(obj_spam, "rowpointers", 0);
+  IntegerVector rowpointers = GetIntVector(obj_spam, "colpointers", 0);
+  IntegerVector rowindices = GetIntVector(obj_spam, "colindices", 0);
+
+  IntegerVector pivot = GetIntVector(obj_spam, "pivot", 0);
+  IntegerVector invpivot = GetIntVector(obj_spam, "invpivot", 0);
+
+  IntegerVector Dim = Rcpp::clone<Rcpp::IntegerVector>(obj_spam.slot("dimension"));
+
+  // copy not really needed or used ...
+  NumericVector entries = Rcpp::clone<Rcpp::NumericVector>(obj_spam.slot("entries"));
+  NumericVector ADentries = Rcpp::clone<Rcpp::NumericVector>(obj_spam.slot("entries"));
+
+  //const int Nsupernodes = supernodes.size()-1;
+  const int N = colpointers.size() - 1;
+  const int size = colpointers[N];
+  const int n_prec_matrices = 1; // not used...
+  NumericMatrix P_matrix(size, n_prec_matrices);
+
+  List L;
+  L["supernodes"] = supernodes;
+  L["colpointers"] = colpointers;
+  L["rowpointers"] = rowpointers;
+  L["rowindices"] =  rowindices;
+  L["pivot"] = pivot;
+  L["invpivot"] = invpivot;
+  L["entries"] = entries;
+  L["ADentries"] = ADentries;
+  L["P"] = P_matrix;
+  return L;
+}
+
+
+// [[Rcpp::export]]
+NumericVector align(Rcpp::S4 ADobj,
+                    Rcpp::S4 spam_matrix)
+{
+  IntegerVector supernodes = ADobj.slot("supernodes");
+  IntegerVector rowpointers = ADobj.slot("rowpointers");
+  IntegerVector colpointers = ADobj.slot("colpointers");
+  IntegerVector rowindices  = ADobj.slot("rowindices");
+  IntegerVector pivot       = ADobj.slot("pivot");
+
+  SparseMatrix A(spam_matrix);
+
+  SparseMatrix Aperm = permuteSymmetric(A,pivot);
+
+  return convertSparseMatrix(
+    Aperm,
+    supernodes,
+    rowpointers,
+    colpointers,
+    rowindices);
 }
 
 // j is current column in Supernode J
@@ -489,6 +612,33 @@ NumericVector dlogdet_cpp_general(
 
   return gradient;
 }
+
+//' @noRd
+//' @keywords internal
+//'
+// [[Rcpp::export]]
+NumericVector dlogdetVector_Rcpp(
+     Rcpp::S4 obj, const NumericVector& entries)
+ {
+   IntegerVector supernodes = obj.slot("supernodes");
+   IntegerVector rowpointers = obj.slot("rowpointers");
+   IntegerVector colpointers = obj.slot("colpointers");
+   IntegerVector rowindices = obj.slot("rowindices");
+
+   NumericVector L = obj.slot("entries");
+   NumericVector F = obj.slot("ADentries");
+
+   L = clone(entries);
+
+   cholesky(L, supernodes, rowpointers, colpointers, rowindices);
+
+   initAD(F, L, colpointers);
+
+   ADcholesky(F, L, supernodes, rowpointers,
+              colpointers, rowindices);
+   return F;
+ }
+
 
 void updateH(NumericVector& H, const SparseMatrix& tX, int i, int j, double alpha)
 {
