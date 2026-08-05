@@ -256,7 +256,7 @@ List convert_ADchol_Rcpp(Rcpp::S4 obj_spam) {
 
 
 // [[Rcpp::export]]
-NumericVector align(Rcpp::S4 ADobj,
+NumericVector vec(Rcpp::S4 ADobj,
                     Rcpp::S4 spam_matrix)
 {
   IntegerVector supernodes = ADobj.slot("supernodes");

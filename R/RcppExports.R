@@ -13,8 +13,8 @@ convert_ADchol_Rcpp <- function(obj_spam) {
     .Call(`_LMMsolver_convert_ADchol_Rcpp`, obj_spam)
 }
 
-align <- function(ADobj, spam_matrix) {
-    .Call(`_LMMsolver_align`, ADobj, spam_matrix)
+vec <- function(ADobj, spam_matrix) {
+    .Call(`_LMMsolver_vec`, ADobj, spam_matrix)
 }
 
 #' Calculate the partial derivatives of log-determinant.

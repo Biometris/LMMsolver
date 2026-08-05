@@ -45,15 +45,15 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// align
-NumericVector align(Rcpp::S4 ADobj, Rcpp::S4 spam_matrix);
-RcppExport SEXP _LMMsolver_align(SEXP ADobjSEXP, SEXP spam_matrixSEXP) {
+// vec
+NumericVector vec(Rcpp::S4 ADobj, Rcpp::S4 spam_matrix);
+RcppExport SEXP _LMMsolver_vec(SEXP ADobjSEXP, SEXP spam_matrixSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Rcpp::S4 >::type ADobj(ADobjSEXP);
     Rcpp::traits::input_parameter< Rcpp::S4 >::type spam_matrix(spam_matrixSEXP);
-    rcpp_result_gen = Rcpp::wrap(align(ADobj, spam_matrix));
+    rcpp_result_gen = Rcpp::wrap(vec(ADobj, spam_matrix));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -150,7 +150,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_LMMsolver_convertSparseMatrix_Rcpp", (DL_FUNC) &_LMMsolver_convertSparseMatrix_Rcpp, 2},
     {"_LMMsolver_construct_ADchol_Rcpp", (DL_FUNC) &_LMMsolver_construct_ADchol_Rcpp, 2},
     {"_LMMsolver_convert_ADchol_Rcpp", (DL_FUNC) &_LMMsolver_convert_ADchol_Rcpp, 1},
-    {"_LMMsolver_align", (DL_FUNC) &_LMMsolver_align, 2},
+    {"_LMMsolver_vec", (DL_FUNC) &_LMMsolver_vec, 2},
     {"_LMMsolver_dlogdet_cpp_linear", (DL_FUNC) &_LMMsolver_dlogdet_cpp_linear, 3},
     {"_LMMsolver_dlogdet_cpp_general", (DL_FUNC) &_LMMsolver_dlogdet_cpp_general, 4},
     {"_LMMsolver_dlogdetVector_Rcpp", (DL_FUNC) &_LMMsolver_dlogdetVector_Rcpp, 2},

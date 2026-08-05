@@ -73,7 +73,7 @@ ADchol <- function(lP) {
       user_def = NULL)
 }
 
-ADchol_nl <- function(user_def, theta0) {
+SparseCholesky <- function(user_def, theta0) {
   #model_eval <- user_def(theta0)
   ## TODO:
   ## Replace C by the structural union of C and all dC matrices.
@@ -136,7 +136,7 @@ dlogdet <- function(obj, theta, b = NULL)
   stop("Unknown ADchol mode.")
 }
 
-dlogdetVector <- function(obj, theta) {
+dlogdetGradient <- function(obj, theta) {
   if (obj@mode == "nonlinear") {
     C <- obj@user_def(theta)
     # use R-indexed pivot:
