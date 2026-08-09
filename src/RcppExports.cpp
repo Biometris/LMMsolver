@@ -131,6 +131,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// logdet_Rcpp_fun
+double logdet_Rcpp_fun(Rcpp::S4 obj);
+RcppExport SEXP _LMMsolver_logdet_Rcpp_fun(SEXP objSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::S4 >::type obj(objSEXP);
+    rcpp_result_gen = Rcpp::wrap(logdet_Rcpp_fun(obj));
+    return rcpp_result_gen;
+END_RCPP
+}
 // constructor_LMMsolver_chol
 List constructor_LMMsolver_chol(Rcpp::S4 obj_spam);
 RcppExport SEXP _LMMsolver_constructor_LMMsolver_chol(SEXP obj_spamSEXP) {
@@ -191,6 +202,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_LMMsolver_diagXCinvXt", (DL_FUNC) &_LMMsolver_diagXCinvXt, 2},
     {"_LMMsolver_update_Rcpp_fun", (DL_FUNC) &_LMMsolver_update_Rcpp_fun, 1},
     {"_LMMsolver_solve_Rcpp_fun", (DL_FUNC) &_LMMsolver_solve_Rcpp_fun, 2},
+    {"_LMMsolver_logdet_Rcpp_fun", (DL_FUNC) &_LMMsolver_logdet_Rcpp_fun, 1},
     {"_LMMsolver_constructor_LMMsolver_chol", (DL_FUNC) &_LMMsolver_constructor_LMMsolver_chol, 1},
     {"_LMMsolver_GetIntVector", (DL_FUNC) &_LMMsolver_GetIntVector, 3},
     {"_LMMsolver_RowKron", (DL_FUNC) &_LMMsolver_RowKron, 2},
