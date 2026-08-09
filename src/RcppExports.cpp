@@ -108,6 +108,40 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// update_Rcpp_fun
+List update_Rcpp_fun(Rcpp::S4 obj);
+RcppExport SEXP _LMMsolver_update_Rcpp_fun(SEXP objSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::S4 >::type obj(objSEXP);
+    rcpp_result_gen = Rcpp::wrap(update_Rcpp_fun(obj));
+    return rcpp_result_gen;
+END_RCPP
+}
+// solve_Rcpp_fun
+NumericVector solve_Rcpp_fun(Rcpp::S4 obj, const NumericVector& b);
+RcppExport SEXP _LMMsolver_solve_Rcpp_fun(SEXP objSEXP, SEXP bSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::S4 >::type obj(objSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type b(bSEXP);
+    rcpp_result_gen = Rcpp::wrap(solve_Rcpp_fun(obj, b));
+    return rcpp_result_gen;
+END_RCPP
+}
+// constructor_LMMsolver_chol
+List constructor_LMMsolver_chol(Rcpp::S4 obj_spam);
+RcppExport SEXP _LMMsolver_constructor_LMMsolver_chol(SEXP obj_spamSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::S4 >::type obj_spam(obj_spamSEXP);
+    rcpp_result_gen = Rcpp::wrap(constructor_LMMsolver_chol(obj_spam));
+    return rcpp_result_gen;
+END_RCPP
+}
 // GetIntVector
 IntegerVector GetIntVector(Rcpp::S4 obj, const String& slotName, int ArrayIndexing);
 RcppExport SEXP _LMMsolver_GetIntVector(SEXP objSEXP, SEXP slotNameSEXP, SEXP ArrayIndexingSEXP) {
@@ -155,6 +189,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"_LMMsolver_dlogdet_cpp_general", (DL_FUNC) &_LMMsolver_dlogdet_cpp_general, 4},
     {"_LMMsolver_dlogdetVector_Rcpp", (DL_FUNC) &_LMMsolver_dlogdetVector_Rcpp, 2},
     {"_LMMsolver_diagXCinvXt", (DL_FUNC) &_LMMsolver_diagXCinvXt, 2},
+    {"_LMMsolver_update_Rcpp_fun", (DL_FUNC) &_LMMsolver_update_Rcpp_fun, 1},
+    {"_LMMsolver_solve_Rcpp_fun", (DL_FUNC) &_LMMsolver_solve_Rcpp_fun, 2},
+    {"_LMMsolver_constructor_LMMsolver_chol", (DL_FUNC) &_LMMsolver_constructor_LMMsolver_chol, 1},
     {"_LMMsolver_GetIntVector", (DL_FUNC) &_LMMsolver_GetIntVector, 3},
     {"_LMMsolver_RowKron", (DL_FUNC) &_LMMsolver_RowKron, 2},
     {"_LMMsolver_MatrixProduct", (DL_FUNC) &_LMMsolver_MatrixProduct, 2},

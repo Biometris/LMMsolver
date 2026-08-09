@@ -255,6 +255,7 @@ List convert_ADchol_Rcpp(Rcpp::S4 obj_spam) {
 }
 
 
+
 // [[Rcpp::export]]
 NumericVector vec(Rcpp::S4 ADobj,
                     Rcpp::S4 spam_matrix)
@@ -613,11 +614,12 @@ NumericVector dlogdet_cpp_general(
   return gradient;
 }
 
+
 //' @noRd
-//' @keywords internal
-//'
-// [[Rcpp::export]]
-NumericVector dlogdetVector_Rcpp(
+ //' @keywords internal
+ //'
+ // [[Rcpp::export]]
+ NumericVector dlogdetVector_Rcpp(
      Rcpp::S4 obj, const NumericVector& entries)
  {
    IntegerVector supernodes = obj.slot("supernodes");
@@ -638,6 +640,7 @@ NumericVector dlogdetVector_Rcpp(
               colpointers, rowindices);
    return F;
  }
+
 
 
 void updateH(NumericVector& H, const SparseMatrix& tX, int i, int j, double alpha)
@@ -700,6 +703,85 @@ NumericVector diagXCinvXt(Rcpp::S4 obj, Rcpp::S4 transposeX)
   }
   return H;
 }
+
+// [[Rcpp::export]]
+List update_Rcpp_fun(Rcpp::S4 obj) {
+  IntegerVector supernodes = obj.slot("supernodes");
+  IntegerVector colpointers = obj.slot("colpointers");
+  IntegerVector rowpointers = obj.slot("rowpointers");
+  IntegerVector rowindices = obj.slot("rowindices");
+
+  NumericVector L = obj.slot("entries");
+  NumericVector F = obj.slot("ADentries");
+
+  cholesky(L, supernodes, rowpointers, colpointers, rowindices);
+  initAD(F, L, colpointers);
+  ADcholesky(F, L, supernodes, rowpointers, colpointers, rowindices);
+
+  List L_obj;
+  L_obj["entries"] = L;
+  L_obj["ADentries"] = F;
+  return L_obj;
+}
+
+// [[Rcpp::export]]
+NumericVector solve_Rcpp_fun(Rcpp::S4 obj, const NumericVector& b) {
+  IntegerVector supernodes = obj.slot("supernodes");
+  IntegerVector colpointers = obj.slot("colpointers");
+  IntegerVector rowpointers = obj.slot("rowpointers");
+  IntegerVector rowindices = obj.slot("rowindices");
+  NumericVector L = obj.slot("entries");
+  IntegerVector pivot = obj.slot("pivot");
+  IntegerVector invpivot = obj.slot("invpivot");
+
+  NumericVector z= forwardCholesky(L, b, supernodes, rowpointers,
+                                     colpointers, rowindices, pivot, invpivot);
+  NumericVector x = backwardCholesky(L, z, supernodes, rowpointers,
+                                       colpointers, rowindices, pivot, invpivot);
+  return x;
+}
+
+
+
+
+
+// [[Rcpp::export]]
+List constructor_LMMsolver_chol(Rcpp::S4 obj_spam) {
+  IntegerVector supernodes = GetIntVector(obj_spam, "supernodes", 0);
+
+  // Exchange row and columns compared to spam object, as in Ng and Peyton 1993
+  IntegerVector colpointers = GetIntVector(obj_spam, "rowpointers", 0);
+  IntegerVector rowpointers = GetIntVector(obj_spam, "colpointers", 0);
+  IntegerVector rowindices = GetIntVector(obj_spam, "colindices", 0);
+
+  IntegerVector pivot = GetIntVector(obj_spam, "pivot", 0);
+  IntegerVector invpivot = GetIntVector(obj_spam, "invpivot", 0);
+  IntegerVector Dim = Rcpp::clone<Rcpp::IntegerVector>(obj_spam.slot("dimension"));
+
+  NumericVector entries = Rcpp::clone<Rcpp::NumericVector>(obj_spam.slot("entries"));
+  const int N_entries = entries.size();
+
+  NumericVector ADentries(N_entries);
+
+  const NumericVector& L = entries;
+  NumericVector& F = ADentries;
+
+  initAD(F, L, colpointers);
+  ADcholesky(F, L, supernodes, rowpointers, colpointers, rowindices);
+
+  List L_obj;
+  L_obj["supernodes"] = supernodes;
+  L_obj["colpointers"] = colpointers;
+  L_obj["rowpointers"] = rowpointers;
+  L_obj["rowindices"] =  rowindices;
+  L_obj["pivot"] = pivot;
+  L_obj["invpivot"] = invpivot;
+  L_obj["entries"] = entries;
+  L_obj["ADentries"] = ADentries;
+  return L_obj;
+}
+
+
 
 /*
 
