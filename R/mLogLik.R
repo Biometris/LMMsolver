@@ -103,14 +103,6 @@ logLikelihood_aux <- function(y,
       dlogdetGinv <- NULL
     }
 
-    ## calculated logdet and dlogdet for Ginv and C.
-    ## Ginv, if exists
-    if (!is.null(objG)) {
-      dlogdetGinv <- dlogdet(ADcholGinv, psi)
-      logdetG <- -attr(dlogdetGinv, which = "logdet")
-    } else {
-      logdetG <- 0
-    }
     ## update the expressions including Rinv.
     YtRinvY <- sum(phi * unlist(lYtRinvY))
     WtRinvY <- as.vector(linearSum(theta = phi, matrixList = lWtRinvY))
