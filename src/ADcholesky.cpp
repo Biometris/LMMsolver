@@ -29,255 +29,6 @@
 using namespace Rcpp;
 using namespace std;
 
-// Convert a SparseMatrix to the internal AD-Cholesky ordering.
-NumericVector convertSparseMatrix(const SparseMatrix& A,
-                                  const IntegerVector& supernodes,
-                                  const IntegerVector& rowpointers,
-                                  const IntegerVector& colpointers,
-                                  const IntegerVector& rowindices)
-{
-  const int Nsupernodes = supernodes.size() - 1;
-  const int N = colpointers.size() - 1;
-  const int size = colpointers[N];
-
-  NumericVector result(size, 0.0);
-
-  for (int J = 0; J < Nsupernodes; J++)
-  {
-    for (int j = supernodes[J]; j < supernodes[J + 1]; j++)
-    {
-      int k   = rowpointers[J + 1] - 1;
-      int ndx = colpointers[j + 1] - 1;
-
-      for (int ll = A.rowpointers[j + 1] - 1; ll >= A.rowpointers[j]; ll--)
-      {
-        int c = A.colindices[ll];
-
-        if (c < j)
-          break;
-
-        while (rowindices[k] != c)
-        {
-          k--;
-          ndx--;
-        }
-
-        if (k < 0)
-        {
-          Rcpp::Rcout << "\nPattern mismatch\n";
-          Rcpp::Rcout << "Column j = " << j
-                      << ", searching for row c = " << c << "\n";
-
-          Rcpp::Rcout << "\nSparseMatrix column rows: ";
-          for (int t = A.rowpointers[j]; t < A.rowpointers[j + 1]; t++)
-            Rcpp::Rcout << A.colindices[t] << " ";
-
-          Rcpp::Rcout << "\nAD column rows: ";
-          for (int t = colpointers[j]; t < colpointers[j + 1]; t++)
-            Rcpp::Rcout << rowindices[t] << " ";
-
-          Rcpp::Rcout << "\n";
-
-          Rcpp::stop("Pattern mismatch");
-        }
-
-        result[ndx] = A.entries[ll];
-
-        if (c == j)
-          break;
-      }
-    }
-  }
-
-  return result;
-}
-
-// Convert a sparse matrix from spam format to the internal supernodal
-// entry ordering used by the AD-Cholesky routines. The sparsity pattern
-// is assumed to be identical to the symbolic factorization.
-NumericVector convertSparseMatrix(const Rcpp::S4& spam_matrix,
-                                  const IntegerVector& supernodes,
-                                  const IntegerVector& rowpointers,
-                                  const IntegerVector& colpointers,
-                                  const IntegerVector& rowindices)
-{
-  const int Nsupernodes = supernodes.size() - 1;
-  const int N = colpointers.size() - 1;
-  const int size = colpointers[N];
-
-  IntegerVector rowpointers_P = GetIntVector(spam_matrix, "rowpointers", 0);
-  IntegerVector colindices_P  = GetIntVector(spam_matrix, "colindices", 0);
-  NumericVector entries_P     = spam_matrix.slot("entries");
-
-  NumericVector result(size, 0.0);
-  for (int J=0; J<Nsupernodes;J++)
-  {
-    for (int j=supernodes[J]; j<supernodes[J+1]; j++)
-    {
-      int k = rowpointers[J+1]-1;   // start at end/bottom
-      int ndx = colpointers[j+1]-1; // start at end/bottom
-      for (int ll=rowpointers_P[j+1]-1;ll>=rowpointers_P[j];ll--)
-      {
-        int c = colindices_P[ll];
-        if (c < j) break;
-        while( rowindices[k] != c)
-        {
-          k--;
-          ndx--;
-        }
-        if(k < 0)
-        {
-          Rcpp::Rcout << "\nPattern mismatch\n";
-          Rcpp::Rcout << "Column j = " << j
-                      << ", searching for row c = " << c << "\n";
-
-          Rcpp::Rcout << "\nspam column rows: ";
-          for(int ll = rowpointers_P[j]; ll < rowpointers_P[j+1]; ll++)
-            Rcpp::Rcout << colindices_P[ll] << " ";
-
-          Rcpp::Rcout << "\n";
-
-          Rcpp::Rcout << "AD column rows:   ";
-          for(int kk = colpointers[j]; kk < colpointers[j+1]; kk++)
-            Rcpp::Rcout << rowindices[kk] << " ";
-
-          Rcpp::Rcout << "\n";
-
-          Rcpp::stop("Pattern mismatch");
-        }
-        result[ndx] = entries_P[ll];
-        if (c == j) break;
-      }
-    }
-  }
-  return result;
-}
-
-
-// [[Rcpp::export]]
-NumericVector convertSparseMatrix_Rcpp(const Rcpp::S4& spam_matrix,
-                                       const Rcpp::S4& ADobj)
-{
-  return convertSparseMatrix(
-    spam_matrix,
-    ADobj.slot("supernodes"),
-    ADobj.slot("rowpointers"),
-    ADobj.slot("colpointers"),
-    ADobj.slot("rowindices"));
-}
-
-// U is a cholesky matrix
-// ZtZ is crossproduct design matrix Z
-// P is a precision matrix.
-// [[Rcpp::export]]
-List construct_ADchol_Rcpp(Rcpp::S4 obj_spam,
-                           const List& P_list) {
-  IntegerVector supernodes = GetIntVector(obj_spam, "supernodes", 0);
-
-  // Exchange row and columns compared to spam object, as in Ng and Peyton 1993
-  IntegerVector colpointers = GetIntVector(obj_spam, "rowpointers", 0);
-  IntegerVector rowpointers = GetIntVector(obj_spam, "colpointers", 0);
-  IntegerVector rowindices = GetIntVector(obj_spam, "colindices", 0);
-
-  IntegerVector pivot = GetIntVector(obj_spam, "pivot", 0);
-  IntegerVector invpivot = GetIntVector(obj_spam, "invpivot", 0);
-
-  IntegerVector Dim = Rcpp::clone<Rcpp::IntegerVector>(obj_spam.slot("dimension"));
-
-  // copy not really needed or used ...
-  NumericVector entries = Rcpp::clone<Rcpp::NumericVector>(obj_spam.slot("entries"));
-  NumericVector ADentries = Rcpp::clone<Rcpp::NumericVector>(obj_spam.slot("entries"));
-
-  //const int Nsupernodes = supernodes.size()-1;
-  const int N = colpointers.size() - 1;
-  const int size = colpointers[N];
-  const int n_prec_matrices = P_list.size();
-  NumericMatrix P_matrix(size, n_prec_matrices);
-
-  for(int i=0;i<n_prec_matrices;i++)
-  {
-    Rcpp::S4 spam_matrix(P_list[i]);
-    P_matrix(_ , i) = convertSparseMatrix(spam_matrix,
-                                        supernodes,
-                                        rowpointers,
-                                        colpointers,
-                                        rowindices);
-  }
-
-  List L;
-  L["supernodes"] = supernodes;
-  L["colpointers"] = colpointers;
-  L["rowpointers"] = rowpointers;
-  L["rowindices"] =  rowindices;
-  L["pivot"] = pivot;
-  L["invpivot"] = invpivot;
-  L["entries"] = entries;
-  L["ADentries"] = ADentries;
-  L["P"] = P_matrix;
-  return L;
-}
-
-// [[Rcpp::export]]
-List convert_ADchol_Rcpp(Rcpp::S4 obj_spam) {
-  IntegerVector supernodes = GetIntVector(obj_spam, "supernodes", 0);
-
-  // Exchange row and columns compared to spam object, as in Ng and Peyton 1993
-  IntegerVector colpointers = GetIntVector(obj_spam, "rowpointers", 0);
-  IntegerVector rowpointers = GetIntVector(obj_spam, "colpointers", 0);
-  IntegerVector rowindices = GetIntVector(obj_spam, "colindices", 0);
-
-  IntegerVector pivot = GetIntVector(obj_spam, "pivot", 0);
-  IntegerVector invpivot = GetIntVector(obj_spam, "invpivot", 0);
-
-  IntegerVector Dim = Rcpp::clone<Rcpp::IntegerVector>(obj_spam.slot("dimension"));
-
-  // copy not really needed or used ...
-  NumericVector entries = Rcpp::clone<Rcpp::NumericVector>(obj_spam.slot("entries"));
-  NumericVector ADentries = Rcpp::clone<Rcpp::NumericVector>(obj_spam.slot("entries"));
-
-  //const int Nsupernodes = supernodes.size()-1;
-  const int N = colpointers.size() - 1;
-  const int size = colpointers[N];
-  const int n_prec_matrices = 1; // not used...
-  NumericMatrix P_matrix(size, n_prec_matrices);
-
-  List L;
-  L["supernodes"] = supernodes;
-  L["colpointers"] = colpointers;
-  L["rowpointers"] = rowpointers;
-  L["rowindices"] =  rowindices;
-  L["pivot"] = pivot;
-  L["invpivot"] = invpivot;
-  L["entries"] = entries;
-  L["ADentries"] = ADentries;
-  L["P"] = P_matrix;
-  return L;
-}
-
-
-
-// [[Rcpp::export]]
-NumericVector vec(Rcpp::S4 ADobj,
-                    Rcpp::S4 spam_matrix)
-{
-  IntegerVector supernodes = ADobj.slot("supernodes");
-  IntegerVector rowpointers = ADobj.slot("rowpointers");
-  IntegerVector colpointers = ADobj.slot("colpointers");
-  IntegerVector rowindices  = ADobj.slot("rowindices");
-  IntegerVector pivot       = ADobj.slot("pivot");
-
-  SparseMatrix A(spam_matrix);
-
-  SparseMatrix Aperm = permuteSymmetric(A,pivot);
-
-  return convertSparseMatrix(
-    Aperm,
-    supernodes,
-    rowpointers,
-    colpointers,
-    rowindices);
-}
-
 // j is current column in Supernode J
 void ADcmod1(NumericVector& F,
              const NumericVector& L, int j, int J,
@@ -430,221 +181,6 @@ void initAD(NumericVector& F, const NumericVector& L, const IntegerVector& colpo
   }
 }
 
-void fillLinearEntries(
-    NumericVector& L,
-    const NumericMatrix& P,
-    const NumericVector& theta)
-{
-  const int sz = P.nrow();
-  const int n_prec_mat = P.ncol();
-
-  std::fill(L.begin(), L.end(), 0.0);
-
-  for(int k=0; k<n_prec_mat; k++)
-  {
-    const NumericMatrix::ConstColumn Pk = P(_, k);
-    const double alpha = theta[k];
-
-    for(int i=0; i<sz; i++)
-      L[i] += alpha * Pk[i];
-  }
-}
-
-
-NumericVector computeGradient(
-    const NumericVector& F,
-    const NumericMatrix& derivatives)
-{
-  const int p = derivatives.ncol();
-
-  NumericVector gradient(p);
-
-  for(int k=0; k<p; k++)
-  {
-    const NumericMatrix::ConstColumn deriv_k = derivatives(_,k);
-
-    gradient[k] =
-      std::inner_product(F.begin(),
-                         F.end(),
-                         deriv_k.begin(),
-                         0.0);
-  }
-
-  return gradient;
-}
-
-void normalizeLinearGradient(
-    NumericVector& gradient,
-    const NumericVector& theta,
-    int N) {
-  // correction, to make sure inner product
-  // between theta and gradient equal to N:
-  double sum = 0.0;
-  int sz = gradient.size();
-  for (int i=0;i<sz;i++)
-  {
-    sum += theta[i]*gradient[i];
-  }
-  for (int i=0;i<sz;i++)
-  {
-    gradient[i] *= N/sum;
-  }
-}
-
-void addAttributes_dlogdet(NumericVector& gradient,
-                      Nullable<NumericVector> b_,
-                      Rcpp::S4 obj,
-                      const NumericVector& L,
-                      const IntegerVector& supernodes,
-                      const IntegerVector& rowpointers,
-                      const IntegerVector& colpointers,
-                      const IntegerVector& rowindices)
-{
-  gradient.attr("logdet") = logdet(L, colpointers);
-
-  if (b_.isNotNull()) {
-    NumericVector b(b_);  // casting to underlying type NumericVector
-    IntegerVector pivot = obj.slot("pivot");
-    IntegerVector invpivot = obj.slot("invpivot");
-
-    NumericVector z= forwardCholesky(L, b, supernodes, rowpointers,
-                                   colpointers, rowindices, pivot, invpivot);
-    NumericVector x = backwardCholesky(L, z, supernodes, rowpointers,
-                                     colpointers, rowindices, pivot, invpivot);
-    gradient.attr("x.coef") = x;
-  }
-}
-
-
-
-
-
-
-//' Calculate the partial derivatives of log-determinant.
-//'
-//' This function calculates the partial derivatives of the the log-determinant in an
-//' efficient way, by using reverse Automated Differentiation of the Cholesky Algorithm,
-//' see Smith (1995) for details. Let
-//'  \deqn{C = \sum_{i} \theta_i P_i}
-//' where the matrices \eqn{P_i} are stored in the `ADchol` object. The partial derivatives
-//' of matrix \eqn{C} are defined by:
-//' \deqn{\frac{\partial C}{\partial \theta_i} = \text{trace} [C^{-1} P_i]},
-//' but are calculated in a more efficient way using backwards Automated Differentiation.
-//'
-//' @param ADobj object of class ADchol.
-//' @param theta a vector with precision or penalty parameters
-//'
-//' @returns The gradient with partial derivatives of \eqn{log|C|} with respect to
-//' parameters \eqn{\theta_i}. As attribute \code{logdet}, \eqn{log|C|} is returned.
-//'
-//' @references
-//' Smith, S. P. (1995). Differentiation of the Cholesky algorithm.
-//' Journal of Computational and Graphical Statistics, 4(2), 134-147.
-//'
-//' @noRd
-//' @keywords internal
-//'
-// [[Rcpp::export]]
-NumericVector dlogdet_cpp_linear(Rcpp::S4 obj, NumericVector theta,
-                      Nullable<NumericVector> b_ = R_NilValue)
-{
-  IntegerVector supernodes = obj.slot("supernodes");
-  IntegerVector rowpointers = obj.slot("rowpointers");
-  IntegerVector colpointers = obj.slot("colpointers");
-  IntegerVector rowindices = obj.slot("rowindices");
-  NumericVector L = obj.slot("entries");
-  NumericVector F = obj.slot("ADentries");
-  NumericMatrix P = obj.slot("P");
-
-  const int n_prec_mat = P.ncol();
-  const int N = colpointers.size()-1;
-
-  if (n_prec_mat != theta.size()) {
-    stop("wrong length vector theta ");
-  }
-
-  fillLinearEntries(L, P, theta);
-  cholesky(L, supernodes, rowpointers, colpointers, rowindices);
-  initAD(F, L, colpointers);
-  ADcholesky(F, L, supernodes, rowpointers, colpointers, rowindices);
-
-  NumericVector gradient = computeGradient(F,P);
-  normalizeLinearGradient(gradient, theta, N);
-
-  addAttributes_dlogdet(gradient, b_, obj, L, supernodes,
-                                              rowpointers,
-                                              colpointers,
-                                              rowindices);
-
-  return gradient;
-}
-
-//' @noRd
-//' @keywords internal
-//'
-// [[Rcpp::export]]
-NumericVector dlogdet_cpp_general(
-    Rcpp::S4 obj,
-    NumericVector entries,
-    NumericMatrix dC,
-    Nullable<NumericVector> b_ = R_NilValue)
-{
-  IntegerVector supernodes = obj.slot("supernodes");
-  IntegerVector rowpointers = obj.slot("rowpointers");
-  IntegerVector colpointers = obj.slot("colpointers");
-  IntegerVector rowindices = obj.slot("rowindices");
-
-  NumericVector L = obj.slot("entries");
-  NumericVector F = obj.slot("ADentries");
-
-  L = clone(entries);
-
-  cholesky(L, supernodes, rowpointers, colpointers, rowindices);
-
-  initAD(F, L, colpointers);
-
-  ADcholesky(F, L, supernodes, rowpointers,
-             colpointers, rowindices);
-
-  NumericVector gradient = computeGradient(F, dC);
-
-  addAttributes_dlogdet(gradient, b_, obj, L, supernodes,
-                        rowpointers,
-                        colpointers,
-                        rowindices);
-
-  return gradient;
-}
-
-
-//' @noRd
- //' @keywords internal
- //'
- // [[Rcpp::export]]
- NumericVector dlogdetVector_Rcpp(
-     Rcpp::S4 obj, const NumericVector& entries)
- {
-   IntegerVector supernodes = obj.slot("supernodes");
-   IntegerVector rowpointers = obj.slot("rowpointers");
-   IntegerVector colpointers = obj.slot("colpointers");
-   IntegerVector rowindices = obj.slot("rowindices");
-
-   NumericVector L = obj.slot("entries");
-   NumericVector F = obj.slot("ADentries");
-
-   L = clone(entries);
-
-   cholesky(L, supernodes, rowpointers, colpointers, rowindices);
-
-   initAD(F, L, colpointers);
-
-   ADcholesky(F, L, supernodes, rowpointers,
-              colpointers, rowindices);
-   return F;
- }
-
-
-
 void updateH(NumericVector& H, const SparseMatrix& tX, int i, int j, double alpha)
 {
   int s1 = tX.rowpointers[i];
@@ -751,8 +287,6 @@ double logdet_Rcpp_fun(Rcpp::S4 obj) {
 }
 
 
-
-
 // [[Rcpp::export]]
 List constructor_LMMsolver_chol(Rcpp::S4 obj_spam) {
   IntegerVector supernodes = GetIntVector(obj_spam, "supernodes", 0);
@@ -789,83 +323,88 @@ List constructor_LMMsolver_chol(Rcpp::S4 obj_spam) {
   return L_obj;
 }
 
-
-
-/*
-
- // [[Rcpp::export]]
- NumericVector partialDerivCholesky(Rcpp::S4 obj)
- {
- IntegerVector supernodes = GetIntVector(obj, "supernodes", 0);
-
- // Exchange row and columns compared to spam object, as in Ng and Peyton 1993
- IntegerVector colpointers = GetIntVector(obj, "rowpointers", 0);
- IntegerVector rowpointers = GetIntVector(obj, "colpointers", 0);
- IntegerVector rowindices = GetIntVector(obj, "colindices", 0);
-
- NumericVector L = Rcpp::clone<Rcpp::NumericVector>(obj.slot("entries"));
-
- const int sz = L.size();
- NumericVector F(sz, 0.0);
- initAD(F, L, colpointers);
- ADcholesky(F, L, supernodes, rowpointers, colpointers, rowindices);
- return F;
- }
-
-// [[Rcpp::export]]
-NumericVector ForwardCholesky(SEXP cholC, NumericVector& b)
+// Convert a SparseMatrix to the internal AD-Cholesky ordering.
+NumericVector convertSparseMatrix(const SparseMatrix& A,
+                                  const IntegerVector& supernodes,
+                                  const IntegerVector& rowpointers,
+                                  const IntegerVector& colpointers,
+                                  const IntegerVector& rowindices)
 {
-  Rcpp::S4 obj(cholC);
-  // We use transpose for calculating Automated Differentiation.
-  IntegerVector supernodes = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("supernodes"));
-  IntegerVector colpointers = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("rowpointers"));
-  IntegerVector rowpointers = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("colpointers"));
-  IntegerVector rowindices = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("colindices"));
-  IntegerVector pivot = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("pivot"));
-  IntegerVector invpivot = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("invpivot"));
+  const int Nsupernodes = supernodes.size() - 1;
+  const int N = colpointers.size() - 1;
+  const int size = colpointers[N];
 
-  NumericVector L = Rcpp::clone<Rcpp::NumericVector>(obj.slot("entries"));
+  NumericVector result(size, 0.0);
 
-  // C using indices starting at 0:
-  transf2C(supernodes);
-  transf2C(colpointers);
-  transf2C(rowpointers);
-  transf2C(rowindices);
-  transf2C(pivot);
-  transf2C(invpivot);
+  for (int J = 0; J < Nsupernodes; J++)
+  {
+    for (int j = supernodes[J]; j < supernodes[J + 1]; j++)
+    {
+      int k   = rowpointers[J + 1] - 1;
+      int ndx = colpointers[j + 1] - 1;
 
-  return forwardCholesky(L, b, supernodes, rowpointers,
-                      colpointers, rowindices, pivot, invpivot);
+      for (int ll = A.rowpointers[j + 1] - 1; ll >= A.rowpointers[j]; ll--)
+      {
+        int c = A.colindices[ll];
 
+        if (c < j)
+          break;
+
+        while (rowindices[k] != c)
+        {
+          k--;
+          ndx--;
+        }
+
+        if (k < 0)
+        {
+          Rcpp::Rcout << "\nPattern mismatch\n";
+          Rcpp::Rcout << "Column j = " << j
+                      << ", searching for row c = " << c << "\n";
+
+          Rcpp::Rcout << "\nSparseMatrix column rows: ";
+          for (int t = A.rowpointers[j]; t < A.rowpointers[j + 1]; t++)
+            Rcpp::Rcout << A.colindices[t] << " ";
+
+          Rcpp::Rcout << "\nAD column rows: ";
+          for (int t = colpointers[j]; t < colpointers[j + 1]; t++)
+            Rcpp::Rcout << rowindices[t] << " ";
+
+          Rcpp::Rcout << "\n";
+
+          Rcpp::stop("Pattern mismatch");
+        }
+
+        result[ndx] = A.entries[ll];
+
+        if (c == j)
+          break;
+      }
+    }
+  }
+
+  return result;
 }
 
-
 // [[Rcpp::export]]
-NumericVector BackwardCholesky(SEXP cholC, NumericVector& b)
+NumericVector vec(Rcpp::S4 ADobj,
+                  Rcpp::S4 spam_matrix)
 {
-  Rcpp::S4 obj(cholC);
-  // We use transpose for calculating Automated Differentiation.
-  IntegerVector supernodes = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("supernodes"));
-  IntegerVector colpointers = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("rowpointers"));
-  IntegerVector rowpointers = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("colpointers"));
-  IntegerVector rowindices = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("colindices"));
-  IntegerVector pivot = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("pivot"));
-  IntegerVector invpivot = Rcpp::clone<Rcpp::IntegerVector>(obj.slot("invpivot"));
+  IntegerVector supernodes = ADobj.slot("supernodes");
+  IntegerVector rowpointers = ADobj.slot("rowpointers");
+  IntegerVector colpointers = ADobj.slot("colpointers");
+  IntegerVector rowindices  = ADobj.slot("rowindices");
+  IntegerVector pivot       = ADobj.slot("pivot");
 
-  NumericVector L = Rcpp::clone<Rcpp::NumericVector>(obj.slot("entries"));
+  SparseMatrix A(spam_matrix);
 
-  // C using indices starting at 0:
-  transf2C(supernodes);
-  transf2C(colpointers);
-  transf2C(rowpointers);
-  transf2C(rowindices);
-  transf2C(pivot);
-  transf2C(invpivot);
+  SparseMatrix Aperm = permuteSymmetric(A,pivot);
 
-  return backwardCholesky(L, b, supernodes, rowpointers,
-                         colpointers, rowindices, pivot, invpivot);
+  return convertSparseMatrix(
+    Aperm,
+    supernodes,
+    rowpointers,
+    colpointers,
+    rowindices);
 }
-
-*/
-
 
