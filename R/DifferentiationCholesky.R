@@ -172,7 +172,9 @@ updateLinear <- function(object, V, theta) {
    object
 }
 
-logdet <- function(object) { 2*sum(object@entries)}
+logdet <- function(object) {
+  logdet_Rcpp_fun(object)
+}
 
 dlogdetLinear <- function(obj, V, theta) {
   g <- as.vector(crossprod(obj@ADentries, V))

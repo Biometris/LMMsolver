@@ -518,6 +518,8 @@ void addAttributes_dlogdet(NumericVector& gradient,
 
 
 
+
+
 //' Calculate the partial derivatives of log-determinant.
 //'
 //' This function calculates the partial derivatives of the the log-determinant in an
@@ -741,6 +743,12 @@ NumericVector solve_Rcpp_fun(Rcpp::S4 obj, const NumericVector& b) {
   return x;
 }
 
+// [[Rcpp::export]]
+double logdet_Rcpp_fun(Rcpp::S4 obj) {
+  IntegerVector colpointers = obj.slot("colpointers");
+  NumericVector L = obj.slot("entries");
+  return logdet(L, colpointers);
+}
 
 
 

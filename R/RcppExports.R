@@ -71,6 +71,10 @@ solve_Rcpp_fun <- function(obj, b) {
     .Call(`_LMMsolver_solve_Rcpp_fun`, obj, b)
 }
 
+logdet_Rcpp_fun <- function(obj) {
+    .Call(`_LMMsolver_logdet_Rcpp_fun`, obj)
+}
+
 constructor_LMMsolver_chol <- function(obj_spam) {
     .Call(`_LMMsolver_constructor_LMMsolver_chol`, obj_spam)
 }
