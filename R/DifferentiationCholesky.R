@@ -82,37 +82,37 @@ convertSparseMatrices <- function(lX, obj)
                  ADobj = obj))
 }
 
-dlogdet <- function(obj, theta, b = NULL)
-{
-  if (obj@mode == "linear") {
-    return(dlogdet_cpp_linear(obj, theta, b))
-  }
-
-  if (obj@mode == "nonlinear") {
-
-    model_eval <- obj@user_def(theta)
-
-    # use R-indexed pivot:
-    pivot_R <- obj@pivot + 1
-    ## reorder C and derivatives
-    C <- reorderSpam(model_eval$C, pivot_R)
-    dC <- lapply(model_eval$dC,
-                 reorderSpam,
-                 permutation = pivot_R)
-
-    entries <- convertSparseMatrix_Rcpp(C, obj)
-    derivatives <- convertSparseMatrices(dC, obj)
-
-    #stop("Need entries(C)")
-
-    return(dlogdet_cpp_general(obj,
-                               entries,
-                               derivatives,
-                               b))
-  }
-
-  stop("Unknown ADchol mode.")
-}
+# dlogdet <- function(obj, theta, b = NULL)
+# {
+#   if (obj@mode == "linear") {
+#     return(dlogdet_cpp_linear(obj, theta, b))
+#   }
+#
+#   if (obj@mode == "nonlinear") {
+#
+#     model_eval <- obj@user_def(theta)
+#
+#     # use R-indexed pivot:
+#     pivot_R <- obj@pivot + 1
+#     ## reorder C and derivatives
+#     C <- reorderSpam(model_eval$C, pivot_R)
+#     dC <- lapply(model_eval$dC,
+#                  reorderSpam,
+#                  permutation = pivot_R)
+#
+#     entries <- convertSparseMatrix_Rcpp(C, obj)
+#     derivatives <- convertSparseMatrices(dC, obj)
+#
+#     #stop("Need entries(C)")
+#
+#     return(dlogdet_cpp_general(obj,
+#                                entries,
+#                                derivatives,
+#                                b))
+#   }
+#
+#   stop("Unknown ADchol mode.")
+# }
 
 #
 # new LMMsolver.chol class
