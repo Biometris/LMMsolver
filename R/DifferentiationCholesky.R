@@ -154,7 +154,6 @@ SparseCholesky <- function(C) {
   return(obj)
 }
 
-#' @export
 setMethod("update", "LMMsolver.chol",
           function(object, C, ...) {
             object@entries <- vec(object, C)
@@ -196,7 +195,6 @@ vecList <- function(obj, x) {
   do.call(cbind, lapply(x, function(dC) vec(obj, dC)))
 }
 
-#' @export
 setMethod("solve", "LMMsolver.chol",
           function(a, b, ...) {
             solve_Rcpp_fun(a, b)
