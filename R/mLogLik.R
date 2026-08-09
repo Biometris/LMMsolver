@@ -60,11 +60,11 @@ logLikelihood_aux <- function(y,
 
   ## Make ADchol for Ginv and C:
   if (Nvarcomp > 0) {
-    C0G <- Reduce('+', lGinv)
-    objG <- SparseCholesky(C0G)
-    VG <- vecList(objG, lGinv)
+    Ginv <- Reduce('+', lGinv)
+    objGinv <- SparseCholesky(Ginv)
+    VGinv <- vecList(objGinv, lGinv)
   } else {
-    objG <- NULL
+    objGinv <- NULL
   }
   C0 <- Reduce('+', lC)
   objC <- SparseCholesky(C0)
@@ -88,12 +88,12 @@ logLikelihood_aux <- function(y,
 
     ## calculated logdet and dlogdet for Ginv and C.
     ## Ginv, if exists
-    if (!is.null(objG)) {
-      objG <- updateLinear(objG, VG, psi)
+    if (!is.null(objGinv)) {
+      objGinv <- updateLinear(objGinv, VGinv, psi)
 
-      logdetG <- -logdet(objG)
+      logdetG <- -logdet(objGinv)
 
-      dlogdetGinv <- dlogdetLinear(objG, VG, psi)
+      dlogdetGinv <- dlogdetLinear(objGinv, VGinv, psi)
 
       ##if (!is.null(C_restrict)) {
       ##  logdetG <- logdetG + logdet_correction(kappa, psi)
@@ -114,12 +114,8 @@ logLikelihood_aux <- function(y,
 
     dlogdetC <- dlogdetLinear(objC, VC, theta)
 
-    ## matrix C.
-    #dlogdetC <- dlogdet(ADcholC, theta, WtRinvY)
-    #logdetC <- attr(dlogdetC, which = "logdet")
-    #a <- attr(dlogdetC, which = "x.coef")
     if (all(!is.na(dlogdetC))) {
-      if (!is.null(objG)) {
+      if (!is.null(objGinv)) {
         EDmax_psi <- psi * dlogdetGinv
       } else {
         EDmax_psi <- NULL

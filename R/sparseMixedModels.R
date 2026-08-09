@@ -221,13 +221,13 @@ sparseMixedModels <- function(y,
   Rinv <- Reduce("+", lRinv)
   logdetRinvConstant <- as.numeric(spam::determinant.spam(Rinv)$modulus)
 
-  ## Make ADchol for Ginv and C:
+  ## Make SparseCholesky for Ginv and C:
   if (Nvarcomp > 0) {
-    C0G <- Reduce('+', lGinv)
-    objG <- SparseCholesky(C0G)
-    VG <- vecList(objG, lGinv)
+    Ginv <- Reduce('+', lGinv)
+    objGinv <- SparseCholesky(Ginv)
+    VGinv <- vecList(objGinv, lGinv)
   } else {
-    objG <- NULL
+    objGinv <- NULL
   }
   C0 <- Reduce('+', lC)
   objC <- SparseCholesky(C0)
@@ -252,12 +252,12 @@ sparseMixedModels <- function(y,
 
     ## calculated logdet and dlogdet for Ginv and C.
     ## Ginv, if exists
-    if (!is.null(objG)) {
-      objG <- updateLinear(objG, VG, psi)
+    if (!is.null(objGinv)) {
+      objGinv <- updateLinear(objGinv, VGinv, psi)
 
-      logdetG <- -logdet(objG)
+      logdetG <- -logdet(objGinv)
 
-      dlogdetGinv <- dlogdetLinear(objG, VG, psi)
+      dlogdetGinv <- dlogdetLinear(objGinv, VGinv, psi)
 
       if (!is.null(C_restrict)) {
         logdetG <- logdetG + logdet_correction(kappa, psi)
@@ -267,17 +267,6 @@ sparseMixedModels <- function(y,
       dlogdetGinv <- NULL
     }
 
-
-    #if (!is.null(ADcholGinv)) {
-    #  dlogdetGinv <- dlogdet(ADcholGinv, psi)
-    #  logdetG <- -attr(dlogdetGinv, which = "logdet")
-    #  if (!is.null(C_restrict)) {
-    #    logdetG <- logdetG + logdet_correction(kappa, psi)
-    #  }
-    #} else {
-    #  logdetG <- 0
-    #}
-    ## update the expressions including Rinv.
     YtRinvY <- sum(phi * unlist(lYtRinvY))
     WtRinvY <- as.vector(linearSum(theta = phi, matrixList = lWtRinvY))
 
@@ -287,12 +276,9 @@ sparseMixedModels <- function(y,
     a <- solve(objC, WtRinvY)
 
     dlogdetC <- dlogdetLinear(objC, VC, theta)
-    #dlogdetC <- dlogdet(ADcholC, theta, WtRinvY)
-    #logdetC <- attr(dlogdetC, which = "logdet")
-    #a <- attr(dlogdetC, which = "x.coef")
 
     ## calculate effective dimensions.
-    if (!is.null(objG)) {
+    if (!is.null(objGinv)) {
       EDmax_psi <- psi * dlogdetGinv
       if (!is.null(C_restrict)) {
         EDmax_psi <- EDmax_psi - ED_corrections(kappa, psi)
