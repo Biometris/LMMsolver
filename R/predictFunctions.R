@@ -37,15 +37,15 @@
 #' Computational statistics & data analysis, 44(4), 571-586.
 #'
 #' @keywords internal
-calcStandardErrors <- function(C,
-                               D) {
+calcStandardErrors <- function(C, D) {
   xi0 <- 1.0e-6
   C_ext <- C + xi0*spam::crossprod.spam(D)
+
   # symbolic factorization
   obj <- SparseCholesky(C_ext)
-  # numerical evaluation for xi=0
+
+  # numerical evaluation for xi = 0
   obj <- update(obj, C)
-  #x <- diagXCinvXt(obj, D)
 
   ## Cholesky uses the pivoted ordering
   tD <- spam::t.spam(D)
@@ -54,28 +54,6 @@ calcStandardErrors <- function(C,
   x <- diagXCinvXt(obj, tDp)
   se <- sqrt(x)
   return(se)
-
-  #
-  # tD <- spam::t.spam(D)
-  # DtD <- tD %*% D
-  #
-  # ## It adds extra zeros ("fill-ins") to matrix C, needed
-  # ## to calculate the Partial Derivatives of Cholesky.
-  # iDtD <- DtD
-  # iC <- C
-  # iC@entries <- rep(2, length(iC@entries))
-  # iDtD@entries <- rep(1, length(iDtD@entries))
-  # Cwf <- iC + iDtD
-  # inC <- which(Cwf@entries==2 | Cwf@entries == 3)
-  # Cwf@entries <- rep(0, length(Cwf@entries))
-  # Cwf@entries[inC] <- C@entries
-  #
-  # cholC <- spam::chol.spam(Cwf)
-  # p <- cholC@pivot
-  # tDp <- tD[p, ]
-  # x <- diagXCinvXt(cholC, tDp)
-  # se <- sqrt(x)
-  #return(se)
 }
 
 
