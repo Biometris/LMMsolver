@@ -45,7 +45,7 @@ expect_silent({
   ## General update interface
 
   obj_update <- LMMsolver:::SparseCholesky(C0)
-  obj_update <- update(obj_update, C)
+  obj_update <- LMMsolver:::update(obj_update, C)
 
   expect_equal(
     obj_update@entries,
