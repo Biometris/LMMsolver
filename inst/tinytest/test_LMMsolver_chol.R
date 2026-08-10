@@ -42,6 +42,23 @@ expect_silent({
 
   obj <- LMMsolver:::updateLinear(obj, V, theta)
 
+  ## General update interface
+
+  obj_update <- LMMsolver:::SparseCholesky(C0)
+  obj_update <- update(obj_update, C)
+
+  expect_equal(
+    obj_update@entries,
+    obj@entries,
+    tolerance = 1e-12
+  )
+
+  expect_equal(
+    obj_update@ADentries,
+    obj@ADentries,
+    tolerance = 1e-12
+  )
+
   ## Individual derivatives after update
   g1_new <- LMMsolver:::dlogdet(obj, A)
   g2_new <- LMMsolver:::dlogdet(obj, B)
