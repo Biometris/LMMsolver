@@ -80,4 +80,24 @@ vecList <- function(obj, x) {
   do.call(cbind, lapply(x, function(dC) vec(obj, dC)))
 }
 
+# ADchol, for backward compatibility
+
+ADchol <- function(lP) {
+  C0 <- Reduce(`+`, lP)
+  obj <- SparseCholesky(C0)
+
+  structure(
+    list(
+      chol = obj,
+      V = vecList(obj, lP)
+    ),
+    class = "ADchol"
+  )
+}
+
+dlogdetAD <- function(obj, theta) {
+  obj$chol <- updateLinear(obj$chol, obj$V, theta)
+  dlogdetLinear(obj$chol, obj$V, theta)
+}
+
 

@@ -74,4 +74,26 @@ expect_silent({
   x2 <- LMMsolver:::solve(obj, b)
 
   expect_equal(x2, x1, tolerance = 1e-10)
+
+  #
+  ## Backward-compatible ADchol interface
+  #
+  lP <- list(A, B)
+
+  ADobj <- LMMsolver:::ADchol(lP)
+
+  expect_true(inherits(ADobj, "ADchol"))
+  expect_true(is(ADobj$chol, "LMMsolver.chol"))
+
+  ## Same gradient as the new interface
+  ## (used function name dlogdet before)
+  g_ad <- LMMsolver:::dlogdetAD(ADobj, theta)
+
+  expect_equal(
+    g_ad,
+    g_linear,
+    tolerance = 1e-12
+  )
 })
+
+
