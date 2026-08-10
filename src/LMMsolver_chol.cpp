@@ -60,6 +60,51 @@ void updateH(NumericVector& H, const SparseMatrix& tX, int i, int j, double alph
   }
 }
 
+
+// [[Rcpp::export]]
+NumericVector diagXCinvXt(Rcpp::S4 obj, Rcpp::S4 transposeX)
+{
+  SparseMatrix tX(transposeX);
+
+  const int nPred = tX.dim[1];
+
+  IntegerVector supernodes = obj.slot("supernodes");
+  IntegerVector colpointers = obj.slot("colpointers");
+  IntegerVector rowpointers = obj.slot("rowpointers");
+  IntegerVector rowindices = obj.slot("rowindices");
+
+  NumericVector F = obj.slot("ADentries");
+
+  NumericVector H(nPred, 0.0);
+
+  const int Nsupernodes = supernodes.size() - 1;
+
+  for (int J = 0; J < Nsupernodes; ++J)
+  {
+    int s = rowpointers[J];
+
+    for (int j = supernodes[J]; j < supernodes[J + 1]; ++j)
+    {
+      int k = s;
+
+      for (int ndx = colpointers[j];
+           ndx < colpointers[j + 1]; ++ndx)
+      {
+        int i = rowindices[k++];
+        double alpha = F[ndx];
+
+        updateH(H, tX, i, j, alpha);
+      }
+
+      ++s;
+    }
+  }
+
+  return H;
+}
+
+
+/*
 // [[Rcpp::export]]
 NumericVector diagXCinvXt(Rcpp::S4 obj, Rcpp::S4 transposeX)
 {
@@ -99,6 +144,7 @@ NumericVector diagXCinvXt(Rcpp::S4 obj, Rcpp::S4 transposeX)
   }
   return H;
 }
+*/
 
 // [[Rcpp::export]]
 List update_Rcpp_fun(Rcpp::S4 obj) {
