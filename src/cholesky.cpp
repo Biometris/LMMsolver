@@ -139,7 +139,11 @@ void cholesky(NumericVector& L,
 
   IntegerVector indmap(N,0);
   NumericVector t(N);
+
+  // for each supernode J
   for (int J=0; J<Nsupernodes;J++) {
+
+    // Phase 1
     makeIndMap(indmap, J, rowpointers, rowindices);
     for (int j=supernodes[J];j<supernodes[J+1];j++)
     {
@@ -159,10 +163,16 @@ void cholesky(NumericVector& L,
         K = nextK;
       }
       HEAD[j] = -1;
+    }
+    // update
+    colhead[J]++;
+
+    // Phase 2
+    for (int j=supernodes[J];j<supernodes[J+1];j++) {
       cmod1(L, j, J, supernodes, colpointers);
       cdiv(L, j, colpointers);
     }
-    colhead[J]++;
+
   }
 }
 
@@ -315,15 +325,14 @@ NumericMatrix PrintCholesky(Rcpp::S4 obj)
 {
   Rcout << "Class: " << as<std::string>(obj.attr("class")) << std::endl;
 
-  IntegerVector supernodes = GetIntVector(obj, "supernodes", 0);
-  // Exchange row and columns compared to spam object, as in Ng and Peyton 1993
-  IntegerVector colpointers = GetIntVector(obj, "rowpointers", 0);
-  IntegerVector rowpointers = GetIntVector(obj, "colpointers", 0);
-  IntegerVector rowindices = GetIntVector(obj, "colindices", 0);
-  IntegerVector pivot = GetIntVector(obj, "pivot", 0);
-  IntegerVector invpivot = GetIntVector(obj, "invpivot", 0);
+  IntegerVector supernodes = obj.slot("supernodes");
+  IntegerVector colpointers = obj.slot("colpointers");
+  IntegerVector rowpointers = obj.slot("rowpointers");
+  IntegerVector rowindices = obj.slot("rowindices");
+  IntegerVector pivot = obj.slot("pivot");
+  IntegerVector invpivot = obj.slot("invpivot");
 
-  NumericVector L = Rcpp::clone<Rcpp::NumericVector>(obj.slot("entries"));
+  NumericVector L = obj.slot("entries");
 
   const int Nsupernodes = supernodes.size()-1;
   const int N = colpointers.size() - 1;
@@ -347,5 +356,4 @@ NumericMatrix PrintCholesky(Rcpp::S4 obj)
   }
   return A;
 }
-
 */
