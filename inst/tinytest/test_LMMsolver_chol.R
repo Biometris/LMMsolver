@@ -104,7 +104,7 @@ expect_silent({
 
   ## Same gradient as the new interface
   ## (used function name dlogdet before)
-  g_ad <- LMMsolver:::dlogdetAD(ADobj, theta)
+  g_ad <- LMMsolver:::dlogdet(ADobj, theta)
 
   expect_equal(
     g_ad,

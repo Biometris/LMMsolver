@@ -17,22 +17,24 @@ SparseCholesky <- function(C) {
 
   # Exchange row and columns compared to spam object, as in Ng and Peyton 1993
   # LMMsolver.chol uses C-index (0) instead of R-index (1)
-  obj <- new("LMMsolver.chol",
-            supernodes = cholC@supernodes - 1,
-            colpointers = cholC@rowpointers - 1,
-            rowpointers = cholC@colpointers - 1,
-            rowindices = cholC@colindices - 1,
-            pivot = cholC@pivot - 1,
-            invpivot = cholC@invpivot - 1,
-            entries = rep(0, N_entries),
-            ADentries = rep(0, N_entries))
+  obj <- methods::new("LMMsolver.chol",
+             supernodes = cholC@supernodes - 1,
+             colpointers = cholC@rowpointers - 1,
+             rowpointers = cholC@colpointers - 1,
+             rowindices = cholC@colindices - 1,
+             pivot = cholC@pivot - 1,
+             invpivot = cholC@invpivot - 1,
+             entries = rep(0, N_entries),
+             ADentries = rep(0, N_entries))
 
   obj@entries <- vec(obj, C)
   L <- update_Rcpp_fun(obj)
   obj@entries <- L$entries
   obj@ADentries <- L$ADentries
-  return(obj)
+
+  obj
 }
+
 
 setMethod("update", "LMMsolver.chol",
           function(object, C, ...) {
@@ -43,28 +45,41 @@ setMethod("update", "LMMsolver.chol",
             object
           })
 
+
 setMethod("solve", "LMMsolver.chol",
           function(a, b, ...) {
             solve_Rcpp_fun(a, b)
           })
 
+
 updateLinear <- function(object, V, theta) {
-   object@entries <- as.vector(V %*% theta)
-   L <- update_Rcpp_fun(object)
-   object@entries <- L$entries
-   object@ADentries <- L$ADentries
-   object
+  object@entries <- as.vector(V %*% theta)
+  L <- update_Rcpp_fun(object)
+  object@entries <- L$entries
+  object@ADentries <- L$ADentries
+  object
 }
+
 
 logdet <- function(object) {
   logdet_Rcpp_fun(object)
 }
 
-dlogdet <- function(obj, dC) {
+
+# Generic for derivative of log determinant
+dlogdet <- function(obj, ...) {
+  UseMethod("dlogdet")
+}
+
+
+# Derivative for LMMsolver.chol
+#' @exportS3Method
+dlogdet.LMMsolver.chol <- function(obj, dC, ...) {
   dF <- obj@ADentries
   v <- vec(obj, dC)
   sum(dF * v)
 }
+
 
 dlogdetLinear <- function(obj, V, theta) {
   g <- as.vector(crossprod(obj@ADentries, V))
@@ -76,9 +91,11 @@ dlogdetLinear <- function(obj, V, theta) {
   n * g / sum(theta * g)
 }
 
+
 vecList <- function(obj, x) {
   do.call(cbind, lapply(x, function(dC) vec(obj, dC)))
 }
+
 
 # ADchol, for backward compatibility
 
@@ -95,7 +112,10 @@ ADchol <- function(lP) {
   )
 }
 
-dlogdetAD <- function(obj, theta) {
+
+# Derivative for the old ADchol object
+#' @exportS3Method
+dlogdet.ADchol <- function(obj, theta, ...) {
   obj$chol <- updateLinear(obj$chol, obj$V, theta)
   dlogdetLinear(obj$chol, obj$V, theta)
 }
