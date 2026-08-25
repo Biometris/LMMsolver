@@ -111,56 +111,6 @@ void cdiv(NumericVector& L, int j, const IntegerVector& colpointers)
   }
 }
 
-void cmod2_sup(
-    NumericVector& L,
-    int J,
-    IntegerVector& colhead,
-    IntegerVector& HEAD,
-    IntegerVector& LINK,
-    IntegerVector& indmap,
-    NumericVector& t,
-    const IntegerVector& supernodes,
-    const IntegerVector& rowpointers,
-    const IntegerVector& colpointers,
-    const IntegerVector& rowindices)
-{
-  // make indmap for current supernode J
-  makeIndMap(indmap, J, rowpointers, rowindices);
-
-  // process all columns of current supernode
-  for (int j = supernodes[J];
-       j < supernodes[J+1]; j++)
-  {
-    int K = HEAD[j];
-
-    while (K != -1)
-    {
-      int nextK = LINK[K];
-
-      int sz = rowpointers[K+1] - colhead[K];
-
-      cmod2(
-        L, j, K, sz, t, indmap,
-        supernodes, rowpointers,
-        colpointers, rowindices
-      );
-
-      // advance K
-      colhead[K]++;
-
-      if (colhead[K] < rowpointers[K+1])
-      {
-        int rNdx = rowindices[colhead[K]];
-
-        insert(HEAD, LINK, rNdx, K);
-      }
-
-      K = nextK;
-    }
-
-    HEAD[j] = -1;
-  }
-}
 
 void cholesky(NumericVector& L,
            const IntegerVector& supernodes,
@@ -192,10 +142,28 @@ void cholesky(NumericVector& L,
 
   // for each supernode J
   for (int J=0; J<Nsupernodes;J++) {
-    cmod2_sup(L,J, colhead, HEAD, LINK,
-            indmap, t, supernodes, rowpointers,
-            colpointers, rowindices);
 
+    // Phase 1
+    makeIndMap(indmap, J, rowpointers, rowindices);
+    for (int j=supernodes[J];j<supernodes[J+1];j++)
+    {
+      int K = HEAD[j];
+      while (K!=-1)
+      {
+        int nextK = LINK[K];
+        int sz = rowpointers[K+1] - colhead[K];
+        cmod2(L, j, K, sz, t, indmap, supernodes, rowpointers, colpointers, rowindices);
+
+        colhead[K]++;
+        if (colhead[K] < rowpointers[K+1])
+        {
+          int rNdx = rowindices[colhead[K]];
+          insert(HEAD, LINK, rNdx, K);
+        }
+        K = nextK;
+      }
+      HEAD[j] = -1;
+    }
     // update
     colhead[J]++;
 
