@@ -116,6 +116,20 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// chol_last_2block
+NumericMatrix chol_last_2block(NumericVector& L, const IntegerVector& supernodes, const IntegerVector& colpointers, int panel_size);
+RcppExport SEXP _LMMsolver_chol_last_2block(SEXP LSEXP, SEXP supernodesSEXP, SEXP colpointersSEXP, SEXP panel_sizeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector& >::type L(LSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type supernodes(supernodesSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type colpointers(colpointersSEXP);
+    Rcpp::traits::input_parameter< int >::type panel_size(panel_sizeSEXP);
+    rcpp_result_gen = Rcpp::wrap(chol_last_2block(L, supernodes, colpointers, panel_size));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_LMMsolver_GetIntVector", (DL_FUNC) &_LMMsolver_GetIntVector, 3},
@@ -127,6 +141,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_LMMsolver_vec", (DL_FUNC) &_LMMsolver_vec, 2},
     {"_LMMsolver_RowKron", (DL_FUNC) &_LMMsolver_RowKron, 2},
     {"_LMMsolver_MatrixProduct", (DL_FUNC) &_LMMsolver_MatrixProduct, 2},
+    {"_LMMsolver_chol_last_2block", (DL_FUNC) &_LMMsolver_chol_last_2block, 4},
     {NULL, NULL, 0}
 };
 

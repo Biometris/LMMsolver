@@ -118,6 +118,130 @@ void cdiv(NumericVector& L, int j, const IntegerVector& colpointers)
 }
 
 
+// [[Rcpp::export]]
+NumericMatrix chol_last_2block(
+    NumericVector& L,
+    const IntegerVector& supernodes,
+    const IntegerVector& colpointers,
+    int panel_size = 246)
+{
+  const int J = 28;
+
+  const int j0 = supernodes[J];
+  const int j1 = supernodes[J + 1];
+
+  const int n = j1 - j0;       // should be 492
+  const int b = panel_size;
+  const int m = n - b;
+
+  if (b <= 0 || b >= n)
+    stop("panel_size must be between 1 and n-1");
+
+  // ------------------------------------------------------------
+  // Temporary dense representation of the supernode.
+  //
+  // A is n x n, column-major.
+  // Only the lower triangle is used.
+  // ------------------------------------------------------------
+  NumericMatrix A(n, n);
+
+  double* l = L.begin();
+
+  for (int j = 0; j < n; ++j)
+  {
+    const int col = j0 + j;
+    const int s = colpointers[col];
+
+    for (int i = j; i < n; ++i)
+      A(i, j) = l[s + (i - j)];
+  }
+
+  // ------------------------------------------------------------
+  // 1. Cholesky of C11
+  // ------------------------------------------------------------
+  for (int j = 0; j < b; ++j)
+  {
+    for (int k = 0; k < j; ++k)
+    {
+      const double Ljk = A(j, k);
+
+      for (int i = j; i < b; ++i)
+        A(i, j) -= A(i, k) * Ljk;
+    }
+
+    A(j, j) = std::sqrt(A(j, j));
+
+    for (int i = j + 1; i < b; ++i)
+      A(i, j) /= A(j, j);
+  }
+
+  // ------------------------------------------------------------
+  // 2. Compute L21:
+  //
+  // C21 = L21 L11^T
+  //
+  // For each column j in panel 2, solve:
+  //
+  //     L21(j,:) L11^T = C21(j,:)
+  //
+  // equivalently process the columns of L11.
+  // ------------------------------------------------------------
+  for (int j = b; j < n; ++j)
+  {
+    for (int k = 0; k < b; ++k)
+    {
+      double x = A(j, k);
+
+      for (int r = 0; r < k; ++r)
+        x -= A(j, r) * A(k, r);
+
+      A(j, k) = x / A(k, k);
+    }
+  }
+
+  // ------------------------------------------------------------
+  // 3. Schur complement:
+  //
+  //     C22 <- C22 - L21 L21^T
+  //
+  // Only lower triangle.
+  // ------------------------------------------------------------
+  for (int j = b; j < n; ++j)
+  {
+    for (int k = b; k <= j; ++k)
+    {
+      double sum = 0.0;
+
+      for (int r = 0; r < b; ++r)
+        sum += A(j, r) * A(k, r);
+
+      A(j, k) -= sum;
+    }
+  }
+
+  // ------------------------------------------------------------
+  // 4. Cholesky of S22 = L22 L22^T
+  // ------------------------------------------------------------
+  for (int j = b; j < n; ++j)
+  {
+    for (int k = b; k < j; ++k)
+    {
+      const double Ljk = A(j, k);
+
+      for (int i = j; i < n; ++i)
+        A(i, j) -= A(i, k) * Ljk;
+    }
+
+    A(j, j) = std::sqrt(A(j, j));
+
+    for (int i = j + 1; i < n; ++i)
+      A(i, j) /= A(j, j);
+  }
+
+  return A;
+}
+
+
 void cholesky(NumericVector& L,
            const IntegerVector& supernodes,
            const IntegerVector& rowpointers,
@@ -148,6 +272,7 @@ void cholesky(NumericVector& L,
 
   // for each supernode J
   for (int J=0; J<Nsupernodes;J++) {
+
 
     long long calls = 0;
     long long work = 0;
@@ -193,6 +318,42 @@ void cholesky(NumericVector& L,
 
     // update
     colhead[J]++;
+
+    if (J == 28) {
+      auto start_chol_last = high_resolution_clock::now();
+
+      NumericMatrix A = chol_last_2block(L, supernodes, colpointers, 246);
+
+      // Write lower triangle of dense result back into entries
+      const int j0 = supernodes[J];
+      const int j1 = supernodes[J + 1];
+      const int n = j1-j0;
+
+      double* l = L.begin();
+
+      for (int j = 0; j < n; ++j)
+      {
+        const int col = j0 + j;
+        const int s = colpointers[col];
+
+        for (int i = j; i < n; ++i)
+          l[s + (i - j)] = A(i, j);
+      }
+
+      auto end_chol_last = high_resolution_clock::now();
+
+      const int sz_node = j1 - j0;
+
+      double elapsed_chol_last =
+        duration<double>(end_chol_last - start_chol_last).count();
+
+      Rcout << "Supernode " << setw(3) << J
+            << " sznode: " << setw(3) << sz_node
+            << " cmod_last: " << setw(4) << elapsed_chol_last
+            << std::endl;
+
+      return;
+    }
 
     // Phase 2
     auto start = high_resolution_clock::now();
