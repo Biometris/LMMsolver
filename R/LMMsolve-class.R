@@ -571,7 +571,7 @@ predict.LMMsolve <- function(object,
 
   outDat <- newdata
 
-  ranTerms <- setdiff(object$term.labels.r, splRanLab)
+  ranTerms <- setdiff(all.vars(object$ran.spec$terms), splRanLab)
   nRanTerms <- length(ranTerms)
   excluded_var <- get_missing_vars(object$ran.spec$terms, newdata)
   for (i in seq_len(nRanTerms)) {
