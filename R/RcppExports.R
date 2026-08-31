@@ -41,15 +41,7 @@ arma_info <- function() {
     invisible(.Call(`_LMMsolver_arma_info`))
 }
 
-chol_last_2block <- function(L, supernodes, colpointers, panel_size = 246L) {
-    invisible(.Call(`_LMMsolver_chol_last_2block`, L, supernodes, colpointers, panel_size))
-}
-
-chol_last <- function(L, supernodes, colpointers) {
-    invisible(.Call(`_LMMsolver_chol_last`, L, supernodes, colpointers))
-}
-
-chol_last2 <- function(L, supernodes, colpointers) {
-    invisible(.Call(`_LMMsolver_chol_last2`, L, supernodes, colpointers))
+chol_last_supernode <- function(L, supernodes, colpointers) {
+    invisible(.Call(`_LMMsolver_chol_last_supernode`, L, supernodes, colpointers))
 }
 

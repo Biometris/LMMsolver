@@ -126,40 +126,15 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
-// chol_last_2block
-void chol_last_2block(NumericVector& L, const IntegerVector& supernodes, const IntegerVector& colpointers, int panel_size);
-RcppExport SEXP _LMMsolver_chol_last_2block(SEXP LSEXP, SEXP supernodesSEXP, SEXP colpointersSEXP, SEXP panel_sizeSEXP) {
+// chol_last_supernode
+void chol_last_supernode(NumericVector& L, const IntegerVector& supernodes, const IntegerVector& colpointers);
+RcppExport SEXP _LMMsolver_chol_last_supernode(SEXP LSEXP, SEXP supernodesSEXP, SEXP colpointersSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector& >::type L(LSEXP);
     Rcpp::traits::input_parameter< const IntegerVector& >::type supernodes(supernodesSEXP);
     Rcpp::traits::input_parameter< const IntegerVector& >::type colpointers(colpointersSEXP);
-    Rcpp::traits::input_parameter< int >::type panel_size(panel_sizeSEXP);
-    chol_last_2block(L, supernodes, colpointers, panel_size);
-    return R_NilValue;
-END_RCPP
-}
-// chol_last
-void chol_last(NumericVector& L, const IntegerVector& supernodes, const IntegerVector& colpointers);
-RcppExport SEXP _LMMsolver_chol_last(SEXP LSEXP, SEXP supernodesSEXP, SEXP colpointersSEXP) {
-BEGIN_RCPP
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector& >::type L(LSEXP);
-    Rcpp::traits::input_parameter< const IntegerVector& >::type supernodes(supernodesSEXP);
-    Rcpp::traits::input_parameter< const IntegerVector& >::type colpointers(colpointersSEXP);
-    chol_last(L, supernodes, colpointers);
-    return R_NilValue;
-END_RCPP
-}
-// chol_last2
-void chol_last2(NumericVector& L, const IntegerVector& supernodes, const IntegerVector& colpointers);
-RcppExport SEXP _LMMsolver_chol_last2(SEXP LSEXP, SEXP supernodesSEXP, SEXP colpointersSEXP) {
-BEGIN_RCPP
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector& >::type L(LSEXP);
-    Rcpp::traits::input_parameter< const IntegerVector& >::type supernodes(supernodesSEXP);
-    Rcpp::traits::input_parameter< const IntegerVector& >::type colpointers(colpointersSEXP);
-    chol_last2(L, supernodes, colpointers);
+    chol_last_supernode(L, supernodes, colpointers);
     return R_NilValue;
 END_RCPP
 }
@@ -175,9 +150,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_LMMsolver_RowKron", (DL_FUNC) &_LMMsolver_RowKron, 2},
     {"_LMMsolver_MatrixProduct", (DL_FUNC) &_LMMsolver_MatrixProduct, 2},
     {"_LMMsolver_arma_info", (DL_FUNC) &_LMMsolver_arma_info, 0},
-    {"_LMMsolver_chol_last_2block", (DL_FUNC) &_LMMsolver_chol_last_2block, 4},
-    {"_LMMsolver_chol_last", (DL_FUNC) &_LMMsolver_chol_last, 3},
-    {"_LMMsolver_chol_last2", (DL_FUNC) &_LMMsolver_chol_last2, 3},
+    {"_LMMsolver_chol_last_supernode", (DL_FUNC) &_LMMsolver_chol_last_supernode, 3},
     {NULL, NULL, 0}
 };
 
