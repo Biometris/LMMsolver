@@ -17,6 +17,10 @@
 #include "SparseMatrix.h"
 #include "cholesky.h"
 
+#include <chrono>
+
+using namespace std::chrono;
+
 using namespace Rcpp;
 using namespace std;
 
@@ -96,6 +100,8 @@ void cmod2(NumericVector& L, int j, int K, int sz,
   }
 }
 
+
+
 void cdiv(NumericVector& L, int j, const IntegerVector& colpointers)
 {
   const int& s = colpointers[j];
@@ -143,15 +149,32 @@ void cholesky(NumericVector& L,
   // for each supernode J
   for (int J=0; J<Nsupernodes;J++) {
 
+    long long calls = 0;
+    long long work = 0;
+
+    int sz_node = supernodes[J+1] - supernodes[J];
+
     // Phase 1
     makeIndMap(indmap, J, rowpointers, rowindices);
+    auto start_cmod2 = high_resolution_clock::now();
+
     for (int j=supernodes[J];j<supernodes[J+1];j++)
     {
       int K = HEAD[j];
+
       while (K!=-1)
       {
+
         int nextK = LINK[K];
         int sz = rowpointers[K+1] - colhead[K];
+
+        //if (J==28) {
+        //    Rcout << " j = " << setw(3) << j << "  " << setw(3) <<
+        //    K << " colhead K " << colhead[K] << " size " << setw(3)  << sz << endl;}
+
+        const int wK = supernodes[K+1] - supernodes[K];
+        calls++;
+        work += static_cast<long long>(sz) * wK;
         cmod2(L, j, K, sz, t, indmap, supernodes, rowpointers, colpointers, rowindices);
 
         colhead[K]++;
@@ -164,13 +187,29 @@ void cholesky(NumericVector& L,
       }
       HEAD[j] = -1;
     }
+
+    auto end_cmod2 = high_resolution_clock::now();
+    double elapsed_cmod2 = duration<double>(end_cmod2 - start_cmod2).count();
+
     // update
     colhead[J]++;
 
     // Phase 2
+    auto start = high_resolution_clock::now();
     for (int j=supernodes[J];j<supernodes[J+1];j++) {
       cmod1(L, j, J, supernodes, colpointers);
       cdiv(L, j, colpointers);
+    }
+    auto end = high_resolution_clock::now();
+    double elapsed = duration<double>(end - start).count();
+
+    if (sz_node > 2) {
+      //  Rcout << "Supernode " << J
+      //        << " calls: " << calls
+      //        << " work: " << work
+      //        << "\n";
+      Rcout << "Supernode " << setw(3) << J << " sznode: " << setw(3) << sz_node <<
+        " cmod2: " << setw(4) << elapsed_cmod2 << " cmod1/cdiv: " << setw(4) << elapsed << endl;
     }
 
   }
