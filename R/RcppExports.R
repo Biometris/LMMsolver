@@ -38,6 +38,6 @@ MatrixProduct <- function(sA, sB) {
 }
 
 chol_last_2block <- function(L, supernodes, colpointers, panel_size = 246L) {
-    .Call(`_LMMsolver_chol_last_2block`, L, supernodes, colpointers, panel_size)
+    invisible(.Call(`_LMMsolver_chol_last_2block`, L, supernodes, colpointers, panel_size))
 }
 

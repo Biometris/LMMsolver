@@ -119,7 +119,7 @@ void cdiv(NumericVector& L, int j, const IntegerVector& colpointers)
 
 
 // [[Rcpp::export]]
-NumericMatrix chol_last_2block(
+void chol_last_2block(
     NumericVector& L,
     const IntegerVector& supernodes,
     const IntegerVector& colpointers,
@@ -238,7 +238,23 @@ NumericMatrix chol_last_2block(
       A(i, j) /= A(j, j);
   }
 
-  return A;
+  // Write lower triangle of dense result back into entries
+  //const int j0 = supernodes[J];
+  //const int j1 = supernodes[J + 1];
+  //const int n = j1-j0;
+
+  //double* l = L.begin();
+
+  for (int j = 0; j < n; ++j)
+  {
+    const int col = j0 + j;
+    const int s = colpointers[col];
+
+    for (int i = j; i < n; ++i)
+      l[s + (i - j)] = A(i, j);
+  }
+  return;
+  //return A;
 }
 
 
@@ -322,30 +338,11 @@ void cholesky(NumericVector& L,
     if (J == 28) {
       auto start_chol_last = high_resolution_clock::now();
 
-      NumericMatrix A = chol_last_2block(L, supernodes, colpointers, 246);
-
-      // Write lower triangle of dense result back into entries
-      const int j0 = supernodes[J];
-      const int j1 = supernodes[J + 1];
-      const int n = j1-j0;
-
-      double* l = L.begin();
-
-      for (int j = 0; j < n; ++j)
-      {
-        const int col = j0 + j;
-        const int s = colpointers[col];
-
-        for (int i = j; i < n; ++i)
-          l[s + (i - j)] = A(i, j);
-      }
+      chol_last_2block(L, supernodes, colpointers, 246);
 
       auto end_chol_last = high_resolution_clock::now();
 
-      const int sz_node = j1 - j0;
-
-      double elapsed_chol_last =
-        duration<double>(end_chol_last - start_chol_last).count();
+      double elapsed_chol_last = duration<double>(end_chol_last - start_chol_last).count();
 
       Rcout << "Supernode " << setw(3) << J
             << " sznode: " << setw(3) << sz_node
