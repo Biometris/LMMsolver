@@ -27,7 +27,9 @@ Imports:
     Rcpp (>= 0.10.4),
     spam,
     splines
-LinkingTo: Rcpp
+LinkingTo: 
+    Rcpp,
+    RcppArmadillo
 Suggests: 
     rmarkdown,
     knitr,
