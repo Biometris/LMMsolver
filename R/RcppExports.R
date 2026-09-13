@@ -37,11 +37,31 @@ MatrixProduct <- function(sA, sB) {
     .Call(`_LMMsolver_MatrixProduct`, sA, sB)
 }
 
+axpy_test_large <- function(n = 492L, nvec = 40000L) {
+    .Call(`_LMMsolver_axpy_test_large`, n, nvec)
+}
+
+axpy_test <- function(n = 492L, reps = 100000L) {
+    .Call(`_LMMsolver_axpy_test`, n, reps)
+}
+
+axpy_test4 <- function(n = 492L, reps = 100000L) {
+    .Call(`_LMMsolver_axpy_test4`, n, reps)
+}
+
+test_dgemm <- function(m = 492L, k = 246L, n = 492L) {
+    .Call(`_LMMsolver_test_dgemm`, m, k, n)
+}
+
 arma_info <- function() {
     invisible(.Call(`_LMMsolver_arma_info`))
 }
 
 chol_last_supernode <- function(L, supernodes, colpointers) {
     invisible(.Call(`_LMMsolver_chol_last_supernode`, L, supernodes, colpointers))
+}
+
+matmul_test <- function(A, B, reps, tileSize) {
+    .Call(`_LMMsolver_matmul_test`, A, B, reps, tileSize)
 }
 
