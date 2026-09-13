@@ -53,7 +53,7 @@ void cmod1(NumericVector& L, int j, int J,
   // for all columns in supernode J left to j:
   for (int k=supernodes[J];k<j;k++)
   {
-    const int& jk = colpointers[k] + (j-k);
+    const int jk = colpointers[k] + (j-k);
     int ik = jk;
     const double Ljk = l[jk];
     for (int ij=s; ij<e; ij++)
@@ -73,23 +73,26 @@ void cmod2(NumericVector& L, int j, int K, int sz,
            const IntegerVector& colpointers,
            const IntegerVector& rowindices)
 {
+  double *l = L.begin();
+  double *tp = t.begin();
+
   // init t:
   for (int i=0;i<sz;i++)
   {
-    t[i] = 0.0;
+    tp[i] = 0.0;
   }
 
-  const int& sCol = supernodes[K];
-  const int& eCol = supernodes[K+1];
+  const int sCol = supernodes[K];
+  const int eCol = supernodes[K+1];
 
   for (int k=sCol; k<eCol; k++)
   {
     int jk = colpointers[k+1]-sz;
     int ik = jk;
-    const double& Ljk = L[jk];
+    const double& Ljk = l[jk];
     for (int i=sz-1;i>=0;i--)
     {
-      t[i] += L[ik++]*Ljk;
+      tp[i] += l[ik++]*Ljk;
       //ik++;
     }
   }
@@ -100,23 +103,24 @@ void cmod2(NumericVector& L, int j, int K, int sz,
   {
     int ndx = rowindices[r--];
     int pos = ref_pos - indmap[ndx];
-    L[pos] -= t[i];
+    l[pos] -= tp[i];
   }
 }
 
 
 void cdiv(NumericVector& L, int j, const IntegerVector& colpointers)
 {
-  const int& s = colpointers[j];
-  const int& e = colpointers[j+1];
+  double *l = L.begin();
+  const int s = colpointers[j];
+  const int e = colpointers[j+1];
 
   // pivot:
-  L[s] = sqrt(L[s]);
+  l[s] = sqrt(l[s]);
   // update column j:
-  double Ls = L[s];
+  double Ls = l[s];
   for (int i = s + 1; i < e; i++)
   {
-    L[i] /= Ls;
+    l[i] /= Ls;
   }
 }
 
@@ -313,6 +317,72 @@ void cmod2_target(
 
 
 void cholesky(NumericVector& L,
+              const IntegerVector& supernodes,
+              const IntegerVector& rowpointers,
+              const IntegerVector& colpointers,
+              const IntegerVector& rowindices)
+{
+  const int N = colpointers.size() - 1;
+  const int Nsupernodes = supernodes.size()-1;
+
+  // linked lists, see section 4.2 Ng and Peyton
+  IntegerVector HEAD(N,-1);
+  IntegerVector LINK(Nsupernodes,-1);
+
+  IntegerVector colhead = clone(rowpointers);
+  for (int J=0; J<Nsupernodes;J++)
+  {
+    int szNode = supernodes[J+1] - supernodes[J];
+    colhead[J] += szNode-1;
+    if (colhead[J] < rowpointers[J+1]-1)
+    {
+      int rNdx = rowindices[colhead[J]+1];
+      insert(HEAD, LINK, rNdx, J);
+    }
+  }
+
+  IntegerVector indmap(N,0);
+  NumericVector t(N);
+
+  // for each supernode J
+  for (int J=0; J<Nsupernodes;J++) {
+
+    // Phase 1
+    makeIndMap(indmap, J, rowpointers, rowindices);
+    for (int j=supernodes[J];j<supernodes[J+1];j++)
+    {
+      int K = HEAD[j];
+      while (K!=-1)
+      {
+        int nextK = LINK[K];
+        int sz = rowpointers[K+1] - colhead[K];
+        cmod2(L, j, K, sz, t, indmap, supernodes, rowpointers, colpointers, rowindices);
+
+        colhead[K]++;
+        if (colhead[K] < rowpointers[K+1])
+        {
+          int rNdx = rowindices[colhead[K]];
+          insert(HEAD, LINK, rNdx, K);
+        }
+        K = nextK;
+      }
+      HEAD[j] = -1;
+    }
+    // update
+    colhead[J]++;
+
+    // Phase 2
+    for (int j=supernodes[J];j<supernodes[J+1];j++) {
+      cmod1(L, j, J, supernodes, colpointers);
+      cdiv(L, j, colpointers);
+    }
+
+  }
+}
+
+
+
+void cholesky_new(NumericVector& L,
            const IntegerVector& supernodes,
            const IntegerVector& rowpointers,
            const IntegerVector& colpointers,

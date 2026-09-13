@@ -44,6 +44,9 @@ void ADcmod1(NumericVector& F,
              const IntegerVector& supernodes,
              const IntegerVector& colpointers)
 {
+  const double *l = L.begin();
+  double *f = F.begin();
+
   int s = colpointers[j];
   int e = colpointers[j+1];
   // for all columns in supernode J left to j:
@@ -51,14 +54,14 @@ void ADcmod1(NumericVector& F,
   {
     int jk = colpointers[k] + (j-k);
     int ik = jk;
-    double& Fjk = F[jk];
-    const double& Ljk = L[jk];
+    double& fjk = f[jk];
+    const double Ljk = l[jk];
     for (int ij=s; ij<e; ij++)
     {
       // F[ik] = F[ik] - F[ij]*L[jk];
       // F[jk] = F[jk] - F[ij]*L[ik];
-      F[ik] -= F[ij]*Ljk;
-      Fjk   -= F[ij]*L[ik];
+      f[ik] -= f[ij]*Ljk;
+      fjk   -= f[ij]*l[ik];
       ik++;
     }
   }
@@ -74,13 +77,17 @@ void ADcmod2(NumericVector& F,
            const IntegerVector& colpointers,
            const IntegerVector& rowindices)
 {
+  const double *l = L.begin();
+  double *f = F.begin();
+  double *tp = t.begin();
+
   // t is dense version of L[j], updated values at end of function:
   int i=0;
   for (int r = rowpointers[K+1] - 1;r>=rowpointers[K];r--)
   {
     int ndx = rowindices[r];
     int pos = colpointers[j+1] - 1 - indmap[ndx];
-    t[i++] = F[pos];
+    tp[i++] = f[pos];
   }
 
   // for all columns k in supernode K:
@@ -88,15 +95,15 @@ void ADcmod2(NumericVector& F,
   {
     int jk = colpointers[k+1]-sz;
     int ik = jk;
-    const double& Ljk = L[jk];
-    double& Fjk = F[jk];
+    const double Ljk = l[jk];
+    double& Fjk = f[jk];
     for (int i=sz-1;i>=0;i--)
     {
       // F[ik] = F[ik] - F_ij*L[jk];
       // F[jk] = F[jk] - F_ij*L[ik];
-      double F_ij = t[i];
-      F[ik] -= F_ij*Ljk;
-      Fjk   -= F_ij*L[ik];
+      double F_ij = tp[i];
+      f[ik] -= F_ij*Ljk;
+      Fjk   -= F_ij*l[ik];
       ik++;
     }
   }
@@ -105,21 +112,24 @@ void ADcmod2(NumericVector& F,
 void ADcdiv(NumericVector& F,
             const NumericVector& L, int j, const IntegerVector& colpointers)
 {
+  const double *l = L.begin();
+  double *f = F.begin();
+
   const int s = colpointers[j];
   const int e = colpointers[j+1];
 
   // update AD for column j:
-  const double& Ls = L[s];
-  double& Fs = F[s];
+  const double Ls = l[s];
+  double Fs = f[s];
   for (int i = s + 1; i < e; i++)
   {
     // F[i] = F[i]/L[s];
     // F[s] = F[s] - L[i]*F[i];
-    F[i] /= Ls;
-    Fs -= L[i]*F[i];
+    f[i] /= Ls;
+    Fs -= l[i]*f[i];
   }
   //F[s] = Fs;
-  F[s] = 0.5*F[s]/Ls;
+  f[s] = 0.5*Fs/Ls;
 }
 
 void ADcholesky(NumericVector& F,
