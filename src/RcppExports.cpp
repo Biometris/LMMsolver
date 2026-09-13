@@ -117,64 +117,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// axpy_test_large
-double axpy_test_large(int n, int nvec);
-RcppExport SEXP _LMMsolver_axpy_test_large(SEXP nSEXP, SEXP nvecSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int >::type n(nSEXP);
-    Rcpp::traits::input_parameter< int >::type nvec(nvecSEXP);
-    rcpp_result_gen = Rcpp::wrap(axpy_test_large(n, nvec));
-    return rcpp_result_gen;
-END_RCPP
-}
-// axpy_test
-double axpy_test(int n, int reps);
-RcppExport SEXP _LMMsolver_axpy_test(SEXP nSEXP, SEXP repsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int >::type n(nSEXP);
-    Rcpp::traits::input_parameter< int >::type reps(repsSEXP);
-    rcpp_result_gen = Rcpp::wrap(axpy_test(n, reps));
-    return rcpp_result_gen;
-END_RCPP
-}
-// axpy_test4
-double axpy_test4(int n, int reps);
-RcppExport SEXP _LMMsolver_axpy_test4(SEXP nSEXP, SEXP repsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int >::type n(nSEXP);
-    Rcpp::traits::input_parameter< int >::type reps(repsSEXP);
-    rcpp_result_gen = Rcpp::wrap(axpy_test4(n, reps));
-    return rcpp_result_gen;
-END_RCPP
-}
-// test_dgemm
-double test_dgemm(int m, int k, int n);
-RcppExport SEXP _LMMsolver_test_dgemm(SEXP mSEXP, SEXP kSEXP, SEXP nSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int >::type m(mSEXP);
-    Rcpp::traits::input_parameter< int >::type k(kSEXP);
-    Rcpp::traits::input_parameter< int >::type n(nSEXP);
-    rcpp_result_gen = Rcpp::wrap(test_dgemm(m, k, n));
-    return rcpp_result_gen;
-END_RCPP
-}
-// arma_info
-void arma_info();
-RcppExport SEXP _LMMsolver_arma_info() {
-BEGIN_RCPP
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    arma_info();
-    return R_NilValue;
-END_RCPP
-}
 // chol_last_supernode
 void chol_last_supernode(NumericVector& L, const IntegerVector& supernodes, const IntegerVector& colpointers);
 RcppExport SEXP _LMMsolver_chol_last_supernode(SEXP LSEXP, SEXP supernodesSEXP, SEXP colpointersSEXP) {
@@ -185,20 +127,6 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const IntegerVector& >::type colpointers(colpointersSEXP);
     chol_last_supernode(L, supernodes, colpointers);
     return R_NilValue;
-END_RCPP
-}
-// matmul_test
-NumericMatrix matmul_test(NumericMatrix A, NumericMatrix B, int reps, int tileSize);
-RcppExport SEXP _LMMsolver_matmul_test(SEXP ASEXP, SEXP BSEXP, SEXP repsSEXP, SEXP tileSizeSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericMatrix >::type A(ASEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type B(BSEXP);
-    Rcpp::traits::input_parameter< int >::type reps(repsSEXP);
-    Rcpp::traits::input_parameter< int >::type tileSize(tileSizeSEXP);
-    rcpp_result_gen = Rcpp::wrap(matmul_test(A, B, reps, tileSize));
-    return rcpp_result_gen;
 END_RCPP
 }
 
@@ -212,13 +140,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_LMMsolver_vec", (DL_FUNC) &_LMMsolver_vec, 2},
     {"_LMMsolver_RowKron", (DL_FUNC) &_LMMsolver_RowKron, 2},
     {"_LMMsolver_MatrixProduct", (DL_FUNC) &_LMMsolver_MatrixProduct, 2},
-    {"_LMMsolver_axpy_test_large", (DL_FUNC) &_LMMsolver_axpy_test_large, 2},
-    {"_LMMsolver_axpy_test", (DL_FUNC) &_LMMsolver_axpy_test, 2},
-    {"_LMMsolver_axpy_test4", (DL_FUNC) &_LMMsolver_axpy_test4, 2},
-    {"_LMMsolver_test_dgemm", (DL_FUNC) &_LMMsolver_test_dgemm, 3},
-    {"_LMMsolver_arma_info", (DL_FUNC) &_LMMsolver_arma_info, 0},
     {"_LMMsolver_chol_last_supernode", (DL_FUNC) &_LMMsolver_chol_last_supernode, 3},
-    {"_LMMsolver_matmul_test", (DL_FUNC) &_LMMsolver_matmul_test, 4},
     {NULL, NULL, 0}
 };
 
