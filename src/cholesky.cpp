@@ -47,17 +47,18 @@ void cmod1(NumericVector& L, int j, int J,
            const IntegerVector& supernodes,
            const IntegerVector& colpointers)
 {
-  const int& s = colpointers[j];
-  const int& e = colpointers[j+1];
+  double *l = L.begin();
+  const int s = colpointers[j];
+  const int e = colpointers[j+1];
   // for all columns in supernode J left to j:
   for (int k=supernodes[J];k<j;k++)
   {
     const int& jk = colpointers[k] + (j-k);
     int ik = jk;
-    const double& Ljk = L[jk];
+    const double Ljk = l[jk];
     for (int ij=s; ij<e; ij++)
     {
-       L[ij] -= L[ik++]*Ljk;
+       l[ij] -= l[ik++]*Ljk;
        //ik++;
     }
   }
@@ -195,15 +196,13 @@ void chol_last_supernode(
   return;
 }
 
+struct Target
+{
+  int j;
+  int k;
+};
 
-// ------------------------------------------------------------
-// Find positions in K's row structure corresponding to the
-// target columns of supernode J.
-//
-// For a proper supernode, these positions are consecutive.
-// target_k[p] corresponds to target column j0 + p.
-// ------------------------------------------------------------
-std::vector<int> find_targets(
+std::vector<Target> find_targets(
     int K,
     int J,
     const IntegerVector& supernodes,
@@ -216,7 +215,7 @@ std::vector<int> find_targets(
   const int j0 = supernodes[J];
   const int j1 = supernodes[J + 1];
 
-  std::vector<int> target_k;
+  std::vector<Target> targets;
 
   for (int k = sK; k < eK; ++k)
   {
@@ -228,19 +227,12 @@ std::vector<int> find_targets(
     if (row >= j1)
       break;
 
-    target_k.push_back(k);
+    targets.push_back({row, k});
   }
 
-  return target_k;
+  return targets;
 }
 
-// ------------------------------------------------------------
-// Process all target columns j of supernode J that receive a
-// contribution from K, in the original j-first order.
-//
-// This uses the same cmod2 numerical kernel, but target columns
-// are obtained through find_targets().
-// ------------------------------------------------------------
 void cmod2_target(
     NumericVector& L,
     int K,
@@ -253,16 +245,11 @@ void cmod2_target(
     const IntegerVector& rowindices)
 {
   const int eK = rowpointers[K + 1];
-  const int j0 = supernodes[J];
 
-  // ------------------------------------------------------------
-  // Find target positions in K's row structure.
-  // target_k[p] corresponds to column j0 + p.
-  // ------------------------------------------------------------
-  const std::vector<int> target_k =
+  const std::vector<Target> targets =
     find_targets(K, J, supernodes, rowpointers, rowindices);
 
-  const int q = target_k.size();
+  const int q = targets.size();
 
   if (q == 0)
     return;
@@ -270,25 +257,32 @@ void cmod2_target(
   double* tp = t.begin();
   double* l  = L.begin();
 
-  // Process target columns in the original j-first order.
+  const int sCol = supernodes[K];
+  const int eCol = supernodes[K + 1];
+
   for (int p = 0; p < q; ++p)
   {
-    const int j = j0 + p;
-    const int khead = target_k[p];
+    const int j     = targets[p].j;
+    const int khead = targets[p].k;
 
-    // Exactly the same sz as in original cmod2().
     const int sz = eK - khead;
 
+    // ----------------------------------------------------------
+    // Initialise t.
+    // ----------------------------------------------------------
     for (int i = 0; i < sz; ++i)
       tp[i] = 0.0;
 
-    const int sCol = supernodes[K];
-    const int eCol = supernodes[K + 1];
-
+    // ----------------------------------------------------------
+    // Contribution from all columns of source supernode K.
+    // ----------------------------------------------------------
     for (int k = sCol; k < eCol; ++k)
     {
-      const int jk = colpointers[k + 1] - sz;
+      const int jk =
+        colpointers[k + 1] - sz;
+
       int ik = jk;
+
       const double Ljk = l[jk];
 
       for (int i = sz - 1; i >= 0; --i)
@@ -297,13 +291,21 @@ void cmod2_target(
       }
     }
 
+    // ----------------------------------------------------------
+    // Scatter back into the ACTUAL target column j.
+    // ----------------------------------------------------------
     int r = eK - 1;
-    const int ref_pos = colpointers[j + 1] - 1;
+
+    const int ref_pos =
+      colpointers[j + 1] - 1;
 
     for (int i = 0; i < sz; ++i)
     {
       const int ndx = rowindices[r--];
-      const int pos = ref_pos - indmap[ndx];
+
+      const int pos =
+        ref_pos - indmap[ndx];
+
       l[pos] -= tp[i];
     }
   }
@@ -321,136 +323,30 @@ void cholesky(NumericVector& L,
   const int N = colpointers.size() - 1;
   const int Nsupernodes = supernodes.size()-1;
 
-  // linked lists, see section 4.2 Ng and Peyton
-  IntegerVector HEAD(N,-1);
-  IntegerVector LINK(Nsupernodes,-1);
-
-  IntegerVector colhead = clone(rowpointers);
-  for (int J=0; J<Nsupernodes;J++)
-  {
-    int szNode = supernodes[J+1] - supernodes[J];
-    colhead[J] += szNode-1;
-    if (colhead[J] < rowpointers[J+1]-1)
-    {
-      int rNdx = rowindices[colhead[J]+1];
-      insert(HEAD, LINK, rNdx, J);
-    }
-  }
-
-
   IntegerVector indmap(N,0);
   NumericVector t(N);
   int last_sn = Nsupernodes-1;
 
   // for each supernode J
   for (int J=0; J<Nsupernodes;J++) {
-    // used to test new implementation:
-    // last supernode..
-    NumericVector copy_L = clone(L);
-
-    if (J == Nsupernodes-1) {
-
-      Rcout << "Left looking for last supernode:..." << endl;
-      auto start_cmod2_target = high_resolution_clock::now();
-
-      // Phase 1
-      makeIndMap(indmap, J, rowpointers, rowindices);
-
-      for (int K = 0; K < J; ++K)
-      {
-        cmod2_target(copy_L, K, J, t, indmap, supernodes, rowpointers, colpointers, rowindices);
-      }
-
-      auto end_cmod2_target = high_resolution_clock::now();
-      double elapsed_cmod2_target = duration<double>(end_cmod2_target - start_cmod2_target).count();
-
-      Rcout << "Supernode " << setw(3) << J
-            << " cmod2_target: " << setw(4) << elapsed_cmod2_target
-            << std::endl;
-    }
-
-    long long calls = 0;
-    long long work = 0;
 
     int sz_node = supernodes[J+1] - supernodes[J];
 
     // Phase 1
     makeIndMap(indmap, J, rowpointers, rowindices);
-    auto start_cmod2 = high_resolution_clock::now();
 
-    for (int j=supernodes[J];j<supernodes[J+1];j++)
-    {
-      int K = HEAD[j];
-
-      while (K!=-1)
-      {
-
-        int nextK = LINK[K];
-        int sz = rowpointers[K+1] - colhead[K];
-
-        const int wK = supernodes[K+1] - supernodes[K];
-        calls++;
-        work += static_cast<long long>(sz) * wK;
-        cmod2(L, j, K, sz, t, indmap, supernodes, rowpointers, colpointers, rowindices);
-
-        colhead[K]++;
-        if (colhead[K] < rowpointers[K+1])
-        {
-          int rNdx = rowindices[colhead[K]];
-          insert(HEAD, LINK, rNdx, K);
-        }
-        K = nextK;
-      }
-      HEAD[j] = -1;
+    for (int K=0;K<J;K++) {
+      cmod2_target(L, K, J, t, indmap, supernodes, rowpointers, colpointers, rowindices);
     }
 
-    auto end_cmod2 = high_resolution_clock::now();
-    double elapsed_cmod2 = duration<double>(end_cmod2 - start_cmod2).count();
-
-    // update
-    colhead[J]++;
-
-    if (J == last_sn) {
-      Rcout << "Comparison using matvec tile vs original code" << endl;
-
-      auto start_chol_last = high_resolution_clock::now();
-
-      chol_last_supernode(copy_L, supernodes, colpointers);
-
-      auto end_chol_last = high_resolution_clock::now();
-
-      double elapsed_chol_last = duration<double>(end_chol_last - start_chol_last).count();
-
-      Rcout << "Supernode " << setw(3) << J
-            << " sznode: " << setw(3) << sz_node
-            << " cmod2:  " << setw(3) << elapsed_cmod2
-            << " cmod_arma: " << setw(4) << elapsed_chol_last
-            << std::endl;
-    }
-
-    // Phase 2
-    auto start = high_resolution_clock::now();
     for (int j=supernodes[J];j<supernodes[J+1];j++) {
       cmod1(L, j, J, supernodes, colpointers);
       cdiv(L, j, colpointers);
     }
-    auto end = high_resolution_clock::now();
-    double elapsed = duration<double>(end - start).count();
-    if (J == last_sn) {
-      if (!Rcpp::is_true(Rcpp::all(Rcpp::abs(copy_L - L) < 1e-09)))
-        Rcpp::stop("copy_L and L differ");
-
-    }
-
-    if (sz_node > 2) {
-      Rcout << "Supernode " << setw(3) << J << " sznode: " << setw(3) << sz_node <<
-        " cmod2: " << setw(4) << elapsed_cmod2 << " cmod1/cdiv: " << setw(4) << elapsed << endl;
-    }
-
   }
   auto end_chol = high_resolution_clock::now();
   double elapsed_total = duration<double>(end_chol - start_chol).count();
-  Rcout << endl << "Total time Cholesky: " << elapsed_total << endl << endl;
+  //Rcout << endl << "Total time Cholesky: " << elapsed_total << endl << endl;
 }
 
 double logdet(const NumericVector& L, const IntegerVector& colpointers)
@@ -557,7 +453,7 @@ NumericVector backwardCholesky(
 }
 
 
-
+/*
 void cmod2_Kfirst4(
     NumericVector& L,
     int K,
@@ -1006,7 +902,7 @@ void cmod2_Kfirst(
     }
   }
 }
-
+*/
 
 
 
