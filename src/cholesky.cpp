@@ -40,139 +40,270 @@ void cmod1(NumericVector& L, int j, int J,
            const IntegerVector& supernodes,
            const IntegerVector& colpointers)
 {
-  const int& s = colpointers[j];
-  const int& e = colpointers[j+1];
+  double *l = L.begin();
+  const int s = colpointers[j];
+  const int e = colpointers[j+1];
   // for all columns in supernode J left to j:
   for (int k=supernodes[J];k<j;k++)
   {
-    const int& jk = colpointers[k] + (j-k);
+    const int jk = colpointers[k] + (j-k);
     int ik = jk;
-    const double& Ljk = L[jk];
+    const double Ljk = l[jk];
     for (int ij=s; ij<e; ij++)
     {
-       L[ij] -= L[ik++]*Ljk;
+       l[ij] -= l[ik++]*Ljk;
        //ik++;
     }
   }
 }
 
-// Adjust column j for all columns in supernode K:
-void cmod2(NumericVector& L, int j, int K, int sz,
-           NumericVector& t,
-           const IntegerVector& indmap,
-           const IntegerVector& supernodes,
-           const IntegerVector& rowpointers,
-           const IntegerVector& colpointers,
-           const IntegerVector& rowindices)
-{
-  // init t:
-  for (int i=0;i<sz;i++)
-  {
-    t[i] = 0.0;
-  }
-
-  const int& sCol = supernodes[K];
-  const int& eCol = supernodes[K+1];
-
-  for (int k=sCol; k<eCol; k++)
-  {
-    int jk = colpointers[k+1]-sz;
-    int ik = jk;
-    const double& Ljk = L[jk];
-    for (int i=sz-1;i>=0;i--)
-    {
-      t[i] += L[ik++]*Ljk;
-      //ik++;
-    }
-  }
-
-  int r = rowpointers[K+1]-1;
-  int ref_pos = colpointers[j+1] - 1;
-  for (int i=0;i<sz;i++)
-  {
-    int ndx = rowindices[r--];
-    int pos = ref_pos - indmap[ndx];
-    L[pos] -= t[i];
-  }
-}
-
 void cdiv(NumericVector& L, int j, const IntegerVector& colpointers)
 {
-  const int& s = colpointers[j];
-  const int& e = colpointers[j+1];
+  double *l = L.begin();
+  const int s = colpointers[j];
+  const int e = colpointers[j+1];
 
   // pivot:
-  L[s] = sqrt(L[s]);
+  l[s] = sqrt(l[s]);
   // update column j:
-  double Ls = L[s];
+  double Ls = l[s];
   for (int i = s + 1; i < e; i++)
   {
-    L[i] /= Ls;
+    l[i] /= Ls;
   }
 }
 
 
-void cholesky(NumericVector& L,
-           const IntegerVector& supernodes,
-           const IntegerVector& rowpointers,
-           const IntegerVector& colpointers,
-           const IntegerVector& rowindices)
+void cmod2_sup(
+    NumericVector& L,
+    int J,
+    int K,
+    int khead,
+    int klen,
+    int ncolup,
+    NumericVector& t,
+    const IntegerVector& indmap,
+    const IntegerVector& supernodes,
+    const IntegerVector& rowpointers,
+    const IntegerVector& colpointers,
+    const IntegerVector& rowindices)
 {
-  const int N = colpointers.size() - 1;
-  const int Nsupernodes = supernodes.size()-1;
+  if (ncolup <= 0)
+    return;
 
-  // linked lists, see section 4.2 Ng and Peyton
-  IntegerVector HEAD(N,-1);
-  IntegerVector LINK(Nsupernodes,-1);
+  double* tp = t.begin();
+  double* l  = L.begin();
 
-  IntegerVector colhead = clone(rowpointers);
-  for (int J=0; J<Nsupernodes;J++)
+  const int eK = rowpointers[K + 1];
+
+  const int sCol = supernodes[K];
+  const int eCol = supernodes[K + 1];
+
+  // ------------------------------------------------------------
+  // Process all target columns j of J receiving an update
+  // from source supernode K.
+  //
+  // khead, klen and ncolup are supplied by the scheduler, so
+  // there is no need for find_targets().
+  // ------------------------------------------------------------
+
+  for (int p = 0; p < ncolup; ++p)
   {
-    int szNode = supernodes[J+1] - supernodes[J];
-    colhead[J] += szNode-1;
-    if (colhead[J] < rowpointers[J+1]-1)
+    const int j = rowindices[khead + p];
+    const int sz = klen - p;
+
+    // Initialise t.
+    for (int i = 0; i < sz; ++i)
+      tp[i] = 0.0;
+
+    // ----------------------------------------------------------
+    // Contribution from all columns of source supernode K.
+    //
+    // The last sz entries of each column contain the active
+    // suffix needed for target column j.
+    // ----------------------------------------------------------
+
+    for (int k = sCol; k < eCol; ++k)
     {
-      int rNdx = rowindices[colhead[J]+1];
-      insert(HEAD, LINK, rNdx, J);
+      const int jk = colpointers[k + 1] - sz;
+      int ik = jk;
+
+      const double Ljk = l[jk];
+
+      for (int i = sz - 1; i >= 0; --i)
+      {
+        tp[i] += l[ik++] * Ljk;
+      }
+    }
+
+    // ----------------------------------------------------------
+    // Scatter back into target column j.
+    // ----------------------------------------------------------
+
+    int r = eK - 1;
+
+    const int ref_pos = colpointers[j + 1] - 1;
+
+    for (int i = 0; i < sz; ++i)
+    {
+      const int ndx = rowindices[r--];
+      const int pos = ref_pos - indmap[ndx];
+
+      l[pos] -= tp[i];
     }
   }
+}
 
-  IntegerVector indmap(N,0);
+void cholesky(
+    NumericVector& L,
+    const IntegerVector& supernodes,
+    const IntegerVector& rowpointers,
+    const IntegerVector& colpointers,
+    const IntegerVector& rowindices)
+{
+  const int N = colpointers.size() - 1;
+  const int Nsupernodes = supernodes.size() - 1;
+
+  // SNODE[j] = supernode containing scalar row/column j
+  IntegerVector SNODE(N);
+
+  for (int J = 0; J < Nsupernodes; ++J)
+  {
+    for (int j = supernodes[J]; j < supernodes[J + 1]; ++j)
+      SNODE[j] = J;
+  }
+
+  // ------------------------------------------------------------
+  // Supernodal linked lists
+  //
+  // LINK[J]   = head of list of source supernodes waiting
+  //             to update J
+  //
+  // LENGTH[K] = active suffix length of source supernode K
+  // ------------------------------------------------------------
+
+  IntegerVector LINK(Nsupernodes, -1);
+  IntegerVector LENGTH(Nsupernodes, 0);
+
+  // ------------------------------------------------------------
+  // Workspace
+  // ------------------------------------------------------------
+
+  IntegerVector indmap(N, 0);
   NumericVector t(N);
 
-  // for each supernode J
-  for (int J=0; J<Nsupernodes;J++) {
+  // ------------------------------------------------------------
+  // Process supernodes in order
+  // ------------------------------------------------------------
 
-    // Phase 1
+  for (int J = 0; J < Nsupernodes; ++J)
+  {
+    const int j0 = supernodes[J];
+    const int j1 = supernodes[J + 1];
+
     makeIndMap(indmap, J, rowpointers, rowindices);
-    for (int j=supernodes[J];j<supernodes[J+1];j++)
+
+    // ----------------------------------------------------------
+    // Process all source supernodes currently waiting for J.
+    //
+    // Important: LINK[K] is the next pointer when K is on
+    // another list, so save it before changing LINK[K].
+    // ----------------------------------------------------------
+
+    int K = LINK[J];
+    LINK[J] = -1;
+
+    while (K != -1)
     {
-      int K = HEAD[j];
-      while (K!=-1)
+      const int nextK = LINK[K];
+      const int klen = LENGTH[K];
+
+      // First active row of K.
+      const int khead = rowpointers[K + 1] - klen;
+
+      // --------------------------------------------------------
+      // Determine how many active rows of K belong to J.
+      //
+      // Because K was put on J's list when its first active row
+      // was in J, rowindices[khead] should be >= j0.
+      // --------------------------------------------------------
+
+      int ncolup = 0;
+
+      while (ncolup < klen && rowindices[khead + ncolup] < j1)
       {
-        int nextK = LINK[K];
-        int sz = rowpointers[K+1] - colhead[K];
-        cmod2(L, j, K, sz, t, indmap, supernodes, rowpointers, colpointers, rowindices);
-
-        colhead[K]++;
-        if (colhead[K] < rowpointers[K+1])
-        {
-          int rNdx = rowindices[colhead[K]];
-          insert(HEAD, LINK, rNdx, K);
-        }
-        K = nextK;
+        ++ncolup;
       }
-      HEAD[j] = -1;
-    }
-    // update
-    colhead[J]++;
 
-    // Phase 2
-    for (int j=supernodes[J];j<supernodes[J+1];j++) {
-      cmod1(L, j, J, supernodes, colpointers);
+      // Numerical update.
+      cmod2_sup(L, J, K, khead, klen, ncolup, t, indmap,
+        supernodes, rowpointers, colpointers, rowindices
+      );
+
+      // --------------------------------------------------------
+      // K may still have an active suffix.
+      //
+      // If so, put K on the list of the next supernode it
+      // contributes to.
+      // --------------------------------------------------------
+
+      if (klen > ncolup)
+      {
+        const int next_row = rowindices[khead + ncolup];
+        const int nextJ = SNODE[next_row];
+
+        LENGTH[K] = klen - ncolup;
+        LINK[K] = LINK[nextJ];
+        LINK[nextJ] = K;
+      }
+      else
+      {
+        LENGTH[K] = 0;
+        LINK[K] = -1;
+      }
+
+      K = nextK;
+    }
+
+    // ----------------------------------------------------------
+    // Phase 2:
+    // factor supernode J
+    // ----------------------------------------------------------
+
+    for (int j = j0; j < j1; ++j)
+    {
+      cmod1(L,j,J, supernodes, colpointers);
       cdiv(L, j, colpointers);
     }
 
+    // ----------------------------------------------------------
+    // Now schedule J's own update.
+    //
+    // The first 'width' entries of J's row list correspond to
+    // its diagonal supernode block. Everything after that is
+    // the update that J still has to deliver.
+    // ----------------------------------------------------------
+
+    const int width = j1 - j0;
+
+    const int len = rowpointers[J + 1] - rowpointers[J];
+
+    LENGTH[J] = len - width;
+
+    if (LENGTH[J] > 0)
+    {
+      // First row below the diagonal block.
+      const int next_row = rowindices[rowpointers[J] + width];
+      const int nextJ = SNODE[next_row];
+
+      LINK[J] = LINK[nextJ];
+      LINK[nextJ] = J;
+    }
+    else
+    {
+      LENGTH[J] = 0;
+      LINK[J] = -1;
+    }
   }
 }
 
@@ -279,6 +410,459 @@ NumericVector backwardCholesky(
   }
   return xP;
 }
+
+
+/*
+void cmod2_Kfirst4(
+    NumericVector& L,
+    int K,
+    int J,
+    const IntegerVector& indmap,
+    const IntegerVector& supernodes,
+    const IntegerVector& rowpointers,
+    const IntegerVector& colpointers,
+    const IntegerVector& rowindices)
+{
+  const int sK = rowpointers[K];
+  const int eK = rowpointers[K + 1];
+
+  const int k0 = supernodes[K];
+  const int k1 = supernodes[K + 1];
+
+  const int j0 = supernodes[J];
+  const int j1 = supernodes[J + 1];
+
+  const int wK = k1 - k0;
+  const int q  = j1 - j0;
+
+  // ------------------------------------------------------------
+  // Find target positions in K's row structure.
+  // ------------------------------------------------------------
+  std::vector<int> target_k = find_targets(K, J, supernodes, rowpointers, rowindices);
+
+  const int nTarget = target_k.size();
+
+  if (nTarget == 0)
+    return;
+
+  // ------------------------------------------------------------
+  // Check the supernode structure required by the 4-way kernel.
+  //
+  // Consecutive target columns must correspond to consecutive
+  // positions in K's row structure.
+  // ------------------------------------------------------------
+  for (int p = 0; p + 1 < nTarget; ++p)
+  {
+    if (target_k[p + 1] != target_k[p] + 1)
+      stop("Unexpected target_k spacing in cmod2_Kfirst4");
+  }
+
+  // ------------------------------------------------------------
+  // Largest K suffix needed.
+  // ------------------------------------------------------------
+  const int firstK = target_k[0];
+  const int maxsz  = eK - firstK;
+
+  const double* lrp = L.begin();
+  double* lp = L.begin();
+
+  // ------------------------------------------------------------
+  // Pack K once.
+  //
+  // P[pc * maxsz + r] contains the suffix of column k0 + pc.
+  // ------------------------------------------------------------
+  std::vector<double> P(wK * maxsz);
+
+  for (int pc = 0; pc < wK; ++pc)
+  {
+    const int col = k0 + pc;
+
+    const int start =
+      colpointers[col + 1] - maxsz;
+
+    double* Pcol =
+      P.data() + pc * maxsz;
+
+    for (int r = 0; r < maxsz; ++r)
+      Pcol[r] = lrp[start + r];
+  }
+
+  // ------------------------------------------------------------
+  // Four target accumulators.
+  // ------------------------------------------------------------
+  std::vector<double> t0(maxsz);
+  std::vector<double> t1(maxsz);
+  std::vector<double> t2(maxsz);
+  std::vector<double> t3(maxsz);
+
+  int p0 = 0;
+
+  // ------------------------------------------------------------
+  // Four target columns at a time.
+  // ------------------------------------------------------------
+  for (; p0 + 3 < nTarget; p0 += 4)
+  {
+    const int khead0 = target_k[p0];
+
+    const int offset =
+      khead0 - firstK;
+
+    const int sz0 = eK - target_k[p0];
+    const int sz1 = eK - target_k[p0 + 1];
+    const int sz2 = eK - target_k[p0 + 2];
+    const int sz3 = eK - target_k[p0 + 3];
+
+    // This should follow from the consecutive target_k positions.
+    if (sz1 != sz0 - 1 ||
+        sz2 != sz0 - 2 ||
+        sz3 != sz0 - 3)
+    {
+      stop("Unexpected target suffix lengths in cmod2_Kfirst4");
+    }
+
+    // ----------------------------------------------------------
+    // Zero accumulators.
+    // ----------------------------------------------------------
+    for (int i = 0; i < sz0; ++i)
+      t0[i] = 0.0;
+
+    for (int i = 0; i < sz1; ++i)
+      t1[i] = 0.0;
+
+    for (int i = 0; i < sz2; ++i)
+      t2[i] = 0.0;
+
+    for (int i = 0; i < sz3; ++i)
+      t3[i] = 0.0;
+
+    // ----------------------------------------------------------
+    // K-first calculation.
+    //
+    // For four consecutive target columns, the mapping simplifies
+    // so that all four targets use the same P position for a
+    // given i:
+    //
+    //     x = Pcol[maxsz - 1 - i]
+    //
+    // while their Ljk values are:
+    //
+    //     Pcol[offset + 0]
+    //     Pcol[offset + 1]
+    //     Pcol[offset + 2]
+    //     Pcol[offset + 3]
+    // ----------------------------------------------------------
+    for (int pc = 0; pc < wK; ++pc)
+    {
+      const double* Pcol =
+        P.data() + pc * maxsz;
+
+      const double Lj0k = Pcol[offset    ];
+      const double Lj1k = Pcol[offset + 1];
+      const double Lj2k = Pcol[offset + 2];
+      const double Lj3k = Pcol[offset + 3];
+
+      // --------------------------------------------------------
+      // Common part: all four targets.
+      // --------------------------------------------------------
+      for (int i = 0; i < sz3; ++i)
+      {
+        const double x =
+          Pcol[maxsz - 1 - i];
+
+        t0[i] += x * Lj0k;
+        t1[i] += x * Lj1k;
+        t2[i] += x * Lj2k;
+        t3[i] += x * Lj3k;
+      }
+
+      // --------------------------------------------------------
+      // Remaining part: targets 0,1,2.
+      // --------------------------------------------------------
+      for (int i = sz3; i < sz2; ++i)
+      {
+        const double x =
+          Pcol[maxsz - 1 - i];
+
+        t0[i] += x * Lj0k;
+        t1[i] += x * Lj1k;
+        t2[i] += x * Lj2k;
+      }
+
+      // --------------------------------------------------------
+      // Remaining part: targets 0,1.
+      // --------------------------------------------------------
+      for (int i = sz2; i < sz1; ++i)
+      {
+        const double x =
+          Pcol[maxsz - 1 - i];
+
+        t0[i] += x * Lj0k;
+        t1[i] += x * Lj1k;
+      }
+
+      // --------------------------------------------------------
+      // Remaining part: target 0.
+      // --------------------------------------------------------
+      for (int i = sz1; i < sz0; ++i)
+      {
+        const double x =
+          Pcol[maxsz - 1 - i];
+
+        t0[i] += x * Lj0k;
+      }
+    }
+
+    // ----------------------------------------------------------
+    // Scatter target 0.
+    // ----------------------------------------------------------
+    {
+      const int j = j0 + p0;
+
+      int r = eK - 1;
+      const int ref_pos = colpointers[j + 1] - 1;
+
+      for (int i = 0; i < sz0; ++i)
+      {
+        const int ndx = rowindices[r--];
+        const int pos = ref_pos - indmap[ndx];
+
+        lp[pos] -= t0[i];
+      }
+    }
+
+    // ----------------------------------------------------------
+    // Scatter target 1.
+    // ----------------------------------------------------------
+    {
+      const int j = j0 + p0 + 1;
+
+      int r = eK - 1;
+      const int ref_pos = colpointers[j + 1] - 1;
+
+      for (int i = 0; i < sz1; ++i)
+      {
+        const int ndx = rowindices[r--];
+        const int pos = ref_pos - indmap[ndx];
+
+        lp[pos] -= t1[i];
+      }
+    }
+
+    // ----------------------------------------------------------
+    // Scatter target 2.
+    // ----------------------------------------------------------
+    {
+      const int j = j0 + p0 + 2;
+
+      int r = eK - 1;
+      const int ref_pos = colpointers[j + 1] - 1;
+
+      for (int i = 0; i < sz2; ++i)
+      {
+        const int ndx = rowindices[r--];
+        const int pos = ref_pos - indmap[ndx];
+
+        lp[pos] -= t2[i];
+      }
+    }
+
+    // ----------------------------------------------------------
+    // Scatter target 3.
+    // ----------------------------------------------------------
+    {
+      const int j = j0 + p0 + 3;
+
+      int r = eK - 1;
+      const int ref_pos = colpointers[j + 1] - 1;
+
+      for (int i = 0; i < sz3; ++i)
+      {
+        const int ndx = rowindices[r--];
+        const int pos = ref_pos - indmap[ndx];
+
+        lp[pos] -= t3[i];
+      }
+    }
+  }
+
+  // ------------------------------------------------------------
+  // Remaining 1-3 target columns.
+  // Use the original packed K-first calculation.
+  // ------------------------------------------------------------
+  std::vector<double> t(maxsz);
+
+  for (; p0 < nTarget; ++p0)
+  {
+    const int j = j0 + p0;
+
+    const int khead = target_k[p0];
+
+    const int sz =
+      eK - khead;
+
+    const int offset =
+      khead - firstK;
+
+    for (int i = 0; i < sz; ++i)
+      t[i] = 0.0;
+
+    for (int pc = 0; pc < wK; ++pc)
+    {
+      const double* Pcol =
+        P.data() + pc * maxsz + offset;
+
+      const double Ljk = Pcol[0];
+
+      for (int i = sz - 1, r = 0;
+           i >= 0;
+           --i, ++r)
+      {
+        t[i] += Pcol[r] * Ljk;
+      }
+    }
+
+    int r = eK - 1;
+    const int ref_pos = colpointers[j + 1] - 1;
+
+    for (int i = 0; i < sz; ++i)
+    {
+      const int ndx = rowindices[r--];
+      const int pos = ref_pos - indmap[ndx];
+
+      lp[pos] -= t[i];
+    }
+  }
+}
+
+
+
+
+
+// ------------------------------------------------------------
+// Process one source supernode K for all columns of target
+// supernode J that K contributes to.
+//
+// Same numerical calculation as original cmod2(), but with
+// the target columns processed together after packing K.
+// ------------------------------------------------------------
+void cmod2_Kfirst(
+    NumericVector& L,
+    int K,
+    int J,
+    NumericVector& t,
+    const IntegerVector& indmap,
+    const IntegerVector& supernodes,
+    const IntegerVector& rowpointers,
+    const IntegerVector& colpointers,
+    const IntegerVector& rowindices)
+{
+  const int eK = rowpointers[K + 1];
+
+  const int k0 = supernodes[K];
+  const int k1 = supernodes[K + 1];
+  const int wK = k1 - k0; // number of columns in K
+
+  const int j0 = supernodes[J];
+
+  // ------------------------------------------------------------
+  // Find all target positions in K's row structure.
+  // ------------------------------------------------------------
+  std::vector<int> target_k = find_targets(K, J, supernodes, rowpointers, rowindices);
+
+  const int q = target_k.size();
+
+  if (q == 0)
+    return;
+
+  // ------------------------------------------------------------
+  // Largest suffix needed: first target column.
+  // ------------------------------------------------------------
+  const int firstK = target_k[0];
+  const int maxsz = eK - firstK;
+
+  if (t.size() < maxsz)
+    stop("t is too small");
+
+  // ------------------------------------------------------------
+  // Pack ALL of K once.
+  //
+  // P[pc * maxsz + r] contains the last maxsz entries
+  // of column k0 + pc.
+  // ------------------------------------------------------------
+  std::vector<double> P(wK * maxsz);
+
+  const double* lp = L.begin();
+
+  for (int k = 0; k < wK; ++k)
+  {
+    const int col = k0 + k;
+
+    const int start = colpointers[col + 1] - maxsz;
+
+    double* Pcol = P.data() + k * maxsz;
+
+    for (int r = 0; r < maxsz; ++r)
+      Pcol[r] = lp[start + r];
+  }
+
+  // ------------------------------------------------------------
+  // Reuse packed K for all target columns.
+  // ------------------------------------------------------------
+  double* tp = t.begin();
+
+  for (int p = 0; p < q; ++p)
+  {
+    const int j = j0 + p;
+
+    // Position in K's row structure corresponding to j.
+    const int khead = target_k[p];
+
+    // Exactly the same sz as original cmod2().
+    const int sz = eK - khead;
+
+    // Offset into packed suffix.
+    const int offset = khead - firstK;
+
+    // ----------------------------------------------------------
+    // t = L[I,K] L[j,K]^T
+    // ----------------------------------------------------------
+
+    for (int i = 0; i < sz; ++i) {
+      tp[i] = 0.0;
+    }
+
+    for (int k = 0; k < wK; ++k)
+    {
+      const double* Pcol = P.data() + k * maxsz + offset;
+
+      // Pcol[0] corresponds to L[j,k].
+      const double Ljk = Pcol[0];
+
+      // Preserve original cmod2() ordering.
+      for (int i = sz - 1, r = 0; i >= 0; --i, ++r)
+      {
+        tp[i] += Pcol[r] * Ljk;
+      }
+    }
+
+    // ----------------------------------------------------------
+    // Scatter exactly as in original cmod2().
+    // ----------------------------------------------------------
+
+    int r = eK - 1;
+
+    const int ref_pos = colpointers[j + 1] - 1;
+
+    for (int i = 0; i < sz; ++i)
+    {
+      const int ndx = rowindices[r--];
+      const int pos = ref_pos - indmap[ndx];
+      L[pos] -= tp[i];
+    }
+  }
+}
+*/
+
 
 
 /*
