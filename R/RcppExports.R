@@ -37,7 +37,3 @@ MatrixProduct <- function(sA, sB) {
     .Call(`_LMMsolver_MatrixProduct`, sA, sB)
 }
 
-chol_last_supernode <- function(L, supernodes, colpointers) {
-    invisible(.Call(`_LMMsolver_chol_last_supernode`, L, supernodes, colpointers))
-}
-
