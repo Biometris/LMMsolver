@@ -36,6 +36,7 @@ NumericVector GetNumericVector(Rcpp::S4 obj, const String& slotName) {
   return x;
 }
 
+/*
 // insert element J in link starting at HEAD[i]
 void insert(IntegerVector& HEAD, IntegerVector& LINK, int i, int J)
 {
@@ -43,4 +44,4 @@ void insert(IntegerVector& HEAD, IntegerVector& LINK, int i, int J)
   HEAD[i] = J;
   LINK[J] = x;
 }
-
+*/

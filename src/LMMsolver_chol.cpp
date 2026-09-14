@@ -146,7 +146,7 @@ double logdet_Rcpp_fun(Rcpp::S4 obj) {
   return logdet(L, colpointers);
 }
 
-
+/*
 // [[Rcpp::export]]
 List constructor_LMMsolver_chol(Rcpp::S4 obj_spam) {
   IntegerVector supernodes = GetIntVector(obj_spam, "supernodes", 0);
@@ -182,6 +182,7 @@ List constructor_LMMsolver_chol(Rcpp::S4 obj_spam) {
   L_obj["ADentries"] = ADentries;
   return L_obj;
 }
+*/
 
 // Convert a SparseMatrix to the internal AD-Cholesky ordering.
 NumericVector convertSparseMatrix(const SparseMatrix& A,
