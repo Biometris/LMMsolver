@@ -380,98 +380,7 @@ void cholesky_org(NumericVector& L,
   }
 }
 
-
-struct Cmod2Work
-{
-  int K;
-  int sz;
-};
-
-void schedule_cmod2(
-    int J,
-    IntegerVector& HEAD,
-    IntegerVector& LINK,
-    IntegerVector& colhead,
-    const IntegerVector& supernodes,
-    const IntegerVector& rowpointers,
-    const IntegerVector& rowindices,
-    std::vector<std::vector<Cmod2Work>>& work)
-{
-  const int j0 = supernodes[J];
-  const int j1 = supernodes[J + 1];
-
-  // One list of active K's for each scalar target j.
-  work.resize(j1 - j0);
-
-  for (int j = j0; j < j1; ++j)
-  {
-    int K = HEAD[j];
-
-    while (K != -1)
-    {
-      const int nextK = LINK[K];
-
-      const int sz =
-        rowpointers[K + 1] - colhead[K];
-
-      work[j - j0].push_back({K, sz});
-
-      // Exactly the original bookkeeping.
-      ++colhead[K];
-
-      if (colhead[K] < rowpointers[K + 1])
-      {
-        const int rNdx =
-          rowindices[colhead[K]];
-
-        insert(
-          HEAD,
-          LINK,
-          rNdx,
-          K);
-      }
-
-      K = nextK;
-    }
-
-    HEAD[j] = -1;
-  }
-}
-
-void cmod2_supernode(
-    NumericVector& L,
-    int J,
-    NumericVector& t,
-    const IntegerVector& indmap,
-    const IntegerVector& supernodes,
-    const IntegerVector& rowpointers,
-    const IntegerVector& colpointers,
-    const IntegerVector& rowindices,
-    const std::vector<std::vector<Cmod2Work>>& work)
-{
-  const int j0 = supernodes[J];
-  const int j1 = supernodes[J + 1];
-
-  for (int j = j0; j < j1; ++j)
-  {
-    for (const Cmod2Work& w : work[j - j0])
-    {
-      cmod2(
-        L,
-        j,
-        w.K,
-        w.sz,
-        t,
-        indmap,
-        supernodes,
-        rowpointers,
-        colpointers,
-        rowindices);
-    }
-  }
-}
-
-void cmod2_sup2(
+void cmod2_sup(
     NumericVector& L,
     int J,
     int K,
@@ -485,26 +394,78 @@ void cmod2_sup2(
     const IntegerVector& colpointers,
     const IntegerVector& rowindices)
 {
+  if (ncolup <= 0)
+    return;
+
+  double* tp = t.begin();
+  double* l  = L.begin();
+
+  const int eK = rowpointers[K + 1];
+
+  const int sCol = supernodes[K];
+  const int eCol = supernodes[K + 1];
+
+  // ------------------------------------------------------------
+  // Process all target columns j of J receiving an update
+  // from source supernode K.
+  //
+  // khead, klen and ncolup are supplied by the scheduler, so
+  // there is no need for find_targets().
+  // ------------------------------------------------------------
+
   for (int p = 0; p < ncolup; ++p)
   {
-    const int j =
-      rowindices[khead + p];
+    const int j = rowindices[khead + p];
 
-    const int sz =
-      klen - p;
+    const int sz = klen - p;
 
-    cmod2(
-      L,
-      j,
-      K,
-      sz,
-      t,
-      indmap,
-      supernodes,
-      rowpointers,
-      colpointers,
-      rowindices
-    );
+    // ----------------------------------------------------------
+    // Initialise t.
+    // ----------------------------------------------------------
+
+    for (int i = 0; i < sz; ++i)
+      tp[i] = 0.0;
+
+    // ----------------------------------------------------------
+    // Contribution from all columns of source supernode K.
+    //
+    // The last sz entries of each column contain the active
+    // suffix needed for target column j.
+    // ----------------------------------------------------------
+
+    for (int k = sCol; k < eCol; ++k)
+    {
+      const int jk =
+        colpointers[k + 1] - sz;
+
+      int ik = jk;
+
+      const double Ljk = l[jk];
+
+      for (int i = sz - 1; i >= 0; --i)
+      {
+        tp[i] += l[ik++] * Ljk;
+      }
+    }
+
+    // ----------------------------------------------------------
+    // Scatter back into target column j.
+    // ----------------------------------------------------------
+
+    int r = eK - 1;
+
+    const int ref_pos =
+      colpointers[j + 1] - 1;
+
+    for (int i = 0; i < sz; ++i)
+    {
+      const int ndx = rowindices[r--];
+
+      const int pos =
+        ref_pos - indmap[ndx];
+
+      l[pos] -= tp[i];
+    }
   }
 }
 
@@ -611,7 +572,7 @@ void cholesky(
       // For now this is deliberately just the scalar cmod2()
       // repeated over all columns j of J receiving an update.
       // --------------------------------------------------------
-      cmod2_sup2(
+      cmod2_sup(
         L,
         J,
         K,
@@ -757,248 +718,6 @@ void cholesky_target(NumericVector& L,
   //Rcout << endl << "Total time Cholesky: " << elapsed_total << endl << endl;
 }
 
-// ------------------------------------------------------------
-// Return the supernode containing scalar column j.
-// ------------------------------------------------------------
-inline int supernode_of(
-    int j,
-    const IntegerVector& supernodes)
-{
-  const int ns = supernodes.size() - 1;
-
-  int lo = 0;
-  int hi = ns;
-
-  while (lo < hi)
-  {
-    const int mid = lo + (hi - lo) / 2;
-
-    if (supernodes[mid + 1] <= j)
-      lo = mid + 1;
-    else
-      hi = mid;
-  }
-
-  return lo;
-}
-
-
-// ------------------------------------------------------------
-// Insert source supernode K into the HEAD list of the
-// supernode containing target column j.
-// ------------------------------------------------------------
-inline void insert_super(
-    IntegerVector& HEAD,
-    IntegerVector& LINK,
-    int j,
-    int K,
-    const IntegerVector& supernodes)
-{
-  const int J =
-    supernode_of(j, supernodes);
-
-  LINK[K] = HEAD[J];
-  HEAD[J] = K;
-}
-
-
-// ------------------------------------------------------------
-// Supernodal HEAD version of Cholesky.
-//
-// HEAD[J] contains source supernodes K whose current target
-// column TARGET[K] lies somewhere inside supernode J.
-//
-// colhead[K] retains exactly the state used by the original
-// scalar HEAD/LINK algorithm.
-// ------------------------------------------------------------
-void cholesky_bla(
-    NumericVector& L,
-    const IntegerVector& supernodes,
-    const IntegerVector& rowpointers,
-    const IntegerVector& colpointers,
-    const IntegerVector& rowindices)
-{
-  const int N =
-    colpointers.size() - 1;
-
-  const int Nsupernodes =
-    supernodes.size() - 1;
-
-  // ------------------------------------------------------------
-  // Supernodal linked lists.
-  //
-  // HEAD[J] = source supernodes K currently targeting J.
-  // ------------------------------------------------------------
-  IntegerVector HEAD(Nsupernodes, -1);
-  IntegerVector LINK(Nsupernodes, -1);
-
-  // Current position in each source supernode's row structure.
-  // Keep exactly the same meaning as in the original algorithm.
-  IntegerVector colhead =
-    clone(rowpointers);
-
-  // Current scalar target column for each K.
-  IntegerVector TARGET(Nsupernodes, -1);
-
-  // ------------------------------------------------------------
-  // Initial state.
-  //
-  // Exactly as in the original algorithm:
-  //
-  //   colhead[K] = last diagonal position
-  //   first target = rowindices[colhead[K] + 1]
-  // ------------------------------------------------------------
-  for (int K = 0; K < Nsupernodes; ++K)
-  {
-    const int szNode =
-      supernodes[K + 1] - supernodes[K];
-
-    colhead[K] += szNode - 1;
-
-    if (colhead[K] < rowpointers[K + 1] - 1)
-    {
-      const int j =
-        rowindices[colhead[K] + 1];
-
-      TARGET[K] = j;
-
-      insert_super(
-        HEAD,
-        LINK,
-        j,
-        K,
-        supernodes);
-    }
-  }
-
-  IntegerVector indmap(N, 0);
-  NumericVector t(N);
-
-  // ------------------------------------------------------------
-  // Process each target supernode J.
-  // ------------------------------------------------------------
-  for (int J = 0; J < Nsupernodes; ++J)
-  {
-    makeIndMap(
-      indmap,
-      J,
-      rowpointers,
-      rowindices);
-
-    const int j0 =
-      supernodes[J];
-
-    const int j1 =
-      supernodes[J + 1];
-
-    // ----------------------------------------------------------
-    // Take the complete current list of K's.
-    //
-    // Clear HEAD[J] first, so that K can safely be reinserted
-    // into a later supernode while we process this one.
-    // ----------------------------------------------------------
-    int K = HEAD[J];
-
-    HEAD[J] = -1;
-
-    while (K != -1)
-    {
-      const int nextK =
-        LINK[K];
-
-      // --------------------------------------------------------
-      // K may have several target columns inside J.
-      //
-      // TARGET[K] is the current scalar target.
-      // colhead[K] gives the exact sz required by cmod2().
-      // --------------------------------------------------------
-      while (TARGET[K] >= j0 &&
-             TARGET[K] < j1)
-      {
-        const int j =
-          TARGET[K];
-
-        // Exactly the original definition.
-        const int sz =
-          rowpointers[K + 1] - colhead[K];
-
-        cmod2(
-          L,
-          j,
-          K,
-          sz,
-          t,
-          indmap,
-          supernodes,
-          rowpointers,
-          colpointers,
-          rowindices);
-
-        // ------------------------------------------------------
-        // Advance K exactly as in the original algorithm.
-        //
-        // After processing the current target:
-        //
-        //   colhead[K]++
-        //
-        // and the new target is rowindices[colhead[K]].
-        // ------------------------------------------------------
-        ++colhead[K];
-
-        if (colhead[K] < rowpointers[K + 1])
-        {
-          TARGET[K] =
-            rowindices[colhead[K]];
-        }
-        else
-        {
-          TARGET[K] = -1;
-        }
-      }
-
-      // --------------------------------------------------------
-      // K has consumed all its targets in J.
-      //
-      // Put it into the HEAD list for its next target, if any.
-      // --------------------------------------------------------
-      if (TARGET[K] != -1)
-      {
-        insert_super(
-          HEAD,
-          LINK,
-          TARGET[K],
-                K,
-                supernodes);
-      }
-
-      K = nextK;
-    }
-
-    // ----------------------------------------------------------
-    // Same update as original algorithm.
-    // ----------------------------------------------------------
-    ++colhead[J];
-
-    // ----------------------------------------------------------
-    // Phase 2.
-    // ----------------------------------------------------------
-    for (int j = j0; j < j1; ++j)
-    {
-      cmod1(
-        L,
-        j,
-        J,
-        supernodes,
-        colpointers);
-
-      cdiv(
-        L,
-        j,
-        colpointers);
-    }
-  }
-}
-
 
 double logdet(const NumericVector& L, const IntegerVector& colpointers)
 {
@@ -1011,8 +730,6 @@ double logdet(const NumericVector& L, const IntegerVector& colpointers)
   }
   return sum;
 }
-
-
 
 
 NumericVector forwardCholesky(
