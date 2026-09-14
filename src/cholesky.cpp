@@ -316,7 +316,7 @@ void cmod2_target(
 }
 
 
-void cholesky(NumericVector& L,
+void cholesky_org(NumericVector& L,
               const IntegerVector& supernodes,
               const IntegerVector& rowpointers,
               const IntegerVector& colpointers,
@@ -381,8 +381,346 @@ void cholesky(NumericVector& L,
 }
 
 
+struct Cmod2Work
+{
+  int K;
+  int sz;
+};
 
-void cholesky_new(NumericVector& L,
+void schedule_cmod2(
+    int J,
+    IntegerVector& HEAD,
+    IntegerVector& LINK,
+    IntegerVector& colhead,
+    const IntegerVector& supernodes,
+    const IntegerVector& rowpointers,
+    const IntegerVector& rowindices,
+    std::vector<std::vector<Cmod2Work>>& work)
+{
+  const int j0 = supernodes[J];
+  const int j1 = supernodes[J + 1];
+
+  // One list of active K's for each scalar target j.
+  work.resize(j1 - j0);
+
+  for (int j = j0; j < j1; ++j)
+  {
+    int K = HEAD[j];
+
+    while (K != -1)
+    {
+      const int nextK = LINK[K];
+
+      const int sz =
+        rowpointers[K + 1] - colhead[K];
+
+      work[j - j0].push_back({K, sz});
+
+      // Exactly the original bookkeeping.
+      ++colhead[K];
+
+      if (colhead[K] < rowpointers[K + 1])
+      {
+        const int rNdx =
+          rowindices[colhead[K]];
+
+        insert(
+          HEAD,
+          LINK,
+          rNdx,
+          K);
+      }
+
+      K = nextK;
+    }
+
+    HEAD[j] = -1;
+  }
+}
+
+void cmod2_supernode(
+    NumericVector& L,
+    int J,
+    NumericVector& t,
+    const IntegerVector& indmap,
+    const IntegerVector& supernodes,
+    const IntegerVector& rowpointers,
+    const IntegerVector& colpointers,
+    const IntegerVector& rowindices,
+    const std::vector<std::vector<Cmod2Work>>& work)
+{
+  const int j0 = supernodes[J];
+  const int j1 = supernodes[J + 1];
+
+  for (int j = j0; j < j1; ++j)
+  {
+    for (const Cmod2Work& w : work[j - j0])
+    {
+      cmod2(
+        L,
+        j,
+        w.K,
+        w.sz,
+        t,
+        indmap,
+        supernodes,
+        rowpointers,
+        colpointers,
+        rowindices);
+    }
+  }
+}
+
+void cmod2_sup2(
+    NumericVector& L,
+    int J,
+    int K,
+    int khead,
+    int klen,
+    int ncolup,
+    NumericVector& t,
+    const IntegerVector& indmap,
+    const IntegerVector& supernodes,
+    const IntegerVector& rowpointers,
+    const IntegerVector& colpointers,
+    const IntegerVector& rowindices)
+{
+  for (int p = 0; p < ncolup; ++p)
+  {
+    const int j =
+      rowindices[khead + p];
+
+    const int sz =
+      klen - p;
+
+    cmod2(
+      L,
+      j,
+      K,
+      sz,
+      t,
+      indmap,
+      supernodes,
+      rowpointers,
+      colpointers,
+      rowindices
+    );
+  }
+}
+
+void cholesky(
+    NumericVector& L,
+    const IntegerVector& supernodes,
+    const IntegerVector& rowpointers,
+    const IntegerVector& colpointers,
+    const IntegerVector& rowindices)
+{
+  const int N = colpointers.size() - 1;
+  const int Nsupernodes = supernodes.size() - 1;
+
+  // ------------------------------------------------------------
+  // SNODE[j] = supernode containing scalar row/column j
+  // ------------------------------------------------------------
+
+  IntegerVector SNODE(N);
+
+  for (int J = 0; J < Nsupernodes; ++J)
+  {
+    for (int j = supernodes[J]; j < supernodes[J + 1]; ++j)
+      SNODE[j] = J;
+  }
+
+  // ------------------------------------------------------------
+  // Supernodal linked lists
+  //
+  // LINK[J]   = head of list of source supernodes waiting
+  //             to update J
+  //
+  // LENGTH[K] = active suffix length of source supernode K
+  // ------------------------------------------------------------
+
+  IntegerVector LINK(Nsupernodes, -1);
+  IntegerVector LENGTH(Nsupernodes, 0);
+
+  // ------------------------------------------------------------
+  // Workspace
+  // ------------------------------------------------------------
+
+  IntegerVector indmap(N, 0);
+  NumericVector t(N);
+
+  // ------------------------------------------------------------
+  // Process supernodes in order
+  // ------------------------------------------------------------
+
+  for (int J = 0; J < Nsupernodes; ++J)
+  {
+    const int j0 = supernodes[J];
+    const int j1 = supernodes[J + 1];
+
+    // ----------------------------------------------------------
+    // Phase 1:
+    // construct the index map for target supernode J
+    // ----------------------------------------------------------
+
+    makeIndMap(
+      indmap,
+      J,
+      rowpointers,
+      rowindices
+    );
+
+    // ----------------------------------------------------------
+    // Process all source supernodes currently waiting for J.
+    //
+    // Important: LINK[K] is the next pointer when K is on
+    // another list, so save it before changing LINK[K].
+    // ----------------------------------------------------------
+
+    int K = LINK[J];
+    LINK[J] = -1;
+
+    while (K != -1)
+    {
+      const int nextK = LINK[K];
+
+      const int klen = LENGTH[K];
+
+      // First active row of K.
+      const int khead =
+        rowpointers[K + 1] - klen;
+
+      // --------------------------------------------------------
+      // Determine how many active rows of K belong to J.
+      //
+      // Because K was put on J's list when its first active row
+      // was in J, rowindices[khead] should be >= j0.
+      // --------------------------------------------------------
+
+      int ncolup = 0;
+
+      while (ncolup < klen &&
+             rowindices[khead + ncolup] < j1)
+      {
+        ++ncolup;
+      }
+
+      // --------------------------------------------------------
+      // Numerical update.
+      //
+      // For now this is deliberately just the scalar cmod2()
+      // repeated over all columns j of J receiving an update.
+      // --------------------------------------------------------
+      cmod2_sup2(
+        L,
+        J,
+        K,
+        khead,
+        klen,
+        ncolup,
+        t,
+        indmap,
+        supernodes,
+        rowpointers,
+        colpointers,
+        rowindices
+      );
+
+      // --------------------------------------------------------
+      // K may still have an active suffix.
+      //
+      // If so, put K on the list of the next supernode it
+      // contributes to.
+      // --------------------------------------------------------
+
+      if (klen > ncolup)
+      {
+        const int next_row =
+          rowindices[khead + ncolup];
+
+        const int nextJ =
+          SNODE[next_row];
+
+        LENGTH[K] =
+          klen - ncolup;
+
+        LINK[K] =
+          LINK[nextJ];
+
+        LINK[nextJ] = K;
+      }
+      else
+      {
+        LENGTH[K] = 0;
+        LINK[K] = -1;
+      }
+
+      K = nextK;
+    }
+
+    // ----------------------------------------------------------
+    // Phase 2:
+    // factor supernode J
+    // ----------------------------------------------------------
+
+    for (int j = j0; j < j1; ++j)
+    {
+      cmod1(
+        L,
+        j,
+        J,
+        supernodes,
+        colpointers
+      );
+
+      cdiv(
+        L,
+        j,
+        colpointers
+      );
+    }
+
+    // ----------------------------------------------------------
+    // Now schedule J's own update.
+    //
+    // The first 'width' entries of J's row list correspond to
+    // its diagonal supernode block. Everything after that is
+    // the update that J still has to deliver.
+    // ----------------------------------------------------------
+
+    const int width =
+      j1 - j0;
+
+    const int len =
+      rowpointers[J + 1] - rowpointers[J];
+
+    LENGTH[J] =
+      len - width;
+
+    if (LENGTH[J] > 0)
+    {
+      // First row below the diagonal block.
+      const int next_row =
+        rowindices[rowpointers[J] + width];
+
+      const int nextJ =
+        SNODE[next_row];
+
+      LINK[J] =
+        LINK[nextJ];
+
+      LINK[nextJ] = J;
+    }
+    else
+    {
+      LENGTH[J] = 0;
+      LINK[J] = -1;
+    }
+  }
+}
+
+
+void cholesky_target(NumericVector& L,
            const IntegerVector& supernodes,
            const IntegerVector& rowpointers,
            const IntegerVector& colpointers,
@@ -419,6 +757,249 @@ void cholesky_new(NumericVector& L,
   //Rcout << endl << "Total time Cholesky: " << elapsed_total << endl << endl;
 }
 
+// ------------------------------------------------------------
+// Return the supernode containing scalar column j.
+// ------------------------------------------------------------
+inline int supernode_of(
+    int j,
+    const IntegerVector& supernodes)
+{
+  const int ns = supernodes.size() - 1;
+
+  int lo = 0;
+  int hi = ns;
+
+  while (lo < hi)
+  {
+    const int mid = lo + (hi - lo) / 2;
+
+    if (supernodes[mid + 1] <= j)
+      lo = mid + 1;
+    else
+      hi = mid;
+  }
+
+  return lo;
+}
+
+
+// ------------------------------------------------------------
+// Insert source supernode K into the HEAD list of the
+// supernode containing target column j.
+// ------------------------------------------------------------
+inline void insert_super(
+    IntegerVector& HEAD,
+    IntegerVector& LINK,
+    int j,
+    int K,
+    const IntegerVector& supernodes)
+{
+  const int J =
+    supernode_of(j, supernodes);
+
+  LINK[K] = HEAD[J];
+  HEAD[J] = K;
+}
+
+
+// ------------------------------------------------------------
+// Supernodal HEAD version of Cholesky.
+//
+// HEAD[J] contains source supernodes K whose current target
+// column TARGET[K] lies somewhere inside supernode J.
+//
+// colhead[K] retains exactly the state used by the original
+// scalar HEAD/LINK algorithm.
+// ------------------------------------------------------------
+void cholesky_bla(
+    NumericVector& L,
+    const IntegerVector& supernodes,
+    const IntegerVector& rowpointers,
+    const IntegerVector& colpointers,
+    const IntegerVector& rowindices)
+{
+  const int N =
+    colpointers.size() - 1;
+
+  const int Nsupernodes =
+    supernodes.size() - 1;
+
+  // ------------------------------------------------------------
+  // Supernodal linked lists.
+  //
+  // HEAD[J] = source supernodes K currently targeting J.
+  // ------------------------------------------------------------
+  IntegerVector HEAD(Nsupernodes, -1);
+  IntegerVector LINK(Nsupernodes, -1);
+
+  // Current position in each source supernode's row structure.
+  // Keep exactly the same meaning as in the original algorithm.
+  IntegerVector colhead =
+    clone(rowpointers);
+
+  // Current scalar target column for each K.
+  IntegerVector TARGET(Nsupernodes, -1);
+
+  // ------------------------------------------------------------
+  // Initial state.
+  //
+  // Exactly as in the original algorithm:
+  //
+  //   colhead[K] = last diagonal position
+  //   first target = rowindices[colhead[K] + 1]
+  // ------------------------------------------------------------
+  for (int K = 0; K < Nsupernodes; ++K)
+  {
+    const int szNode =
+      supernodes[K + 1] - supernodes[K];
+
+    colhead[K] += szNode - 1;
+
+    if (colhead[K] < rowpointers[K + 1] - 1)
+    {
+      const int j =
+        rowindices[colhead[K] + 1];
+
+      TARGET[K] = j;
+
+      insert_super(
+        HEAD,
+        LINK,
+        j,
+        K,
+        supernodes);
+    }
+  }
+
+  IntegerVector indmap(N, 0);
+  NumericVector t(N);
+
+  // ------------------------------------------------------------
+  // Process each target supernode J.
+  // ------------------------------------------------------------
+  for (int J = 0; J < Nsupernodes; ++J)
+  {
+    makeIndMap(
+      indmap,
+      J,
+      rowpointers,
+      rowindices);
+
+    const int j0 =
+      supernodes[J];
+
+    const int j1 =
+      supernodes[J + 1];
+
+    // ----------------------------------------------------------
+    // Take the complete current list of K's.
+    //
+    // Clear HEAD[J] first, so that K can safely be reinserted
+    // into a later supernode while we process this one.
+    // ----------------------------------------------------------
+    int K = HEAD[J];
+
+    HEAD[J] = -1;
+
+    while (K != -1)
+    {
+      const int nextK =
+        LINK[K];
+
+      // --------------------------------------------------------
+      // K may have several target columns inside J.
+      //
+      // TARGET[K] is the current scalar target.
+      // colhead[K] gives the exact sz required by cmod2().
+      // --------------------------------------------------------
+      while (TARGET[K] >= j0 &&
+             TARGET[K] < j1)
+      {
+        const int j =
+          TARGET[K];
+
+        // Exactly the original definition.
+        const int sz =
+          rowpointers[K + 1] - colhead[K];
+
+        cmod2(
+          L,
+          j,
+          K,
+          sz,
+          t,
+          indmap,
+          supernodes,
+          rowpointers,
+          colpointers,
+          rowindices);
+
+        // ------------------------------------------------------
+        // Advance K exactly as in the original algorithm.
+        //
+        // After processing the current target:
+        //
+        //   colhead[K]++
+        //
+        // and the new target is rowindices[colhead[K]].
+        // ------------------------------------------------------
+        ++colhead[K];
+
+        if (colhead[K] < rowpointers[K + 1])
+        {
+          TARGET[K] =
+            rowindices[colhead[K]];
+        }
+        else
+        {
+          TARGET[K] = -1;
+        }
+      }
+
+      // --------------------------------------------------------
+      // K has consumed all its targets in J.
+      //
+      // Put it into the HEAD list for its next target, if any.
+      // --------------------------------------------------------
+      if (TARGET[K] != -1)
+      {
+        insert_super(
+          HEAD,
+          LINK,
+          TARGET[K],
+                K,
+                supernodes);
+      }
+
+      K = nextK;
+    }
+
+    // ----------------------------------------------------------
+    // Same update as original algorithm.
+    // ----------------------------------------------------------
+    ++colhead[J];
+
+    // ----------------------------------------------------------
+    // Phase 2.
+    // ----------------------------------------------------------
+    for (int j = j0; j < j1; ++j)
+    {
+      cmod1(
+        L,
+        j,
+        J,
+        supernodes,
+        colpointers);
+
+      cdiv(
+        L,
+        j,
+        colpointers);
+    }
+  }
+}
+
+
 double logdet(const NumericVector& L, const IntegerVector& colpointers)
 {
   const int N = colpointers.size() - 1;
@@ -430,6 +1011,9 @@ double logdet(const NumericVector& L, const IntegerVector& colpointers)
   }
   return sum;
 }
+
+
+
 
 NumericVector forwardCholesky(
     const NumericVector& L,
