@@ -146,44 +146,6 @@ double logdet_Rcpp_fun(Rcpp::S4 obj) {
   return logdet(L, colpointers);
 }
 
-/*
-// [[Rcpp::export]]
-List constructor_LMMsolver_chol(Rcpp::S4 obj_spam) {
-  IntegerVector supernodes = GetIntVector(obj_spam, "supernodes", 0);
-
-  // Exchange row and columns compared to spam object, as in Ng and Peyton 1993
-  IntegerVector colpointers = GetIntVector(obj_spam, "rowpointers", 0);
-  IntegerVector rowpointers = GetIntVector(obj_spam, "colpointers", 0);
-  IntegerVector rowindices = GetIntVector(obj_spam, "colindices", 0);
-
-  IntegerVector pivot = GetIntVector(obj_spam, "pivot", 0);
-  IntegerVector invpivot = GetIntVector(obj_spam, "invpivot", 0);
-  IntegerVector Dim = Rcpp::clone<Rcpp::IntegerVector>(obj_spam.slot("dimension"));
-
-  NumericVector entries = Rcpp::clone<Rcpp::NumericVector>(obj_spam.slot("entries"));
-  const int N_entries = entries.size();
-
-  NumericVector ADentries(N_entries);
-
-  const NumericVector& L = entries;
-  NumericVector& F = ADentries;
-
-  initAD(F, L, colpointers);
-  ADcholesky(F, L, supernodes, rowpointers, colpointers, rowindices);
-
-  List L_obj;
-  L_obj["supernodes"] = supernodes;
-  L_obj["colpointers"] = colpointers;
-  L_obj["rowpointers"] = rowpointers;
-  L_obj["rowindices"] =  rowindices;
-  L_obj["pivot"] = pivot;
-  L_obj["invpivot"] = invpivot;
-  L_obj["entries"] = entries;
-  L_obj["ADentries"] = ADentries;
-  return L_obj;
-}
-*/
-
 // Convert a SparseMatrix to the internal AD-Cholesky ordering.
 NumericVector convertSparseMatrix(const SparseMatrix& A,
                                   const IntegerVector& supernodes,
@@ -261,11 +223,7 @@ NumericVector vec(Rcpp::S4 ADobj,
 
   SparseMatrix Aperm = permuteSymmetric(A,pivot);
 
-  return convertSparseMatrix(
-    Aperm,
-    supernodes,
-    rowpointers,
-    colpointers,
-    rowindices);
+  return convertSparseMatrix(Aperm, supernodes, rowpointers,
+    colpointers, rowindices);
 }
 
