@@ -32,6 +32,14 @@ expect_silent({
   g2 <- LMMsolver:::dlogdet(obj, B)
   g <- c(g1, g2)
 
+  B_wrong <- B
+  B_wrong[1,3] <- B_wrong[3,1] <- 1.0
+  expect_error(
+    LMMsolver:::dlogdet(obj, B_wrong),
+    "Pattern mismatch",
+    fixed = TRUE
+  )
+
   ## Homogeneity check:
   ## sum(theta * d log|C|/d theta) = n
   expect_equal(sum(theta0 * g), n, tolerance = 1e-10)

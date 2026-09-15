@@ -219,19 +219,19 @@ NumericVector convertSparseMatrix(const SparseMatrix& A,
 
         if (k < 0)
         {
-          Rcpp::Rcout << "\nPattern mismatch\n";
-          Rcpp::Rcout << "Column j = " << j
-                      << ", searching for row c = " << c << "\n";
+          //Rcpp::Rcout << "\nPattern mismatch\n";
+          //Rcpp::Rcout << "Column j = " << j
+          //            << ", searching for row c = " << c << "\n";
 
-          Rcpp::Rcout << "\nSparseMatrix column rows: ";
-          for (int t = A.rowpointers[j]; t < A.rowpointers[j + 1]; t++)
-            Rcpp::Rcout << A.colindices[t] << " ";
+          //Rcpp::Rcout << "\nSparseMatrix column rows: ";
+          //for (int t = A.rowpointers[j]; t < A.rowpointers[j + 1]; t++)
+          //  Rcpp::Rcout << A.colindices[t] << " ";
 
-          Rcpp::Rcout << "\nAD column rows: ";
-          for (int t = colpointers[j]; t < colpointers[j + 1]; t++)
-            Rcpp::Rcout << rowindices[t] << " ";
+          //Rcpp::Rcout << "\nAD column rows: ";
+          //for (int t = colpointers[j]; t < colpointers[j + 1]; t++)
+          //  Rcpp::Rcout << rowindices[t] << " ";
 
-          Rcpp::Rcout << "\n";
+          //Rcpp::Rcout << "\n";
 
           Rcpp::stop("Pattern mismatch");
         }
