@@ -77,7 +77,241 @@ void cdiv(NumericVector& L, int j, const IntegerVector& colpointers)
   }
 }
 
+template <int B>
+inline void update_panel(
+    double* tp,
+    double* l,
+    int sz,
+    const int* colpointers,
+    int k0)
+{
+  const double* lptr[B];
+  double Lj[B];
 
+  for (int q = 0; q < B; ++q)
+  {
+    const int jk = colpointers[k0 + q + 1] - sz;
+    lptr[q] = l + jk;
+    Lj[q]   = l[jk];
+  }
+
+  double* tptr = tp + sz - 1;
+
+  for (int i = 0; i < sz; ++i)
+  {
+    double x = 0.0;
+
+    for (int q = 0; q < B; ++q)
+      x += (*lptr[q]++) * Lj[q];
+
+    *tptr-- += x;
+  }
+}
+
+void cmod2_sup(
+    NumericVector& L,
+    int J,
+    int K,
+    int khead,
+    int klen,
+    int ncolup,
+    NumericVector& t,
+    const IntegerVector& indmap,
+    const IntegerVector& supernodes,
+    const IntegerVector& rowpointers,
+    const IntegerVector& colpointers,
+    const IntegerVector& rowindices)
+{
+  if (ncolup <= 0)
+    return;
+
+  double* l  = L.begin();
+  double* tp = t.begin();
+
+  const int eK   = rowpointers[K + 1];
+  const int sCol = supernodes[K];
+  const int eCol = supernodes[K + 1];
+
+  constexpr int PANEL = 4;
+
+  for (int p = 0; p < ncolup; ++p)
+  {
+    const int j  = rowindices[khead + p];
+    const int sz = klen - p;
+
+    // ----------------------------------------------------------
+    // Initialise target accumulator.
+    // ----------------------------------------------------------
+
+    double* tptr = tp;
+
+    for (int i = 0; i < sz; ++i)
+      *tptr++ = 0.0;
+
+    // ----------------------------------------------------------
+    // Process source supernode K in panels.
+    // ----------------------------------------------------------
+
+    for (int k0 = sCol; k0 < eCol; k0 += PANEL)
+    {
+      const int k1 = std::min(k0 + PANEL, eCol);
+      const int nw = k1 - k0;
+
+      const int jk0 = colpointers[k0 + 1] - sz;
+      const double Lj0 = l[jk0];
+
+      if (nw == 1)
+      {
+        double*       tptr  = tp + sz - 1;
+        const double* lptr0 = l + jk0;
+
+        for (int i = 0; i < sz; ++i)
+          *tptr-- += *lptr0++ * Lj0;
+      }
+      else if (nw == 2)
+      {
+        const int jk1 = colpointers[k0 + 2] - sz;
+
+        const double Lj1 = l[jk1];
+
+        double*       tptr  = tp + sz - 1;
+        const double* lptr0 = l + jk0;
+        const double* lptr1 = l + jk1;
+
+        for (int i = 0; i < sz; ++i)
+          *tptr-- += *lptr0++ * Lj0
+        + *lptr1++ * Lj1;
+      }
+      else if (nw == 3)
+      {
+        const int jk1 = colpointers[k0 + 2] - sz;
+        const int jk2 = colpointers[k0 + 3] - sz;
+
+        const double Lj1 = l[jk1];
+        const double Lj2 = l[jk2];
+
+        double*       tptr  = tp + sz - 1;
+        const double* lptr0 = l + jk0;
+        const double* lptr1 = l + jk1;
+        const double* lptr2 = l + jk2;
+
+        for (int i = 0; i < sz; ++i)
+          *tptr-- += *lptr0++ * Lj0
+        + *lptr1++ * Lj1
+        + *lptr2++ * Lj2;
+      }
+      else
+      {
+        const int jk1 = colpointers[k0 + 2] - sz;
+        const int jk2 = colpointers[k0 + 3] - sz;
+        const int jk3 = colpointers[k0 + 4] - sz;
+
+        const double Lj1 = l[jk1];
+        const double Lj2 = l[jk2];
+        const double Lj3 = l[jk3];
+
+        double*       tptr  = tp + sz - 1;
+        const double* lptr0 = l + jk0;
+        const double* lptr1 = l + jk1;
+        const double* lptr2 = l + jk2;
+        const double* lptr3 = l + jk3;
+
+        for (int i = 0; i < sz; ++i)
+        {
+          *tptr-- += *lptr0++ * Lj0
+          + *lptr1++ * Lj1
+          + *lptr2++ * Lj2
+          + *lptr3++ * Lj3;
+        }
+      }
+    }
+
+    // ----------------------------------------------------------
+    // Scatter result into target column j.
+    // ----------------------------------------------------------
+
+    int r = eK - 1;
+    const int ref_pos = colpointers[j + 1] - 1;
+
+    tptr = tp;
+
+    for (int i = 0; i < sz; ++i)
+    {
+      const int ndx = rowindices[r--];
+      const int pos = ref_pos - indmap[ndx];
+
+      l[pos] -= *tptr++;
+    }
+  }
+}
+
+void cmod2_sup_org(
+    NumericVector& L,
+    int J,
+    int K,
+    int khead,
+    int klen,
+    int ncolup,
+    NumericVector& t,
+    const IntegerVector& indmap,
+    const IntegerVector& supernodes,
+    const IntegerVector& rowpointers,
+    const IntegerVector& colpointers,
+    const IntegerVector& rowindices)
+{
+  if (ncolup <= 0)
+    return;
+
+  double* tp = t.begin();
+  double* l  = L.begin();
+
+  const int eK = rowpointers[K + 1];
+
+  const int sCol = supernodes[K];
+  const int eCol = supernodes[K + 1];
+
+  for (int p = 0; p < ncolup; ++p)
+  {
+    const int j  = rowindices[khead + p];
+    const int sz = klen - p;
+
+    // Initialise t.
+    double* tptr = tp;
+    for (int i = 0; i < sz; ++i)
+      *tptr++ = 0.0;
+
+    // Accumulate contribution from source supernode K.
+    for (int k = sCol; k < eCol; ++k)
+    {
+      const int jk = colpointers[k + 1] - sz;
+
+      const double Ljk = l[jk];
+
+      double*       tptr = tp + sz - 1;
+      double*       lptr = l  + jk;
+
+      for (int i = 0; i < sz; ++i)
+        *tptr-- += *lptr++ * Ljk;
+    }
+
+    // Scatter back into target column j.
+    int r = eK - 1;
+
+    const int ref_pos = colpointers[j + 1] - 1;
+
+    tptr = tp;
+
+    for (int i = 0; i < sz; ++i)
+    {
+      const int ndx = rowindices[r--];
+      const int pos = ref_pos - indmap[ndx];
+
+      l[pos] -= *tptr++;
+    }
+  }
+}
+
+/*
 void cmod2_sup(
     NumericVector& L,
     int J,
@@ -157,6 +391,312 @@ void cmod2_sup(
     }
   }
 }
+*/
+
+/*
+
+void cholesky(
+    NumericVector& L,
+    const IntegerVector& supernodes,
+    const IntegerVector& rowpointers,
+    const IntegerVector& colpointers,
+    const IntegerVector& rowindices)
+{
+  const int N = colpointers.size() - 1;
+  const int Nsupernodes = supernodes.size() - 1;
+
+  using clock = std::chrono::high_resolution_clock;
+
+  // ------------------------------------------------------------
+  // SNODE[j] = supernode containing scalar row/column j
+  // ------------------------------------------------------------
+  IntegerVector SNODE(N);
+
+  for (int J = 0; J < Nsupernodes; ++J)
+  {
+    for (int j = supernodes[J]; j < supernodes[J + 1]; ++j)
+      SNODE[j] = J;
+  }
+
+  // ------------------------------------------------------------
+  // Supernodal linked lists
+  //
+  // LINK[J]   = head of list of source supernodes waiting
+  //             to update J
+  //
+  // LENGTH[K] = active suffix length of source supernode K
+  // ------------------------------------------------------------
+  IntegerVector LINK(Nsupernodes, -1);
+  IntegerVector LENGTH(Nsupernodes, 0);
+
+  // ------------------------------------------------------------
+  // Workspace
+  // ------------------------------------------------------------
+  IntegerVector indmap(4 * N, 0);
+  NumericVector t(N);
+
+  // ------------------------------------------------------------
+  // Timers
+  // ------------------------------------------------------------
+  double time_indmap    = 0.0;
+  double time_phase1    = 0.0;
+  double time_phase2    = 0.0;
+  double time_schedule  = 0.0;
+
+  double time_cmod2     = 0.0;
+  double time_cmod1     = 0.0;
+  double time_cdiv      = 0.0;
+
+  long long n_cmod2 = 0;
+  long long n_cmod1 = 0;
+  long long n_cdiv  = 0;
+
+  // ------------------------------------------------------------
+  // Process supernodes in order
+  // ------------------------------------------------------------
+  for (int J = 0; J < Nsupernodes; ++J)
+  {
+    const int j0 = supernodes[J];
+    const int j1 = supernodes[J + 1];
+
+    // ----------------------------------------------------------
+    // makeIndMap
+    // ----------------------------------------------------------
+    {
+      const auto t0 = clock::now();
+
+      makeIndMap(
+        indmap,
+        J,
+        rowpointers,
+        rowindices);
+
+      time_indmap +=
+        std::chrono::duration<double>(clock::now() - t0).count();
+    }
+
+    // ----------------------------------------------------------
+    // Phase 1: process source supernodes waiting for J
+    // ----------------------------------------------------------
+    {
+      const auto phase1_start = clock::now();
+
+      int K = LINK[J];
+      LINK[J] = -1;
+
+      while (K != -1)
+      {
+        const int nextK = LINK[K];
+        const int klen  = LENGTH[K];
+
+        // First active row of K.
+        const int khead =
+          rowpointers[K + 1] - klen;
+
+        // ------------------------------------------------------
+        // Determine how many active rows of K belong to J.
+        // ------------------------------------------------------
+        int ncolup = 0;
+
+        while (ncolup < klen &&
+               rowindices[khead + ncolup] < j1)
+        {
+          ++ncolup;
+        }
+
+        // ------------------------------------------------------
+        // Numerical cmod2 update
+        // ------------------------------------------------------
+        if (ncolup > 0)
+        {
+          const auto t0 = clock::now();
+
+          cmod2_sup(
+            L,
+            J,
+            K,
+            khead,
+            klen,
+            ncolup,
+            t,
+            indmap,
+            supernodes,
+            rowpointers,
+            colpointers,
+            rowindices);
+
+          time_cmod2 +=
+            std::chrono::duration<double>(
+              clock::now() - t0).count();
+
+          ++n_cmod2;
+        }
+
+        // ------------------------------------------------------
+        // Reschedule K if it has an active suffix left.
+        // ------------------------------------------------------
+        if (klen > ncolup)
+        {
+          const int next_row =
+            rowindices[khead + ncolup];
+
+          const int nextJ =
+            SNODE[next_row];
+
+          LENGTH[K] =
+            klen - ncolup;
+
+          LINK[K] =
+            LINK[nextJ];
+
+          LINK[nextJ] = K;
+        }
+        else
+        {
+          LENGTH[K] = 0;
+          LINK[K] = -1;
+        }
+
+        K = nextK;
+      }
+
+      time_phase1 +=
+        std::chrono::duration<double>(
+          clock::now() - phase1_start).count();
+    }
+
+    // ----------------------------------------------------------
+    // Phase 2: factor supernode J
+    // ----------------------------------------------------------
+    {
+      const auto phase2_start = clock::now();
+
+      for (int j = j0; j < j1; ++j)
+      {
+        // ------------------------------------------------------
+        // cmod1
+        // ------------------------------------------------------
+        {
+          const auto t0 = clock::now();
+
+          cmod1(
+            L,
+            j,
+            J,
+            supernodes,
+            colpointers);
+
+          time_cmod1 +=
+            std::chrono::duration<double>(
+              clock::now() - t0).count();
+
+          ++n_cmod1;
+        }
+
+        // ------------------------------------------------------
+        // cdiv
+        // ------------------------------------------------------
+        {
+          const auto t0 = clock::now();
+
+          cdiv(
+            L,
+            j,
+            colpointers);
+
+          time_cdiv +=
+            std::chrono::duration<double>(
+              clock::now() - t0).count();
+
+          ++n_cdiv;
+        }
+      }
+
+      time_phase2 +=
+        std::chrono::duration<double>(
+          clock::now() - phase2_start).count();
+    }
+
+    // ----------------------------------------------------------
+    // Schedule J's own update
+    // ----------------------------------------------------------
+    {
+      const auto t0 = clock::now();
+
+      const int width =
+        j1 - j0;
+
+      const int len =
+        rowpointers[J + 1] - rowpointers[J];
+
+      LENGTH[J] =
+        len - width;
+
+      if (LENGTH[J] > 0)
+      {
+        const int next_row =
+          rowindices[rowpointers[J] + width];
+
+        const int nextJ =
+          SNODE[next_row];
+
+        LINK[J] =
+          LINK[nextJ];
+
+        LINK[nextJ] = J;
+      }
+      else
+      {
+        LENGTH[J] = 0;
+        LINK[J] = -1;
+      }
+
+      time_schedule +=
+        std::chrono::duration<double>(
+          clock::now() - t0).count();
+    }
+  }
+
+  // ------------------------------------------------------------
+  // Report
+  // ------------------------------------------------------------
+  Rcout << "\n";
+  Rcout << "Cholesky timing summary\n";
+  Rcout << "N = " << N
+        << ", supernodes = " << Nsupernodes << "\n";
+
+  Rcout << "makeIndMap:       "
+        << time_indmap << "\n";
+
+  Rcout << "Phase 1 total:    "
+        << time_phase1 << "\n";
+
+  Rcout << "  cmod2 total:    "
+        << time_cmod2
+        << "  (" << n_cmod2 << " calls)\n";
+
+  Rcout << "Phase 2 total:    "
+        << time_phase2 << "\n";
+
+  Rcout << "  cmod1 total:    "
+        << time_cmod1
+        << "  (" << n_cmod1 << " calls)\n";
+
+  Rcout << "  cdiv total:     "
+        << time_cdiv
+        << "  (" << n_cdiv << " calls)\n";
+
+  Rcout << "Scheduling:       "
+        << time_schedule << "\n";
+
+  Rcout << "Measured total:   "
+        << time_indmap
+  + time_phase1
+  + time_phase2
+  + time_schedule
+  << "\n";
+}
+*/
 
 void cholesky(
     NumericVector& L,
@@ -193,7 +733,7 @@ void cholesky(
   // Workspace
   // ------------------------------------------------------------
 
-  IntegerVector indmap(N, 0);
+  IntegerVector indmap(4*N, 0);
   NumericVector t(N);
 
   // ------------------------------------------------------------

@@ -116,6 +116,33 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// matmul4x4_blocks
+NumericMatrix matmul4x4_blocks(NumericMatrix A, NumericMatrix B, int reps);
+RcppExport SEXP _LMMsolver_matmul4x4_blocks(SEXP ASEXP, SEXP BSEXP, SEXP repsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type A(ASEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type B(BSEXP);
+    Rcpp::traits::input_parameter< int >::type reps(repsSEXP);
+    rcpp_result_gen = Rcpp::wrap(matmul4x4_blocks(A, B, reps));
+    return rcpp_result_gen;
+END_RCPP
+}
+// matmul_test
+NumericMatrix matmul_test(NumericMatrix A, NumericMatrix B, int reps, int tileSize);
+RcppExport SEXP _LMMsolver_matmul_test(SEXP ASEXP, SEXP BSEXP, SEXP repsSEXP, SEXP tileSizeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type A(ASEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type B(BSEXP);
+    Rcpp::traits::input_parameter< int >::type reps(repsSEXP);
+    Rcpp::traits::input_parameter< int >::type tileSize(tileSizeSEXP);
+    rcpp_result_gen = Rcpp::wrap(matmul_test(A, B, reps, tileSize));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_LMMsolver_GetIntVector", (DL_FUNC) &_LMMsolver_GetIntVector, 3},
@@ -127,6 +154,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_LMMsolver_vec", (DL_FUNC) &_LMMsolver_vec, 2},
     {"_LMMsolver_RowKron", (DL_FUNC) &_LMMsolver_RowKron, 2},
     {"_LMMsolver_MatrixProduct", (DL_FUNC) &_LMMsolver_MatrixProduct, 2},
+    {"_LMMsolver_matmul4x4_blocks", (DL_FUNC) &_LMMsolver_matmul4x4_blocks, 3},
+    {"_LMMsolver_matmul_test", (DL_FUNC) &_LMMsolver_matmul_test, 4},
     {NULL, NULL, 0}
 };
 

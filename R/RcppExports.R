@@ -37,3 +37,11 @@ MatrixProduct <- function(sA, sB) {
     .Call(`_LMMsolver_MatrixProduct`, sA, sB)
 }
 
+matmul4x4_blocks <- function(A, B, reps) {
+    .Call(`_LMMsolver_matmul4x4_blocks`, A, B, reps)
+}
+
+matmul_test <- function(A, B, reps, tileSize) {
+    .Call(`_LMMsolver_matmul_test`, A, B, reps, tileSize)
+}
+
