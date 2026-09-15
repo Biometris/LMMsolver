@@ -16,9 +16,32 @@
 #include <vector>
 #include "AuxFun.h"
 #include "SparseMatrix.h"
+#include "matvec_test.h"
 #include "cholesky.h"
 
 #include <chrono>
+
+inline void pack4x4(
+    const double* A,
+    double* P,
+    int ld)
+{
+  for (int i = 0; i < 4; ++i)
+    for (int j = 0; j < 4; ++j)
+      P[4 * i + j] = A[i * ld + j];
+}
+
+
+inline void pack4x4_transpose(
+    const double* A,
+    double* P,
+    int ld)
+{
+  // Pack A^T
+  for (int i = 0; i < 4; ++i)
+    for (int j = 0; j < 4; ++j)
+      P[4 * i + j] = A[j * ld + i];
+}
 
 using namespace std::chrono;
 using namespace Rcpp;
@@ -108,7 +131,7 @@ inline void update_panel(
   }
 }
 
-void cmod2_sup(
+void cmod2_sup_tmp(
     NumericVector& L,
     int J,
     int K,
@@ -244,6 +267,552 @@ void cmod2_sup(
     }
   }
 }
+
+// ------------------------------------------------------------
+// Pack a 4 x K matrix.
+// Input is row-major with leading dimension lda.
+// Output is packed row-major 4 x K.
+// ------------------------------------------------------------
+inline void pack4xK(
+    const double* A,
+    double* P,
+    int lda,
+    int K)
+{
+  for (int i = 0; i < 4; ++i)
+    for (int k = 0; k < K; ++k)
+      P[i * K + k] = A[i * lda + k];
+}
+
+
+// ------------------------------------------------------------
+// Pack transpose of a 4 x K matrix.
+//
+// Input:
+//     A : 4 x K
+//
+// Output:
+//     P : K x 4 = A^T
+//
+// This is the layout expected as B by matmul4x4_block().
+// ------------------------------------------------------------
+inline void pack4xK_transpose(
+    const double* A,
+    double* P,
+    int lda,
+    int K)
+{
+  for (int k = 0; k < K; ++k)
+    for (int i = 0; i < 4; ++i)
+      P[k * 4 + i] = A[i * lda + k];
+}
+
+
+// ------------------------------------------------------------
+// Unpack 4 x 4 result.
+// ------------------------------------------------------------
+inline void unpack4x4(
+    const double* P,
+    double* A,
+    int lda)
+{
+  for (int i = 0; i < 4; ++i)
+    for (int j = 0; j < 4; ++j)
+      A[i * lda + j] = P[i * 4 + j];
+}
+
+// ============================================================
+// 4 x 4 matrix multiplication
+//
+// A : 4 x K
+// B : K x 4
+// C : 4 x 4
+//
+// C = A B
+// ============================================================
+inline void matmul4x4_block(
+    const double* A,
+    const double* B,
+    double* C,
+    int lda,
+    int ldb,
+    int ldc,
+    int K)
+{
+  double c00 = 0.0, c01 = 0.0, c02 = 0.0, c03 = 0.0;
+  double c10 = 0.0, c11 = 0.0, c12 = 0.0, c13 = 0.0;
+  double c20 = 0.0, c21 = 0.0, c22 = 0.0, c23 = 0.0;
+  double c30 = 0.0, c31 = 0.0, c32 = 0.0, c33 = 0.0;
+
+  for (int k = 0; k < K; ++k)
+  {
+    const double a0 = A[0 * lda + k];
+    const double a1 = A[1 * lda + k];
+    const double a2 = A[2 * lda + k];
+    const double a3 = A[3 * lda + k];
+
+    const double b0 = B[k * ldb + 0];
+    const double b1 = B[k * ldb + 1];
+    const double b2 = B[k * ldb + 2];
+    const double b3 = B[k * ldb + 3];
+
+    c00 += a0 * b0;
+    c01 += a0 * b1;
+    c02 += a0 * b2;
+    c03 += a0 * b3;
+
+    c10 += a1 * b0;
+    c11 += a1 * b1;
+    c12 += a1 * b2;
+    c13 += a1 * b3;
+
+    c20 += a2 * b0;
+    c21 += a2 * b1;
+    c22 += a2 * b2;
+    c23 += a2 * b3;
+
+    c30 += a3 * b0;
+    c31 += a3 * b1;
+    c32 += a3 * b2;
+    c33 += a3 * b3;
+  }
+
+  C[0 * ldc + 0] = c00;
+  C[0 * ldc + 1] = c01;
+  C[0 * ldc + 2] = c02;
+  C[0 * ldc + 3] = c03;
+
+  C[1 * ldc + 0] = c10;
+  C[1 * ldc + 1] = c11;
+  C[1 * ldc + 2] = c12;
+  C[1 * ldc + 3] = c13;
+
+  C[2 * ldc + 0] = c20;
+  C[2 * ldc + 1] = c21;
+  C[2 * ldc + 2] = c22;
+  C[2 * ldc + 3] = c23;
+
+  C[3 * ldc + 0] = c30;
+  C[3 * ldc + 1] = c31;
+  C[3 * ldc + 2] = c32;
+  C[3 * ldc + 3] = c33;
+}
+
+
+// ============================================================
+// cmod2_sup
+// ============================================================
+void cmod2_sup(
+    NumericVector& L,
+    int J,
+    int K,
+    int khead,
+    int klen,
+    int ncolup,
+    NumericVector& t,
+    const IntegerVector& indmap,
+    const IntegerVector& supernodes,
+    const IntegerVector& rowpointers,
+    const IntegerVector& colpointers,
+    const IntegerVector& rowindices)
+{
+  if (ncolup <= 0)
+    return;
+
+  double* tp = t.begin();
+  double* l  = L.begin();
+
+  const int eK = rowpointers[K + 1];
+
+  const int sCol = supernodes[K];
+  const int eCol = supernodes[K + 1];
+
+  const int srcWidth = eCol - sCol;
+
+
+  // ==========================================================
+  // Optimised 4-column blocks
+  // ==========================================================
+
+  const int ncol4 = (ncolup / 4) * 4;
+
+  int p0 = 0;
+
+  for (; p0 < ncol4; p0 += 4)
+  {
+    /*
+     * We only use the blocked kernel when the four target
+     * columns do not overlap the source supernode.
+     *
+     * Otherwise use the original in-place update.
+     */
+    bool useOptimized = true;
+
+    for (int j = 0; j < 4; ++j)
+    {
+      const int target =
+        rowindices[khead + p0 + j];
+
+      if (target >= sCol && target < eCol)
+      {
+        useOptimized = false;
+        break;
+      }
+    }
+
+    if (!useOptimized)
+    {
+      // ------------------------------------------------------
+      // Original implementation for this block
+      // ------------------------------------------------------
+      for (int p = p0; p < p0 + 4; ++p)
+      {
+        const int j  = rowindices[khead + p];
+        const int sz = klen - p;
+
+        double* tptr = tp;
+
+        for (int i = 0; i < sz; ++i)
+          *tptr++ = 0.0;
+
+        for (int k = sCol; k < eCol; ++k)
+        {
+          const int jk =
+            colpointers[k + 1] - sz;
+
+          const double Ljk =
+            l[jk];
+
+          double* tptr =
+            tp + sz - 1;
+
+          double* lptr =
+            l + jk;
+
+          for (int i = 0; i < sz; ++i)
+            *tptr-- += *lptr++ * Ljk;
+        }
+
+        int r = eK - 1;
+
+        const int ref_pos =
+          colpointers[j + 1] - 1;
+
+        tptr = tp;
+
+        for (int i = 0; i < sz; ++i)
+        {
+          const int ndx = rowindices[r--];
+          const int pos = ref_pos - indmap[ndx];
+
+          l[pos] -= *tptr++;
+        }
+      }
+
+      continue;
+    }
+
+
+    // ========================================================
+    // Optimised block
+    //
+    // We need:
+    //
+    //     C = A B^T
+    //
+    // where
+    //
+    //     A  = X[r0:r0+3, :]
+    //     B  = X[p0:p0+3, :]
+    //
+    // and X is klen x srcWidth.
+    //
+    // matmul4x4_block computes A * B, so Bt = B^T.
+    // ========================================================
+
+    std::vector<double> A(4 * srcWidth);
+    std::vector<double> Bt(4 * srcWidth);
+
+    /*
+     * Build B^T once for this four-column target block.
+     */
+    for (int k = 0; k < srcWidth; ++k)
+    {
+      const int col = sCol + k;
+
+      const int base =
+        colpointers[col + 1] - klen;
+
+      Bt[k * 4 + 0] =
+        l[base + p0 + 0];
+
+      Bt[k * 4 + 1] =
+        l[base + p0 + 1];
+
+      Bt[k * 4 + 2] =
+        l[base + p0 + 2];
+
+      Bt[k * 4 + 3] =
+        l[base + p0 + 3];
+    }
+
+
+    /*
+     * --------------------------------------------------------
+     * Row blocks of four.
+     * --------------------------------------------------------
+     */
+
+    int r0 = p0;
+
+    for (; r0 + 4 <= klen; r0 += 4)
+    {
+      /*
+       * A = X[r0:r0+3, :]
+       */
+      for (int k = 0; k < srcWidth; ++k)
+      {
+        const int col = sCol + k;
+
+        const int base =
+          colpointers[col + 1] - klen;
+
+        A[0 * srcWidth + k] =
+          l[base + r0 + 0];
+
+        A[1 * srcWidth + k] =
+          l[base + r0 + 1];
+
+        A[2 * srcWidth + k] =
+          l[base + r0 + 2];
+
+        A[3 * srcWidth + k] =
+          l[base + r0 + 3];
+      }
+
+
+      double C[16];
+
+
+      /*
+       * C = A B^T
+       */
+      matmul4x4_block(
+        A.data(),
+        Bt.data(),
+        C,
+        srcWidth,
+        4,
+        4,
+        srcWidth
+      );
+
+
+      /*
+       * ------------------------------------------------------
+       * Scatter valid lower-triangular elements.
+       *
+       * IMPORTANT:
+       *
+       * Original code uses
+       *
+       *   q = sz - 1 - i
+       *
+       * with
+       *
+       *   sz = klen - p
+       *
+       * and global row
+       *
+       *   r = p + i.
+       *
+       * Therefore
+       *
+       *   q = klen - r - 1.
+       *
+       * This is independent of p.
+       * ------------------------------------------------------
+       */
+
+      for (int j = 0; j < 4; ++j)
+      {
+        const int p = p0 + j;
+
+        /*
+         * On the diagonal block, only rows r >= p are valid.
+         */
+        const int imin =
+          (r0 == p0) ? j : 0;
+
+        const int target =
+          rowindices[khead + p];
+
+        const int ref_pos =
+          colpointers[target + 1] - 1;
+
+        for (int i = imin; i < 4; ++i)
+        {
+          const int r = r0 + i;
+
+          /*
+           * q is exactly the index used by the original
+           * scatter operation.
+           */
+          const int q =
+            klen - r - 1;
+
+          const int ndx =
+            rowindices[eK - 1 - q];
+
+          const int pos =
+            ref_pos - indmap[ndx];
+
+          l[pos] -=
+            C[i * 4 + j];
+        }
+      }
+    }
+
+
+    /*
+     * --------------------------------------------------------
+     * Remaining 1-3 rows.
+     *
+     * Calculate directly, preserving the exact original
+     * indexing.
+     * --------------------------------------------------------
+     */
+    if (r0 < klen)
+    {
+      for (int j = 0; j < 4; ++j)
+      {
+        const int p = p0 + j;
+
+        const int sz =
+          klen - p;
+
+        /*
+         * First row not already covered.
+         */
+        int first = r0 - p;
+
+        if (first < 0)
+          first = 0;
+
+        if (first >= sz)
+          continue;
+
+        const int target =
+          rowindices[khead + p];
+
+        const int ref_pos =
+          colpointers[target + 1] - 1;
+
+        for (int i = first; i < sz; ++i)
+        {
+          const int r =
+            p + i;
+
+          double sum = 0.0;
+
+          /*
+           * Same source-vector product as the original code.
+           */
+          for (int k = sCol; k < eCol; ++k)
+          {
+            const int base =
+              colpointers[k + 1] - klen;
+
+            sum +=
+              l[base + r] *
+              l[base + p];
+          }
+
+          /*
+           * Original t index:
+           *
+           *   q = sz - 1 - i
+           *
+           * We don't actually need t here; write directly to L.
+           */
+          const int q =
+            sz - 1 - i;
+
+          const int ndx =
+            rowindices[eK - 1 - q];
+
+          const int pos =
+            ref_pos - indmap[ndx];
+
+          l[pos] -= sum;
+        }
+      }
+    }
+  }
+
+
+  // ==========================================================
+  // Remaining 1-3 target columns
+  // ==========================================================
+
+  for (int p = p0; p < ncolup; ++p)
+  {
+    const int j  = rowindices[khead + p];
+    const int sz = klen - p;
+
+    // Initialise t.
+    double* tptr = tp;
+
+    for (int i = 0; i < sz; ++i)
+      *tptr++ = 0.0;
+
+    // Accumulate contribution from source supernode K.
+    for (int k = sCol; k < eCol; ++k)
+    {
+      const int jk =
+        colpointers[k + 1] - sz;
+
+      const double Ljk =
+        l[jk];
+
+      double* tptr =
+        tp + sz - 1;
+
+      double* lptr =
+        l + jk;
+
+      for (int i = 0; i < sz; ++i)
+        *tptr-- += *lptr++ * Ljk;
+    }
+
+    // Scatter back into target column j.
+    int r = eK - 1;
+
+    const int ref_pos =
+      colpointers[j + 1] - 1;
+
+    tptr = tp;
+
+    for (int i = 0; i < sz; ++i)
+    {
+      const int ndx =
+        rowindices[r--];
+
+      const int pos =
+        ref_pos - indmap[ndx];
+
+      l[pos] -= *tptr++;
+    }
+  }
+}
+
+
+
+
+
+
+
+
 
 void cmod2_sup_org(
     NumericVector& L,
