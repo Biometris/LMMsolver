@@ -79,6 +79,40 @@ inline void matmul4x4(
 }
 
 
+template <int M, int N>
+inline void matmul_block(
+    const double* A,
+    const double* Bt,
+    double* C,
+    int lda,
+    int ldb,
+    int ldc,
+    int K)
+{
+  double c[M][N] = {};
+
+  for (int k = 0; k < K; ++k)
+  {
+    const double* b = Bt + k * ldb;
+
+    #pragma GCC unroll M
+    for (int i = 0; i < M; ++i)
+    {
+      const double a = A[i * lda + k];
+
+      #pragma GCC unroll N
+      for (int j = 0; j < N; ++j)
+        c[i][j] += a * b[j];
+    }
+  }
+
+  for (int i = 0; i < M; ++i)
+  {
+    for (int j = 0; j < N; ++j)
+      C[i * ldc + j] = c[i][j];
+  }
+}
+
 // ============================================================
 // B x B matrix multiplication
 //
@@ -92,7 +126,7 @@ inline void matmul4x4(
 // ============================================================
 
 template <int B>
-inline void matmul_block(
+inline void matmul_block_old(
     const double* A,
     const double* Bm,
     double* C,

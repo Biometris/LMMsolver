@@ -233,7 +233,7 @@ NumericMatrix matmul4x4_blocks_template(
     {
       for (int j = 0; j < cols; j += 4)
       {
-        matmul_block<4>(
+        matmul_block<4,4>(
           &left[i * K],
                &right[j],
                &result[i * cols + j],
@@ -324,7 +324,7 @@ NumericMatrix matmul2x2_blocks_template(
     {
       for (int j = 0; j < cols; j += 2)
       {
-        matmul_block<2>(
+        matmul_block<2,2>(
           &left[i * K],
                &right[j],
                &result[i * cols + j],
@@ -414,7 +414,7 @@ NumericMatrix matmul8x8_blocks_template(
     {
       for (int j = 0; j < cols; j += 8)
       {
-        matmul_block<8>(
+        matmul_block<8,8>(
           &left[i * K],
                &right[j],
                &result[i * cols + j],
