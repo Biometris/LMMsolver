@@ -76,81 +76,6 @@ void cdiv(NumericVector& L, int j, const IntegerVector& colpointers)
   }
 }
 
-inline void pack4x4(
-    const double* A,
-    double* P,
-    int ld)
-{
-  for (int i = 0; i < 4; ++i)
-    for (int j = 0; j < 4; ++j)
-      P[4 * i + j] = A[i * ld + j];
-}
-
-
-inline void pack4x4_transpose(
-    const double* A,
-    double* P,
-    int ld)
-{
-  // Pack A^T
-  for (int i = 0; i < 4; ++i)
-    for (int j = 0; j < 4; ++j)
-      P[4 * i + j] = A[j * ld + i];
-}
-
-// ------------------------------------------------------------
-// Pack a 4 x K matrix.
-// Input is row-major with leading dimension lda.
-// Output is packed row-major 4 x K.
-// ------------------------------------------------------------
-inline void pack4xK(
-    const double* A,
-    double* P,
-    int lda,
-    int K)
-{
-  for (int i = 0; i < 4; ++i)
-    for (int k = 0; k < K; ++k)
-      P[i * K + k] = A[i * lda + k];
-}
-
-
-// ------------------------------------------------------------
-// Pack transpose of a 4 x K matrix.
-//
-// Input:
-//     A : 4 x K
-//
-// Output:
-//     P : K x 4 = A^T
-//
-// This is the layout expected as B by matmul4x4_block().
-// ------------------------------------------------------------
-inline void pack4xK_transpose(
-    const double* A,
-    double* P,
-    int lda,
-    int K)
-{
-  for (int k = 0; k < K; ++k)
-    for (int i = 0; i < 4; ++i)
-      P[k * 4 + i] = A[i * lda + k];
-}
-
-
-// ------------------------------------------------------------
-// Unpack 4 x 4 result.
-// ------------------------------------------------------------
-inline void unpack4x4(
-    const double* P,
-    double* A,
-    int lda)
-{
-  for (int i = 0; i < 4; ++i)
-    for (int j = 0; j < 4; ++j)
-      A[i * lda + j] = P[i * 4 + j];
-}
-
 // ============================================================
 // 4 x 4 matrix multiplication
 //
@@ -240,6 +165,8 @@ void cmod2_sup(
     int klen,
     int ncolup,
     NumericVector& t,
+    std::vector<double>& A,
+    std::vector<double>& Bt,
     const IntegerVector& indmap,
     const IntegerVector& supernodes,
     const IntegerVector& rowpointers,
@@ -359,9 +286,6 @@ void cmod2_sup(
     //
     // matmul4x4_block computes A * B, so Bt = B^T.
     // ========================================================
-
-    std::vector<double> A(4 * srcWidth);
-    std::vector<double> Bt(4 * srcWidth);
 
     /*
      * Build B^T once for this four-column target block.
@@ -636,72 +560,6 @@ void cmod2_sup(
   }
 }
 
-void cmod2_sup_org(
-    NumericVector& L,
-    int J,
-    int K,
-    int khead,
-    int klen,
-    int ncolup,
-    NumericVector& t,
-    const IntegerVector& indmap,
-    const IntegerVector& supernodes,
-    const IntegerVector& rowpointers,
-    const IntegerVector& colpointers,
-    const IntegerVector& rowindices)
-{
-  if (ncolup <= 0)
-    return;
-
-  double* tp = t.begin();
-  double* l  = L.begin();
-
-  const int eK = rowpointers[K + 1];
-
-  const int sCol = supernodes[K];
-  const int eCol = supernodes[K + 1];
-
-  for (int p = 0; p < ncolup; ++p)
-  {
-    const int j  = rowindices[khead + p];
-    const int sz = klen - p;
-
-    // Initialise t.
-    double* tptr = tp;
-    for (int i = 0; i < sz; ++i)
-      *tptr++ = 0.0;
-
-    // Accumulate contribution from source supernode K.
-    for (int k = sCol; k < eCol; ++k)
-    {
-      const int jk = colpointers[k + 1] - sz;
-
-      const double Ljk = l[jk];
-
-      double*       tptr = tp + sz - 1;
-      double*       lptr = l  + jk;
-
-      for (int i = 0; i < sz; ++i)
-        *tptr-- += *lptr++ * Ljk;
-    }
-
-    // Scatter back into target column j.
-    int r = eK - 1;
-
-    const int ref_pos = colpointers[j + 1] - 1;
-
-    tptr = tp;
-
-    for (int i = 0; i < sz; ++i)
-    {
-      const int ndx = rowindices[r--];
-      const int pos = ref_pos - indmap[ndx];
-
-      l[pos] -= *tptr++;
-    }
-  }
-}
-
 
 void cholesky(
     NumericVector& L,
@@ -738,8 +596,19 @@ void cholesky(
   // Workspace
   // ------------------------------------------------------------
 
-  IntegerVector indmap(4*N, 0);
+  IntegerVector indmap(N, 0);
+
+  int maxSrcWidth = 0;
+
+  for (int K = 0; K < supernodes.size() - 1; ++K)
+    maxSrcWidth = std::max(
+      maxSrcWidth,
+      supernodes[K + 1] - supernodes[K]
+    );
+
   NumericVector t(N);
+  std::vector<double> A(4 * maxSrcWidth);
+  std::vector<double> Bt(4 * maxSrcWidth);
 
   // ------------------------------------------------------------
   // Process supernodes in order
@@ -785,7 +654,7 @@ void cholesky(
       }
 
       // Numerical update.
-      cmod2_sup(L, J, K, khead, klen, ncolup, t, indmap,
+      cmod2_sup(L, J, K, khead, klen, ncolup, t, A, Bt, indmap,
         supernodes, rowpointers, colpointers, rowindices
       );
 
