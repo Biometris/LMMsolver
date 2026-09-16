@@ -78,6 +78,85 @@ void cdiv(NumericVector& L, int j, const IntegerVector& colpointers)
 }
 
 // ============================================================
+// Standard cmod2 update
+//
+// Updates ncolup target columns of J from source supernode K
+// using the original t-based implementation.
+// ============================================================
+
+inline void cmod2_default(
+    double* l,
+    double* tp,
+    int K,
+    int khead,
+    int klen,
+    int ncolup,
+    int eK,
+    int sCol,
+    int srcWidth,
+    const IntegerVector& indmap,
+    const IntegerVector& colpointers,
+    const IntegerVector& rowindices)
+{
+  for (int p = 0; p < ncolup; ++p)
+  {
+    const int j  = rowindices[khead + p];
+    const int sz = klen - p;
+
+    // --------------------------------------------------------
+    // Initialise t
+    // --------------------------------------------------------
+
+    for (int i = 0; i < sz; ++i)
+      tp[i] = 0.0;
+
+    // --------------------------------------------------------
+    // Accumulate source supernode contribution
+    // --------------------------------------------------------
+
+    for (int k = 0; k < srcWidth; ++k)
+    {
+      const int jk =
+        colpointers[sCol + k + 1] - sz;
+
+      const double Ljk =
+        l[jk];
+
+      double* tptr =
+        tp + sz - 1;
+
+      double* lptr =
+        l + jk;
+
+      for (int i = 0; i < sz; ++i)
+        *tptr-- += *lptr++ * Ljk;
+    }
+
+    // --------------------------------------------------------
+    // Scatter
+    // --------------------------------------------------------
+
+    int r = eK - 1;
+
+    const int ref_pos =
+      colpointers[j + 1] - 1;
+
+    double* tptr = tp;
+
+    for (int i = 0; i < sz; ++i)
+    {
+      const int ndx =
+        rowindices[r--];
+
+      const int pos =
+        ref_pos - indmap[ndx];
+
+      l[pos] -= *tptr++;
+    }
+  }
+}
+
+// ============================================================
 // 4 x 4 matrix multiplication
 //
 // A : 4 x K
@@ -155,9 +234,11 @@ inline void matmul4x4_block(
 }
 
 
+
 // ============================================================
 // cmod2_sup
 // ============================================================
+
 void cmod2_sup(
     NumericVector& L,
     int J,
@@ -177,90 +258,62 @@ void cmod2_sup(
   if (ncolup <= 0)
     return;
 
-  double* tp = t.begin();
   double* l  = L.begin();
+  double* tp = t.begin();
 
-  const int eK = rowpointers[K + 1];
+  const int eK =
+    rowpointers[K + 1];
 
-  const int sCol = supernodes[K];
-  const int eCol = supernodes[K + 1];
+  const int sCol =
+    supernodes[K];
 
-  const int srcWidth = eCol - sCol;
+  const int eCol =
+    supernodes[K + 1];
+
+  const int srcWidth =
+    eCol - sCol;
 
   // ==========================================================
-  // Trivial / small source supernodes:
-  // use the standard cmod2 implementation.
+  // Small source supernodes:
+  // use standard cmod2.
   // ==========================================================
 
   if (srcWidth <= 3)
   {
-    for (int p = 0; p < ncolup; ++p)
-    {
-      const int j  = rowindices[khead + p];
-      const int sz = klen - p;
-
-      // Initialise t.
-      double* tptr = tp;
-
-      for (int i = 0; i < sz; ++i)
-        *tptr++ = 0.0;
-
-      // Accumulate source supernode contribution.
-      for (int k = 0; k < srcWidth; ++k)
-      {
-        const int jk =
-          colpointers[sCol + k + 1] - sz;
-
-        const double Ljk =
-          l[jk];
-
-        double* tptr =
-          tp + sz - 1;
-
-        double* lptr =
-          l + jk;
-
-        for (int i = 0; i < sz; ++i)
-          *tptr-- += *lptr++ * Ljk;
-      }
-
-      // Scatter.
-      int r = eK - 1;
-
-      const int ref_pos =
-        colpointers[j + 1] - 1;
-
-      tptr = tp;
-
-      for (int i = 0; i < sz; ++i)
-      {
-        const int ndx =
-          rowindices[r--];
-
-        const int pos =
-          ref_pos - indmap[ndx];
-
-        l[pos] -= *tptr++;
-      }
-    }
+    cmod2_default(
+      l,
+      tp,
+      K,
+      khead,
+      klen,
+      ncolup,
+      eK,
+      sCol,
+      srcWidth,
+      indmap,
+      colpointers,
+      rowindices
+    );
 
     return;
   }
 
 
   // ==========================================================
-  // Source-column base positions.
+  // Source-column base positions
   // ==========================================================
 
   std::vector<int> srcBase(srcWidth);
 
   for (int k = 0; k < srcWidth; ++k)
+  {
     srcBase[k] =
       colpointers[sCol + k + 1] - klen;
+  }
 
 
   // ==========================================================
-  // Optimised 4-column target blocks
+  // Process target columns in groups of four.
   // ==========================================================
 
   const int ncol4 =
@@ -271,9 +324,8 @@ void cmod2_sup(
   for (; p0 < ncol4; p0 += 4)
   {
     // --------------------------------------------------------
-    // The blocked kernel cannot be used if the target block
-    // overlaps the source supernode because L is updated
-    // in place.
+    // Check whether the target block overlaps source K.
+    // If so, use the original in-place update.
     // --------------------------------------------------------
 
     bool useOptimized = true;
@@ -292,68 +344,33 @@ void cmod2_sup(
 
     if (!useOptimized)
     {
-      // ------------------------------------------------------
-      // Standard cmod2 for these four target columns.
-      // ------------------------------------------------------
-
-      for (int p = p0; p < p0 + 4; ++p)
-      {
-        const int j  = rowindices[khead + p];
-        const int sz = klen - p;
-
-        double* tptr = tp;
-
-        for (int i = 0; i < sz; ++i)
-          *tptr++ = 0.0;
-
-        for (int k = 0; k < srcWidth; ++k)
-        {
-          const int jk =
-            colpointers[sCol + k + 1] - sz;
-
-          const double Ljk =
-            l[jk];
-
-          double* tptr =
-            tp + sz - 1;
-
-          double* lptr =
-            l + jk;
-
-          for (int i = 0; i < sz; ++i)
-            *tptr-- += *lptr++ * Ljk;
-        }
-
-        int r = eK - 1;
-
-        const int ref_pos =
-          colpointers[j + 1] - 1;
-
-        tptr = tp;
-
-        for (int i = 0; i < sz; ++i)
-        {
-          const int ndx =
-            rowindices[r--];
-
-          const int pos =
-            ref_pos - indmap[ndx];
-
-          l[pos] -= *tptr++;
-        }
-      }
+      cmod2_default(
+        l,
+        tp,
+        K,
+        khead + p0,
+        klen,
+        4,
+        eK,
+        sCol,
+        srcWidth,
+        indmap,
+        colpointers,
+        rowindices
+      );
 
       continue;
     }
 
 
-    // --------------------------------------------------------
-    // Build Bt = B^T once for this target block.
-    // --------------------------------------------------------
+    // ========================================================
+    // Build Bt for this target block
+    // ========================================================
 
     for (int k = 0; k < srcWidth; ++k)
     {
-      const int base = srcBase[k];
+      const int base =
+        srcBase[k];
 
       Bt[k * 4 + 0] =
         l[base + p0 + 0];
@@ -369,9 +386,9 @@ void cmod2_sup(
     }
 
 
-    // --------------------------------------------------------
-    // Row blocks of four.
-    // --------------------------------------------------------
+    // ========================================================
+    // Row blocks
+    // ========================================================
 
     int r0 = p0;
 
@@ -396,35 +413,66 @@ void cmod2_sup(
 
 
     // --------------------------------------------------------
-    // Remaining 1-3 rows.
-    //
-    // For now use update_block so that only one implementation
-    // is needed. This can be optimized separately if necessary.
+    // Tail rows
     // --------------------------------------------------------
 
     if (r0 < klen)
     {
-      const int M = klen - r0;
+      const int M =
+        klen - r0;
 
       if (M == 1)
       {
         update_block<1,4>(
-            l, A, Bt, srcWidth, r0, p0, klen, eK,
-            srcBase, khead, indmap, colpointers, rowindices
+            l,
+            A,
+            Bt,
+            srcWidth,
+            r0,
+            p0,
+            klen,
+            eK,
+            srcBase,
+            khead,
+            indmap,
+            colpointers,
+            rowindices
         );
       }
       else if (M == 2)
       {
         update_block<2,4>(
-            l, A, Bt, srcWidth, r0, p0, klen, eK,
-            srcBase, khead, indmap, colpointers, rowindices
+            l,
+            A,
+            Bt,
+            srcWidth,
+            r0,
+            p0,
+            klen,
+            eK,
+            srcBase,
+            khead,
+            indmap,
+            colpointers,
+            rowindices
         );
       }
       else
       {
         update_block<3,4>(
-            l, A, Bt, srcWidth, r0, p0, klen, eK,
-            srcBase, khead, indmap, colpointers, rowindices
+            l,
+            A,
+            Bt,
+            srcWidth,
+            r0,
+            p0,
+            klen,
+            eK,
+            srcBase,
+            khead,
+            indmap,
+            colpointers,
+            rowindices
         );
       }
     }
@@ -432,54 +480,25 @@ void cmod2_sup(
 
 
   // ==========================================================
-  // Remaining 1-3 target columns
+  // Remaining target columns
   // ==========================================================
 
-  for (int p = p0; p < ncolup; ++p)
+  if (p0 < ncolup)
   {
-    const int j  = rowindices[khead + p];
-    const int sz = klen - p;
-
-    double* tptr = tp;
-
-    for (int i = 0; i < sz; ++i)
-      *tptr++ = 0.0;
-
-    for (int k = 0; k < srcWidth; ++k)
-    {
-      const int jk =
-        colpointers[sCol + k + 1] - sz;
-
-      const double Ljk =
-        l[jk];
-
-      double* tptr =
-        tp + sz - 1;
-
-      double* lptr =
-        l + jk;
-
-      for (int i = 0; i < sz; ++i)
-        *tptr-- += *lptr++ * Ljk;
-    }
-
-    int r = eK - 1;
-
-    const int ref_pos =
-      colpointers[j + 1] - 1;
-
-    tptr = tp;
-
-    for (int i = 0; i < sz; ++i)
-    {
-      const int ndx =
-        rowindices[r--];
-
-      const int pos =
-        ref_pos - indmap[ndx];
-
-      l[pos] -= *tptr++;
-    }
+    cmod2_default(
+      l,
+      tp,
+      K,
+      khead + p0,
+      klen - p0,
+      ncolup - p0,
+      eK,
+      sCol,
+      srcWidth,
+      indmap,
+      colpointers,
+      rowindices
+    );
   }
 }
 
