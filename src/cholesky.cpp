@@ -155,8 +155,6 @@ inline void matmul4x4_block(
 }
 
 
-
-
 // ============================================================
 // cmod2_sup
 // ============================================================
@@ -189,9 +187,70 @@ void cmod2_sup(
 
   const int srcWidth = eCol - sCol;
 
-  // ----------------------------------------------------------
+  // ==========================================================
+  // Trivial / small source supernodes:
+  // use the standard cmod2 implementation.
+  // ==========================================================
+
+  if (srcWidth <= 3)
+  {
+    for (int p = 0; p < ncolup; ++p)
+    {
+      const int j  = rowindices[khead + p];
+      const int sz = klen - p;
+
+      // Initialise t.
+      double* tptr = tp;
+
+      for (int i = 0; i < sz; ++i)
+        *tptr++ = 0.0;
+
+      // Accumulate source supernode contribution.
+      for (int k = 0; k < srcWidth; ++k)
+      {
+        const int jk =
+          colpointers[sCol + k + 1] - sz;
+
+        const double Ljk =
+          l[jk];
+
+        double* tptr =
+          tp + sz - 1;
+
+        double* lptr =
+          l + jk;
+
+        for (int i = 0; i < sz; ++i)
+          *tptr-- += *lptr++ * Ljk;
+      }
+
+      // Scatter.
+      int r = eK - 1;
+
+      const int ref_pos =
+        colpointers[j + 1] - 1;
+
+      tptr = tp;
+
+      for (int i = 0; i < sz; ++i)
+      {
+        const int ndx =
+          rowindices[r--];
+
+        const int pos =
+          ref_pos - indmap[ndx];
+
+        l[pos] -= *tptr++;
+      }
+    }
+
+    return;
+  }
+
+
+  // ==========================================================
   // Source-column base positions.
-  // ----------------------------------------------------------
+  // ==========================================================
 
   std::vector<int> srcBase(srcWidth);
 
@@ -201,15 +260,22 @@ void cmod2_sup(
 
 
   // ==========================================================
-  // Optimised 4-column blocks
+  // Optimised 4-column target blocks
   // ==========================================================
 
-  const int ncol4 = (ncolup / 4) * 4;
+  const int ncol4 =
+    (ncolup / 4) * 4;
 
   int p0 = 0;
 
   for (; p0 < ncol4; p0 += 4)
   {
+    // --------------------------------------------------------
+    // The blocked kernel cannot be used if the target block
+    // overlaps the source supernode because L is updated
+    // in place.
+    // --------------------------------------------------------
+
     bool useOptimized = true;
 
     for (int j = 0; j < 4; ++j)
@@ -227,7 +293,7 @@ void cmod2_sup(
     if (!useOptimized)
     {
       // ------------------------------------------------------
-      // Original implementation
+      // Standard cmod2 for these four target columns.
       // ------------------------------------------------------
 
       for (int p = p0; p < p0 + 4; ++p)
@@ -281,10 +347,6 @@ void cmod2_sup(
     }
 
 
-    // ========================================================
-    // Optimised 4-column target block
-    // ========================================================
-
     // --------------------------------------------------------
     // Build Bt = B^T once for this target block.
     // --------------------------------------------------------
@@ -308,14 +370,14 @@ void cmod2_sup(
 
 
     // --------------------------------------------------------
-    // Row blocks of four
+    // Row blocks of four.
     // --------------------------------------------------------
 
     int r0 = p0;
 
     for (; r0 + 4 <= klen; r0 += 4)
     {
-      update_block<4, 4>(
+      update_block<4,4>(
           l,
           A,
           Bt,
@@ -334,61 +396,36 @@ void cmod2_sup(
 
 
     // --------------------------------------------------------
-    // Remaining 1-3 rows
+    // Remaining 1-3 rows.
     //
-    // Leave this unchanged for the moment.
+    // For now use update_block so that only one implementation
+    // is needed. This can be optimized separately if necessary.
     // --------------------------------------------------------
 
     if (r0 < klen)
     {
-      for (int j = 0; j < 4; ++j)
+      const int M = klen - r0;
+
+      if (M == 1)
       {
-        const int p = p0 + j;
-
-        const int sz =
-          klen - p;
-
-        int first = r0 - p;
-
-        if (first < 0)
-          first = 0;
-
-        if (first >= sz)
-          continue;
-
-        const int target =
-          rowindices[khead + p];
-
-        const int ref_pos =
-          colpointers[target + 1] - 1;
-
-        for (int i = first; i < sz; ++i)
-        {
-          const int r =
-            p + i;
-
-          double sum = 0.0;
-
-          for (int k = 0; k < srcWidth; ++k)
-          {
-            const int base = srcBase[k];
-
-            sum +=
-              l[base + r] *
-              l[base + p];
-          }
-
-          const int q =
-            sz - 1 - i;
-
-          const int ndx =
-            rowindices[eK - 1 - q];
-
-          const int pos =
-            ref_pos - indmap[ndx];
-
-          l[pos] -= sum;
-        }
+        update_block<1,4>(
+            l, A, Bt, srcWidth, r0, p0, klen, eK,
+            srcBase, khead, indmap, colpointers, rowindices
+        );
+      }
+      else if (M == 2)
+      {
+        update_block<2,4>(
+            l, A, Bt, srcWidth, r0, p0, klen, eK,
+            srcBase, khead, indmap, colpointers, rowindices
+        );
+      }
+      else
+      {
+        update_block<3,4>(
+            l, A, Bt, srcWidth, r0, p0, klen, eK,
+            srcBase, khead, indmap, colpointers, rowindices
+        );
       }
     }
   }
@@ -445,9 +482,6 @@ void cmod2_sup(
     }
   }
 }
-
-
-
 
 
 void cholesky(
