@@ -129,6 +129,45 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// matmul4x4_blocks_template
+NumericMatrix matmul4x4_blocks_template(NumericMatrix A, NumericMatrix B, int reps);
+RcppExport SEXP _LMMsolver_matmul4x4_blocks_template(SEXP ASEXP, SEXP BSEXP, SEXP repsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type A(ASEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type B(BSEXP);
+    Rcpp::traits::input_parameter< int >::type reps(repsSEXP);
+    rcpp_result_gen = Rcpp::wrap(matmul4x4_blocks_template(A, B, reps));
+    return rcpp_result_gen;
+END_RCPP
+}
+// matmul2x2_blocks_template
+NumericMatrix matmul2x2_blocks_template(NumericMatrix A, NumericMatrix B, int reps);
+RcppExport SEXP _LMMsolver_matmul2x2_blocks_template(SEXP ASEXP, SEXP BSEXP, SEXP repsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type A(ASEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type B(BSEXP);
+    Rcpp::traits::input_parameter< int >::type reps(repsSEXP);
+    rcpp_result_gen = Rcpp::wrap(matmul2x2_blocks_template(A, B, reps));
+    return rcpp_result_gen;
+END_RCPP
+}
+// matmul8x8_blocks_template
+NumericMatrix matmul8x8_blocks_template(NumericMatrix A, NumericMatrix B, int reps);
+RcppExport SEXP _LMMsolver_matmul8x8_blocks_template(SEXP ASEXP, SEXP BSEXP, SEXP repsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type A(ASEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type B(BSEXP);
+    Rcpp::traits::input_parameter< int >::type reps(repsSEXP);
+    rcpp_result_gen = Rcpp::wrap(matmul8x8_blocks_template(A, B, reps));
+    return rcpp_result_gen;
+END_RCPP
+}
 // matmul_test
 NumericMatrix matmul_test(NumericMatrix A, NumericMatrix B, int reps, int tileSize);
 RcppExport SEXP _LMMsolver_matmul_test(SEXP ASEXP, SEXP BSEXP, SEXP repsSEXP, SEXP tileSizeSEXP) {
@@ -155,6 +194,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"_LMMsolver_RowKron", (DL_FUNC) &_LMMsolver_RowKron, 2},
     {"_LMMsolver_MatrixProduct", (DL_FUNC) &_LMMsolver_MatrixProduct, 2},
     {"_LMMsolver_matmul4x4_blocks", (DL_FUNC) &_LMMsolver_matmul4x4_blocks, 3},
+    {"_LMMsolver_matmul4x4_blocks_template", (DL_FUNC) &_LMMsolver_matmul4x4_blocks_template, 3},
+    {"_LMMsolver_matmul2x2_blocks_template", (DL_FUNC) &_LMMsolver_matmul2x2_blocks_template, 3},
+    {"_LMMsolver_matmul8x8_blocks_template", (DL_FUNC) &_LMMsolver_matmul8x8_blocks_template, 3},
     {"_LMMsolver_matmul_test", (DL_FUNC) &_LMMsolver_matmul_test, 4},
     {NULL, NULL, 0}
 };

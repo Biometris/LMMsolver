@@ -41,6 +41,18 @@ matmul4x4_blocks <- function(A, B, reps) {
     .Call(`_LMMsolver_matmul4x4_blocks`, A, B, reps)
 }
 
+matmul4x4_blocks_template <- function(A, B, reps) {
+    .Call(`_LMMsolver_matmul4x4_blocks_template`, A, B, reps)
+}
+
+matmul2x2_blocks_template <- function(A, B, reps) {
+    .Call(`_LMMsolver_matmul2x2_blocks_template`, A, B, reps)
+}
+
+matmul8x8_blocks_template <- function(A, B, reps) {
+    .Call(`_LMMsolver_matmul8x8_blocks_template`, A, B, reps)
+}
+
 matmul_test <- function(A, B, reps, tileSize) {
     .Call(`_LMMsolver_matmul_test`, A, B, reps, tileSize)
 }

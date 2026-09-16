@@ -16,6 +16,7 @@
 #include "AuxFun.h"
 #include "SparseMatrix.h"
 #include "cholesky.h"
+#include "matvec_test.h"
 #include <chrono>
 
 using namespace std::chrono;
@@ -186,6 +187,19 @@ void cmod2_sup(
 
   const int srcWidth = eCol - sCol;
 
+  // ----------------------------------------------------------
+  // Source-column base positions.
+  //
+  // base[k] is the start of the active k-th source column
+  // relative to the klen-row source block.
+  // ----------------------------------------------------------
+
+  std::vector<int> srcBase(srcWidth);
+
+  for (int k = 0; k < srcWidth; ++k)
+    srcBase[k] =
+      colpointers[sCol + k + 1] - klen;
+
 
   // ==========================================================
   // Optimised 4-column blocks
@@ -197,12 +211,6 @@ void cmod2_sup(
 
   for (; p0 < ncol4; p0 += 4)
   {
-    /*
-     * We only use the blocked kernel when the four target
-     * columns do not overlap the source supernode.
-     *
-     * Otherwise use the original in-place update.
-     */
     bool useOptimized = true;
 
     for (int j = 0; j < 4; ++j)
@@ -222,6 +230,7 @@ void cmod2_sup(
       // ------------------------------------------------------
       // Original implementation for this block
       // ------------------------------------------------------
+
       for (int p = p0; p < p0 + 4; ++p)
       {
         const int j  = rowindices[khead + p];
@@ -232,10 +241,10 @@ void cmod2_sup(
         for (int i = 0; i < sz; ++i)
           *tptr++ = 0.0;
 
-        for (int k = sCol; k < eCol; ++k)
+        for (int k = 0; k < srcWidth; ++k)
         {
           const int jk =
-            colpointers[k + 1] - sz;
+            colpointers[sCol + k + 1] - sz;
 
           const double Ljk =
             l[jk];
@@ -271,31 +280,16 @@ void cmod2_sup(
 
 
     // ========================================================
-    // Optimised block
-    //
-    // We need:
-    //
-    //     C = A B^T
-    //
-    // where
-    //
-    //     A  = X[r0:r0+3, :]
-    //     B  = X[p0:p0+3, :]
-    //
-    // and X is klen x srcWidth.
-    //
-    // matmul4x4_block computes A * B, so Bt = B^T.
+    // Optimised 4 x 4 block
     // ========================================================
 
-    /*
-     * Build B^T once for this four-column target block.
-     */
+    // --------------------------------------------------------
+    // Build B^T once for this four-column target block.
+    // --------------------------------------------------------
+
     for (int k = 0; k < srcWidth; ++k)
     {
-      const int col = sCol + k;
-
-      const int base =
-        colpointers[col + 1] - klen;
+      const int base = srcBase[k];
 
       Bt[k * 4 + 0] =
         l[base + p0 + 0];
@@ -311,47 +305,41 @@ void cmod2_sup(
     }
 
 
-    /*
-     * --------------------------------------------------------
-     * Row blocks of four.
-     * --------------------------------------------------------
-     */
+    // --------------------------------------------------------
+    // Row blocks of four.
+    // --------------------------------------------------------
 
     int r0 = p0;
 
     for (; r0 + 4 <= klen; r0 += 4)
     {
-      /*
-       * A = X[r0:r0+3, :]
-       */
+      // ------------------------------------------------------
+      // Build A = X[r0:r0+3, :]
+      // ------------------------------------------------------
+
+      double* A0 = A.data();
+      double* A1 = A0 + srcWidth;
+      double* A2 = A1 + srcWidth;
+      double* A3 = A2 + srcWidth;
+
       for (int k = 0; k < srcWidth; ++k)
       {
-        const int col = sCol + k;
+        const int base = srcBase[k];
 
-        const int base =
-          colpointers[col + 1] - klen;
-
-        A[0 * srcWidth + k] =
-          l[base + r0 + 0];
-
-        A[1 * srcWidth + k] =
-          l[base + r0 + 1];
-
-        A[2 * srcWidth + k] =
-          l[base + r0 + 2];
-
-        A[3 * srcWidth + k] =
-          l[base + r0 + 3];
+        A0[k] = l[base + r0 + 0];
+        A1[k] = l[base + r0 + 1];
+        A2[k] = l[base + r0 + 2];
+        A3[k] = l[base + r0 + 3];
       }
 
 
       double C[16];
 
 
-      /*
-       * C = A B^T
-       */
-      matmul4x4_block(
+      // ------------------------------------------------------
+      // C = A B^T
+      // ------------------------------------------------------
+      matmul_block<4>(
         A.data(),
         Bt.data(),
         C,
@@ -362,39 +350,14 @@ void cmod2_sup(
       );
 
 
-      /*
-       * ------------------------------------------------------
-       * Scatter valid lower-triangular elements.
-       *
-       * IMPORTANT:
-       *
-       * Original code uses
-       *
-       *   q = sz - 1 - i
-       *
-       * with
-       *
-       *   sz = klen - p
-       *
-       * and global row
-       *
-       *   r = p + i.
-       *
-       * Therefore
-       *
-       *   q = klen - r - 1.
-       *
-       * This is independent of p.
-       * ------------------------------------------------------
-       */
+      // ------------------------------------------------------
+      // Scatter valid lower-triangular elements.
+      // ------------------------------------------------------
 
       for (int j = 0; j < 4; ++j)
       {
         const int p = p0 + j;
 
-        /*
-         * On the diagonal block, only rows r >= p are valid.
-         */
         const int imin =
           (r0 == p0) ? j : 0;
 
@@ -408,10 +371,6 @@ void cmod2_sup(
         {
           const int r = r0 + i;
 
-          /*
-           * q is exactly the index used by the original
-           * scatter operation.
-           */
           const int q =
             klen - r - 1;
 
@@ -428,14 +387,10 @@ void cmod2_sup(
     }
 
 
-    /*
-     * --------------------------------------------------------
-     * Remaining 1-3 rows.
-     *
-     * Calculate directly, preserving the exact original
-     * indexing.
-     * --------------------------------------------------------
-     */
+    // --------------------------------------------------------
+    // Remaining 1-3 rows.
+    // --------------------------------------------------------
+
     if (r0 < klen)
     {
       for (int j = 0; j < 4; ++j)
@@ -445,9 +400,6 @@ void cmod2_sup(
         const int sz =
           klen - p;
 
-        /*
-         * First row not already covered.
-         */
         int first = r0 - p;
 
         if (first < 0)
@@ -469,26 +421,15 @@ void cmod2_sup(
 
           double sum = 0.0;
 
-          /*
-           * Same source-vector product as the original code.
-           */
-          for (int k = sCol; k < eCol; ++k)
+          for (int k = 0; k < srcWidth; ++k)
           {
-            const int base =
-              colpointers[k + 1] - klen;
+            const int base = srcBase[k];
 
             sum +=
               l[base + r] *
               l[base + p];
           }
 
-          /*
-           * Original t index:
-           *
-           *   q = sz - 1 - i
-           *
-           * We don't actually need t here; write directly to L.
-           */
           const int q =
             sz - 1 - i;
 
@@ -514,17 +455,15 @@ void cmod2_sup(
     const int j  = rowindices[khead + p];
     const int sz = klen - p;
 
-    // Initialise t.
     double* tptr = tp;
 
     for (int i = 0; i < sz; ++i)
       *tptr++ = 0.0;
 
-    // Accumulate contribution from source supernode K.
-    for (int k = sCol; k < eCol; ++k)
+    for (int k = 0; k < srcWidth; ++k)
     {
       const int jk =
-        colpointers[k + 1] - sz;
+        colpointers[sCol + k + 1] - sz;
 
       const double Ljk =
         l[jk];
@@ -539,7 +478,6 @@ void cmod2_sup(
         *tptr-- += *lptr++ * Ljk;
     }
 
-    // Scatter back into target column j.
     int r = eK - 1;
 
     const int ref_pos =

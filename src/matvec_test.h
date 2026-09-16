@@ -79,4 +79,50 @@ inline void matmul4x4(
 }
 
 
+// ============================================================
+// B x B matrix multiplication
+//
+// A  : B x K
+// Bm : K x B
+// C  : B x B
+//
+// C = A Bm
+//
+// B is a compile-time constant.
+// ============================================================
+
+template <int B>
+inline void matmul_block(
+    const double* A,
+    const double* Bm,
+    double* C,
+    int lda,
+    int ldb,
+    int ldc,
+    int K)
+{
+  double c[B][B] = {};
+
+  for (int k = 0; k < K; ++k)
+  {
+    const double* b = Bm + k * ldb;
+
+    #pragma GCC unroll B
+    for (int i = 0; i < B; ++i)
+    {
+      const double a = A[i * lda + k];
+
+      #pragma GCC unroll B
+      for (int j = 0; j < B; ++j)
+        c[i][j] += a * b[j];
+    }
+  }
+
+  for (int i = 0; i < B; ++i)
+  {
+    for (int j = 0; j < B; ++j)
+      C[i * ldc + j] = c[i][j];
+  }
+}
+
 #endif
