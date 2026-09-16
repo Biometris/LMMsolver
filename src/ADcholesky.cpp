@@ -177,6 +177,355 @@ void ADcmod2_sup(
   }
 }
 
+// ============================================================
+// Standard reverse/AD cmod2 update
+//
+// This is the original scalar AD update, using t as workspace.
+// ============================================================
+
+inline void ADcmod2_default(
+    double* f,
+    double* tp,
+    int done,
+    int ncolup,
+    int eK,
+    int row0,
+    int sCol,
+    int eCol,
+    const NumericVector& L,
+    const IntegerVector& indmap,
+    const IntegerVector& colpointers,
+    const IntegerVector& rowindices)
+{
+  const double* l = L.begin();
+
+  for (int p = 0; p < ncolup; ++p)
+  {
+    const int rj =
+      eK - 1 - done - p;
+
+    const int j =
+      rowindices[rj];
+
+    const int sz =
+      done + p + 1;
+
+    // --------------------------------------------------------
+    // Gather exactly as in the original ADcmod2().
+    // --------------------------------------------------------
+
+    int i = 0;
+
+    for (int r = eK - 1; r >= row0; --r)
+    {
+      const int ndx =
+        rowindices[r];
+
+      const int pos =
+        colpointers[j + 1] - 1 - indmap[ndx];
+
+      tp[i++] = f[pos];
+    }
+
+    // --------------------------------------------------------
+    // Reverse update through all columns of K.
+    // --------------------------------------------------------
+
+    for (int k = sCol; k < eCol; ++k)
+    {
+      const int jk =
+        colpointers[k + 1] - sz;
+
+      int ik =
+        jk;
+
+      const double Ljk =
+        l[jk];
+
+      double& Fjk =
+        f[jk];
+
+      for (int i = sz - 1; i >= 0; --i)
+      {
+        const double Fij =
+          tp[i];
+
+        f[ik] -=
+          Fij * Ljk;
+
+        Fjk -=
+          Fij * l[ik];
+
+        ++ik;
+      }
+    }
+  }
+}
+
+
+// ============================================================
+// ADcmod2_sup
+// ============================================================
+
+void ADcmod2_sup(
+    NumericVector& F,
+    const NumericVector& L,
+    int K,
+    int done,
+    int ncolup,
+    NumericVector& t,
+    std::vector<double>& A,
+    std::vector<double>& Bt,
+    std::vector<double>& FC,
+    std::vector<double>& FA,
+    std::vector<double>& FBt,
+    const IntegerVector& indmap,
+    const IntegerVector& supernodes,
+    const IntegerVector& rowpointers,
+    const IntegerVector& colpointers,
+    const IntegerVector& rowindices)
+{
+  if (ncolup <= 0)
+    return;
+
+  const double* l = L.begin();
+  double* f = F.begin();
+  double* tp = t.begin();
+
+  const int row0 =
+    rowpointers[K];
+
+  const int eK =
+    rowpointers[K + 1];
+
+  const int sCol =
+    supernodes[K];
+
+  const int eCol =
+    supernodes[K + 1];
+
+  const int srcWidth =
+    eCol - sCol;
+
+  const int widthK =
+    srcWidth;
+
+  const int lenK =
+    eK - row0;
+
+  const int offdiagK =
+    lenK - widthK;
+
+
+  // ==========================================================
+  // Small source supernodes:
+  // use standard reverse cmod2.
+  // ==========================================================
+
+  if (srcWidth <= 3 || ncolup < 4)
+  {
+    ADcmod2_default(
+      f,
+      tp,
+      done,
+      ncolup,
+      eK,
+      row0,
+      sCol,
+      eCol,
+      L,
+      indmap,
+      colpointers,
+      rowindices
+    );
+
+    return;
+  }
+
+
+  // ==========================================================
+  // Source-column end positions.
+  // ==========================================================
+
+  std::vector<int> srcEnd(srcWidth);
+
+  for (int k = 0; k < srcWidth; ++k)
+  {
+    srcEnd[k] =
+      colpointers[sCol + k + 1] - 1;
+  }
+
+
+  // ==========================================================
+  // Process target columns in groups of four.
+  // ==========================================================
+
+  const int ncol4 =
+    (ncolup / 4) * 4;
+
+  int p0 = 0;
+
+  for (; p0 < ncol4; p0 += 4)
+  {
+    // --------------------------------------------------------
+    // Build Bt for the four target columns.
+    // --------------------------------------------------------
+
+    for (int k = 0; k < srcWidth; ++k)
+    {
+      const int end =
+        srcEnd[k];
+
+      Bt[k * 4 + 0] =
+        l[end - (done + p0 + 0)];
+
+      Bt[k * 4 + 1] =
+        l[end - (done + p0 + 1)];
+
+      Bt[k * 4 + 2] =
+        l[end - (done + p0 + 2)];
+
+      Bt[k * 4 + 3] =
+        l[end - (done + p0 + 3)];
+    }
+
+
+    // --------------------------------------------------------
+    // Process source rows in blocks of four.
+    // --------------------------------------------------------
+
+    const int maxq =
+      done + p0 + 3;
+
+    int r0 = 0;
+
+    for (; r0 + 4 <= maxq + 1; r0 += 4)
+    {
+      ADupdate_block<4,4>(
+          l,
+          f,
+          A,
+          Bt,
+          FC,
+          FA,
+          FBt,
+          srcWidth,
+          r0,
+          p0,
+          done,
+          eK,
+          srcEnd,
+          indmap,
+          colpointers,
+          rowindices
+      );
+    }
+
+
+    // --------------------------------------------------------
+    // Remaining 1-3 source rows.
+    // --------------------------------------------------------
+
+    if (r0 <= maxq)
+    {
+      const int M =
+        maxq - r0 + 1;
+
+      if (M == 1)
+      {
+        ADupdate_block<1,4>(
+            l,
+            f,
+            A,
+            Bt,
+            FC,
+            FA,
+            FBt,
+            srcWidth,
+            r0,
+            p0,
+            done,
+            eK,
+            srcEnd,
+            indmap,
+            colpointers,
+            rowindices
+        );
+      }
+      else if (M == 2)
+      {
+        ADupdate_block<2,4>(
+            l,
+            f,
+            A,
+            Bt,
+            FC,
+            FA,
+            FBt,
+            srcWidth,
+            r0,
+            p0,
+            done,
+            eK,
+            srcEnd,
+            indmap,
+            colpointers,
+            rowindices
+        );
+      }
+      else
+      {
+        ADupdate_block<3,4>(
+            l,
+            f,
+            A,
+            Bt,
+            FC,
+            FA,
+            FBt,
+            srcWidth,
+            r0,
+            p0,
+            done,
+            eK,
+            srcEnd,
+            indmap,
+            colpointers,
+            rowindices
+        );
+      }
+    }
+  }
+
+
+  // ==========================================================
+  // Remaining 1-3 target columns:
+  // use the standard reverse cmod2.
+  // ==========================================================
+
+  if (p0 < ncolup)
+  {
+    ADcmod2_default(
+      f,
+      tp,
+      done + p0,
+      ncolup - p0,
+      eK,
+      row0,
+      sCol,
+      eCol,
+      L,
+      indmap,
+      colpointers,
+      rowindices
+    );
+  }
+}
+
+
+// ============================================================
+// ADcholesky
+// ============================================================
 void ADcholesky(
     NumericVector& F,
     const NumericVector& L,
@@ -188,12 +537,17 @@ void ADcholesky(
   const int N = colpointers.size() - 1;
   const int Nsupernodes = supernodes.size() - 1;
 
+  // ------------------------------------------------------------
   // SNODE[j] = supernode containing scalar row/column j
+  // ------------------------------------------------------------
+
   IntegerVector SNODE(N);
 
   for (int J = 0; J < Nsupernodes; ++J)
   {
-    for (int j = supernodes[J]; j < supernodes[J + 1];++j)
+    for (int j = supernodes[J];
+         j < supernodes[J + 1];
+         ++j)
     {
       SNODE[j] = J;
     }
@@ -202,11 +556,11 @@ void ADcholesky(
   // ------------------------------------------------------------
   // Reverse supernodal linked lists.
   //
-  // HEAD[J] = first source supernode K waiting to update J
-  // LINK[K] = next source supernode on that list
+  // HEAD[J]   = first source supernode K waiting to update J
+  // LINK[K]   = next source supernode on that list
   //
   // LENGTH[K] = number of rows of K already consumed from the
-  //             bottom of its off-diagonal part.
+  //              bottom of its off-diagonal part.
   // ------------------------------------------------------------
 
   IntegerVector HEAD(Nsupernodes, -1);
@@ -216,69 +570,148 @@ void ADcholesky(
   // ------------------------------------------------------------
   // Initially schedule every supernode on the list of the
   // supernode containing its last off-diagonal row.
-  //
-  // Unlike the forward case, HEAD and LINK are separate.
-  // This is essential in the reverse traversal.
   // ------------------------------------------------------------
 
-  for (int K = 0; K < Nsupernodes;++K)
+  for (int K = 0; K < Nsupernodes; ++K)
   {
-    const int width = supernodes[K + 1] - supernodes[K];
-    const int len = rowpointers[K + 1] - rowpointers[K];
-    const int offdiag = len - width;
+    const int width =
+      supernodes[K + 1] - supernodes[K];
+
+    const int len =
+      rowpointers[K + 1] - rowpointers[K];
+
+    const int offdiag =
+      len - width;
 
     LENGTH[K] = 0;
 
     if (offdiag > 0)
     {
-      const int last_row = rowindices[rowpointers[K + 1] - 1];
-      const int J = SNODE[last_row];
+      const int last_row =
+        rowindices[rowpointers[K + 1] - 1];
+
+      const int J =
+        SNODE[last_row];
 
       LINK[K] = HEAD[J];
       HEAD[J] = K;
     }
   }
 
+  // ------------------------------------------------------------
   // Workspace
+  // ------------------------------------------------------------
+
   IntegerVector indmap(N, 0);
+
   NumericVector t(N);
+
+  // Maximum source supernode width.
+  int maxSrcWidth = 0;
+
+  for (int K = 0; K < Nsupernodes; ++K)
+  {
+    const int width =
+      supernodes[K + 1] - supernodes[K];
+
+    if (width > maxSrcWidth)
+      maxSrcWidth = width;
+  }
+
+  // Dense block workspaces.
+  std::vector<double> A(4 * maxSrcWidth);
+  std::vector<double> Bt(4 * maxSrcWidth);
+  std::vector<double> FC(16);
+  std::vector<double> FA(4 * maxSrcWidth);
+  std::vector<double> FBt(4 * maxSrcWidth);
 
   // ------------------------------------------------------------
   // Reverse through supernodes
   // ------------------------------------------------------------
 
-  for (int J = Nsupernodes - 1; J >= 0; --J)
+  for (int J = Nsupernodes - 1;
+       J >= 0;
+       --J)
   {
-    const int j0 = supernodes[J];
-    const int j1 = supernodes[J + 1];
+    const int j0 =
+      supernodes[J];
 
+    const int j1 =
+      supernodes[J + 1];
+
+    // ----------------------------------------------------------
     // Construct map for target supernode J.
-    makeIndMap(indmap, J, rowpointers, rowindices);
+    // ----------------------------------------------------------
 
+    makeIndMap(
+      indmap,
+      J,
+      rowpointers,
+      rowindices
+    );
+
+    // ----------------------------------------------------------
     // Reverse operations internal to J.
-    for (int j = j1 - 1;j >= j0;--j)
+    // ----------------------------------------------------------
+
+    for (int j = j1 - 1;
+         j >= j0;
+         --j)
     {
-      ADcdiv(F, L, j, colpointers);
-      ADcmod1(F, L, j, J, supernodes,colpointers);
+      ADcdiv(
+        F,
+        L,
+        j,
+        colpointers
+      );
+
+      ADcmod1(
+        F,
+        L,
+        j,
+        J,
+        supernodes,
+        colpointers
+      );
     }
 
+    // ----------------------------------------------------------
     // Process all source supernodes K waiting to update J.
+    // ----------------------------------------------------------
+
     int K = HEAD[J];
+
     HEAD[J] = -1;
 
     while (K != -1)
     {
+      // --------------------------------------------------------
       // Save next source supernode.
-      const int nextK = LINK[K];
-      const int done = LENGTH[K];
-      const int row0 = rowpointers[K];
-      const int eK =rowpointers[K + 1];
-      const int widthK =supernodes[K + 1] - supernodes[K];
-      const int lenK = eK - row0;
-      const int offdiagK = lenK - widthK;
+      // --------------------------------------------------------
+
+      const int nextK =
+        LINK[K];
+
+      const int done =
+        LENGTH[K];
+
+      const int row0 =
+        rowpointers[K];
+
+      const int eK =
+        rowpointers[K + 1];
+
+      const int widthK =
+        supernodes[K + 1] - supernodes[K];
+
+      const int lenK =
+        eK - row0;
+
+      const int offdiagK =
+        lenK - widthK;
 
       // --------------------------------------------------------
-      // Count the rows of K belonging to J, moving upward from
+      // Count rows of K belonging to J, moving upward from
       // the current bottom.
       // --------------------------------------------------------
 
@@ -286,7 +719,10 @@ void ADcholesky(
 
       while (done + ncolup < offdiagK)
       {
-        const int row = rowindices[eK - 1 - done - ncolup];
+        const int row =
+          rowindices[
+        eK - 1 - done - ncolup
+          ];
 
         if (row < j0)
           break;
@@ -294,18 +730,48 @@ void ADcholesky(
         ++ncolup;
       }
 
-      // Numerical reverse update.
-      ADcmod2_sup(F, L, K, done, ncolup, t, indmap,
-        supernodes, rowpointers, colpointers, rowindices);
+      // --------------------------------------------------------
+      // Reverse numerical update.
+      // --------------------------------------------------------
 
+      ADcmod2_sup(
+        F,
+        L,
+        K,
+        done,
+        ncolup,
+        t,
+        A,
+        Bt,
+        FC,
+        FA,
+        FBt,
+        indmap,
+        supernodes,
+        rowpointers,
+        colpointers,
+        rowindices
+      );
+
+      // --------------------------------------------------------
       // Advance K further upward in its row list.
-      const int newdone = done + ncolup;
+      // --------------------------------------------------------
+
+      const int newdone =
+        done + ncolup;
 
       if (newdone < offdiagK)
       {
-        const int next_row =rowindices[eK - 1 - newdone];
-        const int nextJ = SNODE[next_row];
+        const int next_row =
+          rowindices[
+        eK - 1 - newdone
+          ];
+
+        const int nextJ =
+          SNODE[next_row];
+
         LENGTH[K] = newdone;
+
         LINK[K] = HEAD[nextJ];
         HEAD[nextJ] = K;
       }
@@ -314,10 +780,15 @@ void ADcholesky(
         LENGTH[K] = newdone;
         LINK[K] = -1;
       }
+
       K = nextK;
     }
   }
 }
+
+
+
+
 
 void initAD(NumericVector& F, const NumericVector& L, const IntegerVector& colpointers)
 {
