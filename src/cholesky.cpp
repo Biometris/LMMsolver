@@ -155,6 +155,8 @@ inline void matmul4x4_block(
 }
 
 
+
+
 // ============================================================
 // cmod2_sup
 // ============================================================
@@ -189,9 +191,6 @@ void cmod2_sup(
 
   // ----------------------------------------------------------
   // Source-column base positions.
-  //
-  // base[k] is the start of the active k-th source column
-  // relative to the klen-row source block.
   // ----------------------------------------------------------
 
   std::vector<int> srcBase(srcWidth);
@@ -228,7 +227,7 @@ void cmod2_sup(
     if (!useOptimized)
     {
       // ------------------------------------------------------
-      // Original implementation for this block
+      // Original implementation
       // ------------------------------------------------------
 
       for (int p = p0; p < p0 + 4; ++p)
@@ -268,8 +267,11 @@ void cmod2_sup(
 
         for (int i = 0; i < sz; ++i)
         {
-          const int ndx = rowindices[r--];
-          const int pos = ref_pos - indmap[ndx];
+          const int ndx =
+            rowindices[r--];
+
+          const int pos =
+            ref_pos - indmap[ndx];
 
           l[pos] -= *tptr++;
         }
@@ -280,11 +282,11 @@ void cmod2_sup(
 
 
     // ========================================================
-    // Optimised 4 x 4 block
+    // Optimised 4-column target block
     // ========================================================
 
     // --------------------------------------------------------
-    // Build B^T once for this four-column target block.
+    // Build Bt = B^T once for this target block.
     // --------------------------------------------------------
 
     for (int k = 0; k < srcWidth; ++k)
@@ -306,89 +308,35 @@ void cmod2_sup(
 
 
     // --------------------------------------------------------
-    // Row blocks of four.
+    // Row blocks of four
     // --------------------------------------------------------
 
     int r0 = p0;
 
     for (; r0 + 4 <= klen; r0 += 4)
     {
-      // ------------------------------------------------------
-      // Build A = X[r0:r0+3, :]
-      // ------------------------------------------------------
-
-      double* A0 = A.data();
-      double* A1 = A0 + srcWidth;
-      double* A2 = A1 + srcWidth;
-      double* A3 = A2 + srcWidth;
-
-      for (int k = 0; k < srcWidth; ++k)
-      {
-        const int base = srcBase[k];
-
-        A0[k] = l[base + r0 + 0];
-        A1[k] = l[base + r0 + 1];
-        A2[k] = l[base + r0 + 2];
-        A3[k] = l[base + r0 + 3];
-      }
-
-
-      double C[16];
-
-
-      // ------------------------------------------------------
-      // C = A B^T
-      // ------------------------------------------------------
-      matmul_block<4,4>(
-        A.data(),
-        Bt.data(),
-        C,
-        srcWidth,
-        4,
-        4,
-        srcWidth
+      update_block<4, 4>(
+          l,
+          A,
+          Bt,
+          srcWidth,
+          r0,
+          p0,
+          klen,
+          eK,
+          srcBase,
+          khead,
+          indmap,
+          colpointers,
+          rowindices
       );
-
-
-      // ------------------------------------------------------
-      // Scatter valid lower-triangular elements.
-      // ------------------------------------------------------
-
-      for (int j = 0; j < 4; ++j)
-      {
-        const int p = p0 + j;
-
-        const int imin =
-          (r0 == p0) ? j : 0;
-
-        const int target =
-          rowindices[khead + p];
-
-        const int ref_pos =
-          colpointers[target + 1] - 1;
-
-        for (int i = imin; i < 4; ++i)
-        {
-          const int r = r0 + i;
-
-          const int q =
-            klen - r - 1;
-
-          const int ndx =
-            rowindices[eK - 1 - q];
-
-          const int pos =
-            ref_pos - indmap[ndx];
-
-          l[pos] -=
-            C[i * 4 + j];
-        }
-      }
     }
 
 
     // --------------------------------------------------------
-    // Remaining 1-3 rows.
+    // Remaining 1-3 rows
+    //
+    // Leave this unchanged for the moment.
     // --------------------------------------------------------
 
     if (r0 < klen)
@@ -497,6 +445,9 @@ void cmod2_sup(
     }
   }
 }
+
+
+
 
 
 void cholesky(
