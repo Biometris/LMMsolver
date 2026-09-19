@@ -564,6 +564,398 @@ void cmod2_sup(
 }
 
 
+inline void update_column_cmod2_unroll4(
+    double* l,
+    double* t,
+    int sz,
+    int k0,
+    const IntegerVector& colpointers)
+{
+  const double* p0 =
+    l + colpointers[k0 + 1] - sz;
+
+  const double* p1 =
+    l + colpointers[k0 + 2] - sz;
+
+  const double* p2 =
+    l + colpointers[k0 + 3] - sz;
+
+  const double* p3 =
+    l + colpointers[k0 + 4] - sz;
+
+  const double a0 = *p0;
+  const double a1 = *p1;
+  const double a2 = *p2;
+  const double a3 = *p3;
+
+  double* tptr =
+    t + sz - 1;
+
+  for (int i = 0; i < sz; ++i)
+  {
+    *tptr-- +=
+      (*p0++) * a0
+    + (*p1++) * a1
+    + (*p2++) * a2
+    + (*p3++) * a3;
+  }
+}
+
+
+
+// ============================================================
+// cmod2 using 4 source-column unrolling
+// ============================================================
+
+void cmod2(
+    NumericVector& L,
+    int J,
+    int K,
+    int khead,
+    int klen,
+    int ncolup,
+    NumericVector& t,
+    const IntegerVector& indmap,
+    const IntegerVector& supernodes,
+    const IntegerVector& rowpointers,
+    const IntegerVector& colpointers,
+    const IntegerVector& rowindices)
+{
+  if (ncolup <= 0)
+    return;
+
+  double* l =
+    L.begin();
+
+  double* tp =
+    t.begin();
+
+  const int eK =
+    rowpointers[K + 1];
+
+  const int sCol =
+    supernodes[K];
+
+  const int eCol =
+    supernodes[K + 1];
+
+  const int srcWidth =
+    eCol - sCol;
+
+  // ----------------------------------------------------------
+  // One target column at a time.
+  // ----------------------------------------------------------
+
+  for (int p = 0; p < ncolup; ++p)
+  {
+    const int j =
+      rowindices[khead + p];
+
+    const int sz =
+      klen - p;
+
+    // --------------------------------------------------------
+    // Initialise t.
+    // --------------------------------------------------------
+
+    for (int i = 0; i < sz; ++i)
+      tp[i] = 0.0;
+
+    // --------------------------------------------------------
+    // Four source columns at a time.
+    // --------------------------------------------------------
+
+    const int n4 =
+      (srcWidth / 4) * 4;
+
+    int k =
+      sCol;
+
+    for (; k < sCol + n4; k += 4)
+    {
+      update_column_cmod2_unroll4(
+        l,
+        tp,
+        sz,
+        k,
+        colpointers
+      );
+    }
+
+    // --------------------------------------------------------
+    // Remaining source columns.
+    //
+    // Keep exactly the original indexing.
+    // --------------------------------------------------------
+
+    for (; k < eCol; ++k)
+    {
+      const int jk =
+        colpointers[k + 1] - sz;
+
+      const double Ljk =
+        l[jk];
+
+      const double* lptr =
+        l + jk;
+
+      double* tptr =
+        tp + sz - 1;
+
+      for (int i = 0; i < sz; ++i)
+      {
+        *tptr-- +=
+          *lptr++ * Ljk;
+      }
+    }
+
+    // --------------------------------------------------------
+    // Scatter.
+    // --------------------------------------------------------
+
+    int r =
+      eK - 1;
+
+    const int ref_pos =
+      colpointers[j + 1] - 1;
+
+    for (int i = 0; i < sz; ++i)
+    {
+      const int ndx =
+        rowindices[r--];
+
+      const int pos =
+        ref_pos - indmap[ndx];
+
+      l[pos] -=
+        tp[i];
+    }
+  }
+}
+
+void cholesky(
+    NumericVector& L,
+    const IntegerVector& supernodes,
+    const IntegerVector& rowpointers,
+    const IntegerVector& colpointers,
+    const IntegerVector& rowindices)
+{
+  const int N =
+    colpointers.size() - 1;
+
+  const int Nsupernodes =
+    supernodes.size() - 1;
+
+  // ------------------------------------------------------------
+  // SNODE[j] = supernode containing scalar row/column j
+  // ------------------------------------------------------------
+
+  IntegerVector SNODE(N);
+
+  for (int J = 0; J < Nsupernodes; ++J)
+  {
+    for (int j = supernodes[J];
+         j < supernodes[J + 1];
+         ++j)
+    {
+      SNODE[j] = J;
+    }
+  }
+
+  // ------------------------------------------------------------
+  // Supernodal linked lists
+  //
+  // LINK[J]   = head of list of source supernodes waiting
+  //             to update J
+  //
+  // LENGTH[K] = active suffix length of source supernode K
+  // ------------------------------------------------------------
+
+  IntegerVector LINK(Nsupernodes, -1);
+  IntegerVector LENGTH(Nsupernodes, 0);
+
+  // ------------------------------------------------------------
+  // Workspace
+  // ------------------------------------------------------------
+
+  IntegerVector indmap(N, 0);
+
+  // Temporary vector used by cmod2.
+  NumericVector t(N);
+
+  // ------------------------------------------------------------
+  // Process supernodes in order
+  // ------------------------------------------------------------
+
+  for (int J = 0; J < Nsupernodes; ++J)
+  {
+    const int j0 =
+      supernodes[J];
+
+    const int j1 =
+      supernodes[J + 1];
+
+    makeIndMap(
+      indmap,
+      J,
+      rowpointers,
+      rowindices
+    );
+
+    // ----------------------------------------------------------
+    // Process all source supernodes currently waiting for J.
+    // ----------------------------------------------------------
+
+    int K =
+      LINK[J];
+
+    LINK[J] = -1;
+
+    while (K != -1)
+    {
+      const int nextK =
+        LINK[K];
+
+      const int klen =
+        LENGTH[K];
+
+      // First active row of K.
+      const int khead =
+        rowpointers[K + 1] - klen;
+
+      // --------------------------------------------------------
+      // Determine how many active rows of K belong to J.
+      // --------------------------------------------------------
+
+      int ncolup = 0;
+
+      while (ncolup < klen &&
+             rowindices[khead + ncolup] < j1)
+      {
+        ++ncolup;
+      }
+
+      // --------------------------------------------------------
+      // Numerical update.
+      //
+      // One target column at a time, with source columns of K
+      // processed four at a time.
+      // --------------------------------------------------------
+
+      if (ncolup > 0)
+      {
+        cmod2(
+          L,
+          J,
+          K,
+          khead,
+          klen,
+          ncolup,
+          t,
+          indmap,
+          supernodes,
+          rowpointers,
+          colpointers,
+          rowindices
+        );
+      }
+
+      // --------------------------------------------------------
+      // K may still have an active suffix.
+      //
+      // If so, put K on the list of the next supernode it
+      // contributes to.
+      // --------------------------------------------------------
+
+      if (klen > ncolup)
+      {
+        const int next_row =
+          rowindices[khead + ncolup];
+
+        const int nextJ =
+          SNODE[next_row];
+
+        LENGTH[K] =
+          klen - ncolup;
+
+        LINK[K] =
+          LINK[nextJ];
+
+        LINK[nextJ] =
+          K;
+      }
+      else
+      {
+        LENGTH[K] = 0;
+        LINK[K] = -1;
+      }
+
+      K =
+        nextK;
+    }
+
+    // ----------------------------------------------------------
+    // Factor supernode J
+    // ----------------------------------------------------------
+
+    for (int j = j0; j < j1; ++j)
+    {
+      cmod1(
+        L,
+        j,
+        J,
+        supernodes,
+        colpointers
+      );
+
+      cdiv(
+        L,
+        j,
+        colpointers
+      );
+    }
+
+    // ----------------------------------------------------------
+    // Schedule J's own update.
+    //
+    // The first 'width' entries of J's row list correspond to
+    // its diagonal supernode block. Everything after that is
+    // the update that J still has to deliver.
+    // ----------------------------------------------------------
+
+    const int width =
+      j1 - j0;
+
+    const int len =
+      rowpointers[J + 1] -
+      rowpointers[J];
+
+    LENGTH[J] =
+      len - width;
+
+    if (LENGTH[J] > 0)
+    {
+      const int next_row =
+        rowindices[rowpointers[J] + width];
+
+      const int nextJ =
+        SNODE[next_row];
+
+      LINK[J] =
+        LINK[nextJ];
+
+      LINK[nextJ] =
+        J;
+    }
+    else
+    {
+      LENGTH[J] = 0;
+      LINK[J] = -1;
+    }
+  }
+}
+
+/*
 void cholesky(
     NumericVector& L,
     const IntegerVector& supernodes,
@@ -727,7 +1119,7 @@ void cholesky(
     }
   }
 }
-
+*/
 
 void cholesky_timer(
     NumericVector& L,
