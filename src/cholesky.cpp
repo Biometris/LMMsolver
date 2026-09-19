@@ -288,11 +288,9 @@ void cholesky(
     const IntegerVector& colpointers,
     const IntegerVector& rowindices)
 {
-  const int N =
-    colpointers.size() - 1;
+  const int N = colpointers.size() - 1;
 
-  const int Nsupernodes =
-    supernodes.size() - 1;
+  const int Nsupernodes = supernodes.size() - 1;
 
   // ------------------------------------------------------------
   // SNODE[j] = supernode containing scalar row/column j

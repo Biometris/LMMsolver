@@ -11,8 +11,11 @@ setClass("LMMsolver.chol",
 
 SparseCholesky <- function(C) {
   opt <- summary(C)
-  cholC <- chol(C, memory = list(nnzR = 8 * opt$nnz,
-                                 nnzcolindices = 4 * opt$nnz))
+  cholC <- suppressWarnings(
+    chol(C,
+         memory = list(nnzR = 8 * opt$nnz,
+                       nnzcolindices = 4 * opt$nnz))
+  )
   N_entries <- length(cholC@entries)
 
   # Exchange row and columns compared to spam object, as in Ng and Peyton 1993
