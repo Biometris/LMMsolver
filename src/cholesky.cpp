@@ -62,11 +62,11 @@ inline void update_column_cmod1_unroll4(
     const IntegerVector& colpointers)
 {
   // Starting positions of the active parts of the
-  // eight source columns.
-  double* p0 = l + colpointers[k0]     + (j - k0);
-  double* p1 = l + colpointers[k0 + 1] + (j - (k0 + 1));
-  double* p2 = l + colpointers[k0 + 2] + (j - (k0 + 2));
-  double* p3 = l + colpointers[k0 + 3] + (j - (k0 + 3));
+  // four source columns.
+  const double* p0 = l + colpointers[k0]     + (j - k0);
+  const double* p1 = l + colpointers[k0 + 1] + (j - (k0 + 1));
+  const double* p2 = l + colpointers[k0 + 2] + (j - (k0 + 2));
+  const double* p3 = l + colpointers[k0 + 3] + (j - (k0 + 3));
 
   // The first element of each active source column is
   // L[j,k].
