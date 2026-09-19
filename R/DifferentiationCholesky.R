@@ -9,32 +9,64 @@ setClass("LMMsolver.chol",
                    entries = "numeric",
                    ADentries  = "numeric"))
 
+
 SparseCholesky <- function(C, init = TRUE) {
-  opt <- summary(C)
-  cholC <- suppressWarnings(
-    chol(C,
-         memory = list(nnzR = 8 * opt$nnz,
-                       nnzcolindices = 4 * opt$nnz))
-  )
+
+  ## C can be either a spam matrix or an existing
+  ## spam Ng-Peyton Cholesky object.
+  if (methods::is(C, "spam.chol.NgPeyton")) {
+
+    cholC <- C
+
+  } else {
+
+    opt <- summary(C)
+
+    cholC <- suppressWarnings(
+      chol(C,
+           memory = list(nnzR = 8 * opt$nnz,
+                         nnzcolindices = 4 * opt$nnz))
+    )
+  }
+
   N_entries <- length(cholC@entries)
 
-  # Exchange row and columns compared to spam object, as in Ng and Peyton 1993
-  # LMMsolver.chol uses C-index (0) instead of R-index (1)
-  obj <- methods::new("LMMsolver.chol",
-             supernodes = cholC@supernodes - 1,
-             colpointers = cholC@rowpointers - 1,
-             rowpointers = cholC@colpointers - 1,
-             rowindices = cholC@colindices - 1,
-             pivot = cholC@pivot - 1,
-             invpivot = cholC@invpivot - 1,
-             entries = rep(0, N_entries),
-             ADentries = rep(0, N_entries))
+  # Exchange row and columns compared to spam object,
+  # as in Ng and Peyton 1993.
+  # LMMsolver.chol uses C-index (0) instead of R-index (1).
+  obj <- methods::new(
+    "LMMsolver.chol",
+    supernodes = cholC@supernodes - 1,
+    colpointers = cholC@rowpointers - 1,
+    rowpointers = cholC@colpointers - 1,
+    rowindices = cholC@colindices - 1,
+    pivot = cholC@pivot - 1,
+    invpivot = cholC@invpivot - 1,
+    entries = rep(0, N_entries),
+    ADentries = rep(0, N_entries)
+  )
 
   if (init) {
-    obj@entries <- vec(obj, C)
-    L <- update_Rcpp_fun(obj)
-    obj@entries <- L$entries
-    obj@ADentries <- L$ADentries
+
+    if (methods::is(C, "spam.chol.NgPeyton")) {
+
+      ## The Cholesky factor is already available.
+      ## Only construct the AD entries.
+      L <- constructor_LMMsolver_chol(cholC)
+
+      obj@entries <- L$entries
+      obj@ADentries <- L$ADentries
+
+    } else {
+
+      ## Calculate the numerical factor and AD entries.
+      obj@entries <- vec(obj, C)
+
+      L <- update_Rcpp_fun(obj)
+
+      obj@entries <- L$entries
+      obj@ADentries <- L$ADentries
+    }
   }
 
   obj
