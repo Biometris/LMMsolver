@@ -38,6 +38,7 @@ void makeIndMap(IntegerVector& indmap,
   }
 }
 
+/*
 // j is current column in Supernode J
 void cmod1(NumericVector& L, int j, int J,
            const IntegerVector& supernodes,
@@ -59,6 +60,146 @@ void cmod1(NumericVector& L, int j, int J,
     }
   }
 }
+*/
+
+// Updates one target column j using 4 consecutive source
+// columns k0,...,k0+3.
+//
+// For each row i:
+//
+//   y = L[i,j]
+//   y -= L[i,k0  ] * L[j,k0  ]
+//   y -= L[i,k0+1] * L[j,k0+1]
+//   y -= L[i,k0+2] * L[j,k0+2]
+//   y -= L[i,k0+3] * L[j,k0+3]
+//   L[i,j] = y
+//
+// The target value is therefore loaded/stored only once.
+// ============================================================
+
+inline void update_column_unroll4(
+    double* l,
+    int s,
+    int e,
+    int j,
+    int k0,
+    const IntegerVector& colpointers)
+{
+  // Starting positions of the active parts of the
+  // eight source columns.
+  double* p0 =
+    l + colpointers[k0]     + (j - k0);
+
+  double* p1 =
+    l + colpointers[k0 + 1] + (j - (k0 + 1));
+
+  double* p2 =
+    l + colpointers[k0 + 2] + (j - (k0 + 2));
+
+  double* p3 =
+    l + colpointers[k0 + 3] + (j - (k0 + 3));
+
+
+  // The first element of each active source column is
+  // L[j,k].
+  const double a0 = *p0;
+  const double a1 = *p1;
+  const double a2 = *p2;
+  const double a3 = *p3;
+
+  // ----------------------------------------------------------
+  // Update target column.
+  // ----------------------------------------------------------
+
+  for (int i = s; i < e; ++i)
+  {
+    double y = l[i];
+
+    y -= (*p0++) * a0;
+    y -= (*p1++) * a1;
+    y -= (*p2++) * a2;
+    y -= (*p3++) * a3;
+
+    l[i] = y;
+  }
+}
+
+
+
+// ============================================================
+// cmod1 using source-column unrolling
+// ============================================================
+
+void cmod1(
+    NumericVector& L,
+    int j,
+    int J,
+    const IntegerVector& supernodes,
+    const IntegerVector& colpointers)
+{
+  double* l =
+    L.begin();
+
+  const int s =
+    colpointers[j];
+
+  const int e =
+    colpointers[j + 1];
+
+  const int kstart =
+    supernodes[J];
+
+  const int nsrc =
+    j - kstart;
+
+  // Number of complete groups of 8.
+  const int n4 =
+    (nsrc / 4) * 4;
+
+  int k =
+    kstart;
+
+  // ----------------------------------------------------------
+  // Groups of 4 source columns.
+  // ----------------------------------------------------------
+
+  const int kend =
+    kstart + n4;
+
+  for (; k < kend; k += 4)
+  {
+    update_column_unroll4(
+      l,
+      s,
+      e,
+      j,
+      k,
+      colpointers
+    );
+  }
+
+  // ----------------------------------------------------------
+  // Remaining source columns.
+  //
+  // Keep original cmod1 code for the tail.
+  // ----------------------------------------------------------
+
+  for (; k < j; ++k)
+  {
+    const int jk =
+      colpointers[k] + (j - k);
+
+    int ik =
+      jk;
+
+    const double Ljk =
+      l[jk];
+
+    for (int i = s; i < e; ++i)
+      l[i] -= l[ik++] * Ljk;
+  }
+}
+
 
 void cdiv(NumericVector& L, int j, const IntegerVector& colpointers)
 {
@@ -423,7 +564,7 @@ void cmod2_sup(
 }
 
 
-void cholesky(
+void cholesky_wh_timer(
     NumericVector& L,
     const IntegerVector& supernodes,
     const IntegerVector& rowpointers,
@@ -585,6 +726,331 @@ void cholesky(
       LINK[J] = -1;
     }
   }
+}
+
+
+void cholesky(
+    NumericVector& L,
+    const IntegerVector& supernodes,
+    const IntegerVector& rowpointers,
+    const IntegerVector& colpointers,
+    const IntegerVector& rowindices)
+{
+  using clock = std::chrono::steady_clock;
+
+  const int N =
+    colpointers.size() - 1;
+
+  const int Nsupernodes =
+    supernodes.size() - 1;
+
+  // ------------------------------------------------------------
+  // Timing
+  // ------------------------------------------------------------
+
+  const auto tTotal0 = clock::now();
+
+  double tIndMap = 0.0;
+  double tCmod2  = 0.0;
+  double tCmod1  = 0.0;
+  double tCdiv   = 0.0;
+
+  long long nCmod2 = 0;
+  long long nCmod1 = 0;
+  long long nCdiv  = 0;
+
+  // ------------------------------------------------------------
+  // SNODE[j] = supernode containing scalar row/column j
+  // ------------------------------------------------------------
+
+  IntegerVector SNODE(N);
+
+  for (int J = 0; J < Nsupernodes; ++J)
+  {
+    for (int j = supernodes[J];
+         j < supernodes[J + 1];
+         ++j)
+    {
+      SNODE[j] = J;
+    }
+  }
+
+  // ------------------------------------------------------------
+  // Supernodal linked lists
+  //
+  // LINK[J]   = head of list of source supernodes waiting
+  //             to update J
+  //
+  // LENGTH[K] = active suffix length of source supernode K
+  // ------------------------------------------------------------
+
+  IntegerVector LINK(Nsupernodes, -1);
+  IntegerVector LENGTH(Nsupernodes, 0);
+
+  // ------------------------------------------------------------
+  // Workspace
+  // ------------------------------------------------------------
+
+  IntegerVector indmap(N, 0);
+
+  int maxSrcWidth = 0;
+
+  for (int K = 0; K < supernodes.size() - 1; ++K)
+  {
+    maxSrcWidth = std::max(
+      maxSrcWidth,
+      supernodes[K + 1] - supernodes[K]
+    );
+  }
+
+  NumericVector t(N);
+
+  std::vector<double> A(4 * maxSrcWidth);
+  std::vector<double> Bt(4 * maxSrcWidth);
+
+  // ------------------------------------------------------------
+  // Process supernodes in order
+  // ------------------------------------------------------------
+
+  for (int J = 0; J < Nsupernodes; ++J)
+  {
+    const int j0 = supernodes[J];
+    const int j1 = supernodes[J + 1];
+
+    // ----------------------------------------------------------
+    // Build index map
+    // ----------------------------------------------------------
+
+    {
+      const auto t0 = clock::now();
+
+      makeIndMap(
+        indmap,
+        J,
+        rowpointers,
+        rowindices
+      );
+
+      const auto t1 = clock::now();
+
+      tIndMap +=
+        std::chrono::duration<double>(t1 - t0).count();
+    }
+
+    // ----------------------------------------------------------
+    // Process all source supernodes currently waiting for J.
+    // ----------------------------------------------------------
+
+    int K = LINK[J];
+    LINK[J] = -1;
+
+    while (K != -1)
+    {
+      const int nextK = LINK[K];
+      const int klen = LENGTH[K];
+
+      // First active row of K.
+      const int khead =
+        rowpointers[K + 1] - klen;
+
+      // --------------------------------------------------------
+      // Determine how many active rows of K belong to J.
+      // --------------------------------------------------------
+
+      int ncolup = 0;
+
+      while (ncolup < klen &&
+             rowindices[khead + ncolup] < j1)
+      {
+        ++ncolup;
+      }
+
+      // --------------------------------------------------------
+      // Numerical update.
+      // --------------------------------------------------------
+
+      if (ncolup > 0)
+      {
+        const auto t0 = clock::now();
+
+        cmod2_sup(
+          L,
+          J,
+          K,
+          khead,
+          klen,
+          ncolup,
+          t,
+          A,
+          Bt,
+          indmap,
+          supernodes,
+          rowpointers,
+          colpointers,
+          rowindices
+        );
+
+        const auto t1 = clock::now();
+
+        tCmod2 +=
+          std::chrono::duration<double>(t1 - t0).count();
+
+        ++nCmod2;
+      }
+
+      // --------------------------------------------------------
+      // K may still have an active suffix.
+      // --------------------------------------------------------
+
+      if (klen > ncolup)
+      {
+        const int next_row =
+          rowindices[khead + ncolup];
+
+        const int nextJ =
+          SNODE[next_row];
+
+        LENGTH[K] =
+          klen - ncolup;
+
+        LINK[K] =
+          LINK[nextJ];
+
+        LINK[nextJ] =
+          K;
+      }
+      else
+      {
+        LENGTH[K] = 0;
+        LINK[K] = -1;
+      }
+
+      K = nextK;
+    }
+
+    // ----------------------------------------------------------
+    // Factor supernode J
+    // ----------------------------------------------------------
+
+    for (int j = j0; j < j1; ++j)
+    {
+      // --------------------------------------------------------
+      // cmod1
+      // --------------------------------------------------------
+
+      {
+        const auto t0 = clock::now();
+
+        cmod1(
+          L,
+          j,
+          J,
+          supernodes,
+          colpointers
+        );
+
+        const auto t1 = clock::now();
+
+        tCmod1 +=
+          std::chrono::duration<double>(t1 - t0).count();
+
+        ++nCmod1;
+      }
+
+      // --------------------------------------------------------
+      // cdiv
+      // --------------------------------------------------------
+
+      {
+        const auto t0 = clock::now();
+
+        cdiv(
+          L,
+          j,
+          colpointers
+        );
+
+        const auto t1 = clock::now();
+
+        tCdiv +=
+          std::chrono::duration<double>(t1 - t0).count();
+
+        ++nCdiv;
+      }
+    }
+
+    // ----------------------------------------------------------
+    // Schedule J's own update.
+    // ----------------------------------------------------------
+
+    const int width =
+      j1 - j0;
+
+    const int len =
+      rowpointers[J + 1] -
+      rowpointers[J];
+
+    LENGTH[J] =
+      len - width;
+
+    if (LENGTH[J] > 0)
+    {
+      const int next_row =
+        rowindices[rowpointers[J] + width];
+
+      const int nextJ =
+        SNODE[next_row];
+
+      LINK[J] =
+        LINK[nextJ];
+
+      LINK[nextJ] =
+        J;
+    }
+    else
+    {
+      LENGTH[J] = 0;
+      LINK[J] = -1;
+    }
+  }
+
+  // ------------------------------------------------------------
+  // Total time
+  // ------------------------------------------------------------
+
+  const auto tTotal1 = clock::now();
+
+  const double tTotal =
+    std::chrono::duration<double>(
+      tTotal1 - tTotal0
+    ).count();
+
+  const double tMeasured =
+    tIndMap +
+    tCmod2 +
+    tCmod1 +
+    tCdiv;
+
+  const double tOther =
+    tTotal - tMeasured;
+
+  // ------------------------------------------------------------
+  // Print timing
+  // ------------------------------------------------------------
+
+  Rcpp::Rcout
+  << "\nCholesky timing\n"
+  << "-------------------------\n"
+  << "Total          : " << tTotal << " s\n"
+  << "makeIndMap     : " << tIndMap << " s\n"
+  << "cmod2          : " << tCmod2 << " s  ("
+  << nCmod2 << " calls)\n"
+  << "cmod1          : " << tCmod1 << " s  ("
+  << nCmod1 << " calls)\n"
+  << "cdiv           : " << tCdiv << " s  ("
+  << nCdiv << " calls)\n"
+  << "other          : " << tOther << " s\n"
+  << std::endl;
 }
 
 double logdet(const NumericVector& L, const IntegerVector& colpointers)
