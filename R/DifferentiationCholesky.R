@@ -9,7 +9,7 @@ setClass("LMMsolver.chol",
                    entries = "numeric",
                    ADentries  = "numeric"))
 
-SparseCholesky <- function(C) {
+SparseCholesky <- function(C, init = TRUE) {
   opt <- summary(C)
   cholC <- suppressWarnings(
     chol(C,
@@ -30,10 +30,12 @@ SparseCholesky <- function(C) {
              entries = rep(0, N_entries),
              ADentries = rep(0, N_entries))
 
-  obj@entries <- vec(obj, C)
-  L <- update_Rcpp_fun(obj)
-  obj@entries <- L$entries
-  obj@ADentries <- L$ADentries
+  if (init) {
+    obj@entries <- vec(obj, C)
+    L <- update_Rcpp_fun(obj)
+    obj@entries <- L$entries
+    obj@ADentries <- L$ADentries
+  }
 
   obj
 }

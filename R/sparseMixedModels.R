@@ -224,13 +224,13 @@ sparseMixedModels <- function(y,
   ## Make SparseCholesky for Ginv and C:
   if (Nvarcomp > 0) {
     Ginv <- Reduce('+', lGinv)
-    objGinv <- SparseCholesky(Ginv)
+    objGinv <- SparseCholesky(Ginv, init=FALSE)
     VGinv <- vecList(objGinv, lGinv)
   } else {
     objGinv <- NULL
   }
   C0 <- Reduce('+', lC)
-  objC <- SparseCholesky(C0)
+  objC <- SparseCholesky(C0, init=FALSE)
   VC <- vecList(objC, lC)
 
   ## Initialize values for loop.
