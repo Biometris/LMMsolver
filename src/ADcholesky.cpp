@@ -38,6 +38,8 @@
 using namespace Rcpp;
 using namespace std;
 
+/*
+
 // j is current column in Supernode J
 void ADcmod1(NumericVector& F,
              const NumericVector& L, int j, int J,
@@ -63,6 +65,213 @@ void ADcmod1(NumericVector& F,
       f[ik] -= f[ij]*Ljk;
       fjk   -= f[ij]*l[ik];
       ik++;
+    }
+  }
+}
+*/
+
+
+// ============================================================
+// AD update of one target column using 4 consecutive source
+// columns.
+//
+// For each source column k:
+//
+//   f[i,k] -= f[i,j] * L[j,k]
+//   f[j,k] -= f[i,j] * L[i,k]
+//
+// The first source entry L[j,k] is also F[j,k], so the first
+// row contributes twice to F[j,k]. This is handled explicitly.
+// ============================================================
+
+inline void update_AD_column_unroll4(
+    double* f,
+    const double* l,
+    int s,
+    int e,
+    int j,
+    int k0,
+    const IntegerVector& colpointers)
+{
+  // ----------------------------------------------------------
+  // First positions of the four source columns.
+  // These are the L[j,k] values and also the F[j,k] values.
+  // ----------------------------------------------------------
+
+  const int jk0 =
+    colpointers[k0] + (j - k0);
+
+  const int jk1 =
+    colpointers[k0 + 1] + (j - (k0 + 1));
+
+  const int jk2 =
+    colpointers[k0 + 2] + (j - (k0 + 2));
+
+  const int jk3 =
+    colpointers[k0 + 3] + (j - (k0 + 3));
+
+  const double a0 = l[jk0];
+  const double a1 = l[jk1];
+  const double a2 = l[jk2];
+  const double a3 = l[jk3];
+
+  // ----------------------------------------------------------
+  // First target row.
+  //
+  // Here source F[j,k] and fjk are the same element, so the
+  // original code subtracts the contribution twice.
+  // ----------------------------------------------------------
+
+  const double f0 =
+    f[s];
+
+  double g0 =
+    f[jk0] - 2.0 * f0 * a0;
+
+  double g1 =
+    f[jk1] - 2.0 * f0 * a1;
+
+  double g2 =
+    f[jk2] - 2.0 * f0 * a2;
+
+  double g3 =
+    f[jk3] - 2.0 * f0 * a3;
+
+  // ----------------------------------------------------------
+  // Remaining rows.
+  // ----------------------------------------------------------
+
+  const double* p0 =
+    l + jk0 + 1;
+
+  const double* p1 =
+    l + jk1 + 1;
+
+  const double* p2 =
+    l + jk2 + 1;
+
+  const double* p3 =
+    l + jk3 + 1;
+
+  double* q0 =
+    f + jk0 + 1;
+
+  double* q1 =
+    f + jk1 + 1;
+
+  double* q2 =
+    f + jk2 + 1;
+
+  double* q3 =
+    f + jk3 + 1;
+
+  for (int i = s + 1; i < e; ++i)
+  {
+    const double fij =
+      f[i];
+
+    *q0++ -= fij * a0;
+    g0   -= fij * (*p0++);
+
+    *q1++ -= fij * a1;
+    g1   -= fij * (*p1++);
+
+    *q2++ -= fij * a2;
+    g2   -= fij * (*p2++);
+
+    *q3++ -= fij * a3;
+    g3   -= fij * (*p3++);
+  }
+
+  // ----------------------------------------------------------
+  // Write back F[j,k].
+  // ----------------------------------------------------------
+
+  f[jk0] = g0;
+  f[jk1] = g1;
+  f[jk2] = g2;
+  f[jk3] = g3;
+}
+
+
+// ============================================================
+// ADcmod1 using source-column unrolling
+// ============================================================
+
+void ADcmod1(
+    NumericVector& F,
+    const NumericVector& L,
+    int j,
+    int J,
+    const IntegerVector& supernodes,
+    const IntegerVector& colpointers)
+{
+  const double* l =
+    L.begin();
+
+  double* f =
+    F.begin();
+
+  const int s =
+    colpointers[j];
+
+  const int e =
+    colpointers[j + 1];
+
+  const int kstart =
+    supernodes[J];
+
+  const int nsrc =
+    j - kstart;
+
+  // ----------------------------------------------------------
+  // Complete groups of four source columns.
+  // ----------------------------------------------------------
+
+  const int n4 =
+    (nsrc / 4) * 4;
+
+  int k =
+    kstart;
+
+  for (; k < kstart + n4; k += 4)
+  {
+    update_AD_column_unroll4(
+      f,
+      l,
+      s,
+      e,
+      j,
+      k,
+      colpointers
+    );
+  }
+
+  // ----------------------------------------------------------
+  // Remaining source columns.
+  //
+  // Keep the original implementation for the tail.
+  // ----------------------------------------------------------
+
+  for (; k < j; ++k)
+  {
+    const int jk =
+      colpointers[k] + (j - k);
+
+    int ik =
+      jk;
+
+    double& fjk =
+      f[jk];
+
+    const double Ljk =
+      l[jk];
+
+    for (int ij = s; ij < e; ++ij)
+    {
+      f[ik] -= f[ij] * Ljk;
+      fjk   -= f[ij] * l[ik];
+      ++ik;
     }
   }
 }

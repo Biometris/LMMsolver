@@ -564,7 +564,7 @@ void cmod2_sup(
 }
 
 
-void cholesky_wh_timer(
+void cholesky(
     NumericVector& L,
     const IntegerVector& supernodes,
     const IntegerVector& rowpointers,
@@ -729,7 +729,7 @@ void cholesky_wh_timer(
 }
 
 
-void cholesky(
+void cholesky_timer(
     NumericVector& L,
     const IntegerVector& supernodes,
     const IntegerVector& rowpointers,
