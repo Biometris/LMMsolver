@@ -282,12 +282,6 @@ inline void update_AD_column_cmod2_unroll4(
   f[p3] = g3;
 }
 
-// ============================================================
-// ADcmod2 using source-column unrolling
-//
-// One target column j at a time, with source columns of K
-// processed four at a time.
-// ============================================================
 
 void ADcmod2(
     NumericVector& F,
@@ -302,36 +296,63 @@ void ADcmod2(
     const IntegerVector& colpointers,
     const IntegerVector& rowindices)
 {
+  if (sz <= 0)
+    return;
+
   const double* l = L.begin();
-  double* f =  F.begin();
+  double* f = F.begin();
   double* tp = t.begin();
 
-  // ----------------------------------------------------------
-  // Gather F[j] into t.
-  //
-  // Only the active suffix of length sz is needed.
-  // The order is the same as in the original ADcmod2.
-  // ----------------------------------------------------------
+  const int eK = rowpointers[K + 1];
+  const int sCol = supernodes[K];
+  const int eCol = supernodes[K + 1];
+  const int srcWidth = eCol - sCol;
 
-  int r = rowpointers[K + 1] - 1;
+  // Special case: one source column.
+  if (srcWidth == 1)
+  {
+    const int jk = colpointers[sCol + 1] - sz;
+    const double Ljk = l[jk];
+    double& Fjk = f[jk];
+
+    int r = eK - sz;
+    int ik = jk;
+
+    const int ref_pos = colpointers[j + 1] - 1;
+
+    for (int i = sz - 1; i >= 0; --i)
+    {
+      const int ndx = rowindices[r++];
+
+      const int pos = ref_pos - indmap[ndx];
+
+      // Copy before updating f[ik], since ik may equal pos.
+      const double Fij = f[pos];
+
+      f[ik] -= Fij * Ljk;
+      Fjk    -= Fij * l[ik];
+
+      ++ik;
+    }
+
+    return;
+  }
+
+  // Gather target AD values.
+  int r = eK - 1;
+
+  const int ref_pos = colpointers[j + 1] - 1;
 
   for (int i = 0; i < sz; ++i)
   {
     const int ndx = rowindices[r--];
-    const int pos = colpointers[j + 1] - 1 - indmap[ndx];
+
+    const int pos = ref_pos - indmap[ndx];
 
     tp[i] = f[pos];
   }
 
-  // ----------------------------------------------------------
-  // Source columns of supernode K.
-  // ----------------------------------------------------------
-
-  const int sCol = supernodes[K];
-  const int eCol =  supernodes[K + 1];
-  const int srcWidth =  eCol - sCol;
-
-  // Groups of four source columns.
+  // Four source columns at a time.
   const int n4 = (srcWidth / 4) * 4;
 
   int k = sCol;
@@ -345,18 +366,17 @@ void ADcmod2(
   for (; k < eCol; ++k)
   {
     const int jk = colpointers[k + 1] - sz;
-    int ik = jk;
-
     const double Ljk = l[jk];
-
     double& Fjk = f[jk];
+
+    int ik = jk;
 
     for (int i = sz - 1; i >= 0; --i)
     {
       const double Fij = tp[i];
 
       f[ik] -= Fij * Ljk;
-      Fjk -=Fij * l[ik];
+      Fjk    -= Fij * l[ik];
 
       ++ik;
     }

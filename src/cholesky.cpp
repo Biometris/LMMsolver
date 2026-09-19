@@ -182,10 +182,7 @@ inline void update_column_cmod2_unroll4(
   }
 }
 
-// ============================================================
 // cmod2 using 4 source-column unrolling
-// ============================================================
-
 void cmod2(
     NumericVector& L,
     int J,
@@ -204,16 +201,15 @@ void cmod2(
     return;
 
   double* l = L.begin();
-
   double* tp = t.begin();
 
-  const int eK =  rowpointers[K + 1];
-
+  const int eK = rowpointers[K + 1];
   const int sCol = supernodes[K];
-
   const int eCol = supernodes[K + 1];
-
   const int srcWidth = eCol - sCol;
+
+  // Four source columns at a time.
+  const int n4 = (srcWidth / 4) * 4;
 
   // One target column at a time.
   for (int p = 0; p < ncolup; ++p)
@@ -221,12 +217,32 @@ void cmod2(
     const int j = rowindices[khead + p];
     const int sz = klen - p;
 
+    // Special case: one source column.
+    if (srcWidth == 1)
+    {
+      const int src_end = colpointers[sCol + 1];
+      const int jk = src_end - sz;
+      const double Ljk = l[jk];
+
+      const double* lptr = l + src_end - 1;
+
+      int r = eK - 1;
+      const int ref_pos = colpointers[j + 1] - 1;
+
+      for (int i = 0; i < sz; ++i)
+      {
+        const int ndx = rowindices[r--];
+        const int pos = ref_pos - indmap[ndx];
+
+        l[pos] -= *lptr-- * Ljk;
+      }
+
+      continue;
+    }
+
     // Initialise t.
     for (int i = 0; i < sz; ++i)
       tp[i] = 0.0;
-
-    // Four source columns at a time.
-    const int n4 = (srcWidth / 4) * 4;
 
     int k = sCol;
 
@@ -257,13 +273,13 @@ void cmod2(
     for (int i = 0; i < sz; ++i)
     {
       const int ndx = rowindices[r--];
-
       const int pos = ref_pos - indmap[ndx];
 
       l[pos] -= tp[i];
     }
   }
 }
+
 
 void cholesky(
     NumericVector& L,
