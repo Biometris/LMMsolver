@@ -19,7 +19,7 @@ y <- dat$anomaly
 x1 <- dat$lon
 x2 <- dat$lat
 
-nrSegments <- seq(20, 80, by=5)
+nrSegments <- seq(20, 100, by=5)
 K <- length(nrSegments)
 LMMsolver_time <- rep(NA,K)
 #SOP_time <- rep(NA,K)

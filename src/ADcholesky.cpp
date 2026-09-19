@@ -38,6 +38,239 @@
 using namespace Rcpp;
 using namespace std;
 
+// ============================================================
+// AD update of one target column from 4 source columns.
+// ============================================================
+
+inline void update_AD_column_unroll4(
+    double* f,
+    const double* l,
+    const double* t,
+    int sz,
+    int k0,
+    const IntegerVector& colpointers)
+{
+  const int p0 =
+    colpointers[k0 + 1] - sz;
+
+  const int p1 =
+    colpointers[k0 + 2] - sz;
+
+  const int p2 =
+    colpointers[k0 + 3] - sz;
+
+  const int p3 =
+    colpointers[k0 + 4] - sz;
+
+  const double a0 = l[p0];
+  const double a1 = l[p1];
+  const double a2 = l[p2];
+  const double a3 = l[p3];
+
+  // ----------------------------------------------------------
+  // F[j,k] = F[j,k]
+  //             - 2 * t[sz-1] * L[j,k]
+  //
+  // This is the overlap of the two reverse updates.
+  // ----------------------------------------------------------
+
+  const double fij =
+    t[sz - 1];
+
+  double g0 =
+    f[p0] - 2.0 * fij * a0;
+
+  double g1 =
+    f[p1] - 2.0 * fij * a1;
+
+  double g2 =
+    f[p2] - 2.0 * fij * a2;
+
+  double g3 =
+    f[p3] - 2.0 * fij * a3;
+
+  // ----------------------------------------------------------
+  // Remaining source elements.
+  // ----------------------------------------------------------
+
+  const double* lp0 =
+    l + p0 + 1;
+
+  const double* lp1 =
+    l + p1 + 1;
+
+  const double* lp2 =
+    l + p2 + 1;
+
+  const double* lp3 =
+    l + p3 + 1;
+
+  double* fp0 =
+    f + p0 + 1;
+
+  double* fp1 =
+    f + p1 + 1;
+
+  double* fp2 =
+    f + p2 + 1;
+
+  double* fp3 =
+    f + p3 + 1;
+
+  for (int i = sz - 2; i >= 0; --i)
+  {
+    const double Fij =
+      t[i];
+
+    *fp0 -= Fij * a0;
+    *fp1 -= Fij * a1;
+    *fp2 -= Fij * a2;
+    *fp3 -= Fij * a3;
+
+    g0 -= Fij * (*lp0);
+    g1 -= Fij * (*lp1);
+    g2 -= Fij * (*lp2);
+    g3 -= Fij * (*lp3);
+
+    ++fp0;
+    ++fp1;
+    ++fp2;
+    ++fp3;
+
+    ++lp0;
+    ++lp1;
+    ++lp2;
+    ++lp3;
+  }
+
+  f[p0] = g0;
+  f[p1] = g1;
+  f[p2] = g2;
+  f[p3] = g3;
+}
+
+// ============================================================
+// ADcmod2 using source-column unrolling
+//
+// One target column j at a time, with source columns of K
+// processed four at a time.
+// ============================================================
+
+void ADcmod2(
+    NumericVector& F,
+    const NumericVector& L,
+    int j,
+    int K,
+    int sz,
+    NumericVector& t,
+    const IntegerVector& indmap,
+    const IntegerVector& supernodes,
+    const IntegerVector& rowpointers,
+    const IntegerVector& colpointers,
+    const IntegerVector& rowindices)
+{
+  const double* l =
+    L.begin();
+
+  double* f =
+    F.begin();
+
+  double* tp =
+    t.begin();
+
+  // ----------------------------------------------------------
+  // Gather F[j] into t.
+  //
+  // Only the active suffix of length sz is needed.
+  // The order is the same as in the original ADcmod2.
+  // ----------------------------------------------------------
+
+  int r =
+    rowpointers[K + 1] - 1;
+
+  for (int i = 0; i < sz; ++i)
+  {
+    const int ndx =
+      rowindices[r--];
+
+    const int pos =
+      colpointers[j + 1] - 1 - indmap[ndx];
+
+    tp[i] =
+      f[pos];
+  }
+
+  // ----------------------------------------------------------
+  // Source columns of supernode K.
+  // ----------------------------------------------------------
+
+  const int sCol =
+    supernodes[K];
+
+  const int eCol =
+    supernodes[K + 1];
+
+  const int srcWidth =
+    eCol - sCol;
+
+  // ----------------------------------------------------------
+  // Groups of four source columns.
+  // ----------------------------------------------------------
+
+  const int n4 =
+    (srcWidth / 4) * 4;
+
+  int k =
+    sCol;
+
+  for (; k < sCol + n4; k += 4)
+  {
+    update_AD_column_unroll4(
+      f,
+      l,
+      tp,
+      sz,
+      k,
+      colpointers
+    );
+  }
+
+  // ----------------------------------------------------------
+  // Remaining source columns.
+  //
+  // Keep the original scalar implementation for the tail.
+  // ----------------------------------------------------------
+
+  for (; k < eCol; ++k)
+  {
+    const int jk =
+      colpointers[k + 1] - sz;
+
+    int ik =
+      jk;
+
+    const double Ljk =
+      l[jk];
+
+    double& Fjk =
+      f[jk];
+
+    for (int i = sz - 1; i >= 0; --i)
+    {
+      const double Fij =
+        tp[i];
+
+      f[ik] -=
+        Fij * Ljk;
+
+      Fjk -=
+        Fij * l[ik];
+
+      ++ik;
+    }
+  }
+}
+
 /*
 
 // j is current column in Supernode J
@@ -732,9 +965,11 @@ void ADcmod2_sup(
 }
 
 
+
 // ============================================================
 // ADcholesky
 // ============================================================
+
 void ADcholesky(
     NumericVector& F,
     const NumericVector& L,
@@ -743,8 +978,11 @@ void ADcholesky(
     const IntegerVector& colpointers,
     const IntegerVector& rowindices)
 {
-  const int N = colpointers.size() - 1;
-  const int Nsupernodes = supernodes.size() - 1;
+  const int N =
+    colpointers.size() - 1;
+
+  const int Nsupernodes =
+    supernodes.size() - 1;
 
   // ------------------------------------------------------------
   // SNODE[j] = supernode containing scalar row/column j
@@ -802,8 +1040,11 @@ void ADcholesky(
       const int J =
         SNODE[last_row];
 
-      LINK[K] = HEAD[J];
-      HEAD[J] = K;
+      LINK[K] =
+        HEAD[J];
+
+      HEAD[J] =
+        K;
     }
   }
 
@@ -814,25 +1055,6 @@ void ADcholesky(
   IntegerVector indmap(N, 0);
 
   NumericVector t(N);
-
-  // Maximum source supernode width.
-  int maxSrcWidth = 0;
-
-  for (int K = 0; K < Nsupernodes; ++K)
-  {
-    const int width =
-      supernodes[K + 1] - supernodes[K];
-
-    if (width > maxSrcWidth)
-      maxSrcWidth = width;
-  }
-
-  // Dense block workspaces.
-  std::vector<double> A(4 * maxSrcWidth);
-  std::vector<double> Bt(4 * maxSrcWidth);
-  std::vector<double> FC(16);
-  std::vector<double> FA(4 * maxSrcWidth);
-  std::vector<double> FBt(4 * maxSrcWidth);
 
   // ------------------------------------------------------------
   // Reverse through supernodes
@@ -888,7 +1110,8 @@ void ADcholesky(
     // Process all source supernodes K waiting to update J.
     // ----------------------------------------------------------
 
-    int K = HEAD[J];
+    int K =
+      HEAD[J];
 
     HEAD[J] = -1;
 
@@ -911,7 +1134,8 @@ void ADcholesky(
         rowpointers[K + 1];
 
       const int widthK =
-        supernodes[K + 1] - supernodes[K];
+        supernodes[K + 1] -
+        supernodes[K];
 
       const int lenK =
         eK - row0;
@@ -940,27 +1164,38 @@ void ADcholesky(
       }
 
       // --------------------------------------------------------
-      // Reverse numerical update.
+      // Reverse update, one target column at a time.
+      //
+      // This is the scalar counterpart of the former
+      // ADcmod2_sup() call.
       // --------------------------------------------------------
 
-      ADcmod2_sup(
-        F,
-        L,
-        K,
-        done,
-        ncolup,
-        t,
-        A,
-        Bt,
-        FC,
-        FA,
-        FBt,
-        indmap,
-        supernodes,
-        rowpointers,
-        colpointers,
-        rowindices
-      );
+      for (int p = 0;
+           p < ncolup;
+           ++p)
+      {
+        const int j =
+          rowindices[
+        eK - 1 - done - p
+          ];
+
+        const int sz =
+          done + p + 1;
+
+        ADcmod2(
+          F,
+          L,
+          j,
+          K,
+          sz,
+          t,
+          indmap,
+          supernodes,
+          rowpointers,
+          colpointers,
+          rowindices
+        );
+      }
 
       // --------------------------------------------------------
       // Advance K further upward in its row list.
@@ -979,23 +1214,29 @@ void ADcholesky(
         const int nextJ =
           SNODE[next_row];
 
-        LENGTH[K] = newdone;
+        LENGTH[K] =
+          newdone;
 
-        LINK[K] = HEAD[nextJ];
-        HEAD[nextJ] = K;
+        LINK[K] =
+          HEAD[nextJ];
+
+        HEAD[nextJ] =
+          K;
       }
       else
       {
-        LENGTH[K] = newdone;
-        LINK[K] = -1;
+        LENGTH[K] =
+          newdone;
+
+        LINK[K] =
+          -1;
       }
 
-      K = nextK;
+      K =
+        nextK;
     }
   }
 }
-
-
 
 
 
