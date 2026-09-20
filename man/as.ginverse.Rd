@@ -4,13 +4,16 @@
 \alias{as.ginverse}
 \title{Construct a ginverse Object from Precision Matrices}
 \usage{
-as.ginverse(precisionMatrices, tol = 1e-10)
+as.ginverse(precisionMatrices, levels, tol = 1e-10)
 }
 \arguments{
 \item{precisionMatrices}{A named list of square matrices (base \code{matrix} or
 objects inheriting from \code{Matrix}). Each element represents a precision
 matrix corresponding to a random effect. The names of the list must match the
 variable names used in the \code{random} argument of \code{LMMsolve}.}
+
+\item{levels}{Named list giving the levels corresponding to the
+rows and columns of each precision matrix.}
 
 \item{tol}{A numeric tolerance used for numerical stability (e.g. during inversion
 or eigenvalue truncation). Stored as an attribute of the resulting object.}
@@ -42,15 +45,11 @@ No reordering or alignment with the data is performed at this stage. This is
 handled internally by \code{LMMsolve}.
 }
 \examples{
-library(Matrix)
-
-# Create a simple precision matrix
-K <- Diagonal(5)
-rownames(K) <- colnames(K) <- as.character(1:5)
+K <- diag(1, 5)
 
 # Construct ginverse object
-g <- as.ginverse(list(id = K))
-
+g <- as.ginverse(list(id = K),
+                 levels = list(id = as.character(1:5)))
 g
 
 }

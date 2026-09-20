@@ -47,10 +47,10 @@ expect_error(LMMsolve(fixed = pheno ~ cross,
 #ginvLS <- list(ginv = ginv %*% t(ginv))
 #ginvLS2 <- list(ind = ginv %*% t(ginv))
 indMat <- diag(nrow = nlevels(testDat$ind))
-indMat <- Matrix::Matrix(indMat, sparse=TRUE)
-rownames(indMat) <- colnames(indMat) <- levels(testDat$ind)
 #rownames(indMat) <- colnames(indMat) <- levels(testDat$ind)
-ginvLS3 <- LMMsolver:::as.ginverse(list(ind = indMat))
+#rownames(indMat) <- colnames(indMat) <- levels(testDat$ind)
+ginvLS3 <- LMMsolver:::as.ginverse(list(ind = indMat),
+                                   levels = list(ind = levels(testDat$ind)))
 #expect_error(LMMsolve(fixed = pheno ~ cross, ginverse = ginv, data = testDat),
 #             "ginverse should be a named list of symmetric matrices")
 #expect_error(LMMsolve(fixed = pheno ~ cross, ginverse = ginvL, data = testDat),

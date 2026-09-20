@@ -12,6 +12,8 @@
 #'   objects inheriting from \code{Matrix}). Each element represents a precision
 #'   matrix corresponding to a random effect. The names of the list must match the
 #'   variable names used in the \code{random} argument of \code{LMMsolve}.
+#' @param levels Named list giving the levels corresponding to the
+#'   rows and columns of each precision matrix.
 #' @param tol A numeric tolerance used for numerical stability (e.g. during inversion
 #'   or eigenvalue truncation). Stored as an attribute of the resulting object.
 #'
@@ -34,19 +36,18 @@
 #' @seealso \code{\link{LMMsolve}}
 #'
 #' @examples
-#' library(Matrix)
-#'
-#' # Create a simple precision matrix
-#' K <- Diagonal(5)
-#' rownames(K) <- colnames(K) <- as.character(1:5)
+#' K <- diag(1, 5)
 #'
 #' # Construct ginverse object
-#' g <- as.ginverse(list(id = K))
-#'
+#' g <- as.ginverse(list(id = K),
+#'                  levels = list(id = as.character(1:5)))
 #' g
 #'
 #' @export
-as.ginverse <- function(precisionMatrices, tol = 1e-10) {
+
+as.ginverse <- function(precisionMatrices,
+                        levels,
+                        tol = 1e-10) {
 
   if (!is.list(precisionMatrices)) {
     stop("precisionMatrices must be a list")
@@ -56,25 +57,73 @@ as.ginverse <- function(precisionMatrices, tol = 1e-10) {
     stop("precisionMatrices must be a named list")
   }
 
+  if (!is.list(levels) || is.null(names(levels))) {
+    stop("'levels' must be a named list")
+  }
+
+  if (!identical(names(precisionMatrices), names(levels))) {
+    stop("'levels' must have the same names as 'precisionMatrices'")
+  }
+
   for (nm in names(precisionMatrices)) {
+
     K <- precisionMatrices[[nm]]
+    lev <- levels[[nm]]
 
-    if (!inherits(K, c("matrix", "Matrix"))) {
-      stop(sprintf("'%s' must be a matrix or Matrix", nm))
+    is_spam <- inherits(K, "spam")
+    is_matrix <- inherits(K, c("matrix", "Matrix"))
+
+    if (!is_spam && !is_matrix) {
+      stop(sprintf(
+        "'%s' must be a matrix, Matrix, or spam object",
+        nm
+      ))
     }
 
-    if (is.null(rownames(K)) || is.null(colnames(K))) {
-      stop(sprintf("'%s' must have row and column names", nm))
+    ## Check dimensions
+    if (nrow(K) != ncol(K)) {
+      stop(sprintf(
+        "'%s' must be square",
+        nm
+      ))
     }
 
-    if (!identical(rownames(K), colnames(K))) {
-      stop(sprintf("'%s' row and column names must be identical", nm))
+    ## Check levels
+    if (is.null(lev)) {
+      stop(sprintf(
+        "'levels[[%s]]' must not be NULL",
+        nm
+      ))
+    }
+
+    if (length(lev) != nrow(K)) {
+      stop(sprintf(
+        "'levels[[%s]]' must have length %d",
+        nm, nrow(K)
+      ))
+    }
+
+    if (anyDuplicated(lev)) {
+      stop(sprintf(
+        "'levels[[%s]]' contains duplicated levels",
+        nm
+      ))
+    }
+
+    ## Levels should be character, as they will be matched
+    ## against factor levels in the data.
+    if (!is.character(lev)) {
+      stop(sprintf(
+        "'levels[[%s]]' must be a character vector",
+        nm
+      ))
     }
   }
 
   structure(
     precisionMatrices,
     class = c("ginverse", "list"),
+    levels = levels,
     tol = tol
   )
 }
@@ -85,51 +134,72 @@ checkGinverseAgainstData <- function(ginverse, data, random_terms) {
     stop("ginverse must be created with as.ginverse()")
   }
 
+  ginverse_levels <- attr(ginverse, "levels")
+
+  if (is.null(ginverse_levels)) {
+    stop("ginverse does not contain level information")
+  }
+
   out <- list()
 
   for (nm in names(ginverse)) {
 
     if (!nm %in% random_terms) {
-      stop(sprintf("ginverse '%s' not present in random effects", nm))
-    }
-
-    if (!nm %in% names(data)) {
-      stop(sprintf("Column '%s' not found in data", nm))
-    }
-
-    # Ensure factor
-    data[[nm]] <- as.factor(data[[nm]])
-    data[[nm]] <- droplevels(data[[nm]])
-
-    ids <- levels(data[[nm]])
-    K <- ginverse[[nm]]
-
-    # Check coverage
-    if (!all(ids %in% rownames(K))) {
-      missing <- setdiff(ids, rownames(K))
       stop(sprintf(
-        "ginverse '%s' missing levels: %s",
-        nm, paste(missing, collapse = ", ")
+        "ginverse '%s' not present in random effects",
+        nm
       ))
     }
 
-    # Reorder
-    K <- K[ids, ids, drop = FALSE]
-
-    # Final safety check
-    if (!identical(rownames(K), ids)) {
-      stop(sprintf("Alignment failed for '%s'", nm))
+    if (!nm %in% names(data)) {
+      stop(sprintf(
+        "Column '%s' not found in data",
+        nm
+      ))
     }
 
-    # This is not an efficient conversion
-    K <- as.matrix(K)
-    K <- spam::as.spam(K)
-    #K <- spam::as.spam.dgCMatrix(K)
+    ids <- levels(droplevels(as.factor(data[[nm]])))
 
-    out[[nm]] <- K
+    K <- ginverse[[nm]]
+    K_levels <- ginverse_levels[[nm]]
+
+    if (is.null(K_levels)) {
+      stop(sprintf(
+        "No level information available for ginverse '%s'",
+        nm
+      ))
+    }
+
+    if (length(K_levels) != nrow(K)) {
+      stop(sprintf(
+        "Number of levels for ginverse '%s' does not match matrix dimensions",
+        nm
+      ))
+    }
+
+    if (anyDuplicated(K_levels)) {
+      stop(sprintf(
+        "ginverse '%s' contains duplicated levels",
+        nm
+      ))
+    }
+
+    missing <- setdiff(ids, K_levels)
+
+    if (length(missing) > 0) {
+      stop(sprintf(
+        "ginverse '%s' missing levels: %s",
+        nm,
+        paste(missing, collapse = ", ")
+      ))
+    }
+
+    ind <- match(ids, K_levels)
+
+    out[[nm]] <- K[ind, ind, drop = FALSE]
   }
 
-  return(out)
+  out
 }
 
 
