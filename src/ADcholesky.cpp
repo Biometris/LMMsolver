@@ -2,8 +2,6 @@
 // for calculating partial derivatives of the log-determinant of
 // positive definite symmetric sparse matrices.
 //
-// Implementation by Martin Boer, 2026.
-//
 // The algorithm combines the sparse Cholesky factorization of
 // Ng and Peyton (1993) with the reverse differentiation approach
 // of Smith (1995).
@@ -26,6 +24,8 @@
 // Smith, S. P. (2000).
 // "A Tutorial on Simplicity and Computational Differentiation
 // for Statisticians."
+//
+// Implementation by Martin Boer, 2026.
 
 #include <Rcpp.h>
 #include <set>
@@ -296,9 +296,6 @@ void ADcmod2(
     const IntegerVector& colpointers,
     const IntegerVector& rowindices)
 {
-  if (sz <= 0)
-    return;
-
   const double* l = L.begin();
   double* f = F.begin();
   double* tp = t.begin();

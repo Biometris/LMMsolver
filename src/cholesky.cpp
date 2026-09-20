@@ -9,6 +9,8 @@
 // "spam: A sparse matrix R package with emphasis on MCMC
 // methods for Gaussian Markov random fields."
 // Journal of Statistical Software 36 (2010): 1-25.
+//
+// Implementation by Martin Boer, 2026.
 
 #include <Rcpp.h>
 #include <set>
@@ -16,9 +18,9 @@
 #include "AuxFun.h"
 #include "SparseMatrix.h"
 #include "cholesky.h"
-#include <chrono>
+//#include <chrono>
 
-using namespace std::chrono;
+//using namespace std::chrono;
 using namespace Rcpp;
 using namespace std;
 
@@ -197,9 +199,6 @@ void cmod2(
     const IntegerVector& colpointers,
     const IntegerVector& rowindices)
 {
-  if (ncolup <= 0)
-    return;
-
   double* l = L.begin();
   double* tp = t.begin();
 
@@ -399,8 +398,7 @@ void cholesky(
         LINK[K] = -1;
       }
 
-      K =
-        nextK;
+      K = nextK;
     }
 
     // ----------------------------------------------------------

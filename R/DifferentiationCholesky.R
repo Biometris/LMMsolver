@@ -47,26 +47,13 @@ SparseCholesky <- function(C, init = TRUE) {
   )
 
   if (init) {
+    ## Calculate the numerical factor and AD entries.
+    obj@entries <- vec(obj, C)
 
-    if (methods::is(C, "spam.chol.NgPeyton")) {
+    L <- update_Rcpp_fun(obj)
 
-      ## The Cholesky factor is already available.
-      ## Only construct the AD entries.
-      L <- constructor_LMMsolver_chol(cholC)
-
-      obj@entries <- L$entries
-      obj@ADentries <- L$ADentries
-
-    } else {
-
-      ## Calculate the numerical factor and AD entries.
-      obj@entries <- vec(obj, C)
-
-      L <- update_Rcpp_fun(obj)
-
-      obj@entries <- L$entries
-      obj@ADentries <- L$ADentries
-    }
+    obj@entries <- L$entries
+    obj@ADentries <- L$ADentries
   }
 
   obj
