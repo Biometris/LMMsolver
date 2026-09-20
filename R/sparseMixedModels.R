@@ -224,13 +224,18 @@ sparseMixedModels <- function(y,
   ## Make SparseCholesky for Ginv and C:
   if (Nvarcomp > 0) {
     Ginv <- Reduce('+', lGinv)
-    objGinv <- SparseCholesky(Ginv)
+    objGinv <- SparseCholesky(Ginv, init=FALSE)
     VGinv <- vecList(objGinv, lGinv)
   } else {
     objGinv <- NULL
   }
   C0 <- Reduce('+', lC)
-  objC <- SparseCholesky(C0)
+  opt <- summary(C0)
+  cholC <- suppressWarnings(
+    chol(C0,
+         memory = list(nnzR = 8 * opt$nnz,
+                       nnzcolindices = 4 * opt$nnz)))
+  objC <- SparseCholesky(cholC, init=FALSE)
   VC <- vecList(objC, lC)
 
   ## Initialize values for loop.
@@ -358,11 +363,11 @@ sparseMixedModels <- function(y,
     warning("No convergence after ", maxit, " iterations \n", call. = FALSE)
   }
 
-  ## MB: not really needed, just to keep consistent with previous versions.
   C <- linearSum(theta = theta, matrixList = lC)
-  opt <- summary(C)
-  cholC <- chol(C, memory = list(nnzR = 8 * opt$nnz,
-                                 nnzcolindices = 4 * opt$nnz))
+  cholC@entries <- objC@entries
+  ##opt <- summary(C)
+  ##cholC <- chol(C, memory = list(nnzR = 8 * opt$nnz,
+  ##                               nnzcolindices = 4 * opt$nnz))
 
   ## calculate yhat and residuals
   yhat <- W %*% a
