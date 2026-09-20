@@ -4,28 +4,32 @@
 #' matrices. These matrices are typically used to specify the inverse of covariance
 #' structures for random effects in \code{LMMsolve}.
 #'
-#' Each matrix must have identical row and column names corresponding to the levels
-#' of the associated random effect. Alignment with the data is checked internally
-#' within \code{LMMsolve}.
+#' Each precision matrix must be square, and \code{levels} must provide the
+#' labels corresponding to its rows and columns. For ordinary \code{matrix}
+#' and \code{Matrix} objects, these levels are also checked against the
+#' row and column names when present. \code{spam} objects do not use
+#' row and column names, so \code{levels} provides the required labels.
 #'
-#' @param precisionMatrices A named list of square matrices (base \code{matrix} or
+#' @param precisionMatrices A list of square matrices (base \code{matrix} or
 #'   objects inheriting from \code{Matrix}). Each element represents a precision
-#'   matrix corresponding to a random effect. The names of the list must match the
-#'   variable names used in the \code{random} argument of \code{LMMsolve}.
+#'   matrix corresponding to a random effect.
 #' @param levels Named list giving the levels corresponding to the
 #'   rows and columns of each precision matrix.
 #' @param tol A numeric tolerance used for numerical stability (e.g. during inversion
 #'   or eigenvalue truncation). Stored as an attribute of the resulting object.
 #'
 #' @details
-#' The function performs basic validation:
+#' #' The function performs basic validation:
 #' \itemize{
 #'   \item \code{precisionMatrices} must be a named list.
-#'   \item Each matrix must be square with identical row and column names.
-#'   \item Row and column names are used later to align matrices with factor levels
-#'         in the data.
+#'   \item \code{levels} must be a named list with matching names.
+#'   \item Each precision matrix must be square.
+#'   \item Each element of \code{levels} must be a character vector with
+#'         length equal to the corresponding matrix dimension and contain
+#'         no duplicates.
+#'   \item For \code{matrix} and \code{Matrix} objects, row and column names
+#'         must be identical to each other and to the supplied levels.
 #' }
-#'
 #' No reordering or alignment with the data is performed at this stage. This is
 #' handled internally by \code{LMMsolve}.
 #'
