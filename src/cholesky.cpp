@@ -61,25 +61,6 @@ inline void update_column_cmod1_unroll4(
     int k0,
     const IntegerVector& colpointers)
 {
-<<<<<<< HEAD
-  double *l = L.begin();
-  const int s = colpointers[j];
-  const int e = colpointers[j+1];
-  // for all columns in supernode J left to j:
-  for (int k=supernodes[J];k<j;k++)
-  {
-    const int jk = colpointers[k] + (j-k);
-    int ik = jk;
-    const double Ljk = l[jk];
-    for (int ij=s; ij<e; ij++)
-    {
-       l[ij] -= l[ik++]*Ljk;
-       //ik++;
-    }
-  }
-}
-
-=======
   // Starting positions of the active parts of the
   // four source columns.
   const double* p0 = l + colpointers[k0]     + (j - k0);
@@ -156,7 +137,6 @@ void cmod1(
   }
 }
 
->>>>>>> blockCholesky
 void cdiv(NumericVector& L, int j, const IntegerVector& colpointers)
 {
   double *l = L.begin();
@@ -174,9 +154,6 @@ void cdiv(NumericVector& L, int j, const IntegerVector& colpointers)
 }
 
 
-<<<<<<< HEAD
-void cmod2_sup(
-=======
 inline void update_column_cmod2_unroll4(
     double* l,
     double* t,
@@ -207,7 +184,6 @@ inline void update_column_cmod2_unroll4(
 
 // cmod2 using 4 source-column unrolling
 void cmod2(
->>>>>>> blockCholesky
     NumericVector& L,
     int J,
     int K,
@@ -220,71 +196,6 @@ void cmod2(
     const IntegerVector& rowpointers,
     const IntegerVector& colpointers,
     const IntegerVector& rowindices)
-<<<<<<< HEAD
-{
-  if (ncolup <= 0)
-    return;
-
-  double* tp = t.begin();
-  double* l  = L.begin();
-
-  const int eK = rowpointers[K + 1];
-
-  const int sCol = supernodes[K];
-  const int eCol = supernodes[K + 1];
-
-  // ------------------------------------------------------------
-  // Process all target columns j of J receiving an update
-  // from source supernode K.
-  //
-  // khead, klen and ncolup are supplied by the scheduler, so
-  // there is no need for find_targets().
-  // ------------------------------------------------------------
-
-  for (int p = 0; p < ncolup; ++p)
-  {
-    const int j = rowindices[khead + p];
-    const int sz = klen - p;
-
-    // Initialise t.
-    for (int i = 0; i < sz; ++i)
-      tp[i] = 0.0;
-
-    // ----------------------------------------------------------
-    // Contribution from all columns of source supernode K.
-    //
-    // The last sz entries of each column contain the active
-    // suffix needed for target column j.
-    // ----------------------------------------------------------
-
-    for (int k = sCol; k < eCol; ++k)
-    {
-      const int jk = colpointers[k + 1] - sz;
-      int ik = jk;
-
-      const double Ljk = l[jk];
-
-      for (int i = sz - 1; i >= 0; --i)
-      {
-        tp[i] += l[ik++] * Ljk;
-      }
-    }
-
-    // ----------------------------------------------------------
-    // Scatter back into target column j.
-    // ----------------------------------------------------------
-
-    int r = eK - 1;
-
-    const int ref_pos = colpointers[j + 1] - 1;
-
-    for (int i = 0; i < sz; ++i)
-    {
-      const int ndx = rowindices[r--];
-      const int pos = ref_pos - indmap[ndx];
-
-      l[pos] -= tp[i];
-=======
 {
   if (ncolup <= 0)
     return;
@@ -392,33 +303,9 @@ void cholesky(
     for (int j = supernodes[J]; j < supernodes[J + 1];++j)
     {
       SNODE[j] = J;
->>>>>>> blockCholesky
     }
   }
-}
 
-<<<<<<< HEAD
-void cholesky(
-    NumericVector& L,
-    const IntegerVector& supernodes,
-    const IntegerVector& rowpointers,
-    const IntegerVector& colpointers,
-    const IntegerVector& rowindices)
-{
-  const int N = colpointers.size() - 1;
-  const int Nsupernodes = supernodes.size() - 1;
-
-  // SNODE[j] = supernode containing scalar row/column j
-  IntegerVector SNODE(N);
-
-  for (int J = 0; J < Nsupernodes; ++J)
-  {
-    for (int j = supernodes[J]; j < supernodes[J + 1]; ++j)
-      SNODE[j] = J;
-  }
-
-=======
->>>>>>> blockCholesky
   // ------------------------------------------------------------
   // Supernodal linked lists
   //
@@ -436,11 +323,8 @@ void cholesky(
   // ------------------------------------------------------------
 
   IntegerVector indmap(N, 0);
-<<<<<<< HEAD
-=======
 
   // Temporary vector used by cmod2.
->>>>>>> blockCholesky
   NumericVector t(N);
 
   // ------------------------------------------------------------
@@ -454,20 +338,9 @@ void cholesky(
 
     makeIndMap(indmap, J, rowpointers, rowindices);
 
-<<<<<<< HEAD
-    // ----------------------------------------------------------
-    // Process all source supernodes currently waiting for J.
-    //
-    // Important: LINK[K] is the next pointer when K is on
-    // another list, so save it before changing LINK[K].
-    // ----------------------------------------------------------
-
-    int K = LINK[J];
-=======
     // Process all source supernodes currently waiting for J.
     int K = LINK[J];
 
->>>>>>> blockCholesky
     LINK[J] = -1;
 
     while (K != -1)
@@ -480,32 +353,16 @@ void cholesky(
 
       // --------------------------------------------------------
       // Determine how many active rows of K belong to J.
-<<<<<<< HEAD
-      //
-      // Because K was put on J's list when its first active row
-      // was in J, rowindices[khead] should be >= j0.
-=======
->>>>>>> blockCholesky
       // --------------------------------------------------------
 
       int ncolup = 0;
 
-<<<<<<< HEAD
-      while (ncolup < klen && rowindices[khead + ncolup] < j1)
-=======
       while (ncolup < klen &&
              rowindices[khead + ncolup] < j1)
->>>>>>> blockCholesky
       {
         ++ncolup;
       }
 
-<<<<<<< HEAD
-      // Numerical update.
-      cmod2_sup(L, J, K, khead, klen, ncolup, t, indmap,
-        supernodes, rowpointers, colpointers, rowindices
-      );
-=======
       // --------------------------------------------------------
       // Numerical update.
       //
@@ -518,7 +375,6 @@ void cholesky(
         cmod2(L, J, K, khead, klen, ncolup, t, indmap,
           supernodes, rowpointers, colpointers, rowindices);
       }
->>>>>>> blockCholesky
 
       // --------------------------------------------------------
       // K may still have an active suffix.
@@ -533,10 +389,7 @@ void cholesky(
         const int nextJ = SNODE[next_row];
 
         LENGTH[K] = klen - ncolup;
-<<<<<<< HEAD
-=======
 
->>>>>>> blockCholesky
         LINK[K] = LINK[nextJ];
         LINK[nextJ] = K;
       }
@@ -546,39 +399,22 @@ void cholesky(
         LINK[K] = -1;
       }
 
-<<<<<<< HEAD
-      K = nextK;
-    }
-
-    // ----------------------------------------------------------
-    // Phase 2:
-    // factor supernode J
-=======
       K =
         nextK;
     }
 
     // ----------------------------------------------------------
     // Factor supernode J
->>>>>>> blockCholesky
     // ----------------------------------------------------------
 
     for (int j = j0; j < j1; ++j)
     {
-<<<<<<< HEAD
-      cmod1(L,j,J, supernodes, colpointers);
-=======
       cmod1(L, j, J, supernodes, colpointers);
->>>>>>> blockCholesky
       cdiv(L, j, colpointers);
     }
 
     // ----------------------------------------------------------
-<<<<<<< HEAD
-    // Now schedule J's own update.
-=======
     // Schedule J's own update.
->>>>>>> blockCholesky
     //
     // The first 'width' entries of J's row list correspond to
     // its diagonal supernode block. Everything after that is
@@ -593,10 +429,6 @@ void cholesky(
 
     if (LENGTH[J] > 0)
     {
-<<<<<<< HEAD
-      // First row below the diagonal block.
-=======
->>>>>>> blockCholesky
       const int next_row = rowindices[rowpointers[J] + width];
       const int nextJ = SNODE[next_row];
 
@@ -716,7 +548,3 @@ NumericVector backwardCholesky(
   return xP;
 }
 
-<<<<<<< HEAD
-
-=======
->>>>>>> blockCholesky
