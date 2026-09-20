@@ -1,7 +1,10 @@
 # LMMsolver 1.0.13.9000
 
+-   Improved computational efficiency of supernodal Cholesky and its automatic differentiation.
 -   Improved scaling of penalty for splines, keeping `lambda` in numerical stable range.
-
+-   New argument to `levels` added to `as.ginverse()` function.
+-   Fixed bug predict when interaction present in the model. 
+-   Internal `ADchol` class replaced by `LMMsolver.chol`, with `entries` and `ADentries` slots.
 
 # LMMsolver 1.0.13
 
