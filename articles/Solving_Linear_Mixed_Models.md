@@ -160,10 +160,10 @@ summary(obj2)
 #> Table with effective dimensions and penalties: 
 #> 
 #>         Term Effective Model Nominal Ratio Penalty
-#>  (Intercept)      1.00     1       1  1.00     0.0
-#>       lin(x)      1.00     1       1  1.00     0.0
-#>         s(x)     11.28    53      51  0.22     0.0
-#>     residual    136.72   150     148  0.92    30.3
+#>  (Intercept)      1.00     1       1  1.00    0.00
+#>       lin(x)      1.00     1       1  1.00    0.00
+#>         s(x)     11.28    53      51  0.22   21.38
+#>     residual    136.72   150     148  0.92   30.30
 #> 
 #>  Total Effective Dimension: 150
 ```
@@ -297,7 +297,7 @@ summary(obj4)
 #>     (Intercept)      1.00     1       1  1.00    0.00
 #>          lin(x)      1.00     1       1  1.00    0.00
 #>      Experiment      0.93     2       1  0.93   77.97
-#>            s(x)      7.89    53      51  0.15    0.00
+#>            s(x)      7.89    53      51  0.15   38.18
 #>  Experiment_A!R     43.66    50      50  0.87   32.15
 #>  Experiment_B!R     95.52   100     100  0.96    9.01
 #> 
@@ -384,8 +384,8 @@ summary(obj5)
 #>           Term Effective Model Nominal Ratio Penalty
 #>    (Intercept)      1.00     1       1  1.00    0.00
 #>  lin(lon, lat)      3.00     3       3  1.00    0.00
-#>         s(lon)    302.60  1936    1932  0.16    0.26
-#>         s(lat)    409.09  1936    1932  0.21    0.08
+#>         s(lon)    302.60  1936    1932  0.16    0.01
+#>         s(lat)    409.09  1936    1932  0.21    0.04
 #>       residual   5190.31  5906    5902  0.88   13.53
 #> 
 #>  Total Effective Dimension: 5906
@@ -517,7 +517,7 @@ summary(obj6)
 #>           Term Effective Model Nominal Ratio Penalty
 #>    (Intercept)      1.00     1       1  1.00    0.00
 #>  lin(lon, lat)      3.00     3       3  1.00    0.00
-#>         s(lon)    755.49  5329    5325  0.14    0.00
+#>         s(lon)    755.49  5329    5325  0.14    0.01
 #>         s(lat)    689.68  5329    5325  0.13    0.00
 #>       residual   6263.84  7713    7709  0.81    6.65
 #> 
@@ -647,10 +647,10 @@ summary(obj3)
 #> Table with effective dimensions and penalties: 
 #> 
 #>         Term Effective Model Nominal Ratio Penalty
-#>  (Intercept)      1.00     1       1  1.00       0
-#>       lin(x)      1.00     1       1  1.00       0
-#>         s(x)      6.54    53      51  0.13       0
-#>     residual    141.46   150     148  0.96       1
+#>  (Intercept)      1.00     1       1  1.00    0.00
+#>       lin(x)      1.00     1       1  1.00    0.00
+#>         s(x)      6.54    53      51  0.13   27.25
+#>     residual    141.46   150     148  0.96    1.00
 #> 
 #>  Total Effective Dimension: 150
 ```
@@ -728,10 +728,10 @@ summary(obj3)
 #> Table with effective dimensions and penalties: 
 #> 
 #>         Term Effective Model Nominal Ratio Penalty
-#>  (Intercept)      1.00     1       1  1.00       0
-#>       lin(x)      1.00     1       1  1.00       0
-#>         s(x)      5.85    53      51  0.11       0
-#>     residual     92.15   100      98  0.94       1
+#>  (Intercept)      1.00     1       1  1.00    0.00
+#>       lin(x)      1.00     1       1  1.00    0.00
+#>         s(x)      5.85    53      51  0.11    8.39
+#>     residual     92.15   100      98  0.94    1.00
 #> 
 #>  Total Effective Dimension: 100
 ```
@@ -825,10 +825,10 @@ summary(obj)
 #> Table with effective dimensions and penalties: 
 #> 
 #>         Term Effective Model Nominal Ratio Penalty
-#>  (Intercept)      3.00     3       3  1.00       0
-#>       lin(x)      3.00     3       3  1.00       0
-#>         s(x)      6.03    60      54  0.11       0
-#>     residual    287.97   300     294  0.98       1
+#>  (Intercept)      3.00     3       3  1.00    0.00
+#>       lin(x)      3.00     3       3  1.00    0.00
+#>         s(x)      6.03    60      54  0.11    2.14
+#>     residual    287.97   300     294  0.98    1.00
 #> 
 #>  Total Effective Dimension: 300
 ```
@@ -911,13 +911,10 @@ N <- nrow(oats.data)
 cN <- c(1 / sqrt(N - 1), rep(0, N - 2), 1 / sqrt(N - 1))
 D <- diff(diag(N), diff = 1)
 Delta <- 0.5 * crossprod(D)
-LVinv <- 0.5 * (2 * Delta + cN %*% t(cN))
-lGinv <- list(plotF = LVinv)
+LVinv <- spam::as.spam(0.5 * (2 * Delta + cN %*% t(cN)))
 
-LVinv <- Matrix::Matrix(LVinv, sparse = TRUE)
-rownames(LVinv) <- colnames(LVinv) <- as.character(seq_len(nrow(LVinv)))
-## Add LVinv to list, with name corresponding to random term.
-lGinv <- as.ginverse(list(plotF = LVinv))
+lGinv <- as.ginverse(precisionMatrices  = list(plotF = LVinv),
+                     levels = list(plotF = as.character(seq_len(N))))
 ```
 
 Given the precision matrix for the LV model we can define the model in
@@ -1022,10 +1019,10 @@ summary(obj8)
 #> Table with effective dimensions and penalties: 
 #> 
 #>         Term Effective Model Nominal Ratio Penalty
-#>  (Intercept)      1.00     1       1  1.00    0.00
-#>     lin(das)      1.00     1       1  1.00    0.00
-#>       s(das)      6.46    53      51  0.13    0.01
-#>     residual    112.54   121     119  0.95    0.00
+#>  (Intercept)      1.00     1       1  1.00       0
+#>     lin(das)      1.00     1       1  1.00       0
+#>       s(das)      6.46    53      51  0.13       0
+#>     residual    112.54   121     119  0.95       0
 #> 
 #>  Total Effective Dimension: 121
 ```

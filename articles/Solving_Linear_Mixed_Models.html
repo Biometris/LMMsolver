@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">LMMsolver</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.13</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.14</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -67,7 +67,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Mixed Models and Smoothing</h1>
             
-            <h4 data-toc-skip class="date">2026-05-20</h4>
+            <h4 data-toc-skip class="date">2026-09-21</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/Biometris/LMMsolver/blob/main/vignettes/Solving_Linear_Mixed_Models.Rmd" class="external-link"><code>vignettes/Solving_Linear_Mixed_Models.Rmd</code></a></small>
       <div class="d-none name"><code>Solving_Linear_Mixed_Models.Rmd</code></div>
@@ -213,10 +213,10 @@ P-splines with 50 segments.</p>
 <span><span class="co">#&gt; Table with effective dimensions and penalties: </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;         Term Effective Model Nominal Ratio Penalty</span></span>
-<span><span class="co">#&gt;  (Intercept)      1.00     1       1  1.00     0.0</span></span>
-<span><span class="co">#&gt;       lin(x)      1.00     1       1  1.00     0.0</span></span>
-<span><span class="co">#&gt;         s(x)     11.28    53      51  0.22     0.0</span></span>
-<span><span class="co">#&gt;     residual    136.72   150     148  0.92    30.3</span></span>
+<span><span class="co">#&gt;  (Intercept)      1.00     1       1  1.00    0.00</span></span>
+<span><span class="co">#&gt;       lin(x)      1.00     1       1  1.00    0.00</span></span>
+<span><span class="co">#&gt;         s(x)     11.28    53      51  0.22   21.38</span></span>
+<span><span class="co">#&gt;     residual    136.72   150     148  0.92   30.30</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Total Effective Dimension: 150</span></span></code></pre></div>
 <p>The intercept and the slope <code>lin(x)</code> define the linear (or
@@ -319,7 +319,7 @@ by defining <code>residual = ~Experiment</code>.</li>
 <span><span class="co">#&gt;     (Intercept)      1.00     1       1  1.00    0.00</span></span>
 <span><span class="co">#&gt;          lin(x)      1.00     1       1  1.00    0.00</span></span>
 <span><span class="co">#&gt;      Experiment      0.93     2       1  0.93   77.97</span></span>
-<span><span class="co">#&gt;            s(x)      7.89    53      51  0.15    0.00</span></span>
+<span><span class="co">#&gt;            s(x)      7.89    53      51  0.15   38.18</span></span>
 <span><span class="co">#&gt;  Experiment_A!R     43.66    50      50  0.87   32.15</span></span>
 <span><span class="co">#&gt;  Experiment_B!R     95.52   100     100  0.96    9.01</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -385,8 +385,8 @@ the penalty parameters:</p>
 <span><span class="co">#&gt;           Term Effective Model Nominal Ratio Penalty</span></span>
 <span><span class="co">#&gt;    (Intercept)      1.00     1       1  1.00    0.00</span></span>
 <span><span class="co">#&gt;  lin(lon, lat)      3.00     3       3  1.00    0.00</span></span>
-<span><span class="co">#&gt;         s(lon)    302.60  1936    1932  0.16    0.26</span></span>
-<span><span class="co">#&gt;         s(lat)    409.09  1936    1932  0.21    0.08</span></span>
+<span><span class="co">#&gt;         s(lon)    302.60  1936    1932  0.16    0.01</span></span>
+<span><span class="co">#&gt;         s(lat)    409.09  1936    1932  0.21    0.04</span></span>
 <span><span class="co">#&gt;       residual   5190.31  5906    5902  0.88   13.53</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Total Effective Dimension: 5906</span></span></code></pre></div>
@@ -491,7 +491,7 @@ local changes in Sea Surface Temperatures in this region.</p>
 <span><span class="co">#&gt;           Term Effective Model Nominal Ratio Penalty</span></span>
 <span><span class="co">#&gt;    (Intercept)      1.00     1       1  1.00    0.00</span></span>
 <span><span class="co">#&gt;  lin(lon, lat)      3.00     3       3  1.00    0.00</span></span>
-<span><span class="co">#&gt;         s(lon)    755.49  5329    5325  0.14    0.00</span></span>
+<span><span class="co">#&gt;         s(lon)    755.49  5329    5325  0.14    0.01</span></span>
 <span><span class="co">#&gt;         s(lat)    689.68  5329    5325  0.13    0.00</span></span>
 <span><span class="co">#&gt;       residual   6263.84  7713    7709  0.81    6.65</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -605,10 +605,10 @@ following data</p>
 <span><span class="co">#&gt; Table with effective dimensions and penalties: </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;         Term Effective Model Nominal Ratio Penalty</span></span>
-<span><span class="co">#&gt;  (Intercept)      1.00     1       1  1.00       0</span></span>
-<span><span class="co">#&gt;       lin(x)      1.00     1       1  1.00       0</span></span>
-<span><span class="co">#&gt;         s(x)      6.54    53      51  0.13       0</span></span>
-<span><span class="co">#&gt;     residual    141.46   150     148  0.96       1</span></span>
+<span><span class="co">#&gt;  (Intercept)      1.00     1       1  1.00    0.00</span></span>
+<span><span class="co">#&gt;       lin(x)      1.00     1       1  1.00    0.00</span></span>
+<span><span class="co">#&gt;         s(x)      6.54    53      51  0.13   27.25</span></span>
+<span><span class="co">#&gt;     residual    141.46   150     148  0.96    1.00</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Total Effective Dimension: 150</span></span></code></pre></div>
 <p>Making predictions and plotting the data is similar to the Gaussian
@@ -681,10 +681,10 @@ and for the response using <code>cbind(succes, failure)</code>:</p>
 <span><span class="co">#&gt; Table with effective dimensions and penalties: </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;         Term Effective Model Nominal Ratio Penalty</span></span>
-<span><span class="co">#&gt;  (Intercept)      1.00     1       1  1.00       0</span></span>
-<span><span class="co">#&gt;       lin(x)      1.00     1       1  1.00       0</span></span>
-<span><span class="co">#&gt;         s(x)      5.85    53      51  0.11       0</span></span>
-<span><span class="co">#&gt;     residual     92.15   100      98  0.94       1</span></span>
+<span><span class="co">#&gt;  (Intercept)      1.00     1       1  1.00    0.00</span></span>
+<span><span class="co">#&gt;       lin(x)      1.00     1       1  1.00    0.00</span></span>
+<span><span class="co">#&gt;         s(x)      5.85    53      51  0.11    8.39</span></span>
+<span><span class="co">#&gt;     residual     92.15   100      98  0.94    1.00</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Total Effective Dimension: 100</span></span></code></pre></div>
 <p>Making predictions can be done as shown before in the other
@@ -765,15 +765,15 @@ depend on a single variable
 <span><span class="co">#&gt; Table with effective dimensions and penalties: </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;         Term Effective Model Nominal Ratio Penalty</span></span>
-<span><span class="co">#&gt;  (Intercept)      3.00     3       3  1.00       0</span></span>
-<span><span class="co">#&gt;       lin(x)      3.00     3       3  1.00       0</span></span>
-<span><span class="co">#&gt;         s(x)      6.03    60      54  0.11       0</span></span>
-<span><span class="co">#&gt;     residual    287.97   300     294  0.98       1</span></span>
+<span><span class="co">#&gt;  (Intercept)      3.00     3       3  1.00    0.00</span></span>
+<span><span class="co">#&gt;       lin(x)      3.00     3       3  1.00    0.00</span></span>
+<span><span class="co">#&gt;         s(x)      6.03    60      54  0.11    2.14</span></span>
+<span><span class="co">#&gt;     residual    287.97   300     294  0.98    1.00</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Total Effective Dimension: 300</span></span></code></pre></div>
 <p>The predictions are given by:</p>
 <div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">sRows</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums-methods.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">multiNom</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">sRows</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">multiNom</span><span class="op">)</span></span>
 <span><span class="va">fr</span> <span class="op">&lt;-</span> <span class="va">multiNom</span><span class="op">/</span><span class="va">sRows</span></span>
 <span><span class="va">dat_fr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">fr</span><span class="op">)</span></span>
 <span></span>
@@ -835,14 +835,11 @@ for details:</p>
 <span><span class="va">N</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">oats.data</span><span class="op">)</span></span>
 <span><span class="va">cN</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">N</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">N</span> <span class="op">-</span> <span class="fl">2</span><span class="op">)</span>, <span class="fl">1</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">N</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">D</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/diff.html" class="external-link">diff</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="va">N</span><span class="op">)</span>, diff <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
-<span><span class="va">Delta</span> <span class="op">&lt;-</span> <span class="fl">0.5</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/matmult-methods.html" class="external-link">crossprod</a></span><span class="op">(</span><span class="va">D</span><span class="op">)</span></span>
-<span><span class="va">LVinv</span> <span class="op">&lt;-</span> <span class="fl">0.5</span> <span class="op">*</span> <span class="op">(</span><span class="fl">2</span> <span class="op">*</span> <span class="va">Delta</span> <span class="op">+</span> <span class="va">cN</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">cN</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">lGinv</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>plotF <span class="op">=</span> <span class="va">LVinv</span><span class="op">)</span></span>
+<span><span class="va">Delta</span> <span class="op">&lt;-</span> <span class="fl">0.5</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/crossprod.html" class="external-link">crossprod</a></span><span class="op">(</span><span class="va">D</span><span class="op">)</span></span>
+<span><span class="va">LVinv</span> <span class="op">&lt;-</span> <span class="fu">spam</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/spam/man/spam.html" class="external-link">as.spam</a></span><span class="op">(</span><span class="fl">0.5</span> <span class="op">*</span> <span class="op">(</span><span class="fl">2</span> <span class="op">*</span> <span class="va">Delta</span> <span class="op">+</span> <span class="va">cN</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">cN</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">LVinv</span> <span class="op">&lt;-</span> <span class="fu">Matrix</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/Matrix.html" class="external-link">Matrix</a></span><span class="op">(</span><span class="va">LVinv</span>, sparse <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">LVinv</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">LVinv</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">LVinv</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">## Add LVinv to list, with name corresponding to random term.</span></span>
-<span><span class="va">lGinv</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as.ginverse.html">as.ginverse</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>plotF <span class="op">=</span> <span class="va">LVinv</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">lGinv</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as.ginverse.html">as.ginverse</a></span><span class="op">(</span>precisionMatrices  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>plotF <span class="op">=</span> <span class="va">LVinv</span><span class="op">)</span>,</span>
+<span>                     levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>plotF <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">N</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Given the precision matrix for the LV model we can define the model
 in LMMsolve using the <code>random</code> and <code>ginverse</code>
 arguments:</p>
@@ -919,10 +916,10 @@ measurement error.</p>
 <span><span class="co">#&gt; Table with effective dimensions and penalties: </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;         Term Effective Model Nominal Ratio Penalty</span></span>
-<span><span class="co">#&gt;  (Intercept)      1.00     1       1  1.00    0.00</span></span>
-<span><span class="co">#&gt;     lin(das)      1.00     1       1  1.00    0.00</span></span>
-<span><span class="co">#&gt;       s(das)      6.46    53      51  0.13    0.01</span></span>
-<span><span class="co">#&gt;     residual    112.54   121     119  0.95    0.00</span></span>
+<span><span class="co">#&gt;  (Intercept)      1.00     1       1  1.00       0</span></span>
+<span><span class="co">#&gt;     lin(das)      1.00     1       1  1.00       0</span></span>
+<span><span class="co">#&gt;       s(das)      6.46    53      51  0.13       0</span></span>
+<span><span class="co">#&gt;     residual    112.54   121     119  0.95       0</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  Total Effective Dimension: 121</span></span></code></pre></div>
 <p>The fitted smooth trend can be obtained as explained before:</p>
@@ -1111,7 +1108,7 @@ Basis.”</span> <em>Genetics</em> 212 (4): 991–1008. <a href="https://doi.org
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

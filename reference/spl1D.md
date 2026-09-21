@@ -145,7 +145,7 @@ summary(LMM1_spline)
 #>          rep      2.00     2       2  1.00    0.00
 #>          gen     23.00    23      23  1.00    0.00
 #>    lin(plot)      1.00     1       1  1.00    0.00
-#>      s(plot)      3.99    23      21  0.19 3310.21
+#>      s(plot)      3.99    23      21  0.19   73.99
 #>     residual     41.01    72      45  0.91   13.21
 #> 
 #>  Total Effective Dimension: 72 
@@ -168,8 +168,8 @@ summary(LMM2_spline)
 #>           Term Effective Model Nominal Ratio Penalty
 #>    (Intercept)      1.00     1       1  1.00    0.00
 #>  lin(lon, lat)      3.00     3       3  1.00    0.00
-#>         s(lon)    302.60  1936    1932  0.16    0.26
-#>         s(lat)    409.09  1936    1932  0.21    0.08
+#>         s(lon)    302.60  1936    1932  0.16    0.01
+#>         s(lat)    409.09  1936    1932  0.21    0.04
 #>       residual   5190.31  5906    5902  0.88   13.53
 #> 
 #>  Total Effective Dimension: 5906 

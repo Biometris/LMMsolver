@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">LMMsolver</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.13</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.14</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -42,7 +42,15 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="1.0.13" id="lmmsolver-1013">LMMsolver 1.0.13<a class="anchor" aria-label="anchor" href="#lmmsolver-1013"></a></h2>
+<h2 class="pkg-version" data-toc-text="1.0.14" id="lmmsolver-1014">LMMsolver 1.0.14<a class="anchor" aria-label="anchor" href="#lmmsolver-1014"></a></h2>
+<ul><li>Improved computational efficiency of supernodal Cholesky and its automatic differentiation.</li>
+<li>Improved scaling of penalty for splines, keeping <code>lambda</code> in numerical stable range.</li>
+<li>New argument to <code>levels</code> added to <code><a href="../reference/as.ginverse.html">as.ginverse()</a></code> function.</li>
+<li>Fixed bug predict when interaction present in the model.</li>
+<li>Internal <code>ADchol</code> class replaced by <code>LMMsolver.chol</code>, with <code>entries</code> and <code>ADentries</code> slots.</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.0.13" id="lmmsolver-1013">LMMsolver 1.0.13<a class="anchor" aria-label="anchor" href="#lmmsolver-1013"></a></h2><p class="text-muted">CRAN release: 2026-05-29</p>
 <ul><li>Function <code><a href="../reference/getHeritability.html">getHeritability()</a></code> added.</li>
 <li>Function <code><a href="../reference/makeGrid.html">makeGrid()</a></code> added.</li>
 <li>Function <code><a href="../reference/as.ginverse.html">as.ginverse()</a></code> added.</li>
@@ -163,7 +171,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>
