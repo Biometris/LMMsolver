@@ -644,7 +644,7 @@ N <- nrow(oats.data)
 cN <- c(1 / sqrt(N - 1), rep(0, N - 2), 1 / sqrt(N - 1))
 D <- diff(diag(N), diff = 1)
 Delta <- 0.5 * crossprod(D)
-LVinv <- 0.5 * (2 * Delta + cN %*% t(cN))
+LVinv <- spam::as.spam(0.5 * (2 * Delta + cN %*% t(cN)))
 
 lGinv <- as.ginverse(precisionMatrices  = list(plotF = LVinv),
                      levels = list(plotF = as.character(seq_len(N))))

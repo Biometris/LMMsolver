@@ -49,6 +49,7 @@ expect_error(LMMsolve(fixed = pheno ~ cross,
 indMat <- diag(nrow = nlevels(testDat$ind))
 #rownames(indMat) <- colnames(indMat) <- levels(testDat$ind)
 #rownames(indMat) <- colnames(indMat) <- levels(testDat$ind)
+indMat <- spam::as.spam(indMat)
 ginvLS3 <- LMMsolver:::as.ginverse(list(ind = indMat),
                                    levels = list(ind = levels(testDat$ind)))
 #expect_error(LMMsolve(fixed = pheno ~ cross, ginverse = ginv, data = testDat),

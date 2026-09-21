@@ -4,53 +4,71 @@
 \alias{as.ginverse}
 \title{Construct a ginverse Object from Precision Matrices}
 \usage{
-as.ginverse(precisionMatrices, levels, tol = 1e-10)
+as.ginverse(precisionMatrices, levels = NULL, tol = 1e-10)
 }
 \arguments{
-\item{precisionMatrices}{A named list of square matrices (base \code{matrix} or
-objects inheriting from \code{Matrix}). Each element represents a precision
-matrix corresponding to a random effect. The names of the list must match the
-variable names used in the \code{random} argument of \code{LMMsolve}.}
+\item{precisionMatrices}{A named list of square matrices. Each element
+must be a base \code{matrix}, an object inheriting from \code{Matrix},
+or a \code{spam} object. Each element represents a precision matrix
+corresponding to a random effect.}
 
-\item{levels}{Named list giving the levels corresponding to the
-rows and columns of each precision matrix.}
+\item{levels}{An optional named list giving the levels corresponding to
+the rows and columns of the precision matrices. This is required for
+\code{spam} objects, which do not have row and column names. For
+\code{matrix} and \code{Matrix} objects, levels are obtained from the
+row names; if supplied, they are checked for consistency with the row
+and column names.}
 
-\item{tol}{A numeric tolerance used for numerical stability (e.g. during inversion
-or eigenvalue truncation). Stored as an attribute of the resulting object.}
+\item{tol}{A numeric tolerance used for numerical stability (e.g. during
+inversion or eigenvalue truncation). Stored as an attribute of the
+resulting object.}
 }
 \value{
 An object of class \code{"ginverse"} (a named list) containing the supplied
-precision matrices, with attribute \code{"tol"}.
+precision matrices, with attributes \code{"levels"} and \code{"tol"}.
 }
 \description{
-Creates a \code{ginverse} object from a named list of precision (inverse covariance)
-matrices. These matrices are typically used to specify the inverse of covariance
-structures for random effects in \code{LMMsolve}.
+Creates a \code{ginverse} object from a named list of precision
+(inverse covariance) matrices. These matrices are typically used to
+specify the inverse of covariance structures for random effects in
+\code{LMMsolve}.
 }
 \details{
-Each matrix must have identical row and column names corresponding to the levels
-of the associated random effect. Alignment with the data is checked internally
-within \code{LMMsolve}.
+Each precision matrix must be square. For \code{matrix} and \code{Matrix}
+objects, the row and column names define the corresponding levels. For
+\code{spam} objects, which do not use row and column names, the
+corresponding levels must be supplied through \code{levels}.
 
 
 The function performs basic validation:
 \itemize{
   \item \code{precisionMatrices} must be a named list.
-  \item Each matrix must be square with identical row and column names.
-  \item Row and column names are used later to align matrices with factor levels
-        in the data.
+  \item If supplied, \code{levels} must be a named list with matching
+        names.
+  \item Each precision matrix must be square.
+  \item For \code{matrix} and \code{Matrix} objects, row and column names
+        must be present and identical.
+  \item For \code{spam} objects, \code{levels} must be supplied.
+  \item Levels must be a character vector with length equal to the
+        corresponding matrix dimension and contain no duplicates.
+  \item If \code{levels} is supplied for a \code{matrix} or \code{Matrix}
+        object, it must agree with its row and column names.
 }
-
-No reordering or alignment with the data is performed at this stage. This is
-handled internally by \code{LMMsolve}.
+No reordering or alignment with the data is performed at this stage. This
+is handled internally by \code{LMMsolve}.
 }
 \examples{
 K <- diag(1, 5)
+dimnames(K) <- list(as.character(1:5), as.character(1:5))
 
-# Construct ginverse object
-g <- as.ginverse(list(id = K),
-                 levels = list(id = as.character(1:5)))
+# Construct ginverse object from a matrix with names
+g <- as.ginverse(list(id = K))
 g
+
+# A spam matrix requires levels to be supplied
+# Kspam <- spam::as.spam(K)
+# g <- as.ginverse(list(id = Kspam),
+#                  levels = list(id = as.character(1:5)))
 
 }
 \seealso{
