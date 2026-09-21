@@ -25,22 +25,24 @@ export(spl1D)
 export(spl2D)
 export(spl3D)
 importFrom(Rcpp,sourceCpp)
-importFrom(stats,.getXlevels)
-importFrom(stats,aggregate)
-importFrom(stats,as.formula)
-importFrom(stats,coef)
-importFrom(stats,contrasts)
-importFrom(stats,formula)
-importFrom(stats,gaussian)
-importFrom(stats,logLik)
-importFrom(stats,model.frame)
-importFrom(stats,model.matrix)
-importFrom(stats,model.response)
-importFrom(stats,na.pass)
-importFrom(stats,setNames)
-importFrom(stats,terms)
-importFrom(stats,terms.formula)
-importFrom(stats,update)
-importFrom(stats,var)
+importFrom(stats,
+  .getXlevels,
+  aggregate,
+  as.formula,
+  coef,
+  contrasts,
+  formula,
+  gaussian,
+  logLik,
+  model.frame,
+  model.matrix,
+  model.response,
+  na.pass,
+  setNames,
+  terms,
+  terms.formula,
+  update,
+  var
+)
 importFrom(utils,hasName)
 useDynLib(LMMsolver, .registration = TRUE)
