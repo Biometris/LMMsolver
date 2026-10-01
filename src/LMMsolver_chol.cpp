@@ -166,37 +166,23 @@ NumericVector convertSparseMatrix(const SparseMatrix& A,
       int k   = rowpointers[J + 1] - 1;
       int ndx = colpointers[j + 1] - 1;
 
-      for (int ll = A.rowpointers[j + 1] - 1; ll >= A.rowpointers[j]; ll--)
+      const int kmin = rowpointers[J];
+
+      for (int ll = A.rowpointers[j + 1] - 1; ll >= A.rowpointers[j];ll--)
       {
         int c = A.colindices[ll];
 
         if (c < j)
           break;
 
-        while (rowindices[k] != c)
+        while (k >= kmin && rowindices[k] != c)
         {
           k--;
           ndx--;
         }
 
-        if (k < 0)
-        {
-          //Rcpp::Rcout << "\nPattern mismatch\n";
-          //Rcpp::Rcout << "Column j = " << j
-          //            << ", searching for row c = " << c << "\n";
-
-          //Rcpp::Rcout << "\nSparseMatrix column rows: ";
-          //for (int t = A.rowpointers[j]; t < A.rowpointers[j + 1]; t++)
-          //  Rcpp::Rcout << A.colindices[t] << " ";
-
-          //Rcpp::Rcout << "\nAD column rows: ";
-          //for (int t = colpointers[j]; t < colpointers[j + 1]; t++)
-          //  Rcpp::Rcout << rowindices[t] << " ";
-
-          //Rcpp::Rcout << "\n";
-
+        if (k < kmin)
           Rcpp::stop("Pattern mismatch");
-        }
 
         result[ndx] = A.entries[ll];
 
