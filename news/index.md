@@ -1,6 +1,13 @@
 # Changelog
 
+## LMMsolver 1.0.14.1
+
+- Fixed an out-of-bounds read in `convertSparseMatrix()` when checking a
+  sparse pattern mismatch.
+
 ## LMMsolver 1.0.14
+
+CRAN release: 2026-09-24
 
 - Improved computational efficiency of supernodal Cholesky and its
   automatic differentiation.
