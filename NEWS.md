@@ -1,4 +1,4 @@
-# LMMsolver 1.0.14.9000
+# LMMsolver 1.0.14.1
 
 - Fixed an out-of-bounds read in `convertSparseMatrix()` when checking a sparse pattern mismatch.
 

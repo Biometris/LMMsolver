@@ -10,18 +10,9 @@ rhub::platforms()
 rhub::check_for_cran(path = "C:/Projects/R_packages/LMMsolver/")
 
 ## Check with rhub.
-## Some specific platforms that give issues in earlier releases.
-rhub::check_for_cran(platforms = c("ubuntu-gcc-release",
-                                   "fedora-clang-devel",
-                                   "debian-clang-devel",
-                                   "debian-gcc-devel",
-                                   "macos-highsierra-release"),
-                     path = "C:/Projects/R_packages/LMMsolver/")
-
-
-## For MAC M1 builder use this:
-## This gave test issues for version 1.0.1
-##https://mac.r-project.org/macbuilder/submit.html
+## Check for specific platforms.
+## A list will come up options.
+rhub::rc_submit()
 
 ## Rebuild readme.
 devtools::build_readme()

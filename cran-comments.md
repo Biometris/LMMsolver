@@ -1,6 +1,6 @@
-## Major release
+## Minor release
 
-Improved computational efficiency and some minor changes and bug fixes.
+Fixed issue with valgrind checks.
 
 ----
 
