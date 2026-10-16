@@ -42,7 +42,7 @@ calcStandardErrors <- function(C, D) {
   C_ext <- C + xi0*spam::crossprod.spam(D)
 
   # symbolic factorization
-  obj <- SparseCholesky(C_ext)
+  obj <- SparseCholesky(C_ext, init = FALSE)
 
   # numerical evaluation for xi = 0
   obj <- update(obj, C)
